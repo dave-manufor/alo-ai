@@ -6,9 +6,11 @@ Landing, Google and email-link sign-in, consent, child profiles, the session scr
 
 Follow the project design system **as closely as possible** in every UI change:
 
-- Use its tokens (colour, type, spacing, radius, motion), components and patterns. No hard-coded colour/spacing/font values; no one-off component when a system component exists.
+- The system is in `docs/Alo.ai_Design_System/`: read its `README.md` first, then use `tokens.json`, the `components/` (each has a README, `preview.html` and types in `index.d.ts`) and `assets/`. See the root `AGENTS.md` for the full directive.
+- Use its tokens and components. No hard-coded colour/spacing/font values; no one-off component when a system component exists. Use logos, Jàpá and icons from `assets/` as supplied.
+- Kid mode and grown-up mode are never mixed on one screen. Kid mode never shows red, a score, a timer or a percentage. Story text is always Andika. `moon` is for rewards only.
 - Deviate **only when following it is impossible**. Then keep the deviation minimal, explain it in the PR under "Design system deviations", and propose the missing piece as an addition to the system.
-- The system lives in `web/src/design-system/` and is documented in `docs/DESIGN_SYSTEM.md` (W1 creates it first; until it exists, ask before inventing visual patterns and keep tokens in one swappable place).
+- W1 decides how the app consumes the bundle, tokens and assets (import or copy into `web/`), and does it once in one place. Don't edit the files in `docs/Alo.ai_Design_System/` to suit one screen; changes to the system are their own PR.
 - Run `alo-ui-change` before building UI; review with `design-critique` and `accessibility-review`.
 
 ## Other rules

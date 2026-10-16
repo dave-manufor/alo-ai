@@ -20,7 +20,8 @@ Run on the staged/changed files before committing (PRD 12, 3.1, CONTRIBUTING).
 - Chidi and other seeded names are fictional sample data only.
 
 ## 4. Banned wording in parent-, child- or teacher-facing text and agent prompts' outputs
-- Search changed copy, templates and prompts for: `diagnos`, `dyslex`, `behind`, `failing`, `hyperlexic`, `word caller`. Reports say "screening", never "diagnosis". Children never see scores, timers or red marks.
+- Search changed copy, templates and prompts for: `diagnos`, `dyslex`, `disorder`, `behind`, `failing`, `slow learner`, `hyperlexic`, `word caller` (the PRD list plus the design system README's list). Reports say "screening", never "diagnosis".
+- In child-facing copy also search for `wrong`, `incorrect`, `fail` and a bare "no"; children are never told these, and never see scores, timers, percentages or red marks (design system README, "Voice and tone").
 - Banned words may appear inside the guardrail's own blocklist and its tests; that is fine.
 
 ## 5. Report

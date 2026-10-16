@@ -13,8 +13,8 @@ Docs (read the section for your area, not the whole PRD):
 | `docs/Alo.ai_PRD_v1.8.0.md` | The spec. 3 architecture and agents, 4 session protocol, 5 speech, 6 scoring, 7 grader, 9 books, 10 data contracts, 12 privacy and authz, 13 testing and evals, 14 team and plan, 15 Terraform |
 | `docs/CONTRIBUTING.md` | Git rules, ownership, review ring |
 | `docs/LOCAL_DEV.md` | Docker Compose stack, toggles, make targets |
-| `docs/Software Design Document.pdf` | How each part is built (PDF only) |
-| `docs/DESIGN_SYSTEM.md` | UI design system (W1 creates it; see "Design system") |
+| `docs/Software_Design_Document.md` | How each part is built (markdown copy of `docs/Software Design Document.pdf`; diagrams in `docs/sdd-images/`) |
+| `docs/Alo.ai_Design_System/` | The UI design system: `README.md` (brand, voice, rules), `tokens.json`, `components/`, `assets/` (see "Design system") |
 
 ## Team and ownership
 
@@ -54,7 +54,7 @@ Breaking one of these is a bug, even if the code works. Section numbers refer to
 
 1. **Agents plan, code scores (3.1).** No LLM output may create, change or estimate a score, level or profile. Only `aloai_scoring.py` produces numbers. Every number in agent text must match a tool result.
 2. **No child data or secrets in Git (12).** Never commit `.env`, keys, real children's audio, names, transcripts or large files (audio, weights). Fixtures and seeds use fictional data only. Secrets live in Secret Manager; if one is committed, tell the team and rotate it immediately.
-3. **Screening language only (3.1, 12).** Never write "diagnosis", "dyslexia", "behind", "failing", "hyperlexic" or "word caller" in parent- or child-facing text. Children never see a score, timer or red mark.
+3. **Screening language only (3.1, 12).** Never write "diagnosis", "dyslexia", "disorder", "behind", "failing", "slow learner", "hyperlexic" or "word caller" in parent- or child-facing text. Children never see a score, timer, percentage or red mark, and are never told "wrong", "no", "incorrect" or "fail" (the design system README has the full voice rules).
 4. **Contracts (14.2).** A schema, endpoint or event used by another person changes only with: the schema in `schemas/` updated, its fixture in `fixtures/contracts/` updated, `schema_version` bumped, and the consumer tagged on the PR. Use the `alo-contract-change` skill.
 5. **Scoring (13.3).** Any change to `aloai_scoring.py`, a [CAL] constant, allowlist or profile rule needs W3's approval, a new `scoring_module` version, a validation rerun and a line in the PRD changelog.
 6. **Prompts and models (13.4).** Changing a prompt or model means rerunning its evaluation set and pasting the result in the PR. Use `alo-prompt-eval`.
@@ -67,11 +67,19 @@ Breaking one of these is a bug, even if the code works. Section numbers refer to
 
 ## Design system
 
-All UI work (the web app, PWA, report screens, and the teacher view preview) must **follow the project design system as closely as possible**:
+All UI work (the web app, PWA, report screens, and the teacher view preview) must **follow the project design system as closely as possible**. It lives in `docs/Alo.ai_Design_System/`:
 
-- Use the design system's tokens (colour, type, spacing, radius, motion) and its existing components and patterns. Do not hard-code colour, spacing or font values, and do not write a one-off component when a system component exists.
+| Path | What it is |
+|---|---|
+| `README.md` | Brand, the two modes (kid and grown-up), voice and tone, colour, type, shape, motion, the game layer, accessibility. **Read it before any UI or copy work.** |
+| `tokens.json` | Colour (Day/Night themes), type, spacing, radius, tap sizes, motion |
+| `components/` | React components (`Button`, `MicButton`, `SpeechBubble`, `ReadingPanel`, `Japa`, `MoonProgress`, `ParentReportCard`, `ProfilePill`, `RewardBadge`, `LanternStreak`, ...). Each has a `README.md` and `preview.html`; `index.d.ts` has the prop types; `bundle.js` and `bundle.css` are the built output |
+| `assets/` | Logos, the Jàpá mascot poses, icons, the adire pattern |
+
+- Use its tokens and components. Do not hard-code colour, spacing, radius or font values, and do not write a one-off component when a system component exists. Use the assets as supplied (never recolour or restyle the logo or Jàpá, and no emoji).
+- Respect the rules in its README, for example: never mix kid and grown-up mode on one screen; kid mode never shows red or a score; `moon` means reward only; story text is always Andika; text on `moon`, `coral`, `leaf` and `sky` is `on-bright`; respect `prefers-reduced-motion`.
 - Deviate **only when following the system is impossible** (it lacks the piece, or it conflicts with an accessibility or technical requirement). When you deviate, say why in the PR under "Design system deviations", keep the deviation as small as possible, and propose the missing piece as an addition to the system.
-- If the design system does not exist yet, do not invent your own visual language. W1 creates it in `web/src/design-system/`, documented in `docs/DESIGN_SYSTEM.md`. Until then, ask the user before introducing new visual patterns, and build from tokens in one place so they can be swapped.
+- Treat `docs/Alo.ai_Design_System/` as the source of truth: don't fork or edit its files to suit one screen. A change to the system itself is its own PR with a reason, and W1 (who builds the web app) decides how the app imports the bundle, tokens and assets.
 - Before building UI, use the `alo-ui-change` skill. For review use `design-critique`, `accessibility-review` and `design-handoff`; to extend the system use `design-system`.
 - Accessibility is part of this: the app is used by children on ordinary Android phones. Check touch targets, contrast and screen-reader behaviour.
 
