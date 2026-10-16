@@ -1,0 +1,115 @@
+@import url("https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap");
+
+/* Alo.ai components. Every colour, space and radius comes from tokens.css. */
+.alo-stage { padding: var(--space-5); background: var(--surface); color: var(--ink); font-family: var(--font-ui); display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: flex-start; }
+.alo-stage--col { flex-direction: column; }
+.alo-glyph { display: inline-flex; width: 1.25em; height: 1.25em; flex: none; }
+.alo-glyph svg { width: 100%; height: 100%; }
+.alo-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.alo-muted { color: var(--ink-muted); }
+
+/* Button */
+.alo-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: 2px solid transparent; cursor: pointer;
+  font-family: var(--font-ui); font-weight: 800; transition: transform 120ms cubic-bezier(.34,1.56,.64,1), box-shadow 120ms; }
+.alo-btn--kid { min-height: var(--tap-kid); padding: 0 var(--space-6); border-radius: var(--radius-l); font-size: 20px; line-height: 24px; }
+.alo-btn--grown { min-height: var(--tap-grown); padding: 0 var(--space-5); border-radius: var(--radius-m); font-size: 16px; line-height: 20px; }
+.alo-btn--primary { background: var(--night); color: var(--on-night); box-shadow: var(--press-night); }
+.alo-btn--reward { background: var(--moon); color: var(--on-bright); box-shadow: var(--press-moon); }
+.alo-btn--call { background: var(--coral); color: var(--on-bright); box-shadow: var(--press-coral); }
+.alo-btn--done { background: var(--leaf); color: var(--on-bright); box-shadow: var(--press-leaf); }
+.alo-btn--secondary { background: var(--surface-raised); color: var(--night); border-color: var(--line-strong); box-shadow: var(--press-neutral); }
+.alo-btn--ghost { background: transparent; color: var(--night); }
+.alo-btn--grown.alo-btn--primary, .alo-btn--grown.alo-btn--secondary { box-shadow: none; }
+.alo-btn:active { transform: translateY(4px); box-shadow: none; }
+.alo-btn:focus-visible, .alo-mic:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.alo-btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* MicButton */
+.alo-mic-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: var(--space-4); }
+.alo-mic { position: relative; width: var(--mic); height: var(--mic); border-radius: var(--radius-pill); border: 0; cursor: pointer; display: grid; place-items: center;
+  background: var(--night); color: var(--on-night); box-shadow: var(--press-night); transition: transform 120ms cubic-bezier(.34,1.56,.64,1), background 200ms; }
+.alo-mic-glyph { width: 44px; height: 44px; }
+.alo-mic--listening { background: var(--sky); color: var(--on-bright); box-shadow: 0 0 0 10px var(--sky-soft); animation: alo-pulse 1.4s ease-in-out infinite; }
+.alo-mic--thinking { background: var(--moon); color: var(--on-bright); box-shadow: var(--press-moon); }
+.alo-mic-label { font-size: 20px; line-height: 28px; font-weight: 700; color: var(--ink); }
+.alo-dots { display: inline-flex; gap: 6px; }
+.alo-dots i { width: 12px; height: 12px; border-radius: 50%; background: currentColor; animation: alo-hop 900ms ease-in-out infinite; }
+.alo-dots i:nth-child(2) { animation-delay: 150ms; } .alo-dots i:nth-child(3) { animation-delay: 300ms; }
+@keyframes alo-pulse { 0%, 100% { box-shadow: 0 0 0 6px var(--sky-soft); } 50% { box-shadow: 0 0 0 18px var(--sky-soft); } }
+@keyframes alo-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+
+/* SpeechBubble */
+.alo-bubble-row { display: flex; align-items: flex-end; gap: var(--space-3); max-width: 30em; }
+.alo-avatar { width: 48px; height: 48px; flex: none; border-radius: var(--radius-pill); background: var(--surface-raised); border: 2px solid var(--line); display: grid; place-items: center; }
+.alo-avatar svg { width: 34px; height: 34px; }
+.alo-bubble { position: relative; background: var(--surface-raised); border: 2px solid var(--line); border-radius: var(--radius-l) var(--radius-l) var(--radius-l) var(--radius-s); padding: var(--space-3) var(--space-5) var(--space-4); box-shadow: var(--lift); }
+.alo-bubble--call { background: var(--coral-soft); border-color: var(--coral-soft); }
+.alo-bubble-who { display: block; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--ink-muted); }
+.alo-bubble-text { font-size: 20px; line-height: 28px; font-weight: 700; color: var(--ink); }
+.alo-bubble-call { font-family: var(--font-reading); font-size: 40px; line-height: 48px; font-weight: 700; color: var(--coral-text); }
+
+/* ReadingPanel */
+.alo-reading { background: var(--surface-raised); color: var(--ink); border-radius: var(--radius-l); padding: var(--space-6); box-shadow: var(--lift); max-width: var(--measure-reading); }
+.alo-reading-title { margin: 0 0 var(--space-4); font-family: var(--font-display); color: var(--ink); }
+.alo-reading-text { margin: 0; font-family: var(--font-reading); text-align: left; hyphens: none; }
+
+/* MoonProgress */
+.alo-moons { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--space-2); align-items: flex-start; }
+.alo-moon { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); width: 76px; }
+.alo-moon:not(:last-child)::after { content: ""; position: absolute; top: 17px; left: calc(50% + 22px); width: calc(100% - 36px); height: 4px; border-radius: 2px; background: var(--line); }
+.alo-moon--done:not(:last-child)::after { background: var(--leaf); }
+.alo-moon-disc { width: 38px; height: 38px; border-radius: var(--radius-pill); display: grid; place-items: center; box-sizing: border-box; }
+.alo-moon--done .alo-moon-disc { background: var(--leaf); color: var(--on-bright); }
+.alo-moon--now .alo-moon-disc { background: var(--moon); border: 4px solid var(--moon-edge); box-shadow: 0 0 0 6px var(--moon-soft); }
+.alo-moon--next .alo-moon-disc { border: 3px solid var(--line-strong); background: var(--surface-raised); }
+.alo-moon-label { font-size: 14px; line-height: 18px; font-weight: 800; color: var(--ink-muted); text-align: center; }
+.alo-moon--now .alo-moon-label { color: var(--ink); }
+
+/* RewardBadge */
+.alo-badge { margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); width: 136px; text-align: center; }
+.alo-badge-medal { width: 88px; height: 88px; border-radius: var(--radius-pill); display: grid; place-items: center; font-size: 40px; }
+.alo-badge--earned .alo-badge-medal { background: var(--moon); color: var(--on-bright); box-shadow: var(--press-moon), 0 0 0 8px var(--moon-soft); }
+.alo-badge--locked .alo-badge-medal { background: var(--surface-raised); color: var(--line-strong); border: 3px dashed var(--line-strong); }
+.alo-badge figcaption { display: flex; flex-direction: column; gap: 2px; }
+.alo-badge strong { font-size: 16px; line-height: 20px; font-weight: 800; color: var(--ink); }
+.alo-badge figcaption span { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+
+/* LanternStreak */
+.alo-streak { display: flex; flex-direction: column; gap: var(--space-3); }
+.alo-lanterns { display: flex; gap: var(--space-3); }
+.alo-lantern { width: 44px; height: 52px; border-radius: var(--radius-m); display: grid; place-items: center; font-size: 30px; }
+.alo-lantern--lit { color: var(--moon); background: var(--moon-soft); }
+.alo-lantern--rest { color: var(--line-strong); background: var(--surface-raised); border: 2px solid var(--line); }
+.alo-streak-text { margin: 0; font-size: 20px; line-height: 28px; font-weight: 700; color: var(--ink); }
+
+/* Japa */
+.alo-japa { display: inline-block; width: var(--mascot-m); line-height: 0; }
+.alo-japa svg { width: 100%; height: auto; }
+
+/* ParentReportCard (grown-up mode) */
+.alo-report { background: var(--surface-raised); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-m); padding: var(--space-4) var(--space-5); max-width: 380px; display: flex; flex-direction: column; gap: var(--space-3); font-family: var(--font-ui); }
+.alo-report h3, .alo-report p { margin: 0; }
+.alo-report-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+.alo-report-stats { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2) var(--space-4); }
+.alo-report-stat { border-top: 1px solid var(--line); padding-top: var(--space-2); }
+.alo-report-stat dt { color: var(--ink-muted); }
+.alo-report-stat dd { margin: 2px 0 0; font-size: 22px; line-height: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.alo-report-focus .label, .alo-report-stat .label { text-transform: uppercase; }
+.alo-report-focus .label { color: var(--ink-muted); margin-right: var(--space-1); }
+.alo-report-tip { background: var(--night-soft); border-radius: var(--radius-s); padding: var(--space-3); }
+.alo-report .alo-btn { align-self: flex-start; }
+
+/* ProfilePill */
+.alo-pill { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0 var(--space-3); border-radius: var(--radius-pill); font-size: 14px; line-height: 18px; font-weight: 800; }
+.alo-pill--leaf { background: var(--leaf-soft); color: var(--leaf-text); }
+.alo-pill--sky { background: var(--sky-soft); color: var(--sky-text); }
+.alo-pill--coral { background: var(--coral-soft); color: var(--coral-text); }
+.alo-pill--night { background: var(--night-soft); color: var(--night); }
+.alo-pill--moon { background: var(--moon-soft); color: var(--ink); }
+.alo-pill--none { background: var(--surface-raised); color: var(--ink-muted); border: 2px solid var(--line-strong); }
+.alo-pill-prov { font-weight: 600; font-size: 12px; opacity: .85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .alo-btn, .alo-mic { transition: none; }
+  .alo-mic--listening, .alo-dots i { animation: none; }
+}

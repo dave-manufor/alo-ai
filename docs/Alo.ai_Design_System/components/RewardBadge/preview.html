@@ -1,0 +1,12 @@
+<!-- @dsCard group="Progress & rewards" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>RewardBadge — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(A.RewardBadge, {kind:'brave'}), h(A.RewardBadge, {kind:'teller'}), h(A.RewardBadge, {kind:'collector', earned:false}), h(A.RewardBadge, {kind:'listener', earned:false})));
+</script>
+</body>
+</html>

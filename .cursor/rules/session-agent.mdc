@@ -1,0 +1,11 @@
+---
+description: Session Agent and passage generation (W2).
+globs: services/session_agent/**,services/core/generator/**,services/core/books/**
+alwaysApply: false
+---
+
+See `services/session_agent/AGENTS.md` and `services/core/AGENTS.md`.
+- The state machine is a pure function and decides every prompt; keep it at 100% line coverage.
+- "That word is X." is always a clip, never Gemini Live. `VOICE_MODE`/`SESSION_PROFILE` come from server env only.
+- The child's own words never reach the generator; only taxonomy tags and a safe detail do.
+- Prompt/model changes: rerun the eval set (use `alo-prompt-eval`).

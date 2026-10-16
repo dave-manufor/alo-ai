@@ -1,0 +1,35 @@
+# Review ring (docs/CONTRIBUTING.md):
+#   W1 (Anthony) is reviewed by W2 or W3; W2 (David) reviews W3; W3 (Nelson) reviews W2.
+# TODO: replace @W1-GITHUB-USERNAME with Anthony's GitHub username.
+
+# W1: web, accounts and payments, platform
+/apps/web/                @dave-manufor @SmartWebCodder
+/services/account/        @dave-manufor @SmartWebCodder
+/infra/                   @dave-manufor @SmartWebCodder
+/ops/                     @dave-manufor @SmartWebCodder
+/dev/                     @dave-manufor @SmartWebCodder
+/.github/                 @dave-manufor @SmartWebCodder
+/docker-compose.yml       @dave-manufor @SmartWebCodder
+/Makefile                 @dave-manufor @SmartWebCodder
+
+# W2: live session (reviewed by W3)
+/services/session_agent/  @SmartWebCodder
+/services/core/generator/ @SmartWebCodder
+/services/core/books/     @SmartWebCodder
+
+# W3: after the session (reviewed by W2)
+/services/reading_scorer/ @dave-manufor
+/services/core/grader/    @dave-manufor
+/services/core/coach/     @dave-manufor
+/libs/aloai/              @dave-manufor
+/tests/                   @dave-manufor
+
+# Shared: all three
+/schemas/                 @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/eval/                    @dave-manufor @SmartWebCodder
+/fixtures/contracts/      @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/docs/                    @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/AGENTS.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/CLAUDE.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/GEMINI.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/.agents/                 @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder

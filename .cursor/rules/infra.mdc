@@ -1,0 +1,12 @@
+---
+description: Terraform, ops and local dev tooling (W1).
+globs: infra/**,ops/**,dev/**,docker-compose.yml,Makefile
+alwaysApply: false
+---
+
+See `infra/AGENTS.md`, `ops/AGENTS.md`, `dev/AGENTS.md`.
+- Nothing in Google Cloud is created or changed by hand; Terraform only (use `alo-infra-change`).
+- Secret values never go in Terraform or state. EU region. Least-privilege service accounts.
+- Server settings change only via a `chore/infra-...` PR to `terraform.tfvars`.
+- Never weaken the `ALO_ENV=local` / `K_SERVICE` refusal guard.
+- Run `terraform fmt -check` and `terraform validate` before a PR.

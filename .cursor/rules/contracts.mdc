@@ -1,0 +1,9 @@
+---
+description: Schemas and contract fixtures (shared).
+globs: schemas/**,fixtures/contracts/**
+alwaysApply: false
+---
+
+See `schemas/AGENTS.md` and use `alo-contract-change`.
+- Update the schema, the fixture and `schema_version` in the same PR, and tag the consumer (PRD 14.2 table).
+- Never edit a fixture to hide a producer bug. Fictional data only.

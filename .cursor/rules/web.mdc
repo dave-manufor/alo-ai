@@ -1,0 +1,16 @@
+---
+description: Web app / PWA (W1). Design system is mandatory.
+globs: apps/web/**
+alwaysApply: false
+---
+
+See `apps/web/AGENTS.md`.
+
+Design system: follow it AS CLOSELY AS POSSIBLE.
+- Use its tokens, components and patterns. No hard-coded colour, spacing or font values; no one-off component when a system component exists.
+- Deviate ONLY when following it is impossible. Keep the deviation minimal, explain it in the PR under "Design system deviations", and propose the missing piece as an addition to the system.
+- The system is in `docs/Alo.ai_Design_System/`: read its `README.md` first, then `tokens.json`, `components/` (README, `preview.html`, `index.d.ts`) and `assets/`. Don't edit those files to suit one screen.
+- Never mix kid and grown-up mode on one screen. Kid mode never shows red, a score, a timer or a percentage. Story text is always Andika. `moon` is for rewards only. No emoji.
+- Use the `alo-ui-change` skill first; review with `design-critique` and `accessibility-review`.
+
+Also: children never see a score, timer or red mark; screening language only; the teacher view is a labelled preview with sample data and no network calls.

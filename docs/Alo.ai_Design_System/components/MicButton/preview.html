@@ -1,0 +1,12 @@
+<!-- @dsCard group="Actions" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>MicButton — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(A.MicButton, {state:'idle'}), h(A.MicButton, {state:'listening'}), h(A.MicButton, {state:'thinking'})));
+</script>
+</body>
+</html>
