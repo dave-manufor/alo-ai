@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "passage_id": "bank_p3_market_day",
+  "title": "Market Day",
+  "mode": "READ",
+  "source": "BANK",
+  "topic_tags": ["food"],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 23,
+  "text_content": "Ada and Mama went to the market. Ada saw a red hat. It cost too much. Ada smiled and chose a blue hat.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    { "token_index": 0, "sentence_index": 0, "text": "Ada", "clean_text": "ada", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": "ˈɑːdɑ", "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ada~%CB%88%C9%91%CB%90d%C9%91.mp3" },
+    { "token_index": 1, "sentence_index": 0, "text": "and", "clean_text": "and", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3" },
+    { "token_index": 2, "sentence_index": 0, "text": "Mama", "clean_text": "mama", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama.mp3" },
+    { "token_index": 3, "sentence_index": 0, "text": "went", "clean_text": "went", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/went.mp3" },
+    { "token_index": 4, "sentence_index": 0, "text": "to", "clean_text": "to", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3" },
+    { "token_index": 5, "sentence_index": 0, "text": "the", "clean_text": "the", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3" },
+    { "token_index": 6, "sentence_index": 0, "text": "market.", "clean_text": "market", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/market.mp3" },
+    { "token_index": 7, "sentence_index": 1, "text": "Ada", "clean_text": "ada", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": "ˈɑːdɑ", "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ada~%CB%88%C9%91%CB%90d%C9%91.mp3" },
+    { "token_index": 8, "sentence_index": 1, "text": "saw", "clean_text": "saw", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/saw.mp3" },
+    { "token_index": 9, "sentence_index": 1, "text": "a", "clean_text": "a", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3" },
+    { "token_index": 10, "sentence_index": 1, "text": "red", "clean_text": "red", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/red.mp3" },
+    { "token_index": 11, "sentence_index": 1, "text": "hat.", "clean_text": "hat", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hat.mp3" },
+    { "token_index": 12, "sentence_index": 2, "text": "It", "clean_text": "it", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3" },
+    { "token_index": 13, "sentence_index": 2, "text": "cost", "clean_text": "cost", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/cost.mp3" },
+    { "token_index": 14, "sentence_index": 2, "text": "too", "clean_text": "too", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/too.mp3" },
+    { "token_index": 15, "sentence_index": 2, "text": "much.", "clean_text": "much", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/much.mp3" },
+    { "token_index": 16, "sentence_index": 3, "text": "Ada", "clean_text": "ada", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": "ˈɑːdɑ", "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ada~%CB%88%C9%91%CB%90d%C9%91.mp3" },
+    { "token_index": 17, "sentence_index": 3, "text": "smiled", "clean_text": "smiled", "is_content_word": true, "syntactic_boundary_after": "CLAUSE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/smiled.mp3" },
+    { "token_index": 18, "sentence_index": 3, "text": "and", "clean_text": "and", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3" },
+    { "token_index": 19, "sentence_index": 3, "text": "chose", "clean_text": "chose", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chose.mp3" },
+    { "token_index": 20, "sentence_index": 3, "text": "a", "clean_text": "a", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3" },
+    { "token_index": 21, "sentence_index": 3, "text": "blue", "clean_text": "blue", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/blue.mp3" },
+    { "token_index": 22, "sentence_index": 3, "text": "hat.", "clean_text": "hat", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hat.mp3" }
+  ],
+  "propositions": [
+    { "id": "p1", "sentence_index": 0, "category": "SETTING", "description": "Ada and her mother went to the market.", "weight": 1, "example_paraphrases": ["Ada was at the market with Mama."] },
+    { "id": "p2", "sentence_index": 1, "category": "ACTION", "description": "Ada saw a red hat.", "weight": 1, "example_paraphrases": ["There was a red hat and Ada looked at it."] },
+    { "id": "p3", "sentence_index": 2, "category": "PROBLEM", "description": "The red hat cost too much.", "weight": 2, "example_paraphrases": ["The red hat was too expensive."] },
+    { "id": "p4", "sentence_index": 3, "category": "RESOLUTION", "description": "Ada chose a blue hat instead.", "weight": 2, "example_paraphrases": ["She picked the blue one."] }
+  ],
+  "items": [
+    {
+      "item_id": "bank_p3_market_day_q1",
+      "order": 1,
+      "type": "LITERAL",
+      "target_sentence_index": 1,
+      "prompt_text": "What colour was the first hat Ada saw?",
+      "max_points": 2,
+      "rubric": { "2": "Says red.", "1": "Says a hat but not the colour.", "0": "No relevant answer." },
+      "exemplars": [
+        { "answer": "It was red.", "points": 2 },
+        { "answer": "A hat.", "points": 1 },
+        { "answer": "I do not know.", "points": 0 }
+      ]
+    },
+    {
+      "item_id": "bank_p3_market_day_q2",
+      "order": 2,
+      "type": "INFERENTIAL",
+      "target_sentence_index": 3,
+      "prompt_text": "Why do you think Ada chose the blue hat?",
+      "max_points": 2,
+      "rubric": { "2": "Says the red hat cost too much or the blue hat cost less.", "1": "Gives a reason that is not in the story, such as liking blue.", "0": "No relevant answer." },
+      "exemplars": [
+        { "answer": "Because the red one was too much money.", "points": 2 },
+        { "answer": "She likes blue.", "points": 1 },
+        { "answer": "I do not know.", "points": 0 }
+      ]
+    }
+  ],
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)"
+}
