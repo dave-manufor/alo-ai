@@ -1,0 +1,21 @@
+[project]
+name = "aloai-session-agent"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Alo.ai Session Agent (W2)"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+# Run from the repo root with: pytest -c services/session_agent/pyproject.toml services/session_agent
+pythonpath = ["../.."]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
