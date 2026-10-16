@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session_record.schema.json",
+  "title": "SessionRecord",
+  "description": "Firestore sessions/{session_id} and sessions/{session_id}/turns/{turn_id} (SDD 12). Written by the Session Agent (W2); turns are also written by Core. Turn phase names are chosen from the PRD 4 step labels.",
+  "$defs": {
+    "session_flag": {
+      "type": "string",
+      "enum": ["LOW_AUDIO", "SHORT_READING", "LIVE_FALLBACK", "RECONNECTED", "DEMO_PROFILE", "LIVE_FIRST", "FALLBACK_PASSAGE"]
+    },
+    "turn_phase": {
+      "type": "string",
+      "enum": ["INTEREST_CHAT", "MIC_CHECK", "READING", "RETELL", "QUESTION", "LISTENING_RETELL", "LISTENING_QUESTION"]
+    },
+    "session": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "child_id": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["STARTED", "COMPLETE", "INCOMPLETE"] },
+        "context": { "type": "string", "enum": ["HOME", "SCHOOL"] },
+        "capture_mode": { "type": "string", "enum": ["LIVE", "LOCAL_CAPTURE"] },
+        "voice_mode": { "type": "string", "enum": ["cache_first", "live_first"] },
+        "session_profile": { "type": "string", "enum": ["standard", "demo"] },
+        "passage_id": { "type": "string", "minLength": 1 },
+        "passage_source": { "type": "string", "enum": ["BANK", "GENERATED"] },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/session_flag" }, "uniqueItems": true },
+        "voice_profile_id": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["schema_version", "child_id", "status", "context", "capture_mode", "voice_mode", "session_profile", "passage_id", "passage_source", "flags", "voice_profile_id", "created_at"],
+      "additionalProperties": false
+    },
+    "turn": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "phase": { "$ref": "#/$defs/turn_phase" },
+        "audio_uri": { "type": "string", "pattern": "^gs://" },
+        "live_transcript": { "type": ["string", "null"] },
+        "asr_transcript": { "type": ["string", "null"] }
+      },
+      "required": ["schema_version", "phase", "audio_uri", "live_transcript", "asr_transcript"],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/session" },
+    { "$ref": "#/$defs/turn" }
+  ]
+}

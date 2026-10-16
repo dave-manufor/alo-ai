@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "child_id": "child_demo_001",
+  "status": "COMPLETE",
+  "context": "SCHOOL",
+  "capture_mode": "LIVE",
+  "voice_mode": "cache_first",
+  "session_profile": "standard",
+  "passage_id": "bank_p3_market_day",
+  "passage_source": "BANK",
+  "flags": ["LIVE_FALLBACK"],
+  "voice_profile_id": "voice_demo_a",
+  "created_at": "2026-01-15T09:00:00Z"
+}

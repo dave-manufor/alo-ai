@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session_protocol.schema.json",
+  "title": "SessionProtocolMessage",
+  "description": "LiveKit data-channel messages between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: play, show_passage, hide_passage, reconnecting, clip_list. Client to agent: played, missing. The client never shows a score, timer or red mark.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "cmd": { "const": "clip_list" },
+        "clips": {
+          "type": "array",
+          "description": "Clips the client should cache before the session starts.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "clip_id": { "type": "string", "minLength": 1 },
+              "url": { "type": "string", "minLength": 1 }
+            },
+            "required": ["clip_id", "url"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["schema_version", "cmd", "clips"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "cmd": { "const": "play" },
+        "clip_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["schema_version", "cmd", "clip_id"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "cmd": { "const": "show_passage" },
+        "passage_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["schema_version", "cmd", "passage_id"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "cmd": { "enum": ["hide_passage", "reconnecting"] }
+      },
+      "required": ["schema_version", "cmd"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "cmd": { "enum": ["played", "missing"] },
+        "clip_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["schema_version", "cmd", "clip_id"],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event_envelope.schema.json",
+  "title": "EventEnvelope",
+  "description": "Envelope for every event on the aloai.session-events topic (SDD 11). Producer of the session.* and phase1.recorded events: Session Agent (W2).",
+  "type": "object",
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "type": { "type": "string", "enum": ["session.started", "phase1.recorded", "session.done"] },
+    "schema_version": { "type": "integer", "const": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "session_id": { "type": "string", "minLength": 1 },
+    "data": { "type": "object" }
+  },
+  "required": ["event_id", "type", "schema_version", "occurred_at", "session_id", "data"],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "session.started" } } },
+      "then": { "properties": { "data": { "$ref": "session_started.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "phase1.recorded" } } },
+      "then": { "properties": { "data": { "$ref": "phase1_recorded.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "session.done" } } },
+      "then": { "properties": { "data": { "$ref": "session_done.schema.json" } } }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "schema_version": 1,
+    "cmd": "clip_list",
+    "clips": [
+      { "clip_id": "greeting_1", "url": "https://storage.googleapis.com/aloai-dev-clips/voice_demo_a/v1/greeting_1.mp3" },
+      { "clip_id": "word_market", "url": "https://storage.googleapis.com/aloai-dev-clips/voice_demo_a/v1/words/market.mp3" }
+    ]
+  },
+  { "schema_version": 1, "cmd": "play", "clip_id": "word_market" },
+  { "schema_version": 1, "cmd": "show_passage", "passage_id": "bank_p3_market_day" },
+  { "schema_version": 1, "cmd": "hide_passage" },
+  { "schema_version": 1, "cmd": "reconnecting" },
+  { "schema_version": 1, "cmd": "played", "clip_id": "word_market" },
+  { "schema_version": 1, "cmd": "missing", "clip_id": "word_market" }
+]
