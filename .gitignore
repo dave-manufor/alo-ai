@@ -1,0 +1,67 @@
+# Secrets and local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+adc.json
+application_default_credentials.json
+
+# Child data and large media: never commit (PRD 12, CONTRIBUTING)
+*.wav
+*.mp3
+*.webm
+*.opus
+*.m4a
+*.ogg
+*.flac
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.ckpt
+# Consented adult or synthetic test clips may be added with `git add -f`; see fixtures/recordings/README.md
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+.firebase/
+*.log
+npm-debug.log*
+
+# Terraform (keep .terraform.lock.hcl)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+
+# Emulator data
+firebase-export-*/
+emulator-data/
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Per-developer agent state
+.claude/settings.local.json
+.claude/worktrees/
+.cursor/mcp.json
+CLAUDE.local.md
