@@ -90,8 +90,42 @@ def test_every_schema_has_a_fixture():
         "session_done.schema.json",
         "session_record.schema.json",
         "session_protocol.schema.json",
+        "passage.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
+
+
+def test_passage_fixture_validates():
+    _validator("passage.schema.json").validate(_fixture("passage.bank_p3_market_day.json"))
+
+
+def test_passage_fixture_is_consistent():
+    passage = _fixture("passage.bank_p3_market_day.json")
+    tokens = passage["tokens"]
+    assert [t["token_index"] for t in tokens] == list(range(len(tokens)))
+    assert passage["word_count"] == len(tokens)
+    assert " ".join(t["text"] for t in tokens) == passage["text_content"]
+    sentences = sorted({t["sentence_index"] for t in tokens})
+    assert sentences == list(range(len(sentences)))
+    # Each sentence ends on its last token with TERMINAL, and nowhere else.
+    for token, following in zip(tokens, [*tokens[1:], None], strict=True):
+        ends = following is None or following["sentence_index"] != token["sentence_index"]
+        assert (token["syntactic_boundary_after"] == "TERMINAL") == ends
+    assert all(p["sentence_index"] < len(sentences) for p in passage["propositions"])
+    assert all(i["target_sentence_index"] < len(sentences) for i in passage["items"])
+    assert [i["order"] for i in passage["items"]] == [1, 2]
+
+
+def test_passage_with_an_unknown_field_is_rejected():
+    passage = _fixture("passage.bank_p3_market_day.json")
+    passage["tokens"][0]["child_name"] = "not allowed"
+    assert not _validator("passage.schema.json").is_valid(passage)
+
+
+def test_passage_needs_four_propositions():
+    passage = _fixture("passage.bank_p3_market_day.json")
+    passage["propositions"] = passage["propositions"][:3]
+    assert not _validator("passage.schema.json").is_valid(passage)
 
 
 def test_unknown_field_is_rejected():
