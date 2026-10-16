@@ -11,6 +11,14 @@ LiveKit Agents worker that runs a reading session (PRD 4). Rules for working her
 - Timers are named `<kind>:<task_seq>`; a timer from an earlier task is ignored.
 - In `live_first` the prompts are `SpeakLive` (with a clip fallback) while Live is healthy. "That word is X." and the listening story are always clips.
 
+## Building blocks (no network; real Cloud clients are wired in with the worker)
+
+- `clips/`: word keys (`keys.py`), the clip store layout and only-if-absent write (`store.py`), and seeding (`seed.py`).
+- `position_tracker.py`: follows the child through the passage from speech-to-text partials; reports stalls, progress and the end.
+- `protocol.py`: data-channel messages for the web app (`schemas/session_protocol.schema.json`).
+- `recording.py`: names each turn's audio object (UUID v4) and keeps the turn list.
+- `events.py`, `session_store.py`: build the published events and Firestore records the contracts describe.
+
 ## Run the tests
 
 Python 3.11. From the repo root:
