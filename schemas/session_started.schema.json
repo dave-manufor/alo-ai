@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session_started.schema.json",
+  "title": "SessionStartedData",
+  "description": "data of the session.started event. Producer: Session Agent (W2). No consumer in the hackathon. child_ref is an opaque reference, never a name.",
+  "type": "object",
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "child_ref": { "type": "string", "minLength": 1 },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "context": { "type": "string", "enum": ["HOME", "SCHOOL"] },
+    "voice_profile_id": { "type": "string", "minLength": 1 },
+    "voice_mode": { "type": "string", "enum": ["cache_first", "live_first"] },
+    "session_profile": { "type": "string", "enum": ["standard", "demo"] }
+  },
+  "required": ["session_id", "child_ref", "passage_id", "context", "voice_profile_id", "voice_mode", "session_profile"],
+  "additionalProperties": false
+}

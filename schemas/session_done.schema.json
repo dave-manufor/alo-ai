@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session_done.schema.json",
+  "title": "SessionDoneData",
+  "description": "data of the session.done event. Producer: Session Agent (W2). Consumer: Core Grader (W3). Flags are the informational and blocking flags the Session Agent can raise (PRD 6.8); the Grader and Scorer raise the others.",
+  "type": "object",
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "turn_audio_uris": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "turn_id": { "type": "string", "minLength": 1 },
+          "phase": { "$ref": "session_record.schema.json#/$defs/turn_phase" },
+          "audio_uri": { "type": "string", "pattern": "^gs://" }
+        },
+        "required": ["turn_id", "phase", "audio_uri"],
+        "additionalProperties": false
+      }
+    },
+    "capture_mode": { "type": "string", "enum": ["LIVE", "LOCAL_CAPTURE"] },
+    "session_settings": {
+      "type": "object",
+      "properties": {
+        "voice_mode": { "type": "string", "enum": ["cache_first", "live_first"] },
+        "session_profile": { "type": "string", "enum": ["standard", "demo"] }
+      },
+      "required": ["voice_mode", "session_profile"],
+      "additionalProperties": false
+    },
+    "flags": {
+      "type": "array",
+      "items": { "$ref": "session_record.schema.json#/$defs/session_flag" },
+      "uniqueItems": true
+    },
+    "listening_module_run": { "type": "boolean" }
+  },
+  "required": ["session_id", "turn_audio_uris", "capture_mode", "session_settings", "flags", "listening_module_run"],
+  "additionalProperties": false
+}

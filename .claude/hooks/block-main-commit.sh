@@ -8,7 +8,12 @@ case "$input" in
   *) exit 0 ;;
 esac
 
-branch="$(git -C "${CLAUDE_PROJECT_DIR:-.}" branch --show-current 2>/dev/null)"
+# Use the directory the command runs in, so a worktree is judged by its own branch.
+# Fall back to the project dir if that is not a git checkout.
+branch="$(git branch --show-current 2>/dev/null)"
+if [ -z "$branch" ]; then
+  branch="$(git -C "${CLAUDE_PROJECT_DIR:-.}" branch --show-current 2>/dev/null)"
+fi
 if [ "$branch" = "main" ]; then
   echo "Blocked: you are on main. Create a branch first (type/scope-short-description), e.g. git checkout -b feat/session-told-word-prompt. See docs/CONTRIBUTING.md." >&2
   exit 2

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phase1_recorded.schema.json",
+  "title": "Phase1RecordedData",
+  "description": "data of the phase1.recorded event. Producer: Session Agent (W2). Consumer: Reading Scorer (W3). told_token_indices are passage token indices the child was told via the 'That word is X.' clip (the TOLD log).",
+  "type": "object",
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "audio_uri": { "type": "string", "pattern": "^gs://" },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "told_token_indices": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "uniqueItems": true
+    }
+  },
+  "required": ["session_id", "audio_uri", "passage_id", "told_token_indices"],
+  "additionalProperties": false
+}
