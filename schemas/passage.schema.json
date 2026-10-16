@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "passage.schema.json",
+  "title": "PassageArtifact",
+  "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "mode": { "type": "string", "enum": ["READ", "LISTEN"] },
+    "source": { "type": "string", "enum": ["BANK", "GENERATED"] },
+    "topic_tags": { "type": "array", "items": { "type": "string" }, "maxItems": 2 },
+    "generation": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "prompt_version": { "type": "string" },
+        "target_arl": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "estimated_arl": { "type": "number" },
+        "attempts": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "gate_results": { "type": "object", "additionalProperties": { "type": "boolean" } },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["model", "prompt_version", "target_arl", "estimated_arl", "attempts", "gate_results", "created_at"],
+      "additionalProperties": false
+    },
+    "genre": { "type": "string", "enum": ["NARRATIVE", "EXPOSITORY"] },
+    "arl_level": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "word_count": { "type": "integer", "minimum": 1 },
+    "text_content": { "type": "string", "minLength": 1 },
+    "audio_gcs_uri": { "type": "string", "pattern": "^gs://" },
+    "voice_profile_id": { "type": "string" },
+    "tokens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "token_index": { "type": "integer", "minimum": 0 },
+          "sentence_index": { "type": "integer", "minimum": 0 },
+          "text": { "type": "string" },
+          "clean_text": { "type": "string" },
+          "is_content_word": { "type": "boolean" },
+          "syntactic_boundary_after": { "type": "string", "enum": ["NONE", "PHRASE", "CLAUSE", "TERMINAL"] },
+          "name_ipa": { "type": ["string", "null"] },
+          "word_clip_gcs_uri": { "type": "string", "pattern": "^gs://" }
+        },
+        "required": ["token_index", "sentence_index", "text", "clean_text", "is_content_word", "syntactic_boundary_after", "word_clip_gcs_uri"],
+        "additionalProperties": false
+      }
+    },
+    "length_profile": { "type": "string", "enum": ["STANDARD", "DEMO"] },
+    "propositions": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "sentence_index": { "type": "integer", "minimum": 0 },
+          "category": { "type": "string", "enum": ["SETTING", "CHARACTER", "PROBLEM", "ACTION", "RESOLUTION", "MAIN_IDEA", "DETAIL"] },
+          "description": { "type": "string" },
+          "weight": { "type": "integer", "enum": [1, 2] },
+          "example_paraphrases": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["id", "category", "description", "weight"],
+        "additionalProperties": false
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": { "type": "string" },
+          "order": { "type": "integer" },
+          "type": { "type": "string", "enum": ["LITERAL", "INFERENTIAL", "VOCABULARY"] },
+          "target_sentence_index": { "type": "integer", "minimum": 0 },
+          "prompt_text": { "type": "string" },
+          "prompt_audio_gcs_uri": { "type": "string", "pattern": "^gs://" },
+          "max_points": { "type": "integer", "const": 2 },
+          "rubric": {
+            "type": "object",
+            "properties": {
+              "2": { "type": "string" },
+              "1": { "type": "string" },
+              "0": { "type": "string" }
+            },
+            "required": ["2", "1", "0"],
+            "additionalProperties": false
+          },
+          "exemplars": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "answer": { "type": "string" },
+                "points": { "type": "integer", "enum": [0, 1, 2] }
+              },
+              "required": ["answer", "points"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["item_id", "order", "type", "target_sentence_index", "prompt_text", "max_points", "rubric", "exemplars"],
+        "additionalProperties": false
+      }
+    },
+    "paired_listening_passage_id": { "type": "string" },
+    "licence": { "type": "string" }
+  },
+  "required": ["schema_version", "passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "tokens", "propositions", "items"],
+  "additionalProperties": false
+}
