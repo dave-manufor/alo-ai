@@ -1,0 +1,19 @@
+---
+description: Alo.ai core rules. Always applied.
+alwaysApply: true
+---
+
+Read and follow `AGENTS.md` at the repo root; it is the source of truth. The area folder's `AGENTS.md` adds local rules.
+
+Non-negotiable:
+- Agents plan, code scores: only `aloai_scoring.py` produces numbers. No LLM-made scores, levels or profiles.
+- Never commit secrets, `.env`, real children's audio, names or transcripts, or large files. Fictional fixtures only.
+- Screening language only. Never write: diagnosis, dyslexia, behind, failing, hyperlexic, word caller.
+- Contract change = schema + fixture + `schema_version` bump + tag the consumer, in one PR.
+- Scoring/[CAL] change = W3 approval + `scoring_module` bump + validation rerun + PRD changelog line.
+- Prompt/model change = rerun its eval set, paste result in PR.
+- Infra only through Terraform. Server settings only via a `chore/infra-...` PR.
+- "That word is X." is always a clip. Keep the `ALO_ENV=local` / `K_SERVICE` guard.
+- UI follows the design system as closely as possible; deviate only when impossible and explain in the PR.
+- Never commit to `main`. Branch `type/scope-description`, commit `type(scope): what`. Nobody merges their own PR. Review ring: W1 reviewed by W2 or W3, W2 by W3, W3 by W2.
+- Skills are in `.agents/skills/` (also `.cursor/skills/`); use the `alo-*` skills for these workflows.

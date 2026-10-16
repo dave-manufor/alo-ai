@@ -1,0 +1,10 @@
+---
+description: Account and Payments service (W1).
+globs: services/account/**,ops/paystack/**
+alwaysApply: false
+---
+
+See `services/account/AGENTS.md`.
+- Only this service holds the Paystack secret and email key. Never log or move them.
+- Verify `x-paystack-signature` (HMAC-SHA512) first; reject forged, ignore duplicates. Test mode only.
+- No session without a consent record and an entitlement. Emails never contain scores.
