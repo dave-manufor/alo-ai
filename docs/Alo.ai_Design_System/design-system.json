@@ -1,0 +1,177 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-10-14T11:43:57Z"
+ },
+ "title": "Alo.ai",
+ "namespace": "Alo",
+ "libraries": [
+  {
+   "name": "react",
+   "version": "18"
+  },
+  {
+   "name": "react-dom",
+   "version": "18"
+  }
+ ],
+ "sections": {},
+ "groups": [
+  "Logos",
+  "Mascot",
+  "Icons",
+  "Patterns"
+ ],
+ "assetGroups": {
+  "Logos": {
+   "name": "Logos",
+   "tile": "l",
+   "order": [
+    "wordmark-on-light.svg",
+    "wordmark-on-dark.svg",
+    "mark.svg",
+    "app-icon.svg"
+   ],
+   "files": {
+    "wordmark-on-light.svg": {
+     "name": "wordmark-on-light.svg",
+     "blob": "87e96c3ac93dd2df21ac509a23806573",
+     "size": 931,
+     "type": "image/svg+xml"
+    },
+    "wordmark-on-dark.svg": {
+     "name": "wordmark-on-dark.svg",
+     "blob": "1571cded26b93ad302c7a744b59ee4ad",
+     "size": 931,
+     "type": "image/svg+xml"
+    },
+    "mark.svg": {
+     "name": "mark.svg",
+     "blob": "6d2e2e7507f8a3475b7a7d313e78c88b",
+     "size": 256,
+     "type": "image/svg+xml"
+    },
+    "app-icon.svg": {
+     "name": "app-icon.svg",
+     "blob": "960ae9cec5514926da5f4f8d21f9a693",
+     "size": 323,
+     "type": "image/svg+xml"
+    }
+   }
+  },
+  "Mascot": {
+   "name": "Mascot",
+   "tile": "l",
+   "order": [
+    "japa-happy.svg",
+    "japa-cheer.svg",
+    "japa-listen.svg",
+    "japa-think.svg"
+   ],
+   "files": {
+    "japa-happy.svg": {
+     "name": "japa-happy.svg",
+     "blob": "546aee6adef28d324bf877a708b375e1",
+     "size": 2083,
+     "type": "image/svg+xml"
+    },
+    "japa-cheer.svg": {
+     "name": "japa-cheer.svg",
+     "blob": "bf6330132f59d95e152970ac78f09d3d",
+     "size": 2782,
+     "type": "image/svg+xml"
+    },
+    "japa-listen.svg": {
+     "name": "japa-listen.svg",
+     "blob": "d959f2cd54d267b3dca7b99b3840a45f",
+     "size": 2271,
+     "type": "image/svg+xml"
+    },
+    "japa-think.svg": {
+     "name": "japa-think.svg",
+     "blob": "41b704a8d5103b090f27f71f1d4eeb43",
+     "size": 2316,
+     "type": "image/svg+xml"
+    }
+   }
+  },
+  "Icons": {
+   "name": "Icons",
+   "tile": "s",
+   "order": [
+    "mic.svg",
+    "replay.svg",
+    "star.svg",
+    "lantern.svg",
+    "book.svg",
+    "check.svg"
+   ],
+   "files": {
+    "mic.svg": {
+     "name": "mic.svg",
+     "blob": "f658d7b6123e4acc4c788baa91faaccb",
+     "size": 366,
+     "type": "image/svg+xml"
+    },
+    "replay.svg": {
+     "name": "replay.svg",
+     "blob": "717b775480aa6e42ac0c9deeb8592168",
+     "size": 485,
+     "type": "image/svg+xml"
+    },
+    "star.svg": {
+     "name": "star.svg",
+     "blob": "b7078ea8ef015ba1d8ff902e7d8baa37",
+     "size": 278,
+     "type": "image/svg+xml"
+    },
+    "lantern.svg": {
+     "name": "lantern.svg",
+     "blob": "9cd9df809846641267a033893fcc54f6",
+     "size": 619,
+     "type": "image/svg+xml"
+    },
+    "book.svg": {
+     "name": "book.svg",
+     "blob": "65a8e0b90140f9a91246dc60238f2811",
+     "size": 402,
+     "type": "image/svg+xml"
+    },
+    "check.svg": {
+     "name": "check.svg",
+     "blob": "2c1bdd5a407123a1fe77208d617db995",
+     "size": 333,
+     "type": "image/svg+xml"
+    }
+   }
+  },
+  "Patterns": {
+   "name": "Patterns",
+   "tile": "m",
+   "order": [
+    "adire-circles.svg"
+   ],
+   "files": {
+    "adire-circles.svg": {
+     "name": "adire-circles.svg",
+     "blob": "d3397012d694b9a606760bfa88d048c2",
+     "size": 950,
+     "type": "image/svg+xml"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Dave Manufor",
+  "at": "2026-10-14T11:43:57Z",
+  "via": "Claude",
+  "note": "Created the Alo.ai brand system"
+ }
+}

@@ -1,0 +1,12 @@
+<!-- @dsCard group="Story" height=260 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SpeechBubble — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage alo-stage--col"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(A.SpeechBubble, {tone:'call'}, 'Àlọ́ o!'), h(A.SpeechBubble, null, 'Before we read, tell me: what kind of stories do you like?')));
+</script>
+</body>
+</html>

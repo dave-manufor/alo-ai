@@ -1,0 +1,12 @@
+<!-- @dsCard group="Grown-ups" height=170 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ProfilePill — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(A.ProfilePill, {profile:'ON_TRACK'}), h(A.ProfilePill, {profile:'UNDERSTANDS_BUILDING_WORD_READING'}), h(A.ProfilePill, {profile:'DECODING_LIMITED'}), h(A.ProfilePill, {profile:'FLUENT_NEEDS_LANGUAGE_SUPPORT'}), h(A.ProfilePill, {profile:'NEEDS_SUPPORT_IN_BOTH', provisional:true}), h(A.ProfilePill, {profile:'COMPREHENSION_STRATEGY_GAP'}), h(A.ProfilePill, {profile:'INSUFFICIENT_EVIDENCE'})));
+</script>
+</body>
+</html>

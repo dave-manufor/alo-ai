@@ -1,0 +1,12 @@
+<!-- @dsCard group="Actions" height=120 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(A.Button, {variant:'primary', icon:'mic'}, 'Start reading'), h(A.Button, {variant:'reward', icon:'star'}, 'Collect stars'), h(A.Button, {variant:'call'}, 'Àlọ́ o!'), h(A.Button, {variant:'secondary', icon:'replay'}, 'Say it again'), h(A.Button, {variant:'primary', size:'grown'}, 'View report'), h(A.Button, {variant:'secondary', size:'grown'}, 'Cancel')));
+</script>
+</body>
+</html>
