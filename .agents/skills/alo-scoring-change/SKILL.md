@@ -1,6 +1,6 @@
 ---
 name: alo-scoring-change
-description: Change scoring formulas, a [CAL] constant, an allowlist or a profile rule in aloai_scoring.py (or anything that decides a score, level or profile). Use before editing libs/aloai_scoring.py or scoring logic anywhere.
+description: Change scoring formulas, a [CAL] constant, an allowlist or a profile rule in aloai_scoring.py (or anything that decides a score, level or profile). Use before editing libs/aloai/aloai_scoring.py or scoring logic anywhere.
 ---
 
 # Alo.ai scoring change

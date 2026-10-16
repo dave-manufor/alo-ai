@@ -614,21 +614,19 @@ Everything in Google Cloud is declared in one flat Terraform configuration, and 
 **Repository layout** (one repository):
 
 ```
-apps/web/                 # PWA (kid and grown-up modes, teacher view preview)
-services/account/         # Account and Payments service
+apps/web/
+services/account/          # Account and Payments
 services/session_agent/
-services/core/            # generator/ (W2), grader/ and coach/ (W3), books/ (ingestion job)
+services/core/             # generator/, books/, grader/ and coach/
 services/reading_scorer/
-libs/aloai/               # aloai_scoring.py, aloai_authz.py, aloai_guardrails.py, clients
-schemas/  fixtures/       # contract schemas and the fixtures that local stubs and CI use
-dev/                      # Docker Compose helpers: emulators, init, replay, webhook, smoke
-infra/                    # flat Terraform: main.tf, variables.tf, terraform.tfvars
-ops/                      # Paystack script, delete_child.py, README
-eval/                     # agent evaluation sets, red-team set, golden recordings index
-docker-compose.yml
+libs/aloai/                # scoring, authz, guardrails, shared clients
+schemas/  fixtures/  eval/  dev/
+infra/                     # flat Terraform, including pubsub.json
+ops/                       # paystack/, delete_child.py, README.md
+docker-compose.yml  Makefile  .env.example
 ```
 
-> **Note on this copy:** the layout above is as written in the SDD. The repository skeleton and `docs/LOCAL_DEV.md` use `web/`, `services/scorer/`, `libs/` and have no `eval/` folder yet. Until the team settles which is right, follow `LOCAL_DEV.md` and the actual repo.
+> **Note on this copy:** this layout is the team's agreed one (updated 2026-10-16). It replaces the layout printed in the PDF, which differs in small ways (shorter comments, and `pubsub.json` and `Makefile` are now named). `docs/LOCAL_DEV.md` and the repo skeleton use the same layout.
 
 ### Pipeline:
 

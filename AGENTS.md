@@ -31,18 +31,23 @@ Review ring: **W1's PRs are reviewed by W2 or W3; W2 reviews W3; W3 reviews W2.*
 ## Repo layout
 
 ```
-services/
-  session_agent/  W2        account/  W1 (accounts and payments)
-  scorer/         W3        core/     generator/ books/ (W2), grader/ coach/ (W3)
-web/              W1        libs/     aloai_scoring, aloai_authz, aloai_guardrails (W3)
-schemas/          one JSON Schema per contract (PRD 14.2)
-fixtures/         seed/, contracts/, ai/, recordings/
-dev/              emulators/, init.py, replay.py, webhook.py, smoke.py (W1)
-infra/            Terraform + pubsub.json (W1)     ops/  things configured outside Terraform
-tests/            pytest
+apps/web/                   W1  web app / PWA
+services/account/           W1  Account and Payments
+services/session_agent/     W2  Session Agent
+services/core/              generator/ books/ (W2), grader/ coach/ (W3)
+services/reading_scorer/    W3  Reading Scorer
+libs/aloai/                 W3  aloai_scoring, aloai_authz, aloai_guardrails, shared clients
+schemas/                    one JSON Schema per contract (PRD 14.2)
+fixtures/                   seed/, contracts/, ai/, recordings/
+eval/                       agent evaluation sets, red-team set, golden recordings index
+dev/                        emulators/, init.py, replay.py, webhook.py, smoke.py (W1)
+infra/                      flat Terraform, including pubsub.json (W1)
+ops/                        paystack/, delete_child.py, README.md (W1)
+tests/                      pytest
+docker-compose.yml  Makefile  .env.example   (W1; not created yet)
 ```
 
-Some of these folders are empty skeletons. Check what exists before assuming code is there. `aloai_scoring.py`, `aloai_authz.py`, `aloai_guardrails.py` and their 130 tests are described in the PRD and are to be added by W3.
+This is the agreed layout (it replaces the one in `docs/LOCAL_DEV.md` v1 and SDD section 14). Some of these folders are empty skeletons. Check what exists before assuming code is there. `aloai_scoring.py`, `aloai_authz.py`, `aloai_guardrails.py` and their 130 tests are described in the PRD and are to be added by W3.
 
 ## Running things
 

@@ -40,18 +40,22 @@ One Docker Compose stack, three profiles: one per owner. Each person runs their 
 ## Repository layout this assumes
 
 ```
-services/
-  session_agent/  W2
-  account/        W1 (accounts and payments)
-  scorer/         W3
-  core/           generator/ and books/ (W2), grader/ and coach/ (W3)
-web/              W1
-libs/             aloai_scoring, aloai_authz, aloai_guardrails
-schemas/          one JSON Schema per contract in PRD 14.2
-fixtures/         seed/, contracts/, ai/, recordings/
-dev/              emulators/, init.py, replay.py, webhook.py, smoke.py
-infra/            Terraform, plus pubsub.json shared with dev/init.py
+apps/web/                   W1
+services/account/           W1 (accounts and payments)
+services/session_agent/     W2
+services/core/              generator/ and books/ (W2), grader/ and coach/ (W3)
+services/reading_scorer/    W3
+libs/aloai/                 aloai_scoring, aloai_authz, aloai_guardrails, shared clients
+schemas/                    one JSON Schema per contract in PRD 14.2
+fixtures/                   seed/, contracts/, ai/, recordings/
+eval/                       agent evaluation sets, red-team set, golden recordings index
+dev/                        emulators/, init.py, replay.py, webhook.py, smoke.py
+infra/                      flat Terraform, including pubsub.json shared with dev/init.py
+ops/                        paystack/, delete_child.py, README.md
+docker-compose.yml  Makefile  .env.example
 ```
+
+Compose service names stay short (`web`, `account`, `session-agent`, `core`, `scorer`); only the folders they build from have the longer names above.
 
 ## `docker-compose.yml`
 
@@ -115,7 +119,7 @@ services:
     environment:
       VITE_ALO_ENV: local                         # web app connects to the Auth and Firestore emulators
     ports: ["5173:5173"]
-    volumes: ["./web:/web", "web-node-modules:/web/node_modules"]
+    volumes: ["./apps/web:/web", "web-node-modules:/web/node_modules"]
     profiles: [web, session, after, all]
 
   account:                                        # Account and Payments service
@@ -173,7 +177,7 @@ services:
 
   # ---------- W3 ----------
   scorer:
-    build: { context: ., dockerfile: services/scorer/Dockerfile }   # CPU-only PyTorch, same image as Cloud Run
+    build: { context: ., dockerfile: services/reading_scorer/Dockerfile }   # CPU-only PyTorch, same image as Cloud Run
     environment: *local-env
     ports: ["8084:8080"]
     volumes: [*adc]
@@ -181,7 +185,7 @@ services:
     depends_on: *after-init
     develop:
       watch:
-        - { action: sync+restart, path: ./services/scorer, target: /app/services/scorer }
+        - { action: sync+restart, path: ./services/reading_scorer, target: /app/services/reading_scorer }
         - { action: sync+restart, path: ./libs, target: /app/libs }
     profiles: [after, all, scorer]
 

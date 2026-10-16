@@ -1,10 +1,10 @@
 ---
 description: Web app / PWA (W1). Design system is mandatory.
-globs: web/**
+globs: apps/web/**
 alwaysApply: false
 ---
 
-See `web/AGENTS.md`.
+See `apps/web/AGENTS.md`.
 
 Design system: follow it AS CLOSELY AS POSSIBLE.
 - Use its tokens, components and patterns. No hard-coded colour, spacing or font values; no one-off component when a system component exists.

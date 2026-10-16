@@ -3,7 +3,7 @@
 # TODO: replace @W1-GITHUB-USERNAME with Anthony's GitHub username.
 
 # W1: web, accounts and payments, platform
-/web/                     @dave-manufor @SmartWebCodder
+/apps/web/                @dave-manufor @SmartWebCodder
 /services/account/        @dave-manufor @SmartWebCodder
 /infra/                   @dave-manufor @SmartWebCodder
 /ops/                     @dave-manufor @SmartWebCodder
@@ -18,14 +18,15 @@
 /services/core/books/     @SmartWebCodder
 
 # W3: after the session (reviewed by W2)
-/services/scorer/         @dave-manufor
+/services/reading_scorer/ @dave-manufor
 /services/core/grader/    @dave-manufor
 /services/core/coach/     @dave-manufor
-/libs/                    @dave-manufor
+/libs/aloai/              @dave-manufor
 /tests/                   @dave-manufor
 
 # Shared: all three
 /schemas/                 @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/eval/                    @dave-manufor @SmartWebCodder
 /fixtures/contracts/      @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
 /docs/                    @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
 /AGENTS.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder

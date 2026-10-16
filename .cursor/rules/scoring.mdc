@@ -1,10 +1,10 @@
 ---
-description: Scoring, authz and guardrails libraries (W3). Apply when editing libs/ or scorer/grader code.
-globs: libs/**,services/scorer/**,services/core/grader/**
+description: Scoring, authz and guardrails libraries (W3). Apply when editing libs/aloai or scorer/grader code.
+globs: libs/aloai/**,services/reading_scorer/**,services/core/grader/**
 alwaysApply: false
 ---
 
-See `libs/AGENTS.md`, `services/scorer/AGENTS.md`, `services/core/AGENTS.md`.
+See `libs/aloai/AGENTS.md`, `services/reading_scorer/AGENTS.md`, `services/core/AGENTS.md`.
 - `aloai_scoring` is the only source of numbers; pure functions, no LLM, no network.
 - Any formula/[CAL]/allowlist/profile change needs W3 approval, a new `scoring_module` version, a validation rerun and a PRD changelog line (use `alo-scoring-change`).
 - 100% line coverage for scoring, authz, guardrails. Never loosen a test to pass.

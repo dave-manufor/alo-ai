@@ -1,4 +1,4 @@
-# web: Web app / PWA (W1, reviewed by W2 or W3)
+# apps/web: Web app / PWA (W1, reviewed by W2 or W3)
 
 Landing, Google and email-link sign-in, consent, child profiles, the session screen (mic, clip cache, reconnect), report screen, Paystack checkout and the teacher view **preview**. Read PRD 4.1, 4.4, 4.7, 14.1 and the root `AGENTS.md` first.
 
@@ -10,7 +10,7 @@ Follow the project design system **as closely as possible** in every UI change:
 - Use its tokens and components. No hard-coded colour/spacing/font values; no one-off component when a system component exists. Use logos, Jàpá and icons from `assets/` as supplied.
 - Kid mode and grown-up mode are never mixed on one screen. Kid mode never shows red, a score, a timer or a percentage. Story text is always Andika. `moon` is for rewards only.
 - Deviate **only when following it is impossible**. Then keep the deviation minimal, explain it in the PR under "Design system deviations", and propose the missing piece as an addition to the system.
-- W1 decides how the app consumes the bundle, tokens and assets (import or copy into `web/`), and does it once in one place. Don't edit the files in `docs/Alo.ai_Design_System/` to suit one screen; changes to the system are their own PR.
+- W1 decides how the app consumes the bundle, tokens and assets (import or copy into `apps/web/`), and does it once in one place. Don't edit the files in `docs/Alo.ai_Design_System/` to suit one screen; changes to the system are their own PR.
 - Run `alo-ui-change` before building UI; review with `design-critique` and `accessibility-review`.
 
 ## Other rules
