@@ -1,4 +1,4 @@
-"""Every score, band, level and profile in Alo.ai (PRD 6, 7.2, 8).
+"""Every score, band, level and profile in Alo.ai (PRD 5.5, 6, 7.2, 8).
 
 Pure functions: no I/O, no clock, no randomness and no model calls. The Reading
 Scorer, the quick endpoint and final grading all call these, so a number means the
@@ -25,7 +25,7 @@ from .comprehension import (
     run_listening_module,
     weighted_credit,
 )
-from .constants import SCORING_MODULE, Band, ProfileCode
+from .constants import PAUSE_MS, SCORING_MODULE, Band, ProfileCode
 from .fluency import Fluency, fluency, word_reading_ok
 from .levels import (
     ReportedLevel,
@@ -38,8 +38,10 @@ from .levels import (
     start_arl,
 )
 from .profile import Profile, assign_profile
+from .prosody import Prosody, prosody, sentence_eligible
 
 __all__ = [
+    "PAUSE_MS",
     "SCORING_MODULE",
     "Band",
     "CombinedItems",
@@ -49,6 +51,7 @@ __all__ = [
     "ListeningOutcome",
     "Profile",
     "ProfileCode",
+    "Prosody",
     "ReportedLevel",
     "approx_primary_class",
     "assign_profile",
@@ -65,10 +68,12 @@ __all__ = [
     "listening_outcome",
     "next_passage_level",
     "performance_band",
+    "prosody",
     "reported_level",
     "retell_coverage",
     "retell_needs_third_pass",
     "run_listening_module",
+    "sentence_eligible",
     "start_arl",
     "weighted_credit",
     "word_reading_ok",

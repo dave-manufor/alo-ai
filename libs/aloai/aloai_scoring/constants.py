@@ -67,6 +67,13 @@ BOOK_BAND_OFFSETS = {  # PRD 8, as (low, high) around the reported ARL
     "COMPREHENSION_STRATEGY_GAP": (0, 0),
 }
 
+PAUSE_MS = 180  # [CAL] PRD 5.5: a silent interval this long counts as a pause
+PHRASING_FULL_INTRUSION = 0.25  # [CAL] PRD 5.5: phrasing reaches 0 at this intrusion rate
+PROSODY_MIN_ACCURACY = 90  # PRD 5.5
+PROSODY_MIN_SENTENCES = 2  # PRD 5.5
+ELIGIBLE_MIN_WORDS = 5  # PRD 5.5: an eligible sentence has at least 5 words
+ELIGIBLE_MAX_ERRORS = 1  # PRD 5.5: and fewer than 2 errors
+
 BLOCKING_FLAGS = frozenset({"LOW_AUDIO", "OFF_TASK"})
 INFORMATIONAL_FLAGS = frozenset(
     {
