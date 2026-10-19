@@ -29,7 +29,7 @@
     "item_score": 0.5,
     "quick_reading_comprehension": 70.0,
     "listening_module_run": true,
-    "listening_comprehension": 75.0,
+    "listening_comprehension": 93.3,
     "listening_used": true,
     "quick_vs_final_item_agreement": 1.0
   },
@@ -45,8 +45,8 @@
   "profile": {
     "code": "UNDERSTANDS_BUILDING_WORD_READING",
     "provisional": true,
-    "primary_need": "Word reading",
-    "instructional_focus": "Practise the sounds in the words that were hard today; keep story questions at class level."
+    "primary_need": "Understands stories; reading the words is still developing",
+    "instructional_focus": "Practise the sounds in the words that were hard today, and keep story questions at class level."
   },
   "recommendations": {
     "arl_min": 1,
@@ -59,6 +59,7 @@
     "scoring_module": "1.0.0",
     "quick_model": "gemini-2.5-flash",
     "grader_model": "gemini-2.5-pro",
-    "grader_prompt": "grader_v1"
+    "grader_prompt": "grader_v1",
+    "response_asr": "chirp_3"
   }
 }

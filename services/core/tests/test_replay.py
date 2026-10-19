@@ -14,6 +14,7 @@ from services.core.tests.support import (
     RECORDED,
     SESSION_ID,
     add_telemetry,
+    contract,
     event,
     events,
     pushed,
@@ -68,3 +69,10 @@ def test_a_replayed_session_ends_in_one_report(telemetry_first):
     }
     assert report["level"]["next_passage_arl"] == 2
     assert [e["type"] for e in publisher.events] == ["report.ready"]
+
+
+def test_the_replayed_report_is_the_report_contract():
+    report, _, _ = replay(telemetry_first=True)
+    expected = contract("reading_report.sess_demo_001.json")
+    expected["recommendations"]["book_ids"] = []  # book ranking (PRD 9.3) is not built yet
+    assert report == expected
