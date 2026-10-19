@@ -1,0 +1,4 @@
+{
+  "about": "PRD 13.1 and 13.5: the golden recordings and a person's hand count of each. Session ids and counts only: the audio stays in the EU audio bucket, never in Git. Add the 3 day-1 test recordings, then the 3-5 mini-study readings. errors counts every miscue, told words included; told_waits is the told words after the first word (it defaults to told).",
+  "recordings": []
+}
