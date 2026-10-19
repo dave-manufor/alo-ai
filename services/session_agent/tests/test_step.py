@@ -642,6 +642,14 @@ def test_session_done_reports_listening_and_flags():
     assert actions[0].data["flags"] == ["DEMO_PROFILE"]
 
 
+def test_a_listening_module_without_a_listening_passage_is_logged():
+    # The passage schema makes the pairing required, so this means a bug upstream.
+    state = run(at_listening_ask(profile="demo"), ANSWERED)[0]
+    _, actions = step(state, T(state, "close"))
+    assert isinstance(actions[0], Log) and "without a listening passage" in actions[0].reason
+    assert actions[1].type == "session.done"
+
+
 def test_close_ignores_other_events():
     state = at_close()
     assert isinstance(step(state, ANSWERED)[1][0], Log)

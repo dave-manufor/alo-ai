@@ -604,10 +604,16 @@ def _close(state: SessionState, event: Event) -> Result:
             "session_profile": state.profile.name,
         },
     }
+    actions: list[Action] = []
     if state.listening_run:
+        if state.listening_passage_id is None:
+            # A READ passage must name its pairing (passage schema), so this is a bug upstream.
+            actions.append(
+                Log("listening ran without a listening passage; session.done is invalid")
+            )
         data["listening_passage_id"] = state.listening_passage_id
     done = EmitEvent("session.done", data)
-    return replace(state, phase=Phase.ENDED, status="COMPLETE"), [
+    return replace(state, phase=Phase.ENDED, status="COMPLETE"), actions + [
         done,
         EndSession("COMPLETE"),
     ]
