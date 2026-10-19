@@ -2,7 +2,7 @@
 name = "aloai-core"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "Alo.ai Core service (Grader: W3)"
+description = "Alo.ai Core service (Grader and Reading Coach: W3)"
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "httpx2>=2.14,<3", "ruff>=0.6"]

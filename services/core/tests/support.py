@@ -22,6 +22,8 @@ SESSION_ID = "sess_demo_001"
 PASSAGE_ID = "bank_p3_market_day"
 NOW = datetime(2026, 1, 15, 9, 9, 5, tzinfo=UTC)
 AUDIO = "gs://aloai-dev-audio/3f2b9c1e-7d44-4c0b-8a52-0e6f1d9a7b10"
+CHILD_ID = "child_demo_001"
+GUARDIAN_ID = "guardian_demo_001"
 
 
 def contract(name: str) -> dict:
@@ -156,6 +158,22 @@ class ScriptedModel:
     def grade(self, task: GradingTask) -> dict:
         self.tasks.append(task)
         return self._outputs[task.key]
+
+
+def coach_store() -> MemoryStore:
+    """sess_demo_001's finished report, with its child, consent and catalogue books."""
+    docs = {
+        paths.report(SESSION_ID): contract("reading_report.sess_demo_001.json"),
+        paths.child(CHILD_ID): {
+            "guardian_id": GUARDIAN_ID,
+            "first_name": "Chidi",
+            "saved_tags": ["food"],
+        },
+        "consents/consent_demo_001": {"guardian_id": GUARDIAN_ID, "child_id": CHILD_ID},
+    }
+    for number in (1, 2, 3):
+        docs[f"books/book_demo_00{number}"] = {"title": f"Demo Book {number}", "licence": "CC BY"}
+    return MemoryStore(docs)
 
 
 def demo_report(**changes) -> dict:
