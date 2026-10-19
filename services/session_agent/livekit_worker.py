@@ -25,6 +25,7 @@ from livekit.agents import AutoSubscribe, JobContext, JobProcess, WorkerOptions,
 from livekit.plugins import google, silero
 
 from . import cloud, config, metadata, quick_grade
+from .background import Background
 from .clips.catalog import ClipCatalog
 from .clips.store import ClipStore
 from .driver import Driver, Ports
@@ -79,33 +80,19 @@ class _Timers:
         self._loop.call_later(ms / 1000, lambda: self.driver.handle(Timer(name)))
 
 
-class _Background:
-    """Blocking cloud calls run in threads; the session waits for them before ending."""
-
-    def __init__(self) -> None:
-        self._pending: set[asyncio.Future] = set()
-
-    def run(self, fn, *args) -> None:
-        future = asyncio.get_running_loop().run_in_executor(None, functools.partial(fn, *args))
-        self._pending.add(future)
-        future.add_done_callback(self._done)
-
-    def _done(self, future: asyncio.Future) -> None:
-        self._pending.discard(future)
-        if future.exception() is not None:
-            log.error("background call failed", exc_info=future.exception())
-
-    async def drain(self) -> None:
-        if self._pending:
-            await asyncio.gather(*self._pending, return_exceptions=True)
-
-
 class _Grader:
     def __init__(self, settings: config.WorkerSettings, cfg: config.Config, items: int) -> None:
-        self._settings, self._live = settings, cfg.ai_mode == "live"
+        self._live = cfg.ai_mode == "live"
         self._fixture = quick_grade.FixtureQuickGrader(
             items=items, fixtures_dir=Path("fixtures/ai/quick")
         )
+        # One HTTP client and one ID token for the whole session (2 s p90 target).
+        self._client = (
+            quick_grade.QuickGradeClient(settings.core_url, _id_token(settings))
+            if self._live
+            else None
+        )
+        self._calls: set[asyncio.Task] = set()
         self.driver: Driver | None = None
 
     def request(self, body: dict) -> None:
@@ -116,12 +103,17 @@ class _Grader:
             return
 
         async def call() -> None:
-            response = await quick_grade.post(
-                self._settings.core_url, body, _id_token(self._settings)
-            )
-            self.driver.on_quick_response(response)
+            self.driver.on_quick_response(await self._client.post(body))
 
-        asyncio.create_task(call())
+        task = asyncio.create_task(call())
+        self._calls.add(task)
+        task.add_done_callback(self._calls.discard)
+
+    async def close(self) -> None:
+        if self._calls:
+            await asyncio.gather(*self._calls, return_exceptions=True)
+        if self._client is not None:
+            await self._client.aclose()
 
 
 def _id_token(settings: config.WorkerSettings):
@@ -175,7 +167,7 @@ async def entrypoint(ctx: JobContext) -> None:
     gcs = cloud.storage_client(settings.project)
     audio_bucket = cloud.GcsBucket(gcs, settings.audio_bucket)
     db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
-    background = _Background()
+    background = Background()
     timers = _Timers(loop)
     channel = _Channel(ctx.room)
     profile = config.PROFILES[cfg.session_profile]
@@ -194,7 +186,9 @@ async def entrypoint(ctx: JobContext) -> None:
 
     class _Publish:
         def publish(self, event: dict) -> None:
-            background.run(publisher.publish, event)
+            # After the uploads and records queued so far, so an event never runs ahead
+            # of the audio and documents it names (the Scorer and Grader read them).
+            background.run_after_pending(publisher.publish, event)
 
     ended = asyncio.Event()
     started = time.monotonic()
@@ -252,6 +246,7 @@ async def entrypoint(ctx: JobContext) -> None:
     await ended.wait()
     tick_task.cancel()
     await background.drain()
+    await grader.close()
     await asyncio.sleep(1)  # let the last data-channel messages go
     ctx.shutdown(reason="session ended")
 
