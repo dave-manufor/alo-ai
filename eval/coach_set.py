@@ -7,6 +7,8 @@ the real Coach and is scored on three metrics, each with its threshold:
 - library only: every activity in the plan comes from the library for the report
 - validator first try: the Coach's first summary passed the guardrail
 
+From the repository root, with libs/aloai on the path:
+
     python -m eval.coach_set                  replay eval/recorded/coach/ (free; CI)
     python -m eval.coach_set --live           Gemini on Vertex AI (spends the shared budget)
     python -m eval.coach_set --live --record  also save the turns for the replay

@@ -2,6 +2,8 @@
 Coach, the Grader and the code checks. Every check reads what the run saved, so a case
 passes only if the result is safe, whatever the model said. The set passes at 20 of 20.
 
+From the repository root, with libs/aloai on the path:
+
     python -m eval.redteam                  replay eval/recorded/redteam/ (free; CI)
     python -m eval.redteam --live           Gemini on Vertex AI (spends the shared budget)
     python -m eval.redteam --live --record  also save the model's turns for the replay

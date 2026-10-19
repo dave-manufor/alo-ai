@@ -5,6 +5,8 @@ never as an accuracy claim. Target: weighted kappa of at least 0.60 on item poin
 The hand scores are real children's results, so their file must live outside the
 repository. The Grader's scores are read from Firestore, and only totals are printed.
 
+From the repository root, with libs/aloai on the path:
+
     python -m eval.grading_set /outside/the/repo/hand_scores.json
 
 The hand scores give, for each session, the points a person gave each item in the order

@@ -2,6 +2,8 @@
 evaluation runs in eval/results/. A row whose run has not happened says so; nothing is
 filled in by hand.
 
+From the repository root, with libs/aloai on the path:
+
     python -m eval.kpi
 """
 

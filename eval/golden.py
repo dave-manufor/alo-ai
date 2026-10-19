@@ -5,6 +5,8 @@ count; the check reads the telemetry the deployed Reading Scorer wrote for that 
 The hand count goes through the same aloai_scoring rules, so both sides follow the
 told-word wait the same way.
 
+From the repository root, with libs/aloai on the path:
+
     python -m eval.golden
 """
 
