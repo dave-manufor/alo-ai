@@ -1,8 +1,9 @@
 """Core service entry point: uvicorn services.core.main:create_app --factory.
 
-Wires the Grader and the Reading Coach to Firestore and Pub/Sub (their emulators when
-the *_EMULATOR_HOST variables are set) and, by AI_MODE, to Vertex AI, Speech-to-Text and
-Text-to-Speech or to the recorded responses in fixtures/ai/. The Coach's email goes to
+Wires the Grader and the Reading Coach to Firestore (and its vector search for books) and
+Pub/Sub, or their emulators when the *_EMULATOR_HOST variables are set, and, by AI_MODE,
+to Vertex AI, Speech-to-Text and Text-to-Speech or to the recorded responses in
+fixtures/ai/. The Coach's email goes to
 the Account and Payments service at ACCOUNT_URL, or to the Firestore outbox with
 ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the template plan.
 Refuses to start with ALO_ENV=local on Cloud Run.
@@ -39,6 +40,13 @@ from .coach.run import ReadingCoach
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
+from .grader.books import (
+    BookRecommender,
+    Embedder,
+    FirestoreBookSearch,
+    FixtureEmbedder,
+    VertexEmbedder,
+)
 from .grader.final import FinalGrader
 from .grader.models import FixtureGradingModel, GradingModel, VertexGradingModel
 from .grader.quick import QuickGrader
@@ -51,10 +59,13 @@ FLAGS = {"true": True, "false": False}
 def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     env = os.environ if env is None else env
     settings = aloai_env.load(env)
-    store = FirestoreStore(firestore.Client(project=settings.project))
+    db = firestore.Client(project=settings.project)
+    store = FirestoreStore(db)
     publisher = PubSubPublisher(pubsub_v1.PublisherClient(), settings.project)
-    assembler = ReportAssembler(store, publisher)
-    model, transcriber = _ai(settings)
+    model, transcriber, embedder = _ai(settings)
+    assembler = ReportAssembler(
+        store, publisher, BookRecommender(FirestoreBookSearch(db), embedder)
+    )
     coach = ReadingCoach(
         store=store,
         publisher=publisher,
@@ -72,14 +83,22 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     return app
 
 
-def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber]:
+def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder]:
     if settings.ai_mode == "fixtures":
-        return FixtureGradingModel(RECORDED / "grader"), FixtureTranscriber(RECORDED / "asr")
+        return (
+            FixtureGradingModel(RECORDED / "grader"),
+            FixtureTranscriber(RECORDED / "asr"),
+            FixtureEmbedder(RECORDED / "embeddings.json"),
+        )
     speech = speech_v2.SpeechClient(
         client_options=ClientOptions(api_endpoint=f"{CHIRP_LOCATION}-speech.googleapis.com")
     )
     vertex = genai.Client(vertexai=True, project=settings.project, location=settings.location)
-    return VertexGradingModel(vertex), ChirpTranscriber(speech, settings.project)
+    return (
+        VertexGradingModel(vertex),
+        ChirpTranscriber(speech, settings.project),
+        VertexEmbedder(vertex),
+    )
 
 
 def _coach_model(settings: aloai_env.Config) -> Callable[[str], BaseLlm | str]:

@@ -6,9 +6,11 @@ fixtures/contracts/ and the recorded responses in fixtures/ai/.
 
 import base64
 import json
+import math
 from datetime import UTC, datetime
 from pathlib import Path
 
+import aloai_scoring as scoring
 from aloai_events import MemoryPublisher, envelope
 from aloai_store import MemoryStore
 from fastapi import APIRouter
@@ -19,6 +21,7 @@ from services.core.coach.run import ReadingCoach
 from services.core.grader import paths
 from services.core.grader.asr import FixtureTranscriber
 from services.core.grader.assembly import ReportAssembler
+from services.core.grader.books import BookRecommender, FixtureEmbedder
 from services.core.grader.final import FinalGrader
 from services.core.grader.models import FixtureGradingModel, GradingTask
 
@@ -38,6 +41,24 @@ def contract(name: str) -> dict:
     return json.loads((CONTRACTS / name).read_text())
 
 
+# Fictional catalogue books. For the demo session ("food", band 1 to 2) they rank 001,
+# 002, 003; 004 sits a level above the band and 005 is too far to be a candidate.
+BOOKS = {
+    "book_demo_001": {"arl": 2, "embedding": [0.9, 0.1, 0.0, 0.0], "west_african_setting": True},
+    "book_demo_002": {"arl": 1, "embedding": [0.6, 0.8, 0.0, 0.0], "west_african_setting": True},
+    "book_demo_003": {"arl": 2, "embedding": [0.8, 0.0, 0.6, 0.0], "west_african_setting": False},
+    "book_demo_004": {"arl": 3, "embedding": [1.0, 0.0, 0.0, 0.0], "west_african_setting": True},
+    "book_demo_005": {"arl": 6, "embedding": [1.0, 0.0, 0.0, 0.0], "west_african_setting": True},
+}
+
+
+def catalogue() -> dict[str, dict]:
+    return {
+        f"books/{book_id}": book | {"title": f"Demo Book {book_id[-1]}", "licence": "CC BY"}
+        for book_id, book in BOOKS.items()
+    }
+
+
 def seeded_store() -> MemoryStore:
     session = contract("session_record.session.json") | {
         "session_profile": "demo",
@@ -50,8 +71,37 @@ def seeded_store() -> MemoryStore:
             paths.child("child_demo_001"): {"guardian_id": "guardian_demo_001", "primary_class": 2},
             paths.passage(PASSAGE_ID): contract("passage.bank_p3_market_day.json"),
             paths.passage(LISTEN_ID): contract("passage.bank_l3_rain.json"),
+            **catalogue(),
         }
     )
+
+
+class MemoryBookSearch:
+    """Cosine similarity over the books in a MemoryStore, as Firestore's find_nearest."""
+
+    def __init__(self, store: MemoryStore) -> None:
+        self._store = store
+
+    def nearest(self, vector, levels, limit) -> list[scoring.BookCandidate]:
+        candidates = [
+            scoring.BookCandidate(
+                book_id=path.removeprefix("books/"),
+                arl=book["arl"],
+                similarity=_cosine(vector, book["embedding"]),
+                west_african=book.get("west_african_setting", False),
+            )
+            for path, book in self._store.docs.items()
+            if path.startswith("books/") and book["arl"] in levels
+        ]
+        return sorted(candidates, key=lambda book: -book.similarity)[:limit]
+
+
+def _cosine(a, b) -> float:
+    return sum(x * y for x, y in zip(a, b)) / (math.hypot(*a) * math.hypot(*b))
+
+
+def recommender(store: MemoryStore) -> BookRecommender:
+    return BookRecommender(MemoryBookSearch(store), FixtureEmbedder(RECORDED / "embeddings.json"))
 
 
 def add_telemetry(store: MemoryStore) -> None:
@@ -105,6 +155,7 @@ def assembler(store: MemoryStore, publisher: MemoryPublisher) -> ReportAssembler
     return ReportAssembler(
         store,
         publisher,
+        recommender(store),
         clock=lambda: NOW,
         new_event_id=lambda: "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1005",
     )
@@ -186,9 +237,7 @@ def coach_store() -> MemoryStore:
         },
         "consents/consent_demo_001": {"guardian_id": GUARDIAN_ID, "child_id": CHILD_ID},
     }
-    for number in (1, 2, 3):
-        docs[f"books/book_demo_00{number}"] = {"title": f"Demo Book {number}", "licence": "CC BY"}
-    return MemoryStore(docs)
+    return MemoryStore(docs | catalogue())
 
 
 def demo_report(**changes) -> dict:
