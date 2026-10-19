@@ -6,7 +6,7 @@ Voice-first reading and comprehension screener for Nigerian primary school child
 
 | | Person | Area |
 |---|---|---|
-| W1 | Anthony | Web app, accounts and payments, Terraform, CI, Docker Compose |
+| W1 | Anthony ([@dhtml](https://github.com/dhtml)) | Web app, accounts and payments, Terraform, CI, Docker Compose |
 | W2 | David ([@dave-manufor](https://github.com/dave-manufor)) | Live session, voice and clips, Passage Generator, books |
 | W3 | Nelson ([@SmartWebCodder](https://github.com/SmartWebCodder)) | Scorer, Grader, scoring code, Reading Coach, evals |
 

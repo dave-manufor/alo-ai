@@ -20,7 +20,7 @@ Docs (read the section for your area, not the whole PRD):
 
 | | Person | GitHub | Owns | Reviewed by |
 |---|---|---|---|---|
-| W1 | Anthony | TODO | Web app/PWA, Account and Payments service, Terraform, CI, Docker Compose, Firestore rules | W2 or W3 |
+| W1 | Anthony | @dhtml | Web app/PWA, Account and Payments service, Terraform, CI, Docker Compose, Firestore rules | W2 or W3 |
 | W2 | David | @dave-manufor | Session Agent, voice and clip store, Passage Generator, book catalogue | W3 |
 | W3 | Nelson | @SmartWebCodder | Reading Scorer, Grader, `aloai_scoring.py`, Reading Coach, authz, guardrails, evals | W2 |
 

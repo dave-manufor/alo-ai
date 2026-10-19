@@ -6,7 +6,7 @@ How the three of us use Git during the hackathon. Keep it simple, keep `main` wo
 
 | Owner | Area | Branch scopes | Reviewed and merged by |
 |---|---|---|---|
-| W1: Anthony | Web app, the Account and Payments service, Terraform, CI, the Docker Compose setup | `web`, `account`, `payments`, `infra`, `ci`, `dev` | W2 or W3 |
+| W1: Anthony (@dhtml) | Web app, the Account and Payments service, Terraform, CI, the Docker Compose setup | `web`, `account`, `payments`, `infra`, `ci`, `dev` | W2 or W3 |
 | W2: David (@dave-manufor) | Live session: Session Agent, voice and the clip store, Passage Generator, book catalogue | `session`, `generator`, `voice`, `clips`, `books` | W3 |
 | W3: Nelson (@SmartWebCodder) | After the session: Reading Scorer, Grader, `aloai_scoring.py`, Reading Coach, evals | `scorer`, `grader`, `scoring`, `coach`, `eval` | W2 |
 

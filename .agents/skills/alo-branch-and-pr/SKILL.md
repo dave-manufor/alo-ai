@@ -21,7 +21,7 @@ Rules come from `docs/CONTRIBUTING.md` and PRD 14.2. Never commit to `main`.
 1. `git fetch && git rebase origin/main`, then push with `-u`.
 2. Write the body to a temporary file from `.github/pull_request_template.md` (what / why / how tested / checklist). Do not use heredocs inside command flags.
 3. `gh pr create --base main --title "type(scope): what" --body-file <file> --reviewer <reviewer>`.
-4. **Reviewer ring:** W1 (Anthony) PRs -> W2 (`dave-manufor`) or W3 (`SmartWebCodder`); W2 (David) PRs -> W3 (`SmartWebCodder`); W3 (Nelson) PRs -> W2 (`dave-manufor`). If the reviewer is busy for more than a couple of hours, the remaining person reviews.
+4. **Reviewer ring:** W1 (Anthony, `dhtml`) PRs -> W2 (`dave-manufor`) or W3 (`SmartWebCodder`); W2 (David) PRs -> W3 (`SmartWebCodder`); W3 (Nelson) PRs -> W2 (`dave-manufor`). If the reviewer is busy for more than a couple of hours, the remaining person reviews.
 5. Contract, scoring, prompt/model and UI-deviation items in the template must be filled in or ticked honestly. Tag consumers by name.
 6. Nobody merges their own PR. The reviewer squash-merges after CI is green; delete the branch.
 
