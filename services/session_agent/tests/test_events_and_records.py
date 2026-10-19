@@ -207,8 +207,8 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
         TurnEnd("ANSWERED"),
         PassageReady("gen1"),
         MicResult(True),
-        Silence(3000, 5),
-        Silence(3000, 8),
+        Silence(5000, 5),
+        Silence(5000, 8),
         ReadingDone(75_000),
     ]:
         state = drive(state, event, log, publisher, validate)
@@ -216,7 +216,7 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
     # Retell and its follow-up, then the three questions.
     for _ in range(5):
         state = drive(state, TurnEnd("ANSWERED"), log, publisher, validate)
-    state = drive(state, QuickScore(92.0), log, publisher, validate)
+    state = drive(state, QuickScore(False), log, publisher, validate)
     state = drive(state, Timer(f"close:{state.task_seq}"), log, publisher, validate)
 
     types = [e["type"] for e in publisher.events]

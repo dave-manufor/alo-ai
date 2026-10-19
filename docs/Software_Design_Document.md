@@ -174,7 +174,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 
 - **State machine as a pure function:** `step(state, event) -> (state, actions)`. The states are in the diagram below. Events include `turn_end(reason)`, `silence(ms)`, `passage_ready`, `passage_fallback`, `quick_score(result | timeout)`, `live_degraded`, `disconnected`, `reconnected`, `child_stop` and `timer`. Actions include `PlayClip`, `SpeakLive(text, fallback_clip)`, `StartRecording`, `StopRecording`, `ShowPassage`, `HidePassage`, `CallQuickScore`, `EmitEvent` and `SetLiveMode`. The session profile and voice mode are inputs to the machine, so both are unit-tested. A thin adapter executes the actions, so the whole protocol is tested without audio (PRD 13.5).
 
-- **Position tracker (reading phase):** Chirp 3 `StreamingRecognize` partials are fuzzy-matched to the passage tokens to follow where the child is. 3.0 s of silence on the same word emits `PlayClip(word_clip[word_key])` and logs the word `TOLD`. "That word is X." is always a clip, in both voice modes. Reading is capped at 90 s.
+- **Position tracker (reading phase):** Chirp 3 `StreamingRecognize` partials are fuzzy-matched to the passage tokens to follow where the child is. 5.0 s without progress on the same word (silence or sounding it out) emits `PlayClip(word_clip[word_key])` and logs the word `TOLD`. "That word is X." is always a clip, in both voice modes. Reading is capped at 90 s.
 
 - **Kindness and stop rules** are transitions, not prompts: fewer than 10 words correct in the first 30 s ends the reading and goes to the listening module; two silences over 8 s in one task move on; "stop" ends with praise and marks the session incomplete.
 
@@ -207,7 +207,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 ```mermaid
 flowchart LR
   A["Interest chat<br/>~15 s; becomes tags;<br/>skipped when returning"] --> B["Mic check<br/>~10 s; counts 1 to 5;<br/>one retry"]
-  B --> C["Reading<br/>Up to 90 s; told the word<br/>after 3 s silence"]
+  B --> C["Reading<br/>Up to 90 s; told the word<br/>after 5 s without progress"]
   C --> D["Retell<br/>Up to 45 s, own words;<br/>one 'Anything else?'"]
   D --> E["Questions<br/>3 in fixed order, demo 2;<br/>1 inference"]
   E -.->|"only if quick reading score below 78"| F["Listening module<br/>(conditional)"]

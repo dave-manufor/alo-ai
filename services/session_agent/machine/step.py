@@ -1,7 +1,7 @@
 """The Session Agent state machine: step(state, event) -> (state, actions).
 
-Pure. No I/O, no clock, no randomness, and no scores: it only branches on the
-numbers it is handed (words read, a quick RC from the Grader). The adapter turns
+Pure. No I/O, no clock, no randomness, and no scores: it only branches on what it
+is handed (words read, the Grader's listening decision). The adapter turns
 LiveKit, speech and timer callbacks into events and runs the actions.
 
 Timers are named "<kind>:<task_seq>". task_seq goes up every time a new task
@@ -436,7 +436,7 @@ def _enter_retell(state: SessionState) -> Result:
 def _retell(state: SessionState, event: Event) -> Result:
     match event:
         case Timer() if _is_timer(event, "retell_cap", state):
-            return _finish_retell(state)
+            return _finish_retell(state, answered=True)
         case TurnEnd(reason="ANSWERED"):
             if state.sub == "main":
                 # One neutral follow-up, then done.
@@ -445,18 +445,19 @@ def _retell(state: SessionState, event: Event) -> Result:
                     _say(state, "anything_else"),
                     StartRecording("RETELL"),
                 ]
-            return _finish_retell(state)
+            return _finish_retell(state, answered=True)
         case TurnEnd(reason="SILENCE"):
             state = replace(state, silences=state.silences + 1)
             if state.sub == "main" and state.silences < cfg.MAX_SILENCES:
                 return state, [_say(state, "take_your_time")]
-            return _finish_retell(state)
+            # Silence after "Anything else?" still leaves the main retell answered.
+            return _finish_retell(state, answered=state.sub == "followup")
     return _ignored(state, event)
 
 
-def _finish_retell(state: SessionState) -> Result:
+def _finish_retell(state: SessionState, *, answered: bool) -> Result:
     state, actions = _ask_item(state, Phase.QUESTIONS, 0)
-    return state, [StopRecording(), CallQuickScore("RETELL", 0)] + actions
+    return state, [StopRecording(), CallQuickScore("RETELL", 0, answered)] + actions
 
 
 # ---- 2B. scripted items and 3. listening items (shared)
@@ -501,8 +502,9 @@ def _item_done(state: SessionState, *, answered: bool) -> Result:
     if not answered:
         actions.append(_say(state, "lets_go_next"))
     scored = state.phase is Phase.QUESTIONS
-    if answered and scored:
-        actions.append(CallQuickScore("QUESTION", state.index))
+    if scored:
+        # Every item is scored, answered or not, so the listening decision can complete.
+        actions.append(CallQuickScore("QUESTION", state.index, answered))
     count = state.profile.n_questions if scored else state.profile.n_listening_items
     if state.index + 1 < count:
         state, more = _ask_item(state, state.phase, state.index + 1)
@@ -513,7 +515,7 @@ def _item_done(state: SessionState, *, answered: bool) -> Result:
     return state, actions + more
 
 
-# ---- questions: waiting for the quick RC
+# ---- questions: waiting for the listening decision
 
 
 def _await_quick_score(state: SessionState) -> Result:
@@ -525,10 +527,10 @@ def _questions(state: SessionState, event: Event) -> Result:
     if state.sub == "ask":
         return _item_event(state, event)
     match event:
-        case QuickScore(quick_rc=quick_rc):
-            if quick_rc is not None and quick_rc >= cfg.LISTENING_RC_THRESHOLD:
-                return _enter_close(state)
-            return _enter_listening(state)
+        case QuickScore(run_listening_module=run_listening_module):
+            if run_listening_module:
+                return _enter_listening(state)
+            return _enter_close(state)
         case Timer() if _is_timer(event, "quick_score", state):
             return _enter_listening(state)  # no answer from the Grader in 6 s
     return _ignored(state, event)

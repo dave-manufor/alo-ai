@@ -7,7 +7,7 @@ LiveKit Agents worker that runs a reading session (PRD 4). Rules for working her
 `machine/step.py` is a pure function: `step(state, event) -> (state, actions)`. It does no I/O, reads no clock and computes no score. An adapter (next PR) turns LiveKit, speech and timer callbacks into events and runs the actions.
 
 - `machine/types.py`: state, events and actions.
-- `machine/profiles.py`: `standard` and `demo` profiles and the protocol timings. `LISTENING_RC_THRESHOLD` mirrors a [CAL] value owned by W3.
+- `machine/profiles.py`: `standard` and `demo` profiles and the protocol timings. No [CAL] values: the listening decision comes from `grade:quick`.
 - Timers are named `<kind>:<task_seq>`; a timer from an earlier task is ignored.
 - In `live_first` the prompts are `SpeakLive` (with a clip fallback) while Live is healthy. "That word is X." and the listening story are always clips.
 
