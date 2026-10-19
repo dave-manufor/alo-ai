@@ -4,6 +4,10 @@ Chirp 3 transcribes each retell and answer. Each passage is then graded by two
 independent Gemini 2.5 Pro passes, with a third when they disagree, and the
 reconciled credits and points are stored for report assembly. Grading already
 stored is not redone, so a redelivered event changes nothing.
+
+session.done (schema_version 2) names the passages, says whether the kindness rule
+ended the reading, and gives each turn the item it answers (index) and its place among
+that item's recordings (part); the parts of a retell or an answer are heard together.
 """
 
 from collections.abc import Callable, Mapping, Sequence
@@ -33,22 +37,22 @@ class PassScore:
     points: tuple[int, ...]
 
 
-def reading_stopped_early(turns: Sequence[Mapping[str, Any]], listening_module_run: bool) -> bool:
-    """The kindness rule ends the reading and goes straight to the listening module,
-    so such a session has no retell."""
-    return listening_module_run and not any(turn["phase"] == "RETELL" for turn in turns)
-
-
-def answer_turns(passage: dict, turns: Sequence[Mapping[str, Any]]) -> dict[str, str]:
-    """The turn that answers each item, by item_id. Turns carry no item index, so they
-    are matched to items in the order asked; a repeated or resumed question adds a turn,
-    which cannot be matched."""
+def answer_turns(passage: dict, turns: Sequence[Mapping[str, Any]]) -> dict[str, list[str]]:
+    """The turns that answer each item, by item_id, in part order. A turn for an item the
+    passage does not have, or an item with no turn, means the event is wrong."""
     items = ordered_items(passage)
-    if len(turns) != len(items):
-        raise TurnMismatch(
-            f"{len(turns)} answer turns for the {len(items)} items of {passage['passage_id']}"
-        )
-    return {item["item_id"]: turn["turn_id"] for item, turn in zip(items, turns)}
+    answers: dict[str, list[str]] = {item["item_id"]: [] for item in items}
+    for turn in sorted(turns, key=lambda turn: (turn["index"], turn["part"])):
+        if turn["index"] >= len(items):
+            raise TurnMismatch(
+                f"{turn['turn_id']} answers item {turn['index']}, "
+                f"but {passage['passage_id']} has {len(items)}"
+            )
+        answers[items[turn["index"]]["item_id"]].append(turn["turn_id"])
+    unanswered = [item_id for item_id, turn_ids in answers.items() if not turn_ids]
+    if unanswered:
+        raise TurnMismatch(f"no answer turn for {', '.join(unanswered)}")
+    return answers
 
 
 @dataclass(frozen=True)
@@ -69,13 +73,14 @@ class FinalGrader:
         session_id = done["session_id"]
         session = require(self.store, paths.session(session_id))
         primary_class = require(self.store, paths.child(session["child_id"]))["primary_class"]
-        read = require(self.store, paths.passage(session["passage_id"]))
-        stopped = reading_stopped_early(done["turn_audio_uris"], done["listening_module_run"])
-        targets = self._targets(read, stopped, done["listening_module_run"])
+        targets = self._targets(done)
         phases = {
             phase for _, retell_phase, item_phase in targets for phase in (retell_phase, item_phase)
         }
-        turns = [turn for turn in done["turn_audio_uris"] if turn["phase"] in phases]
+        turns = sorted(
+            (turn for turn in done["turn_audio_uris"] if turn["phase"] in phases),
+            key=lambda turn: turn["part"],
+        )
         matched = {
             passage["passage_id"]: answer_turns(
                 passage, [t for t in turns if t["phase"] == item_phase]
@@ -87,14 +92,14 @@ class FinalGrader:
         for passage, retell_phase, _ in targets:
             retell = " ".join(texts[t["turn_id"]] for t in turns if t["phase"] == retell_phase)
             answers = {
-                item_id: texts[turn_id]
-                for item_id, turn_id in matched[passage["passage_id"]].items()
+                item_id: " ".join(texts[turn_id] for turn_id in turn_ids).strip()
+                for item_id, turn_ids in matched[passage["passage_id"]].items()
             }
             graded[passage["mode"]] = self._grade_passage(
                 session_id, passage, primary_class, retell.strip(), answers
             )
         return {
-            "reading_stopped_early": stopped,
+            "reading_stopped_early": done["reading_stopped_early"],
             "listening_module_run": done["listening_module_run"],
             "capture_mode": done["capture_mode"],
             "session_settings": done["session_settings"],
@@ -103,16 +108,14 @@ class FinalGrader:
             "listen": graded.get("LISTEN"),
         }
 
-    def _targets(
-        self, read: dict, stopped: bool, listening_module_run: bool
-    ) -> list[tuple[dict, str, str]]:
+    def _targets(self, done: Mapping[str, Any]) -> list[tuple[dict, str, str]]:
         """The passages to grade, with the turn phases of their retell and items."""
         targets = []
-        if not stopped:
+        if not done["reading_stopped_early"]:
+            read = require(self.store, paths.passage(done["passage_id"]))
             targets.append((read, "RETELL", "QUESTION"))
-        listen_id = read.get("paired_listening_passage_id")
-        if listening_module_run and listen_id:
-            listen = require(self.store, paths.passage(listen_id))
+        if done["listening_module_run"]:
+            listen = require(self.store, paths.passage(done["listening_passage_id"]))
             targets.append((listen, "LISTENING_RETELL", "LISTENING_QUESTION"))
         return targets
 

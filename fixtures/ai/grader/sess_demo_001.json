@@ -113,5 +113,77 @@
     ],
     "inaccuracies": [],
     "needs_review": true
+  },
+  "bank_l3_rain/pass1": {
+    "passage_id": "bank_l3_rain",
+    "propositions": [
+      {
+        "id": "p1",
+        "credit": 1,
+        "evidence": "it was raining"
+      },
+      {
+        "id": "p2",
+        "credit": 1,
+        "evidence": "tunde took the goats inside"
+      },
+      {
+        "id": "p3",
+        "credit": 0,
+        "evidence": null
+      },
+      {
+        "id": "p4",
+        "credit": 0,
+        "evidence": null
+      }
+    ],
+    "items": [
+      {
+        "item_id": "bank_l3_rain_q1",
+        "points": 2,
+        "evidence": "because it was raining",
+        "rationale": "Says it was raining.",
+        "needs_review": false
+      }
+    ],
+    "inaccuracies": [],
+    "needs_review": false
+  },
+  "bank_l3_rain/pass2": {
+    "passage_id": "bank_l3_rain",
+    "propositions": [
+      {
+        "id": "p1",
+        "credit": 1,
+        "evidence": "it was raining"
+      },
+      {
+        "id": "p2",
+        "credit": 1,
+        "evidence": "tunde took the goats inside"
+      },
+      {
+        "id": "p3",
+        "credit": 0,
+        "evidence": null
+      },
+      {
+        "id": "p4",
+        "credit": 0,
+        "evidence": null
+      }
+    ],
+    "items": [
+      {
+        "item_id": "bank_l3_rain_q1",
+        "points": 2,
+        "evidence": "because it was raining",
+        "rationale": "Says it was raining.",
+        "needs_review": false
+      }
+    ],
+    "inaccuracies": [],
+    "needs_review": false
   }
 }

@@ -27,6 +27,7 @@ CONTRACTS = ROOT / "fixtures" / "contracts"
 RECORDED = ROOT / "fixtures" / "ai"
 SESSION_ID = "sess_demo_001"
 PASSAGE_ID = "bank_p3_market_day"
+LISTEN_ID = "bank_l3_rain"
 NOW = datetime(2026, 1, 15, 9, 9, 5, tzinfo=UTC)
 AUDIO = "gs://aloai-dev-audio/3f2b9c1e-7d44-4c0b-8a52-0e6f1d9a7b10"
 CHILD_ID = "child_demo_001"
@@ -48,6 +49,7 @@ def seeded_store() -> MemoryStore:
             paths.session(SESSION_ID): session,
             paths.child("child_demo_001"): {"guardian_id": "guardian_demo_001", "primary_class": 2},
             paths.passage(PASSAGE_ID): contract("passage.bank_p3_market_day.json"),
+            paths.passage(LISTEN_ID): contract("passage.bank_l3_rain.json"),
         }
     )
 
@@ -56,33 +58,19 @@ def add_telemetry(store: MemoryStore) -> None:
     store.set(paths.telemetry(SESSION_ID), contract("phase1_telemetry.sess_demo_001.json"))
 
 
-def turn(number: int, phase: str) -> dict:
+def turn(number: int, phase: str, index: int = 0, part: int = 0) -> dict:
     return {
         "turn_id": f"turn_{number:03d}",
         "phase": phase,
+        "index": index,
+        "part": part,
         "audio_uri": f"{AUDIO}/{phase}/a1b2c3d4-0000-4000-8000-{number:012d}.flac",
     }
 
 
 def session_done(**changes) -> dict:
-    """session.done data for a demo session whose listening module ran."""
-    turns = [
-        turn(1, "READING"),
-        turn(11, "RETELL"),
-        turn(12, "RETELL"),
-        turn(13, "QUESTION"),
-        turn(14, "QUESTION"),
-        turn(15, "LISTENING_RETELL"),
-        turn(16, "LISTENING_QUESTION"),
-    ]
-    return {
-        "session_id": SESSION_ID,
-        "turn_audio_uris": turns,
-        "capture_mode": "LIVE",
-        "session_settings": {"voice_mode": "cache_first", "session_profile": "demo"},
-        "flags": ["DEMO_PROFILE"],
-        "listening_module_run": True,
-    } | changes
+    """The session.done contract's data: a demo session whose listening module ran."""
+    return contract("event.session_done.json")["data"] | changes
 
 
 def quick_request(turn_phase: str, index: int, transcript: str) -> dict:
@@ -97,9 +85,11 @@ def quick_request(turn_phase: str, index: int, transcript: str) -> dict:
 
 
 def event(event_type: str, data: dict) -> dict:
-    return envelope(
+    """An event as its producer sends it; session.done is at schema_version 2."""
+    sent = envelope(
         event_type, SESSION_ID, data, event_id="6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1009", now=NOW
     )
+    return sent | {"schema_version": 2} if event_type == "session.done" else sent
 
 
 def pushed(message: dict) -> dict:
