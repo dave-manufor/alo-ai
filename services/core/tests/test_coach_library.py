@@ -57,6 +57,13 @@ def test_the_template_summary_states_the_rounded_wcpm_and_the_first_activity():
     assert "Try this at home: pictures in the mind." in summary
 
 
+def test_a_name_that_fails_the_guardrail_is_left_out_of_the_template():
+    report = demo_report(code="ON_TRACK")
+    summary = template_summary(report, "Ada slow learner")
+    assert summary.startswith("Your child read accurately")
+    assert validate_parent_summary(summary, report) == []
+
+
 def test_without_a_wcpm_the_summary_states_no_number():
     summary = template_summary(demo_report(code="DECODING_LIMITED", wcpm=None), "Chidi")
     assert not any(character.isdigit() for character in summary)

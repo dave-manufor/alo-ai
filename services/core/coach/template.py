@@ -1,7 +1,11 @@
 """What the Reading Coach falls back on (PRD 3.1): a template summary and a default plan,
 used when the Coach is off, fails, or writes a summary the guardrail refuses twice
 (COACH_TEMPLATE_USED). Screening language only, and every number comes from the report.
+The parent typed the child's name, so a summary the name makes fail the guardrail is
+written without it.
 """
+
+from aloai_guardrails import validate_parent_summary
 
 from .library import activities_for
 
@@ -28,6 +32,7 @@ STRENGTHS = {
     ),
 }
 RETRY_ADVICE = "Try another check in a quiet place, with the phone close to your child."
+UNNAMED_CHILD = "Your child"
 
 
 def next_check_days(report: dict) -> int:
@@ -45,6 +50,13 @@ def default_activities(report: dict) -> list[dict]:
 
 
 def template_summary(report: dict, first_name: str) -> str:
+    summary = _summary(report, first_name)
+    if validate_parent_summary(summary, report):
+        return _summary(report, UNNAMED_CHILD)
+    return summary
+
+
+def _summary(report: dict, first_name: str) -> str:
     code = report["profile"]["code"]
     if code == "INSUFFICIENT_EVIDENCE":
         return f"{first_name}'s check today did not give us enough to go on. {RETRY_ADVICE}"

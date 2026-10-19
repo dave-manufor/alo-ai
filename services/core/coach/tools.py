@@ -23,19 +23,25 @@ from ..grader import paths
 from . import library
 from .clients import REPORT_READY, Notifier, StoryRequests
 from .plan import next_session_at, write_plan, write_template_plan
-from .template import next_check_days
+from .template import UNNAMED_CHILD, next_check_days
 
 ACTIVITIES_PER_PLAN = 3
 BOOKS_PER_PLAN = 3
 MAX_TAGS = 2
 TAG = re.compile(r"[a-z][a-z_]{1,30}")
 HIDDEN_REPORT_FIELDS = ("guardian_id", "versions")
-UNNAMED_CHILD = "Your child"
+FIRST_NAME = re.compile(r"[^\W\d_]+(?:[ '-][^\W\d_]+){0,2}")
+MAX_NAME_LENGTH = 30
 
 
 def first_name(store: Store, report: dict) -> str:
+    """The name the parent gave, or "Your child" when it does not look like a first name
+    (one to three words of letters), so text typed into the name can't steer the Coach."""
     child = store.get(paths.child(report["child_id"])) or {}
-    return child.get("first_name") or UNNAMED_CHILD
+    name = (child.get("first_name") or "").strip()
+    if len(name) <= MAX_NAME_LENGTH and FIRST_NAME.fullmatch(name):
+        return name
+    return UNNAMED_CHILD
 
 
 def catalogue_books(store: Store, report: dict) -> list[dict]:
@@ -90,7 +96,7 @@ class CoachTools:
         """
         child = self.store.get(paths.child(child_id)) or {}
         return {
-            "first_name": child.get("first_name"),
+            "first_name": first_name(self.store, self.report),
             "saved_tags": child.get("saved_tags", []),
             "earlier_checks": [
                 {
