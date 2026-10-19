@@ -95,12 +95,14 @@ class Phase1Scorer:
         )
         times = self.aligner.word_times(audio, targets[: len(labels)]) if labels else []
         counts = error_counts(labels)
+        told_first = 1 if labels and labels[0].label == "TOLD" else 0
         fluency = scoring.fluency(
             words_attempted=len(labels),
             reading_seconds=(times[-1][1] - times[0][0]) / 1000 if times else 0.0,
             substitutions=counts["substitution"],
             omissions=counts["omission"],
             told=counts["told"],
+            told_waits=counts["told"] - told_first,
             mispronunciations=counts["mispronunciation"],
             self_corrections=sum(label.is_self_corrected for label in labels),
             uncertain=sum(label.label == "UNCERTAIN" for label in labels),

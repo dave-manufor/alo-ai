@@ -29,6 +29,8 @@ HIGH_UNCERTAINTY_SHARE = 0.05
 
 ACCURACY_CUT = 95  # [CAL] PRD 6.2
 WCPM_CUT = {1: 34, 2: 59, 3: 79, 4: 95, 5: 109, 6: 109}  # [CAL] PRD 6.2, US norms until local ones
+TOLD_WAIT_S = 5  # PRD 4.1: the Session Agent's wait before "That word is X." (its TOLD_WORD_MS)
+NORM_TOLD_WAIT_S = 3  # [CAL] PRD 6.2: the norms behind WCPM_CUT tell a word after 3 s
 
 RETELL_FULL_COVERAGE = 0.60  # [CAL] PRD 6.3
 RETELL_WEIGHT = 0.40  # [CAL] PRD 6.3

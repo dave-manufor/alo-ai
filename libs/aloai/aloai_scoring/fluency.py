@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from .constants import (
     ACCURACY_CUT,
     HIGH_UNCERTAINTY_SHARE,
+    NORM_TOLD_WAIT_S,
     READING_CAP_S,
     SHORT_READING_S,
+    TOLD_WAIT_S,
     WCPM_CUT,
     check_class,
 )
@@ -30,29 +32,38 @@ def fluency(
     substitutions: int,
     omissions: int,
     told: int,
+    told_waits: int,
     mispronunciations: int,
     self_corrections: int,
     uncertain: int,
 ) -> Fluency:
     """PRD 6.1. UNCERTAIN words (the two transcripts disagree, PRD 5.3) are left out of
-    both the words scored and the errors, so they count neither for nor against the child."""
+    both the words scored and the errors, so they count neither for nor against the child.
+
+    told_waits: the told words whose wait fell inside the reading time (all but a told
+    first word). WCPM leaves out the part of each wait beyond the norms' 3 s, so it stays
+    comparable with WCPM_CUT; reading_seconds stays as measured."""
     counts = (
         words_attempted,
         substitutions,
         omissions,
         told,
+        told_waits,
         mispronunciations,
         self_corrections,
         uncertain,
     )
     if min(counts) < 0 or reading_seconds < 0:
         raise ValueError("counts and reading_seconds must not be negative")
+    if told_waits > told:
+        raise ValueError("more told waits than told words")
     errors = substitutions + omissions + told + mispronunciations
     scored = words_attempted - uncertain
     if errors > scored:
         raise ValueError("more errors and uncertain words than words attempted")
 
     seconds = min(reading_seconds, READING_CAP_S)
+    wcpm_seconds = max(0, seconds - told_waits * (TOLD_WAIT_S - NORM_TOLD_WAIT_S))
     correct = scored - errors
     misreads = substitutions + omissions + mispronunciations
     flags = []
@@ -65,7 +76,7 @@ def fluency(
         words_correct=correct,
         reading_seconds=seconds,
         accuracy_pct=round(100 * correct / scored, 1) if scored else None,
-        wcpm=round(60 * correct / seconds, 1) if scored and seconds else None,
+        wcpm=round(60 * correct / wcpm_seconds, 1) if scored and wcpm_seconds else None,
         self_correction_ratio=(
             round(self_corrections / (self_corrections + misreads), 2)
             if self_corrections + misreads

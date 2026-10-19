@@ -31,6 +31,7 @@ def reading(**counts):
         "substitutions": 0,
         "omissions": 0,
         "told": 0,
+        "told_waits": 0,
         "mispronunciations": 0,
         "self_corrections": 0,
         "uncertain": 0,
@@ -108,6 +109,21 @@ def test_reading_time_is_capped_at_90_seconds():
     assert (f.reading_seconds, f.wcpm) == (90, 66.7)
 
 
+def test_wcpm_leaves_out_the_told_wait_beyond_the_norms_3_seconds():
+    # PRD 4.1 waits 5 s before "That word is X."; the WCPM_CUT norms waited 3 s.
+    f = reading(reading_seconds=64.0, told=2, told_waits=2)
+    assert (f.reading_seconds, f.wcpm) == (64.0, 98.0)
+
+
+def test_a_told_first_word_has_no_wait_inside_the_reading():
+    f = reading(reading_seconds=64.0, told=1, told_waits=0)
+    assert f.wcpm == round(60 * 99 / 64, 1)
+
+
+def test_no_reading_time_left_after_the_waits_gives_no_wcpm():
+    assert reading(reading_seconds=4.0, told=2, told_waits=2).wcpm is None
+
+
 def test_told_words_are_left_out_of_the_self_correction_ratio():
     f = reading(substitutions=1, told=3, self_corrections=1)
     assert f.self_correction_ratio == 0.5
@@ -145,6 +161,8 @@ def test_no_reading_time_gives_no_wcpm():
         {"omissions": -1},
         {"reading_seconds": -0.5},
         {"words_attempted": 5, "substitutions": 4, "uncertain": 2},
+        {"told": 1, "told_waits": 2},
+        {"told_waits": -1},
     ],
 )
 def test_impossible_counts_are_refused(counts):

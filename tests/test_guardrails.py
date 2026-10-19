@@ -88,4 +88,4 @@ def test_true_and_false_are_not_numbers():
 
 def test_numbers_are_found_anywhere_in_a_full_report():
     numbers = traceable_numbers(REPORT)
-    assert {90.9, 61.0, 70.0, 2.0, 50.0} <= numbers
+    assert {90.9, 68.0, 70.0, 2.0, 50.0} <= numbers

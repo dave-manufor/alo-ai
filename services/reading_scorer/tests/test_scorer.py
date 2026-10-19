@@ -101,3 +101,11 @@ def test_what_each_transcript_heard_is_kept_for_review():
     assert events[0]["chirp_hypothesis"] == "ada"
     assert events[0]["gemini_hypothesis"] is None
     assert Heard("ada").confidence is None
+
+
+def test_a_told_first_word_has_no_wait_inside_the_reading_time():
+    store = seeded_store()
+    scorer(store, MemoryPublisher()).handle(recorded(told_token_indices=[0, 14]))
+    telemetry = store.get(telemetry_path(SESSION_ID))
+    assert telemetry["error_counts"]["told"] == 2
+    assert telemetry["wcpm"] == round(60 * 19 / (19.65 - 2), 1)
