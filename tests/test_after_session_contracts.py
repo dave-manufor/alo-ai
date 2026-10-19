@@ -29,6 +29,7 @@ W3_SCHEMAS = [
     "phase1_scored.schema.json",
     "report_ready.schema.json",
     "plan_ready.schema.json",
+    "plan.schema.json",
 ]
 
 
@@ -49,6 +50,7 @@ def _fixture(name: str) -> dict:
 TELEMETRY = _validator("phase1_telemetry.schema.json")
 GRADER = _validator("grader_output.schema.json")
 REPORT = _validator("reading_report.schema.json")
+PLAN = _validator("plan.schema.json")
 ENVELOPE = _validator("event_envelope.schema.json")
 
 
@@ -63,6 +65,7 @@ def test_schemas_are_valid_json_schema(schema_file):
         (TELEMETRY, "phase1_telemetry.sess_demo_001.json"),
         (GRADER, "grader_output.sess_demo_001.json"),
         (REPORT, "reading_report.sess_demo_001.json"),
+        (PLAN, "plan.sess_demo_001.json"),
         (ENVELOPE, "event.phase1_scored.json"),
         (ENVELOPE, "event.report_ready.json"),
         (ENVELOPE, "event.plan_ready.json"),
@@ -229,3 +232,28 @@ def test_telemetry_refuses_values_outside_the_contract(change):
     telemetry = _fixture("phase1_telemetry.sess_demo_001.json")
     change(telemetry)
     assert not TELEMETRY.is_valid(telemetry)
+
+
+def test_the_plan_belongs_to_the_reports_session_child_and_guardian():
+    plan = _fixture("plan.sess_demo_001.json")
+    report = _fixture("reading_report.sess_demo_001.json")
+    assert (plan["session_id"], plan["child_id"], plan["guardian_id"]) == (
+        report["session_id"],
+        report["child_id"],
+        report["guardian_id"],
+    )
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda p: p["activities"].append(p["activities"][0]),
+        lambda p: p.update(summary_audio_uri="https://example.org/a.mp3"),
+        lambda p: p.pop("guardian_id"),
+        lambda p: p["activities"][0].update(score=3),
+    ],
+)
+def test_plan_refuses_values_outside_the_contract(change):
+    plan = _fixture("plan.sess_demo_001.json")
+    change(plan)
+    assert not PLAN.is_valid(plan)

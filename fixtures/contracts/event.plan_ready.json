@@ -6,7 +6,7 @@
   "session_id": "sess_demo_001",
   "data": {
     "session_id": "sess_demo_001",
-    "plan_ref": "plans/plan_demo_001",
+    "plan_ref": "plans/plan_sess_demo_001",
     "template_used": false
   }
 }

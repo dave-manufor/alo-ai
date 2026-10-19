@@ -99,6 +99,7 @@ def test_every_schema_has_a_fixture():
         "phase1_scored.schema.json",
         "report_ready.schema.json",
         "plan_ready.schema.json",
+        "plan.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
