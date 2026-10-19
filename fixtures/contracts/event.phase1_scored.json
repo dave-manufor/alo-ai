@@ -6,6 +6,6 @@
   "session_id": "sess_demo_001",
   "data": {
     "session_id": "sess_demo_001",
-    "telemetry_ref": "sessions/sess_demo_001/phase1"
+    "telemetry_ref": "sessions/sess_demo_001/phase1/telemetry"
   }
 }

@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "session_id": { "type": "string", "minLength": 1 },
-    "telemetry_ref": { "type": "string", "pattern": "^sessions/[^/]+/phase1$" }
+    "telemetry_ref": { "type": "string", "pattern": "^sessions/[^/]+/phase1/telemetry$" }
   },
   "required": ["session_id", "telemetry_ref"],
   "additionalProperties": false

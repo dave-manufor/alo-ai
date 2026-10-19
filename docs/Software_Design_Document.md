@@ -284,7 +284,7 @@ The Reading Scorer turns the reading-phase audio into Phase 1 telemetry (PRD 10.
 
 6. **Prosody (phrasing only):** pauses of 180 ms or more from Silero VAD, placed with the alignment timings and compared with the passage's stored spaCy boundaries, when accuracy is at least 90%. Expression stays null until a Nigerian English reference voice exists.
 
-7. **Write:** telemetry to `sessions/{id}/phase1` and publish `phase1.scored`.
+7. **Write:** telemetry to `sessions/{id}/phase1/telemetry` and publish `phase1.scored`.
 
 **Runtime (hackathon):** Cloud Run, 2 vCPU and 4 GiB, no GPU; min 0, and min 1 from the evening before the demo. An estimated 10–20 s per session (measure on day 1). `MMS_FA` and Silero VAD are baked into the image at pinned versions, and `model_versions` in the telemetry records every model and the scoring module version. The same image runs on laptops under Docker Compose.
 
@@ -526,7 +526,7 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`children/{child_id}`|Child profile|guardian_id, first_name, primary_class, birth_year, saved_tags, next_passage_arl, level_confirmed|Account and Payments, Core|
 |`sessions/{session_id}`|One session|child_id, status, context, capture_mode, voice_mode, session_profile, passage_id, passage_source, flags, voice_profile_id, created_at|Session Agent|
 |`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
-|`sessions/{id}/phase1`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
+|`sessions/{id}/phase1/telemetry`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
 |`sessions/{id}/quick/{turn_phase}_{index}`|Quick scores|points or credits, latency_ms|Core|
 |`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|
 |`plans/{plan_id}`|Two-week plan|child_id, activity_ids, book_ids, next_session_at, template_used|Core (Reading Coach)|
