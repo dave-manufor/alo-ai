@@ -3,8 +3,8 @@
     "schema_version": 1,
     "cmd": "clip_list",
     "clips": [
-      { "clip_id": "greeting_1", "url": "https://storage.googleapis.com/aloai-dev-clips/voice_demo_a/v1/greeting_1.mp3" },
-      { "clip_id": "word_market", "url": "https://storage.googleapis.com/aloai-dev-clips/voice_demo_a/v1/words/market.mp3" }
+      { "clip_id": "greeting_1", "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/greeting_1.mp3" },
+      { "clip_id": "word_market", "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/words/market.mp3" }
     ]
   },
   { "schema_version": 1, "cmd": "play", "clip_id": "word_market" },

@@ -477,7 +477,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`session.started`|Session Agent|None in the hackathon (analytics later)|`session_id`, `child_ref`, `passage_id`, `context`, `voice_profile_id`, `voice_mode`, `session_profile`|
 |`phase1.recorded`|Session Agent|Reading Scorer|`session_id`, `audio_uri`, `passage_id`, `told_token_indices`|
 |`phase1.scored`|Reading Scorer|Core (report assembly)|`session_id`, `telemetry_ref`|
-|`session.done`|Session Agent|Core (Grader)|`session_id`, `turn_audio_uris`, `capture_mode`, `session_settings`, `flags`, `listening_module_run`|
+|`session.done`|Session Agent|Core (Grader)|`session_id`, `passage_id`, `turn_audio_uris` (each with `phase`, item `index` and `part`), `capture_mode`, `session_settings`, `flags`, `reading_stopped_early`, `listening_module_run`, `listening_passage_id` (when the listening module ran). Envelope `schema_version` 2|
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
 |`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
 
@@ -525,7 +525,7 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`consents/{consent_id}`|Verified consent record|guardian_id, child_id, text_version, attestation, sign_in_method, verified_email, timestamp, training_opt_in|Account and Payments|
 |`children/{child_id}`|Child profile|guardian_id, first_name, primary_class, birth_year, saved_tags, next_passage_arl, level_confirmed|Account and Payments, Core|
 |`sessions/{session_id}`|One session|child_id, status, context, capture_mode, voice_mode, session_profile, passage_id, passage_source, flags, voice_profile_id, created_at|Session Agent|
-|`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
+|`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, index, part, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
 |`sessions/{id}/phase1`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
 |`sessions/{id}/quick/{turn_id}`|Quick scores|points or credits, latency_ms|Core|
 |`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|

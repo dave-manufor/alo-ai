@@ -2,11 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "session_record.schema.json",
   "title": "SessionRecord",
-  "description": "Firestore sessions/{session_id} and sessions/{session_id}/turns/{turn_id} (SDD 12). Written by the Session Agent (W2); turns are also written by Core. Turn phase names are chosen from the PRD 4 step labels.",
+  "description": "Firestore sessions/{session_id} and sessions/{session_id}/turns/{turn_id} (SDD 12). Written by the Session Agent (W2); turns are also written by Core. Turn phase names are chosen from the PRD 4 step labels. A turn (schema_version 2) carries index and part as in session_done.schema.json. Sessions stay at schema_version 1.",
   "$defs": {
     "session_flag": {
       "type": "string",
-      "enum": ["LOW_AUDIO", "SHORT_READING", "LIVE_FALLBACK", "RECONNECTED", "DEMO_PROFILE", "LIVE_FIRST", "FALLBACK_PASSAGE"]
+      "enum": ["LOW_AUDIO", "LIVE_FALLBACK", "RECONNECTED", "DEMO_PROFILE", "LIVE_FIRST", "FALLBACK_PASSAGE"]
     },
     "turn_phase": {
       "type": "string",
@@ -34,13 +34,15 @@
     "turn": {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
+        "schema_version": { "type": "integer", "const": 2 },
         "phase": { "$ref": "#/$defs/turn_phase" },
+        "index": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "part": { "type": "integer", "minimum": 0 },
         "audio_uri": { "type": "string", "pattern": "^gs://" },
         "live_transcript": { "type": ["string", "null"] },
         "asr_transcript": { "type": ["string", "null"] }
       },
-      "required": ["schema_version", "phase", "audio_uri", "live_transcript", "asr_transcript"],
+      "required": ["schema_version", "phase", "index", "part", "audio_uri", "live_transcript", "asr_transcript"],
       "additionalProperties": false
     }
   },

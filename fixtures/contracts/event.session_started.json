@@ -9,8 +9,8 @@
     "child_ref": "child_demo_001",
     "passage_id": "bank_p3_market_day",
     "context": "SCHOOL",
-    "voice_profile_id": "voice_demo_a",
+    "voice_profile_id": "vp_google_v1",
     "voice_mode": "cache_first",
-    "session_profile": "standard"
+    "session_profile": "demo"
   }
 }
