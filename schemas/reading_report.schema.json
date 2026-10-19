@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "reading_report.schema.json",
   "title": "ReadingReport",
-  "description": "Firestore reports/{session_id} (PRD 10.4, SDD 7 and 12). Producer: Grader (W3), with every number from aloai_scoring; the Reading Coach later fills parent_reporting only. Consumer: the report screen (W1). child_id and guardian_id are what the Firestore rules check. Numbers are null where the session gave no evidence for them: no RC after a reading stopped by the kindness rule (PRD 4.3), no accuracy when no word could be scored, no level without a band, no book band for INSUFFICIENT_EVIDENCE (PRD 8). parent_reporting is null until the Reading Coach writes it.",
+  "description": "Firestore reports/{session_id} (PRD 10.4, SDD 7 and 12). Producer: Grader (W3), with every number from aloai_scoring; the Reading Coach later fills parent_reporting and, when it uses the template summary, adds COACH_TEMPLATE_USED to flags. Consumer: the report screen (W1). child_id and guardian_id are what the Firestore rules check. Numbers are null where the session gave no evidence for them: no RC after a reading stopped by the kindness rule (PRD 4.3), no accuracy when no word could be scored, no level without a band, no book band for INSUFFICIENT_EVIDENCE (PRD 8). parent_reporting is null until the Reading Coach writes it.",
   "type": "object",
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },

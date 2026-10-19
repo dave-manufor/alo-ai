@@ -1,7 +1,7 @@
 """The two-week plan (plans/{plan_id}, schemas/plan.schema.json) and the Coach's text on
-the report. The Reading Coach writes parent_reporting only; every other field of the
-report was written by the Grader. The report's text is written before the plan, so a
-saved plan always has its summary."""
+the report. The Reading Coach writes only parent_reporting and, for a template plan, the
+COACH_TEMPLATE_USED flag; every other field of the report was written by the Grader. The
+report's text is written before the plan, so a saved plan always has its summary."""
 
 from collections.abc import Sequence
 from datetime import datetime, timedelta
@@ -14,6 +14,7 @@ from . import library
 from .template import default_activities, next_check_days, template_home_practice, template_summary
 
 SCHEMA_VERSION = 1
+TEMPLATE_FLAG = "COACH_TEMPLATE_USED"
 
 
 def plan_id(session_id: str) -> str:
@@ -58,10 +59,10 @@ def write_plan(
         "created_at": iso_utc(now),
     }
     aloai_contracts.PLAN.validate(plan)
-    store.merge(
-        f"reports/{session_id}",
-        {"parent_reporting": {"summary_script": summary, "home_practice": home_practice}},
-    )
+    text = {"parent_reporting": {"summary_script": summary, "home_practice": home_practice}}
+    if template_used and TEMPLATE_FLAG not in report["flags"]:
+        text["flags"] = [*report["flags"], TEMPLATE_FLAG]
+    store.merge(f"reports/{session_id}", text)
     store.set(plan_path(session_id), plan)
     return plan
 

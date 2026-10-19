@@ -94,6 +94,7 @@ def test_the_recorded_run_saves_the_plan_in_the_contract():
     coach, publisher, speaker = run()
     store = coach.store
     assert store.get(plan_path(SESSION_ID)) == contract("plan.sess_demo_001.json")
+    assert store.get(paths.report(SESSION_ID))["flags"] == ["DEMO_PROFILE", "SHORT_READING"]
     summary = RECORDED_TURNS[SAVE_PLAN]["parts"][0]["args"]["summary"]
     assert store.get(paths.report(SESSION_ID))["parent_reporting"]["summary_script"] == summary
     assert speaker.spoken == [summary]
@@ -194,6 +195,11 @@ def test_a_second_refused_summary_uses_the_template():
 def test_a_failed_run_saves_the_template_plan_and_still_emails(turns):
     coach, publisher, _ = run(turns=turns)
     assert coach.store.get(plan_path(SESSION_ID))["template_used"] is True
+    assert coach.store.get(paths.report(SESSION_ID))["flags"] == [
+        "DEMO_PROFILE",
+        "SHORT_READING",
+        "COACH_TEMPLATE_USED",
+    ]
     assert len(coach.notifier.sent) == 1
     assert [event["type"] for event in publisher.events] == ["plan.ready"]
 
@@ -273,3 +279,10 @@ def test_a_tool_that_fails_is_audited_and_the_template_plan_is_saved():
     [failed] = [entry for entry in audit(store) if entry["tool"] == "queue_story"]
     assert (failed["allowed"], failed["result_size"]) == (True, None)
     assert store.get(plan_path(SESSION_ID))["template_used"] is True
+
+
+def test_the_template_flag_is_added_once():
+    store = coach_store()
+    store.merge(paths.report(SESSION_ID), {"flags": ["COACH_TEMPLATE_USED"]})
+    run(store, enabled=False)
+    assert store.get(paths.report(SESSION_ID))["flags"] == ["COACH_TEMPLATE_USED"]

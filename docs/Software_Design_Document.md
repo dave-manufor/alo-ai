@@ -528,7 +528,7 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, index, part, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
 |`sessions/{id}/phase1/telemetry`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
 |`sessions/{id}/quick/{turn_phase}_{index}`|Quick scores|points or credits, latency_ms|Core|
-|`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|
+|`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes only `parent_reporting` and, for a template plan, the `COACH_TEMPLATE_USED` flag)|
 |`plans/{plan_id}`|Two-week plan|child_id, activity_ids, book_ids, next_session_at, template_used|Core (Reading Coach)|
 |`passages/{passage_id}`|PassageArtifact (PRD 10.1)|as the schema; no child data|Core (Passage Generator)|
 |`books/{book_id}`|Catalogue of about 30 real books|title, author, ARL (from the publisher level), tags, licence, attribution, description, `embedding` (vector field with a vector index)|Book ingestion job|

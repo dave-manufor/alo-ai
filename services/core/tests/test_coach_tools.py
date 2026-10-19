@@ -244,8 +244,12 @@ def test_a_second_refusal_saves_the_template_plan():
         "act_word_families",
     ]
     assert plan["book_ids"] == BOOKS
-    summary = tools.store.get(paths.report(SESSION_ID))["parent_reporting"]["summary_script"]
-    assert summary.startswith("Chidi understood the story well")
+    report = tools.store.get(paths.report(SESSION_ID))
+    assert report["parent_reporting"]["summary_script"].startswith(
+        "Chidi understood the story well"
+    )
+    assert "COACH_TEMPLATE_USED" in report["flags"]
+    aloai_contracts.READING_REPORT.validate(report)
 
 
 def test_a_saved_plan_is_not_replaced():
