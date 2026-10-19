@@ -29,4 +29,5 @@ def validator(schema_file: str) -> Draft202012Validator:
 GRADE_QUICK_REQUEST = validator("grade_quick_request.schema.json")
 GRADER_OUTPUT = validator("grader_output.schema.json")
 READING_REPORT = validator("reading_report.schema.json")
+PHASE1_TELEMETRY = validator("phase1_telemetry.schema.json")
 EVENT_ENVELOPE = validator("event_envelope.schema.json")

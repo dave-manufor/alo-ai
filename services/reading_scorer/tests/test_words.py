@@ -1,0 +1,53 @@
+"""Placing what a transcript heard against the passage (PRD 5.3)."""
+
+import pytest
+from services.reading_scorer.words import Heard, Placed, align, normalize
+
+PASSAGE = ["ada", "saw", "a", "red", "hat"]
+
+
+def heard(text: str) -> list[Heard]:
+    return [Heard(word) for word in text.split()]
+
+
+@pytest.mark.parametrize(
+    "word, normalized",
+    [("Jàpá,", "japa"), ("Market.", "market"), ("we'll", "we'll"), ("'quoted'", "quoted")],
+)
+def test_words_match_without_case_accents_or_punctuation(word, normalized):
+    assert normalize(word) == normalized
+
+
+def test_an_exact_reading_places_every_word():
+    placed = align(PASSAGE, heard("Ada saw a red hat."))
+    assert [p.heard.text for p in placed] == ["Ada", "saw", "a", "red", "hat."]
+    assert all(p.before == () for p in placed)
+
+
+def test_a_misread_word_takes_the_place_of_the_passage_word():
+    placed = align(PASSAGE, heard("ada sew a red hat"))
+    assert placed[1] == Placed(Heard("sew"))
+
+
+def test_a_skipped_word_has_nothing_in_its_place():
+    placed = align(PASSAGE, heard("ada saw red hat"))
+    assert placed[2] == Placed(None)
+
+
+def test_an_added_word_is_kept_before_the_passage_word_it_precedes():
+    placed = align(PASSAGE, heard("ada sow saw a red hat"))
+    assert placed[1] == Placed(Heard("saw"), before=("sow",))
+
+
+def test_words_added_after_the_last_passage_word_are_dropped():
+    placed = align(PASSAGE, heard("ada saw a red hat the end"))
+    assert placed[-1] == Placed(Heard("hat"))
+
+
+def test_a_reading_that_stops_leaves_the_rest_unplaced():
+    placed = align(PASSAGE, heard("ada saw"))
+    assert [p.heard for p in placed[2:]] == [None, None, None]
+
+
+def test_nothing_heard_places_nothing():
+    assert align(PASSAGE, []) == [Placed(None)] * 5
