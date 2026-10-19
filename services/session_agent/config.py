@@ -32,6 +32,41 @@ def _choice(env: Mapping[str, str], name: str, default: str, allowed) -> str:
     return value
 
 
+@dataclass(frozen=True)
+class WorkerSettings:
+    """Where the worker's data goes. Names follow docs/LOCAL_DEV.md and Terraform."""
+
+    project: str
+    audio_bucket: str
+    clips_bucket: str
+    clips_base_url: str  # what the browser fetches clips from
+    voice_profile_id: str
+    tts_version: str
+    core_url: str  # the Grader's grade:quick lives in Core
+    bank_passage_id: str  # the bank passage used until the Passage Generator is live
+    bank_dir: str  # local only: a folder of passage.*.json files, instead of Firestore
+    stt_language: str
+    stt_location: str
+
+
+def worker_settings(env: Mapping[str, str]) -> WorkerSettings:
+    clips_bucket = env.get("CLIPS_BUCKET", "aloai-dev-clips")
+    return WorkerSettings(
+        project=env.get("GOOGLE_CLOUD_PROJECT", "aloai-dev"),
+        audio_bucket=env.get("AUDIO_BUCKET", "aloai-dev-audio"),
+        clips_bucket=clips_bucket,
+        clips_base_url=env.get("CLIPS_BASE_URL", f"https://storage.googleapis.com/{clips_bucket}"),
+        voice_profile_id=env.get("VOICE_PROFILE_ID", "vp_google_v1"),
+        tts_version=env.get("TTS_VERSION", "v1"),
+        core_url=env.get("CORE_URL", "http://localhost:8080"),
+        bank_passage_id=env.get("BANK_PASSAGE_ID", "bank_p3_market_day"),
+        bank_dir=env.get("BANK_DIR", ""),
+        # Chirp 3 has no en-NG locale (PRD 1, decision 9); the day-3 benchmark picks one.
+        stt_language=env.get("STT_LANGUAGE", "en-GB"),
+        stt_location=env.get("STT_LOCATION", "eu"),  # Chirp 3: us or eu multi-region only
+    )
+
+
 def load(env: Mapping[str, str]) -> Config:
     alo_env = env.get("ALO_ENV", "")
     if alo_env == "local" and env.get("K_SERVICE"):
