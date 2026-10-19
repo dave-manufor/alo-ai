@@ -489,10 +489,10 @@ Every event uses one envelope: `{event_id (UUID v4), type, schema_version, occur
 |---|---|---|---|
 |`get_report`|Read|`session_id`|The ReadingReport|
 |`get_history`|Read|`child_id`|Past sessions, saved tags, last plan|
-|`get_activity_library`|Read|`profile`, `arl`|Matching activity ids and texts|
-|`search_books`|Read|`arl_min`, `arl_max`, `tags`|Ranked book ids with titles and licences|
+|`get_activity_library`|Read|none: the report's profile and level|Matching activity ids and texts|
+|`search_books`|Read|none: the report's ranked books (PRD 9.3)|Book ids with titles and licences, from the catalogue only|
 |`queue_story`|Internal write|`child_id`, `arl`, `tags`|`passage_id`|
-|`schedule_session`|Internal write|`child_id`, `days` (7 or 14)|Reminder id|
+|`schedule_session`|Internal write|`child_id`, `days` (7 or 14)|`next_session_at`, stored on the child|
 |`save_plan`|Internal write|`child_id`, the plan (JSON schema)|`plan_id`|
 |`send_parent_email`|External write, once per run|`child_id`, `template_id`|Delivery id|
 
