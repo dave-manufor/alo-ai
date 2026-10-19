@@ -1,0 +1,245 @@
+{
+  "version": "activities_v1",
+  "activities": [
+    {
+      "activity_id": "act_longer_story",
+      "title": "A longer story",
+      "text": "Choose a story with more pages and fewer pictures. Take turns reading a page each.",
+      "profiles": ["ON_TRACK"],
+      "arl_min": 3,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_picture_in_mind",
+      "title": "Pictures in the mind",
+      "text": "After a page, close the book and ask your child to describe what they see in their mind: the place, the people, the weather.",
+      "profiles": ["ON_TRACK", "COMPREHENSION_STRATEGY_GAP"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_one_step_up",
+      "title": "One step up",
+      "text": "Pick a book a little harder than usual. Let your child read the first page to you, and help only when asked.",
+      "profiles": ["ON_TRACK"],
+      "arl_min": 2,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_own_ending",
+      "title": "Make your own ending",
+      "text": "Stop before the end of a story and ask your child how they think it ends. Then read on together and compare.",
+      "profiles": ["ON_TRACK", "FLUENT_NEEDS_LANGUAGE_SUPPORT"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_family_reader",
+      "title": "Family reader",
+      "text": "Ask your child to read a short story or notice aloud to the family, then tell everyone what it was about.",
+      "profiles": ["ON_TRACK"],
+      "arl_min": 5,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_sound_hunt",
+      "title": "Sound hunt",
+      "text": "Pick a sound from a word your child found hard today, like the 'ch' in 'chose'. Find three things at home or at the market that start with that sound.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_word_builder",
+      "title": "Word builder",
+      "text": "Write a word from the story that was hard today. Cover the end, read the first part together, then uncover the rest and read the whole word.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED"],
+      "arl_min": 1,
+      "arl_max": 8
+    },
+    {
+      "activity_id": "act_word_families",
+      "title": "Word families",
+      "text": "Write words that end the same way, like hat, cat and mat. Read them together, then make up a funny sentence that uses them.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_class_level_talk",
+      "title": "Talk about class-level stories",
+      "text": "Keep reading stories at your child's class level aloud to them and ask what happened and why. Understanding is a strength, so keep it growing.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_word_cards",
+      "title": "Word cards",
+      "text": "Write five words your child paused on today on small cards. Read them together each day, and put a card away once the word feels easy.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_word_chunks",
+      "title": "Chunk long words",
+      "text": "Show how a long word breaks into parts, like 'to-ge-ther'. Clap the parts together, then read the whole word.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED"],
+      "arl_min": 5,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_listen_and_learn",
+      "title": "Listen and learn",
+      "text": "Read class-level books aloud to your child, or play an audio story, and talk about them. Your child understands a lot when listening, so keep that going while their word reading grows.",
+      "profiles": ["DECODING_LIMITED"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_sound_it_out_books",
+      "title": "Easy-to-sound-out books",
+      "text": "Choose short books with simple, regular words. Let your child read each one more than once; reading it again builds speed.",
+      "profiles": ["DECODING_LIMITED", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_finger_along",
+      "title": "Finger along",
+      "text": "Let your child point under each word while reading slowly. For a hard word, point to each sound in turn.",
+      "profiles": ["DECODING_LIMITED", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_why_stop",
+      "title": "Stop and ask why",
+      "text": "While reading together, stop every few sentences and ask 'Why do you think that happened?' Let your child answer before you read on.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "COMPREHENSION_STRATEGY_GAP"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_word_talk",
+      "title": "Word talk",
+      "text": "Pick two new words from a story. Talk about what they mean, and use each one in a sentence about your day.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_read_discuss",
+      "title": "Read aloud and discuss",
+      "text": "Read a story aloud to your child, then talk about it together: who was in it, what problem they had, and how it was solved.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_who_is_it",
+      "title": "Who is 'he'?",
+      "text": "When a story says 'he', 'she' or 'they', pause and ask your child who it means.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT"],
+      "arl_min": 3,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_feelings_detective",
+      "title": "Feelings detective",
+      "text": "Ask how a character feels, and what in the story tells you so.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "COMPREHENSION_STRATEGY_GAP"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_tell_it_back",
+      "title": "Tell it back",
+      "text": "After a story, ask your child to tell it to someone else in the family in their own words.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "COMPREHENSION_STRATEGY_GAP", "NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_echo_reading",
+      "title": "Echo reading",
+      "text": "Read one sentence with lots of expression, then let your child read the same sentence back, copying how you said it.",
+      "profiles": ["NEEDS_SUPPORT_IN_BOTH", "DECODING_LIMITED"],
+      "arl_min": 1,
+      "arl_max": 8
+    },
+    {
+      "activity_id": "act_everyday_words",
+      "title": "Everyday words",
+      "text": "Practise five common words a week, like 'the', 'went' and 'said'. Spot them together in books, on signs and on packets.",
+      "profiles": ["NEEDS_SUPPORT_IN_BOTH", "UNDERSTANDS_BUILDING_WORD_READING"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_naming_game",
+      "title": "Naming game",
+      "text": "At home or at the market, take turns naming things in a group, like fruits, colours or animals, and describing one of them.",
+      "profiles": ["NEEDS_SUPPORT_IN_BOTH", "FLUENT_NEEDS_LANGUAGE_SUPPORT"],
+      "arl_min": 1,
+      "arl_max": 8
+    },
+    {
+      "activity_id": "act_picture_talk",
+      "title": "Picture talk",
+      "text": "Before reading, look at the pictures in a book together and talk about what might happen.",
+      "profiles": ["NEEDS_SUPPORT_IN_BOTH"],
+      "arl_min": 1,
+      "arl_max": 6
+    },
+    {
+      "activity_id": "act_one_part_at_a_time",
+      "title": "One part at a time",
+      "text": "Read one short part of a story, then ask your child to tell you what happened in it before you read the next part.",
+      "profiles": ["COMPREHENSION_STRATEGY_GAP", "FLUENT_NEEDS_LANGUAGE_SUPPORT"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_read_then_tell",
+      "title": "Read, then tell",
+      "text": "Your child reads a short page alone, then tells you about it. If a part is hard to remember, read it again together and talk it through.",
+      "profiles": ["COMPREHENSION_STRATEGY_GAP"],
+      "arl_min": 3,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_question_maker",
+      "title": "Question maker",
+      "text": "After reading, your child asks you a question about the story. Answer it, then swap.",
+      "profiles": ["COMPREHENSION_STRATEGY_GAP", "ON_TRACK", "FLUENT_NEEDS_LANGUAGE_SUPPORT"],
+      "arl_min": 3,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_slow_and_steady",
+      "title": "Slow and steady",
+      "text": "Ask your child to read a page slowly and pause at each full stop to think about what it said.",
+      "profiles": ["COMPREHENSION_STRATEGY_GAP", "ON_TRACK"],
+      "arl_min": 3,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_label_hunt",
+      "title": "Label hunt",
+      "text": "On errands, read labels, signs and packets together, and ask your child what each one tells you.",
+      "profiles": ["UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED", "NEEDS_SUPPORT_IN_BOTH", "ON_TRACK"],
+      "arl_min": 1,
+      "arl_max": 12
+    },
+    {
+      "activity_id": "act_first_next_last",
+      "title": "First, next, last",
+      "text": "After a story, ask your child what happened first, what happened next, and how it ended.",
+      "profiles": ["FLUENT_NEEDS_LANGUAGE_SUPPORT", "NEEDS_SUPPORT_IN_BOTH", "COMPREHENSION_STRATEGY_GAP"],
+      "arl_min": 1,
+      "arl_max": 8
+    }
+  ]
+}

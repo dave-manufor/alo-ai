@@ -156,3 +156,11 @@ class ScriptedModel:
     def grade(self, task: GradingTask) -> dict:
         self.tasks.append(task)
         return self._outputs[task.key]
+
+
+def demo_report(**changes) -> dict:
+    """sess_demo_001's report with its profile, level or fluency fields changed."""
+    report = contract("reading_report.sess_demo_001.json")
+    for section in ("profile", "level", "fluency"):
+        report[section] |= {k: v for k, v in changes.items() if k in report[section]}
+    return report
