@@ -3,8 +3,11 @@
 Follows where the child is in the passage by fuzzy-matching speech-to-text
 partials to the passage tokens. It reports three things to the state machine:
 
-- `stall(now_ms)`  3.0 s with no progress on the same word -> Silence(ms, word_index)
-- `progress(now_ms)` the words read so far, for the kindness rule -> ReadingProgress
+- `stall(now_ms)`  5.0 s with no progress on the same word -> Silence(ms, word_index).
+  No progress, not silence: a child sounding a word out gets the same 5 s.
+- `progress(now_ms, told)` the words read so far, without the words the child was
+  told, for the kindness rule -> ReadingProgress. The tracker cannot judge a word
+  correct live, so this approximates "words correct" (PRD 4.3).
 - `done(now_ms)`   the last word was reached -> ReadingDone
 
 Pure: the caller passes the clock. It counts words and finds positions; it does
@@ -12,7 +15,7 @@ not score anything. The matching constants decide when "That word is X." plays,
 so change them only after rehearsing with real readings.
 """
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from difflib import SequenceMatcher
 
 from .clips.keys import clean_word
@@ -72,7 +75,7 @@ class PositionTracker:
         self._segment_start = self._position
 
     def stall(self, now_ms: int) -> Silence | None:
-        """Silence for TOLD_WORD_MS on one word. Reported once per word."""
+        """No progress for TOLD_WORD_MS on one word. Reported once per word."""
         if self._started_ms is None or self.done_reached:
             return None
         waited = now_ms - self._last_advance_ms
@@ -81,8 +84,10 @@ class PositionTracker:
         self._stalled_on.add(self._position)
         return Silence(ms=waited, word_index=self._position)
 
-    def progress(self, now_ms: int) -> ReadingProgress:
-        return ReadingProgress(elapsed_ms=self._elapsed(now_ms), words_read=self.words_read)
+    def progress(self, now_ms: int, told: Iterable[int] = ()) -> ReadingProgress:
+        """told: the token indices the child was told (the machine's TOLD log)."""
+        words_read = len(self._counted - set(told))
+        return ReadingProgress(elapsed_ms=self._elapsed(now_ms), words_read=words_read)
 
     def done(self, now_ms: int) -> ReadingDone | None:
         if not self.done_reached:

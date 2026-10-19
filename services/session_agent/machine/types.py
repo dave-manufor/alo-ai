@@ -143,9 +143,10 @@ class PassageFallback:
 
 @dataclass(frozen=True)
 class QuickScore:
-    """Quick reading comprehension from the Grader. None means the call timed out."""
+    """The Grader's listening decision (grade:quick, PRD 6.5). Only a complete response
+    is forwarded; if none arrives in time, the quick_score timer runs the module."""
 
-    quick_rc: float | None
+    run_listening_module: bool
 
 
 @dataclass(frozen=True)
@@ -277,8 +278,12 @@ class UseBankPassage:
 
 @dataclass(frozen=True)
 class CallQuickScore:
+    """Ask grade:quick to score one turn. answered=False: the child said nothing, so the
+    adapter sends an empty transcript (scored 0 without a model call)."""
+
     turn_phase: TurnPhase
     index: int
+    answered: bool = True
 
 
 @dataclass(frozen=True)
