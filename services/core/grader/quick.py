@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import aloai_scoring as scoring
+from aloai_store import Store
 
-from ..store import Store
 from . import paths
 from .models import QUICK_MODEL, GradingModel, GradingTask, grade
 from .passages import ordered_items, total_weight, weights

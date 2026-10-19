@@ -1,13 +1,11 @@
-"""The adapters to Vertex AI, Speech-to-Text, Firestore and Pub/Sub, against fake
-clients: no test reaches a Google service."""
+"""The Grader's adapters to Vertex AI and Speech-to-Text, against fake clients: no
+test reaches a Google service."""
 
 import json
 from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
-from google.api_core.exceptions import AlreadyExists
-from services.core.events import PubSubPublisher
 from services.core.grader.asr import ChirpTranscriber, FixtureTranscriber, transcript
 from services.core.grader.models import (
     FixtureGradingModel,
@@ -16,7 +14,6 @@ from services.core.grader.models import (
     VertexGradingModel,
 )
 from services.core.grader.prompts import INSTRUCTIONS
-from services.core.store import FirestoreStore
 from services.core.tests.support import PASSAGE_ID, RECORDED, contract, grader_output
 
 PASSAGE = contract("passage.bank_p3_market_day.json")
@@ -118,69 +115,3 @@ def test_recorded_words_are_found_by_the_audio_object_name():
         ("was", 0.95),
         ("red", 0.95),
     ]
-
-
-class FakeDocument:
-    def __init__(self, documents, path):
-        self._documents, self._path = documents, path
-
-    def get(self):
-        data = self._documents.get(self._path)
-        return SimpleNamespace(exists=data is not None, to_dict=lambda: data)
-
-    def set(self, data, merge=False):
-        base = self._documents.get(self._path, {}) if merge else {}
-        self._documents[self._path] = base | data
-
-    def create(self, data):
-        if self._path in self._documents:
-            raise AlreadyExists("exists")
-        self._documents[self._path] = data
-
-
-class FakeFirestore:
-    def __init__(self):
-        self.documents = {}
-        self.filters = []
-
-    def document(self, path):
-        return FakeDocument(self.documents, path)
-
-    def collection(self, name):
-        def where(filter):
-            self.filters.append(filter)
-            found = [d for p, d in self.documents.items() if p.startswith(f"{name}/")]
-            return SimpleNamespace(
-                stream=lambda: [SimpleNamespace(to_dict=lambda d=d: d) for d in found]
-            )
-
-        return SimpleNamespace(where=where)
-
-
-def test_firestore_documents_are_read_written_merged_and_created_once():
-    client = FakeFirestore()
-    store = FirestoreStore(client)
-    assert store.get("reports/a") is None
-    store.set("children/c", {"primary_class": 2})
-    store.merge("children/c", {"next_passage_arl": 3})
-    assert store.get("children/c") == {"primary_class": 2, "next_passage_arl": 3}
-    assert store.create("reports/a", {"child_id": "c"}) is True
-    assert store.create("reports/a", {"child_id": "other"}) is False
-    assert store.where("reports", "child_id", "c") == [{"child_id": "c"}]
-    [query] = client.filters
-    assert (query.field_path, query.op_string, query.value) == ("child_id", "==", "c")
-
-
-def test_events_are_published_with_their_type_as_an_attribute():
-    published = []
-    client = SimpleNamespace(
-        topic_path=lambda project, topic: f"projects/{project}/topics/{topic}",
-        publish=lambda topic, data, **attrs: (
-            published.append((topic, data, attrs)) or SimpleNamespace(result=lambda: "1")
-        ),
-    )
-    PubSubPublisher(client, "aloai-dev").publish({"type": "report.ready", "session_id": "s"})
-    [(topic, data, attrs)] = published
-    assert topic == "projects/aloai-dev/topics/aloai.session-events"
-    assert json.loads(data) == {"type": "report.ready", "session_id": "s"}
-    assert attrs == {"type": "report.ready"}

@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import aloai_scoring as scoring
+from aloai_store import Store, require
 
-from ..store import Store, require
 from . import paths
 from .asr import Transcriber, transcript
 from .assembly import ReportAssembler

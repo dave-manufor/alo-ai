@@ -6,15 +6,14 @@ session.done starts final grading, phase1.scored retries report assembly, and ot
 types are ignored. A failure while handling an event returns 500, so Pub/Sub retries.
 """
 
-import base64
-import json
 from typing import Annotated, Any
 
+import aloai_contracts
+from aloai_events import pushed_event
 from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse, Response
 from jsonschema import Draft202012Validator
 
-from .. import contracts
 from .assembly import ReportAssembler
 from .final import FinalGrader
 from .models import GradingError
@@ -26,7 +25,7 @@ def router(quick: QuickGrader, final: FinalGrader, assembler: ReportAssembler) -
 
     @routes.post("/v1/grade:quick")
     def grade_quick(body: Annotated[Any, Body()]) -> JSONResponse:
-        problem = _first_error(contracts.GRADE_QUICK_REQUEST, body)
+        problem = _first_error(aloai_contracts.GRADE_QUICK_REQUEST, body)
         if problem is not None:
             return _error(400, "INVALID_REQUEST", problem, retryable=False)
         try:
@@ -51,15 +50,6 @@ def router(quick: QuickGrader, final: FinalGrader, assembler: ReportAssembler) -
         return Response(status_code=204)
 
     return routes
-
-
-def pushed_event(body: Any) -> dict | None:
-    """The event inside a Pub/Sub push body, or None when it is not a valid event."""
-    try:
-        event = json.loads(base64.b64decode(body["message"]["data"], validate=True))
-    except (KeyError, TypeError, ValueError):
-        return None
-    return event if contracts.EVENT_ENVELOPE.is_valid(event) else None
 
 
 def _first_error(validator: Draft202012Validator, body: Any) -> str | None:

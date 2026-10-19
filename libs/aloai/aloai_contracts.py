@@ -1,5 +1,5 @@
-"""The JSON Schemas in schemas/ (PRD 14.2), used to check what the Core service
-receives and what it writes."""
+"""The JSON Schemas in schemas/ (PRD 14.2), used to check what a service receives
+and what it writes."""
 
 import json
 from pathlib import Path

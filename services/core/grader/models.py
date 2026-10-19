@@ -12,10 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+import aloai_contracts
 from google import genai
 from google.genai import types
 
-from .. import contracts
 from .prompts import build_prompt
 
 QUICK_MODEL = "gemini-2.5-flash"
@@ -46,7 +46,7 @@ class GradingModel(Protocol):
 
 _RESPONSE_SCHEMA = {
     key: value
-    for key, value in contracts.load("grader_output.schema.json").items()
+    for key, value in aloai_contracts.load("grader_output.schema.json").items()
     if key not in ("$schema", "$id")
 }
 _CONFIG = types.GenerateContentConfig(
@@ -90,7 +90,7 @@ def grade(model: GradingModel, task: GradingTask) -> dict:
     """The model's GraderOutput for the task, refused if it breaks the schema or grades
     other propositions or items than it was asked."""
     output = model.grade(task)
-    error = next(iter(contracts.GRADER_OUTPUT.iter_errors(output)), None)
+    error = next(iter(aloai_contracts.GRADER_OUTPUT.iter_errors(output)), None)
     if error is not None:
         raise GradingError(f"{task.key} is not a GraderOutput: {error.message}")
     propositions = (

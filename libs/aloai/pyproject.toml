@@ -2,13 +2,18 @@
 name = "aloai-libs"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "Alo.ai shared libraries (W3): aloai_scoring"
+description = "Alo.ai shared libraries (W3): scoring, authorization, guardrails and shared clients"
+dependencies = [
+    "jsonschema[format]==4.26.0",
+    "google-cloud-firestore==2.34.1",
+    "google-cloud-pubsub==2.43.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "ruff>=0.6"]
 
 [tool.pytest.ini_options]
-# Run from the repo root with: pytest -c libs/aloai/pyproject.toml tests/test_scoring.py
+# Run from the repo root with: pytest -c libs/aloai/pyproject.toml tests
 pythonpath = ["."]
 addopts = "--import-mode=importlib"
 

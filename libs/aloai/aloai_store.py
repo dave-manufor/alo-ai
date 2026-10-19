@@ -1,4 +1,4 @@
-"""Firestore documents for the Core service (SDD 12).
+"""Firestore documents for the Alo.ai services (SDD 12).
 
 Paths are full document paths such as "sessions/{session_id}". FirestoreStore talks
 to Firestore, or to its emulator when FIRESTORE_EMULATOR_HOST is set; MemoryStore

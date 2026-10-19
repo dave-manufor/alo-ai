@@ -2,11 +2,11 @@
 
 import base64
 
+import aloai_contracts
 import pytest
+from aloai_events import MemoryPublisher
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from services.core import contracts
-from services.core.events import MemoryPublisher
 from services.core.grader import paths
 from services.core.grader.api import router
 from services.core.grader.asr import FixtureTranscriber
@@ -26,7 +26,7 @@ from services.core.tests.support import (
     session_done,
 )
 
-RESPONSE = contracts.validator("grade_quick_response.schema.json")
+RESPONSE = aloai_contracts.validator("grade_quick_response.schema.json")
 
 
 class BrokenModel:
@@ -96,7 +96,7 @@ def test_session_done_grades_and_phase1_scored_assembles_the_report():
     scored = {"session_id": SESSION_ID, "telemetry_ref": paths.telemetry(SESSION_ID)}
     response = http.post("/pubsub/session-events", json=pushed(event("phase1.scored", scored)))
     assert response.status_code == 204
-    contracts.READING_REPORT.validate(store.get(paths.report(SESSION_ID)))
+    aloai_contracts.READING_REPORT.validate(store.get(paths.report(SESSION_ID)))
     assert [e["type"] for e in publisher.events] == ["report.ready"]
 
 

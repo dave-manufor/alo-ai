@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import aloai_scoring as scoring
+from aloai_events import iso_utc
 
-from ..events import iso_utc
 from .asr import CHIRP_MODEL
 from .models import GRADER_MODEL, QUICK_MODEL
 from .prompts import PROMPT_VERSION

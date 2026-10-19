@@ -1,9 +1,9 @@
 """Report assembly (SDD 7 step 6): written once, when grading and telemetry are both in."""
 
-from services.core import contracts
-from services.core.events import MemoryPublisher
+import aloai_contracts
+from aloai_events import MemoryPublisher
+from aloai_store import MemoryStore
 from services.core.grader import paths
-from services.core.store import MemoryStore
 from services.core.tests.support import (
     SESSION_ID,
     add_telemetry,
@@ -63,7 +63,7 @@ def test_the_report_is_written_once_and_announced_each_time():
         }
     ]
     for event in publisher.events:
-        contracts.EVENT_ENVELOPE.validate(event)
+        aloai_contracts.EVENT_ENVELOPE.validate(event)
 
 
 def test_the_childs_next_passage_level_is_saved():

@@ -1,7 +1,7 @@
 """Building the ReadingReport (PRD 10.4) from telemetry and reconciled grading."""
 
+import aloai_contracts
 import pytest
-from services.core import contracts
 from services.core.grader.report import ReportInputs, build_report
 from services.core.tests.support import NOW, PASSAGE_ID, SESSION_ID, contract
 
@@ -46,7 +46,7 @@ def report(quick=QUICK, previous=None, **grading) -> dict:
             now=NOW,
         )
     )
-    contracts.READING_REPORT.validate(built)
+    aloai_contracts.READING_REPORT.validate(built)
     return built
 
 

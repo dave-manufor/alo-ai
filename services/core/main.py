@@ -9,26 +9,26 @@ import os
 from collections.abc import Mapping
 from pathlib import Path
 
+import aloai_env
+from aloai_events import PubSubPublisher
+from aloai_store import FirestoreStore
 from fastapi import FastAPI
 from google import genai
 from google.api_core.client_options import ClientOptions
 from google.cloud import firestore, pubsub_v1, speech_v2
 
-from . import config
-from .events import PubSubPublisher
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
 from .grader.final import FinalGrader
 from .grader.models import FixtureGradingModel, GradingModel, VertexGradingModel
 from .grader.quick import QuickGrader
-from .store import FirestoreStore
 
 RECORDED = Path(__file__).resolve().parents[2] / "fixtures" / "ai"
 
 
 def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
-    settings = config.load(os.environ if env is None else env)
+    settings = aloai_env.load(os.environ if env is None else env)
     store = FirestoreStore(firestore.Client(project=settings.project))
     publisher = PubSubPublisher(pubsub_v1.PublisherClient(), settings.project)
     assembler = ReportAssembler(store, publisher)
@@ -44,7 +44,7 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     return app
 
 
-def _ai(settings: config.Config) -> tuple[GradingModel, Transcriber]:
+def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber]:
     if settings.ai_mode == "fixtures":
         return FixtureGradingModel(RECORDED / "grader"), FixtureTranscriber(RECORDED / "asr")
     speech = speech_v2.SpeechClient(

@@ -9,11 +9,11 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from services.core.events import MemoryPublisher, envelope
+from aloai_events import MemoryPublisher, envelope
+from aloai_store import MemoryStore
 from services.core.grader import paths
 from services.core.grader.assembly import ReportAssembler
 from services.core.grader.models import FixtureGradingModel, GradingTask
-from services.core.store import MemoryStore
 
 ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = ROOT / "fixtures" / "contracts"

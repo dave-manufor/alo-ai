@@ -12,9 +12,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from .. import contracts
-from ..events import Publisher, envelope
-from ..store import Store, require
+import aloai_contracts
+from aloai_events import Publisher, envelope
+from aloai_store import Store, require
+
 from . import paths
 from .report import ReportInputs, build_report
 
@@ -71,7 +72,7 @@ class ReportAssembler:
                 now=self.clock(),
             )
         )
-        contracts.READING_REPORT.validate(report)
+        aloai_contracts.READING_REPORT.validate(report)
         if not self.store.create(paths.report(session_id), report):
             return require(self.store, paths.report(session_id))
         self.store.merge(

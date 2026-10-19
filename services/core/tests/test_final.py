@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from services.core.events import MemoryPublisher
+from aloai_events import MemoryPublisher
 from services.core.grader import paths
 from services.core.grader.asr import FixtureTranscriber
 from services.core.grader.final import FinalGrader, TurnMismatch, reading_stopped_early

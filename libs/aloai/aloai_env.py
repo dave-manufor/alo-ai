@@ -1,4 +1,4 @@
-"""Core service settings, read once from the environment.
+"""Settings every Alo.ai service reads once from the environment.
 
 Local shortcuts (ALO_ENV=local: emulators and recorded AI responses) must never run
 on Cloud Run, which sets K_SERVICE.

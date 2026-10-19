@@ -1,7 +1,7 @@
 """Quick scoring (PRD 7.4): one Flash pass per turn, stored, then the listening decision."""
 
+import aloai_contracts
 import pytest
-from services.core import contracts
 from services.core.grader import paths
 from services.core.grader.models import GradingError
 from services.core.grader.quick import PassageNotFound, QuickGrader, UnknownItem
@@ -14,7 +14,7 @@ from services.core.tests.support import (
     seeded_store,
 )
 
-RESPONSE = contracts.validator("grade_quick_response.schema.json")
+RESPONSE = aloai_contracts.validator("grade_quick_response.schema.json")
 PENDING = {"schema_version": 1, "complete": False, "run_listening_module": None}
 RETELL = "ada and her mama went to the market"
 

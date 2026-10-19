@@ -1,11 +1,11 @@
 """One session through the Grader on recorded responses, as `make replay` will run it:
 quick scores during the session, then session.done and phase1.scored in either order."""
 
+import aloai_contracts
 import pytest
+from aloai_events import MemoryPublisher
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from services.core import contracts
-from services.core.events import MemoryPublisher
 from services.core.grader import paths
 from services.core.grader.api import router
 from services.core.grader.asr import FixtureTranscriber
@@ -61,7 +61,7 @@ def replay(telemetry_first: bool) -> tuple[dict, MemoryPublisher, list[dict]]:
 def test_a_replayed_session_ends_in_one_report(telemetry_first):
     report, publisher, quick = replay(telemetry_first)
     assert quick[-1] == {"schema_version": 1, "complete": True, "run_listening_module": True}
-    contracts.READING_REPORT.validate(report)
+    aloai_contracts.READING_REPORT.validate(report)
     assert report["comprehension"]["reading_comprehension"] == 70.0
     assert report["comprehension"]["quick_reading_comprehension"] == 70.0
     assert report["comprehension"]["quick_vs_final_item_agreement"] == 1.0
