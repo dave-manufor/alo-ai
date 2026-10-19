@@ -14,6 +14,10 @@
 
 ## 0. What changed
 
+**Changes during the v1.8.0 sprint** (contract and rule changes agreed between workstreams; newest first):
+
+- **2026-10-19, passage and `session.done` (10.1, 14.2; issue #8):** a LISTEN passage may have 1 item, a READ passage must name `paired_listening_passage_id` (passage `schema_version` 2). `session.done` (`schema_version` 2) adds `passage_id`, `reading_stopped_early`, `listening_passage_id`, and an `index` and `part` on every turn so the Grader can match each recording to its item. `SHORT_READING` is raised only by scoring (6.1), not by the Session Agent.
+
 **v1.8.0 (this version): the 6-day hackathon build.** The deadline is now 6 days. Everything that must run live on stage stays; plumbing that only matters at scale is postponed. Section 14 has the scope, team, plan and budget.
 
 - **Infrastructure (3, 14.5, 15):** one Google Cloud project (`aloai-dev`, which also hosts the demo), **four Cloud Run services** (Session Agent; Account and Payments; Reading Scorer; Core, which holds the Passage Generator, Grader and Reading Coach) plus one Cloud Run job for book ingestion. Pub/Sub stays. Firestore and three buckets (audio, clips, books). Flat Terraform with one environment. Postponed: the prod project, Terraform modules and drift checks, BigQuery (the audit log moves to Firestore), field-level KMS encryption, and monitoring alerts (budget alerts stay).
@@ -1020,7 +1024,7 @@ RankScore(B) = 0.50 * Fit + 0.30 * Sim + 0.20 * Culture          (range 0-1)    
     },
     "items": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "maxItems": 3,
       "items": {
         "type": "object",
@@ -1059,9 +1063,13 @@ RankScore(B) = 0.50 * Fit + 0.30 * Sim + 0.20 * Culture          (range 0-1)    
     "paired_listening_passage_id": { "type": "string" },
     "licence": { "type": "string" }
   },
-  "required": ["passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "tokens", "propositions", "items"]
+  "required": ["passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "tokens", "propositions", "items"],
+  "if": { "properties": { "mode": { "const": "READ" } } },
+  "then": { "properties": { "items": { "minItems": 2 } }, "required": ["paired_listening_passage_id"] }
 }
 ```
+
+A READ passage has 2–3 items and always names its paired listening passage, which is the one the listening module plays. A LISTEN passage has 1–3 items (the demo listening module asks 1, 4.1). The full schema, with `schema_version`, is `schemas/passage.schema.json`.
 
 Passage length and difficulty limits for both bank and generated passages are in the blueprint table in section 4.5 (and the demo profile in 4.1). Reading is capped at 90 s. `word_clip_gcs_uri` points into the shared clip store (4.5 G5).
 

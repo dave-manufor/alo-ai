@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "passage_id": "bank_p3_market_day",
   "title": "Market Day",
   "mode": "READ",
@@ -72,5 +72,6 @@
       ]
     }
   ],
+  "paired_listening_passage_id": "bank_l3_rain",
   "licence": "CC0-1.0 (written for Alo.ai fixtures)"
 }

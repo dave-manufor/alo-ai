@@ -32,7 +32,6 @@ VOICE_MODES = ("cache_first", "live_first")
 TOLD_WORD_MS = 3_000  # silence on the same word before "That word is X."
 KINDNESS_WINDOW_MS = 30_000  # first 30 s of reading
 KINDNESS_MIN_WORDS = 10  # fewer than this in the window ends the reading kindly
-SHORT_READING_MS = 60_000  # reading shorter than this carries SHORT_READING
 TRANSITION_MS = 2_000
 RETELL_CAP_MS = 45_000
 LISTENING_RETELL_CAP_MS = 30_000

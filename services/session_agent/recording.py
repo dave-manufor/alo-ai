@@ -17,8 +17,13 @@ from .machine.types import TurnPhase
 
 @dataclass(frozen=True)
 class Turn:
+    """index: the scripted item answered (0 otherwise). part: the recordings of the same
+    phase and index before this one (a repeat, "Anything else?" or a reconnect)."""
+
     turn_id: str
     phase: TurnPhase
+    index: int
+    part: int
     audio_uri: str
 
 
@@ -40,16 +45,29 @@ class AudioLog:
     def turns(self) -> tuple[Turn, ...]:
         return tuple(self._turns)
 
-    def new_turn(self, phase: TurnPhase) -> Turn:
+    def new_turn(self, phase: TurnPhase, index: int = 0) -> Turn:
         name = f"{self._session_uuid}/{phase}/{self._new_uuid()}.flac"
-        turn = Turn(f"turn_{len(self._turns) + 1:03d}", phase, f"gs://{self._bucket_name}/{name}")
+        part = sum(1 for t in self._turns if (t.phase, t.index) == (phase, index))
+        turn = Turn(
+            f"turn_{len(self._turns) + 1:03d}",
+            phase,
+            index,
+            part,
+            f"gs://{self._bucket_name}/{name}",
+        )
         self._turns.append(turn)
         return turn
 
     def turn_audio_uris(self) -> list[dict]:
         """The turn_audio_uris of the session.done event."""
         return [
-            {"turn_id": t.turn_id, "phase": t.phase, "audio_uri": t.audio_uri}
+            {
+                "turn_id": t.turn_id,
+                "phase": t.phase,
+                "index": t.index,
+                "part": t.part,
+                "audio_uri": t.audio_uri,
+            }
             for t in self._turns
         ]
 

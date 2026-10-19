@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "passage.schema.json",
   "title": "PassageArtifact",
-  "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
+  "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). A READ passage has 2 to 3 items and names its paired listening passage; a LISTEN passage has 1 to 3 (the demo listening module asks 1). Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
   "type": "object",
   "properties": {
-    "schema_version": { "type": "integer", "const": 1 },
+    "schema_version": { "type": "integer", "const": 2 },
     "passage_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string" },
     "mode": { "type": "string", "enum": ["READ", "LISTEN"] },
@@ -70,7 +70,7 @@
     },
     "items": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "maxItems": 3,
       "items": {
         "type": "object",
@@ -113,5 +113,10 @@
     "licence": { "type": "string" }
   },
   "required": ["schema_version", "passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "tokens", "propositions", "items"],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "if": { "properties": { "mode": { "const": "READ" } } },
+  "then": {
+    "properties": { "items": { "minItems": 2 } },
+    "required": ["paired_listening_passage_id"]
+  }
 }

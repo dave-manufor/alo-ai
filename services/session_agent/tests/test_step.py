@@ -63,8 +63,8 @@ def T(state, kind):
     return Timer(f"{kind}:{state.task_seq}")
 
 
-def begin(profile="standard", voice="cache_first", passage=None, live=True):
-    return run(initial_state(profile, voice), Start(passage, live))
+def begin(profile="standard", voice="cache_first", passage=None, live=True, listening=None):
+    return run(initial_state(profile, voice), Start(passage, live, listening))
 
 
 def kinds(actions):
@@ -159,9 +159,10 @@ def test_live_first_without_live_uses_clips():
 
 
 def test_returning_child_skips_interest_chat():
-    state, actions = begin(passage="p9")
+    state, actions = begin(passage="p9", listening="l9")
     assert state.phase is Phase.MIC_CHECK
     assert state.passage_ready and state.passage_id == "p9"
+    assert state.listening_passage_id == "l9"
     assert actions == [PlayClip("mic_check_prompt"), StartRecording("MIC_CHECK")]
 
 
@@ -255,15 +256,16 @@ def test_mic_ok_without_passage_waits_with_the_cover_clip():
 
 
 def test_generated_passage_arriving_during_the_wait_starts_reading():
-    state, actions = step(at_mic_waiting(), PassageReady("gen1"))
+    state, actions = step(at_mic_waiting(), PassageReady("gen1", "listen1"))
     assert state.phase is Phase.READING and state.passage_id == "gen1"
+    assert state.listening_passage_id == "listen1"
     assert "FALLBACK_PASSAGE" not in state.flags
     assert ShowPassage("gen1") in actions
 
 
 def test_fallback_passage_sets_flag():
-    state, actions = step(at_mic_waiting(), PassageFallback("bank1"))
-    assert state.phase is Phase.READING
+    state, actions = step(at_mic_waiting(), PassageFallback("bank1", "bank_listen1"))
+    assert state.phase is Phase.READING and state.listening_passage_id == "bank_listen1"
     assert "FALLBACK_PASSAGE" in state.flags
     assert SetFlag("FALLBACK_PASSAGE") in actions
 
@@ -367,7 +369,7 @@ def test_fewer_than_ten_words_in_30_seconds_ends_kindly_and_skips_to_listening()
     told = run(at_reading(), Silence(3000, 1))[0]
     state, actions = step(told, ReadingProgress(30_000, 9))
     assert state.phase is Phase.LISTENING and state.sub == "story"
-    assert state.next_passage_lower and state.listening_run
+    assert state.reading_stopped_early and state.listening_run
     recorded = next(a for a in actions if isinstance(a, EmitEvent))
     assert recorded.type == "phase1.recorded"
     assert recorded.data == {"passage_id": "p1", "told_token_indices": [1]}
@@ -375,17 +377,14 @@ def test_fewer_than_ten_words_in_30_seconds_ends_kindly_and_skips_to_listening()
     assert PlayClip("kind_end") in actions and PlayClip("listening_story") in actions
 
 
-def test_finishing_the_passage_quickly_flags_short_reading():
-    state, actions = step(at_reading(), ReadingDone(45_000))
-    assert state.phase is Phase.TRANSITION and "SHORT_READING" in state.flags
-    assert SetFlag("SHORT_READING") in actions
+@pytest.mark.parametrize("elapsed_ms", [45_000, 80_000])
+def test_finishing_the_passage_goes_to_the_transition_without_a_flag(elapsed_ms):
+    # SHORT_READING is the Scorer's flag (PRD 6.1), however quickly the child read.
+    state, actions = step(at_reading(), ReadingDone(elapsed_ms))
+    assert state.phase is Phase.TRANSITION and state.flags == ()
+    assert not any(isinstance(a, SetFlag) for a in actions)
     assert any(isinstance(a, EmitEvent) and a.type == "phase1.recorded" for a in actions)
     assert has_timer(actions, "transition")
-
-
-def test_finishing_in_time_has_no_short_flag():
-    state, _ = step(at_reading(), ReadingDone(80_000))
-    assert state.phase is Phase.TRANSITION and state.flags == ()
 
 
 def test_reading_cap_ends_the_reading():
@@ -502,9 +501,11 @@ def test_one_repeat_per_prompt():
     assert actions == [StopRecording(), PlayClip("question:0"), StartRecording("QUESTION")]
     state, actions = step(state, RepeatRequest())
     assert isinstance(actions[0], Log)
-    state, _ = step(state, ANSWERED)
+    state, actions = step(state, ANSWERED)
+    assert StartRecording("QUESTION", 1) in actions  # each answer says which item it is
     _, actions = step(state, RepeatRequest())  # a new prompt allows a new repeat
     assert PlayClip("question:1") in actions
+    assert StartRecording("QUESTION", 1) in actions
 
 
 def test_question_phase_ignores_reading_events():
@@ -602,9 +603,14 @@ def test_listening_items_allow_one_repeat_and_silence_moves_on():
     assert state.index == 1
 
 
-def test_kindly_ended_reading_lowers_the_next_passage():
-    state, _ = step(at_reading(), ReadingProgress(30_000, 2))
-    assert state.next_passage_lower
+def test_a_kindly_ended_reading_is_reported_as_stopped_early():
+    state = run(at_reading(listening="l1"), ReadingProgress(30_000, 2))[0]
+    answers = [ANSWERED] * (1 + state.profile.n_listening_items)  # retell, then the items
+    state = run(state, T(state, "listening_story"), *answers)[0]
+    _, actions = step(state, T(state, "close"))
+    done = actions[0].data
+    assert done["reading_stopped_early"] is True and done["listening_module_run"] is True
+    assert done["listening_passage_id"] == "l1"
 
 
 # ---- 4 close and the end of the session
@@ -616,8 +622,11 @@ def test_close_ends_the_session_and_publishes_session_done():
     assert state.phase is Phase.ENDED and state.status == "COMPLETE"
     done = actions[0]
     assert done.type == "session.done"
+    # No listening module, so no listening passage is named.
     assert done.data == {
+        "passage_id": "p1",
         "flags": [],
+        "reading_stopped_early": False,
         "listening_module_run": False,
         "session_settings": {"voice_mode": "cache_first", "session_profile": "standard"},
     }
@@ -625,10 +634,20 @@ def test_close_ends_the_session_and_publishes_session_done():
 
 
 def test_session_done_reports_listening_and_flags():
-    state = run(at_listening_ask(profile="demo"), ANSWERED)[0]
+    state = run(at_listening_ask(profile="demo", listening="l1"), ANSWERED)[0]
     _, actions = step(state, T(state, "close"))
     assert actions[0].data["listening_module_run"] is True
+    assert actions[0].data["listening_passage_id"] == "l1"
+    assert actions[0].data["reading_stopped_early"] is False
     assert actions[0].data["flags"] == ["DEMO_PROFILE"]
+
+
+def test_a_listening_module_without_a_listening_passage_is_logged():
+    # The passage schema makes the pairing required, so this means a bug upstream.
+    state = run(at_listening_ask(profile="demo"), ANSWERED)[0]
+    _, actions = step(state, T(state, "close"))
+    assert isinstance(actions[0], Log) and "without a listening passage" in actions[0].reason
+    assert actions[1].type == "session.done"
 
 
 def test_close_ignores_other_events():

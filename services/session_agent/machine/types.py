@@ -61,10 +61,11 @@ class SessionState:
     mic_retries: int = 0
     mic_done: bool = False
     passage_id: str | None = None
+    listening_passage_id: str | None = None
     passage_ready: bool = False
     told: tuple[int, ...] = ()
     kindness_checked: bool = False
-    next_passage_lower: bool = False
+    reading_stopped_early: bool = False
     flags: tuple[str, ...] = ()
     live_active: bool = True
     live_slow_turns: int = 0
@@ -83,6 +84,7 @@ class Start:
 
     passage_id: str | None = None
     live_available: bool = True
+    listening_passage_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -125,7 +127,10 @@ class MicResult:
 
 @dataclass(frozen=True)
 class PassageReady:
+    """listening_passage_id is the passage's paired_listening_passage_id."""
+
     passage_id: str
+    listening_passage_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -133,6 +138,7 @@ class PassageFallback:
     """A bank passage is used (the generator fell back, or the 20 s wait ran out)."""
 
     passage_id: str
+    listening_passage_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -230,7 +236,10 @@ class SpeakLive:
 
 @dataclass(frozen=True)
 class StartRecording:
+    """index: the scripted item being answered (0 for every other turn)."""
+
     turn_phase: TurnPhase
+    index: int = 0
 
 
 @dataclass(frozen=True)
