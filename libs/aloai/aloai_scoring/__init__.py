@@ -7,6 +7,7 @@ points (PRD 7); everything else is computed here. Every constant, with the versi
 reports store, is in constants.py.
 """
 
+from .books import BookCandidate, book_fit, candidate_levels, rank_books, rank_score
 from .comprehension import (
     CombinedItems,
     CombinedRetell,
@@ -25,7 +26,7 @@ from .comprehension import (
     run_listening_module,
     weighted_credit,
 )
-from .constants import PAUSE_MS, SCORING_MODULE, Band, ProfileCode
+from .constants import BOOK_CANDIDATES, PAUSE_MS, SCORING_MODULE, Band, ProfileCode
 from .fluency import Fluency, fluency, word_reading_ok
 from .levels import (
     ReportedLevel,
@@ -41,9 +42,11 @@ from .profile import Profile, assign_profile
 from .prosody import Prosody, prosody, sentence_eligible
 
 __all__ = [
+    "BOOK_CANDIDATES",
     "PAUSE_MS",
     "SCORING_MODULE",
     "Band",
+    "BookCandidate",
     "CombinedItems",
     "CombinedRetell",
     "Comprehension",
@@ -56,6 +59,8 @@ __all__ = [
     "approx_primary_class",
     "assign_profile",
     "book_band",
+    "book_fit",
+    "candidate_levels",
     "combine_item_passes",
     "combine_retell_passes",
     "comprehension",
@@ -69,6 +74,8 @@ __all__ = [
     "next_passage_level",
     "performance_band",
     "prosody",
+    "rank_books",
+    "rank_score",
     "reported_level",
     "retell_coverage",
     "retell_needs_third_pass",

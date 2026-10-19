@@ -68,6 +68,12 @@ BOOK_BAND_OFFSETS = {  # PRD 8, as (low, high) around the reported ARL
     "NEEDS_SUPPORT_IN_BOTH": (-2, -1),
     "COMPREHENSION_STRATEGY_GAP": (0, 0),
 }
+BOOK_CANDIDATES = 15  # PRD 9.3: the nearest books vector search returns
+BOOK_CANDIDATE_MARGIN = 1  # PRD 9.3: candidates may sit this many levels outside the band
+BOOKS_RECOMMENDED = 3  # PRD 9.3
+RANK_FIT_WEIGHT = 0.50  # [CAL] PRD 9.3
+RANK_SIM_WEIGHT = 0.30  # [CAL] PRD 9.3
+RANK_CULTURE_WEIGHT = 0.20  # [CAL] PRD 9.3
 
 PAUSE_MS = 180  # [CAL] PRD 5.5: a silent interval this long counts as a pause
 PHRASING_FULL_INTRUSION = 0.25  # [CAL] PRD 5.5: phrasing reaches 0 at this intrusion rate
