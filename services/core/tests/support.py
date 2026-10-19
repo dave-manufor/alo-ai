@@ -11,8 +11,15 @@ from pathlib import Path
 
 from aloai_events import MemoryPublisher, envelope
 from aloai_store import MemoryStore
+from fastapi import APIRouter
+from services.core.api import events_router
+from services.core.coach.agent import RecordedModel as RecordedCoach
+from services.core.coach.clients import Outbox, SilentSpeaker, StoryRequests
+from services.core.coach.run import ReadingCoach
 from services.core.grader import paths
+from services.core.grader.asr import FixtureTranscriber
 from services.core.grader.assembly import ReportAssembler
+from services.core.grader.final import FinalGrader
 from services.core.grader.models import FixtureGradingModel, GradingTask
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -111,6 +118,24 @@ def assembler(store: MemoryStore, publisher: MemoryPublisher) -> ReportAssembler
         clock=lambda: NOW,
         new_event_id=lambda: "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1005",
     )
+
+
+def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
+    """Core's push route on the recorded responses, wired as AI_MODE=fixtures wires it."""
+    model, reports = FixtureGradingModel(RECORDED / "grader"), assembler(store, publisher)
+    coach = ReadingCoach(
+        store=store,
+        publisher=publisher,
+        stories=StoryRequests(store),
+        notifier=Outbox(store),
+        speaker=SilentSpeaker(),
+        model_for=lambda session_id: RecordedCoach.from_file(
+            RECORDED / "coach" / f"{session_id}.json"
+        ),
+        clock=lambda: NOW,
+    )
+    grader = FinalGrader(store, model, FixtureTranscriber(RECORDED / "asr"), reports)
+    return events_router(grader, reports, coach)
 
 
 def grader_output(

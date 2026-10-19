@@ -8,16 +8,14 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from services.core.grader import paths
 from services.core.grader.api import router
-from services.core.grader.asr import FixtureTranscriber
-from services.core.grader.final import FinalGrader
 from services.core.grader.models import FixtureGradingModel
 from services.core.grader.quick import QuickGrader
 from services.core.tests.support import (
     RECORDED,
     SESSION_ID,
     add_telemetry,
-    assembler,
     event,
+    events,
     pushed,
     quick_request,
     seeded_store,
@@ -28,15 +26,9 @@ from services.core.tests.support import (
 def replay(telemetry_first: bool) -> tuple[dict, MemoryPublisher, list[dict]]:
     store, publisher = seeded_store(), MemoryPublisher()
     model = FixtureGradingModel(RECORDED / "grader")
-    reports = assembler(store, publisher)
     app = FastAPI()
-    app.include_router(
-        router(
-            QuickGrader(store, model),
-            FinalGrader(store, model, FixtureTranscriber(RECORDED / "asr"), reports),
-            reports,
-        )
-    )
+    app.include_router(router(QuickGrader(store, model)))
+    app.include_router(events(store, publisher))
     http = TestClient(app)
     turns = [
         ("RETELL", 0, "ada and her mama went to the market and she saw a red hat"),
