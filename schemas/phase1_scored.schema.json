@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phase1_scored.schema.json",
+  "title": "Phase1ScoredData",
+  "description": "data of the phase1.scored event (SDD 11). Producer: Reading Scorer (W3). Consumer: Core report assembly (W3). telemetry_ref is the Firestore path of the Phase 1 telemetry.",
+  "type": "object",
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "telemetry_ref": { "type": "string", "pattern": "^sessions/[^/]+/phase1$" }
+  },
+  "required": ["session_id", "telemetry_ref"],
+  "additionalProperties": false
+}

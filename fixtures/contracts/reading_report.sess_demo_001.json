@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "session_id": "sess_demo_001",
+  "child_id": "child_demo_001",
+  "guardian_id": "guardian_demo_001",
+  "timestamp_iso": "2026-01-15T09:09:05Z",
+  "context": "SCHOOL",
+  "capture_mode": "LIVE",
+  "session_settings": { "voice_mode": "cache_first", "session_profile": "demo" },
+  "primary_class": 2,
+  "passage": {
+    "passage_id": "bank_p3_market_day",
+    "source": "BANK",
+    "title": "Market Day",
+    "topic_tags": ["food"]
+  },
+  "fluency": {
+    "accuracy_pct": 90.9,
+    "wcpm": 61.2,
+    "words_attempted": 23,
+    "reading_seconds": 19.6,
+    "self_correction_ratio": 0.5,
+    "word_reading_ok": false
+  },
+  "prosody": { "reported": true, "phrasing": 60.0, "expression": null, "overall": 60.0 },
+  "comprehension": {
+    "reading_comprehension": 70.0,
+    "retell_coverage": 1.0,
+    "item_score": 0.5,
+    "quick_reading_comprehension": 70.0,
+    "listening_module_run": true,
+    "listening_comprehension": 75.0,
+    "listening_used": true,
+    "quick_vs_final_item_agreement": 1.0
+  },
+  "level": {
+    "passage_arl": 3,
+    "band": "SUPPORTED",
+    "reported_arl": 2,
+    "at_least": false,
+    "confirmed": false,
+    "next_passage_arl": 2,
+    "approx_primary_class": "Primary 1 (approximate, not normed)"
+  },
+  "profile": {
+    "code": "UNDERSTANDS_BUILDING_WORD_READING",
+    "provisional": true,
+    "primary_need": "Word reading",
+    "instructional_focus": "Practise the sounds in the words that were hard today; keep story questions at class level."
+  },
+  "recommendations": {
+    "arl_min": 1,
+    "arl_max": 2,
+    "book_ids": ["book_demo_001", "book_demo_002", "book_demo_003"]
+  },
+  "flags": ["DEMO_PROFILE", "SHORT_READING"],
+  "parent_reporting": null,
+  "versions": {
+    "scoring_module": "1.0.0",
+    "quick_model": "gemini-2.5-flash",
+    "grader_model": "gemini-2.5-pro",
+    "grader_prompt": "grader_v1"
+  }
+}

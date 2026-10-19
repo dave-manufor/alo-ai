@@ -1,0 +1,28 @@
+{
+  "passage_id": "bank_p3_market_day",
+  "propositions": [
+    { "id": "p1", "credit": 1, "evidence": "ada and her mama went to the market" },
+    { "id": "p2", "credit": 1, "evidence": "she saw a red hat" },
+    { "id": "p3", "credit": 1, "evidence": "it was too much money" },
+    { "id": "p4", "credit": 0.5, "evidence": "she took the blue one" }
+  ],
+  "items": [
+    {
+      "item_id": "bank_p3_market_day_q1",
+      "points": 2,
+      "evidence": "it was red",
+      "rationale": "Says the first hat was red.",
+      "needs_review": false
+    },
+    {
+      "item_id": "bank_p3_market_day_q2",
+      "points": 0,
+      "evidence": null,
+      "rationale": "No answer was given.",
+      "needs_review": false
+    }
+  ],
+  "inaccuracies": [],
+  "miscue_tags": [{ "token_index": 19, "tag": "MEANING_DISRUPTING" }],
+  "needs_review": false
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "report_ready.schema.json",
+  "title": "ReportReadyData",
+  "description": "data of the report.ready event (SDD 11). Producer: Core Grader (W3). Consumer: Reading Coach (W3). report_ref is the Firestore path of the ReadingReport.",
+  "type": "object",
+  "properties": {
+    "session_id": { "type": "string", "minLength": 1 },
+    "report_ref": { "type": "string", "pattern": "^reports/[^/]+$" },
+    "profile": {
+      "type": "string",
+      "enum": ["ON_TRACK", "UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED", "FLUENT_NEEDS_LANGUAGE_SUPPORT", "NEEDS_SUPPORT_IN_BOTH", "COMPREHENSION_STRATEGY_GAP", "INSUFFICIENT_EVIDENCE"]
+    },
+    "provisional": { "type": "boolean" }
+  },
+  "required": ["session_id", "report_ref", "profile", "provisional"],
+  "additionalProperties": false
+}

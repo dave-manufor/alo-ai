@@ -93,6 +93,12 @@ def test_every_schema_has_a_fixture():
         "passage.schema.json",
         "grade_quick_request.schema.json",
         "grade_quick_response.schema.json",
+        "phase1_telemetry.schema.json",
+        "grader_output.schema.json",
+        "reading_report.schema.json",
+        "phase1_scored.schema.json",
+        "report_ready.schema.json",
+        "plan_ready.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
