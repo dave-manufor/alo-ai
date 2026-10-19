@@ -63,6 +63,18 @@ NEXT_OFFSET = {"INDEPENDENT": 1, "INSTRUCTIONAL": 0, "SUPPORTED": -1, "FRUSTRATI
 
 TERM_1_MONTHS = range(9, 13)  # [CAL] PRD 6.7 default calendar: term 1 is September to December
 
+RETELL_PASS_TOLERANCE = 1.0  # PRD 7.2
+RETELL_SPREAD_LIMIT = 2.0  # PRD 7.2
+
+BOOK_BAND_OFFSETS = {  # PRD 8, as (low, high) around the reported ARL
+    "ON_TRACK": (0, 1),
+    "UNDERSTANDS_BUILDING_WORD_READING": (-1, 0),
+    "DECODING_LIMITED": (-2, -1),
+    "FLUENT_NEEDS_LANGUAGE_SUPPORT": (-1, 0),
+    "NEEDS_SUPPORT_IN_BOTH": (-2, -1),
+    "COMPREHENSION_STRATEGY_GAP": (0, 0),
+}
+
 BLOCKING_FLAGS = frozenset({"LOW_AUDIO", "OFF_TASK"})
 INFORMATIONAL_FLAGS = frozenset(
     {
@@ -184,6 +196,31 @@ def comprehension_score(coverage: float, items: float) -> float:
     if not (0 <= coverage <= 1 and 0 <= items <= 1):
         raise ValueError("coverage and item score must be between 0 and 1")
     return round(100 * (RETELL_WEIGHT * coverage + ITEM_WEIGHT * items), 1)
+
+
+@dataclass(frozen=True)
+class Comprehension:
+    score: float
+    retell_coverage: float
+    item_score: float
+
+
+def comprehension(credit: float, total_weight: int, points: Sequence[int]) -> Comprehension:
+    """The score with the coverage and item score it came from, as the report shows them."""
+    coverage = retell_coverage(credit, total_weight)
+    items = item_score(points)
+    return Comprehension(
+        score=comprehension_score(coverage, items),
+        retell_coverage=round(coverage, 2),
+        item_score=round(items, 2),
+    )
+
+
+def item_agreement(quick: Sequence[int], final: Sequence[int]) -> float:
+    """Share of items where the quick and final points match (PRD 7.4 monitoring)."""
+    if not quick or len(quick) != len(final):
+        raise ValueError("quick and final points must cover the same items")
+    return round(sum(q == f for q, f in zip(quick, final)) / len(quick), 2)
 
 
 # ---- 6.5 listening module
@@ -308,7 +345,7 @@ def next_passage_level(passage_arl: int, band: Band | None) -> int:
     _check_arl(passage_arl)
     if band is None:
         return passage_arl
-    return min(ARL_MAX, max(ARL_MIN, passage_arl + NEXT_OFFSET[band]))
+    return _clamp_arl(passage_arl + NEXT_OFFSET[band])
 
 
 def level_confirmed(previous_arl: int | None, reported_arl: int) -> bool:
@@ -330,6 +367,78 @@ def start_arl(primary_class: int, on: date, previous_next_arl: int | None = None
         _check_arl(previous_next_arl)
         return previous_next_arl
     return 2 * primary_class - (1 if on.month in TERM_1_MONTHS else 0)
+
+
+# ---- 7.2 combining grading passes
+
+
+@dataclass(frozen=True)
+class CombinedRetell:
+    credit: float
+    disagreement: bool
+
+
+@dataclass(frozen=True)
+class CombinedItems:
+    points: tuple[int, ...]
+    disagreement: bool
+
+
+def retell_needs_third_pass(a: float, b: float) -> bool:
+    return abs(a - b) > RETELL_PASS_TOLERANCE
+
+
+def combine_retell_passes(a: float, b: float, c: float | None = None) -> CombinedRetell:
+    """Weighted retell credit: the mean of two passes within 1.0 of each other, otherwise
+    the median of three, a disagreement when the three still spread more than 2.0."""
+    if not retell_needs_third_pass(a, b):
+        return CombinedRetell(credit=(a + b) / 2, disagreement=False)
+    if c is None:
+        raise ValueError("the retell passes differ by more than 1.0; a third pass is needed")
+    low, middle, high = sorted((a, b, c))
+    return CombinedRetell(credit=middle, disagreement=high - low > RETELL_SPREAD_LIMIT)
+
+
+def items_need_third_pass(a: Sequence[int], b: Sequence[int]) -> bool:
+    _check_same_items(a, b)
+    return list(a) != list(b)
+
+
+def combine_item_passes(
+    a: Sequence[int], b: Sequence[int], c: Sequence[int] | None = None
+) -> CombinedItems:
+    """Item points: where the passes differ, the majority of three. An item on which all
+    three differ is a disagreement and takes the middle value."""
+    if not items_need_third_pass(a, b):
+        return CombinedItems(points=tuple(a), disagreement=False)
+    if c is None:
+        raise ValueError("the item passes differ; a third pass is needed")
+    _check_same_items(a, c)
+    points = [sorted(trio)[1] for trio in zip(a, b, c)]
+    disagreement = any(len(set(trio)) == 3 for trio in zip(a, b, c))
+    return CombinedItems(points=tuple(points), disagreement=disagreement)
+
+
+def _check_same_items(a: Sequence[int], b: Sequence[int]) -> None:
+    if len(a) != len(b):
+        raise ValueError("grading passes must score the same items")
+
+
+# ---- 8 book band
+
+
+def book_band(profile: ProfileCode, reported_arl: int | None) -> tuple[int, int] | None:
+    """The ARL range books are recommended from, around L = reported_arl. None for
+    INSUFFICIENT_EVIDENCE or without a reported level."""
+    if profile not in BOOK_BAND_OFFSETS or reported_arl is None:
+        return None
+    _check_arl(reported_arl)
+    low, high = BOOK_BAND_OFFSETS[profile]
+    return _clamp_arl(reported_arl + low), _clamp_arl(reported_arl + high)
+
+
+def _clamp_arl(arl: int) -> int:
+    return min(ARL_MAX, max(ARL_MIN, arl))
 
 
 def _check_arl(arl: int) -> None:
