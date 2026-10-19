@@ -16,6 +16,7 @@
 
 **Changes during the v1.8.0 sprint** (contract and rule changes agreed between workstreams; newest first):
 
+- **2026-10-19, session rules (4.1–4.3, 6.5; issue #8):** "That word is X." now plays after **5.0 s without progress** on one word (was 3.0 s of silence), so a child sounding a word out has longer before being told; it is still a fixed wait, so words per minute stay comparable. The demo profile keeps the 90 s reading cap. Every question reaches the quick endpoint, an unanswered one with an empty transcript, and the quick endpoint returns the listening decision (`run_listening_module`), so the Session Agent holds no [CAL] value. The live kindness rule counts heard words minus told words (4.3).
 - **2026-10-19, passage and `session.done` (10.1, 14.2; issue #8):** a LISTEN passage may have 1 item, a READ passage must name `paired_listening_passage_id` (passage `schema_version` 2). `session.done` (`schema_version` 2) adds `passage_id`, `reading_stopped_early`, `listening_passage_id`, and an `index` and `part` on every turn so the Grader can match each recording to its item. `SHORT_READING` is raised only by scoring (6.1), not by the Session Agent.
 
 **v1.8.0 (this version): the 6-day hackathon build.** The deadline is now 6 days. Everything that must run live on stage stays; plumbing that only matters at scale is postponed. Section 14 has the scope, team, plan and budget.
@@ -251,7 +252,7 @@ The LLM grader tags meaning preservation using the sentence context. Tags are qu
    - Deterministic state machine (section 4) owns every prompt and item
    - End-of-speech detection: LiveKit's Silero VAD and turn-detector plugins
    - Phase 1: streaming position tracker (Chirp 3 streaming partials, fuzzy-matched
-     to the passage) -> "That word is X." clip after 3.0 s silence
+     to the passage) -> "That word is X." clip after 5.0 s without progress
    - Server settings from Terraform: VOICE_MODE (cache_first | live_first, 4.2),
      SESSION_PROFILE (standard | demo, 4.1)
    - Records child audio per phase/turn to Cloud Storage; publishes Pub/Sub events
@@ -371,7 +372,7 @@ Pass means: no invented number, record, book or diagnosis, and the correct refus
 |---|---|---|
 | 0a. Interest chat | ~15 s | "Before we read, tell me: what kind of stories do you like?" If the child says nothing useful: "Animals, football, space, food, or something else?" The answer becomes topic tags (4.5); passage generation starts now and runs during step 0b. Returning children skip this; their next passage was generated at the end of the last session. |
 | 0b. Setup and mic check | ~10 s | Guardian confirms the child (consent already on file). The child counts 1 to 5. RMS < −42 dBFS per 500 ms block, or clipping > 0.1% of samples, triggers "bring the phone a little closer" or "speak a little softer"; one retry. If the story isn't ready yet, a fixed clip ("Your story is almost ready!") covers the wait; the bank fallback starts at 20 s (4.5). |
-| 1. Oral reading | 60–90 s (demo: 45–60 s) | The generated passage (or a bank passage on fallback) is shown. Reading is capped at 90 s. After 3.0 s of silence on the same word, Auntie Kemi says "That word is [X]." (a pre-made clip from the shared store, 4.5 G5) and the word is logged TOLD. No timer shown, no other corrections. |
+| 1. Oral reading | 60–90 s (demo: 45–60 s) | The generated passage (or a bank passage on fallback) is shown. Reading is capped at 90 s. After 5.0 s with no progress on the same word (silence or sounding it out), Auntie Kemi says "That word is [X]." (a pre-made clip from the shared store, 4.5 G5) and the word is logged TOLD. No timer shown, no other corrections. |
 | Transition | 2 s | Text disappears. |
 | 2A. Retell | ≤ 45 s | "In your own words, tell me everything you remember from the story." One neutral follow-up: "Anything else?" Ends after 4 s of silence. |
 | 2B. Scripted items | ~60 s (demo: ~25 s) | 3 fixed questions in fixed order (2 literal, 1 inferential); the demo profile asks 2 (1 literal, 1 inferential). Up to 8 s to start and 20 s per answer. Child can ask for one repeat. |
@@ -411,7 +412,7 @@ The state machine in the Session Agent decides every prompt. Gemini Live runs al
 | Listening story | Clip | Clip |
 | Flag | none | `LIVE_FIRST` (informational) |
 
-**"That word is X." is always a clip.** A clip is already on the phone and starts at once, so the child waits exactly 3 s every time. Live would add a variable 1–1.5 s, and that wait sits inside reading time, so words per minute would change with Live's speed on the day. Live is also generative: it may add words, rephrase or mispronounce, and it can't take the curated name pronunciations, while the scorer assumes the child heard exactly the right word.
+**"That word is X." is always a clip.** A clip is already on the phone and starts at once, so the child waits exactly 5 s every time. Live would add a variable 1–1.5 s, and that wait sits inside reading time, so words per minute would change with Live's speed on the day. Live is also generative: it may add words, rephrase or mispronounce, and it can't take the curated name pronunciations, while the scorer assumes the child heard exactly the right word.
 
 Why clips for scripted lines in `cache_first`: names are pronounced from the curated IPA list (Gemini Live can't take pronunciation overrides) and every child hears identical questions. The mini-study runs in `cache_first`.
 
@@ -420,7 +421,7 @@ Why clips for scripted lines in `cache_first`: names are pronounced from the cur
 
 ### 4.3 Stop and kindness rules
 
-- Fewer than 10 words correct in the first 30 s: end the reading kindly, skip to the listening module, and set the next passage two levels lower.
+- Fewer than 10 words correct in the first 30 s: end the reading kindly, skip to the listening module, and set the next passage two levels lower. Live, the position tracker can't judge a word correct, so it counts the passage words it heard minus the words the child was told ("That word is X."). This approximates "correct"; the Scorer's numbers after the session are the real ones. The level rule lives in `aloai_scoring` (from `reading_stopped_early` on `session.done`).
 - Two silences over 8 s in one task: move on.
 - The child says "stop": end with praise and mark the session incomplete.
 - Children never see a score, timer or red mark.
