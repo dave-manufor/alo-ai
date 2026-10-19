@@ -1,0 +1,64 @@
+{
+  "schema_version": 2,
+  "passage_id": "bank_l3_rain",
+  "title": "The Rain",
+  "mode": "LISTEN",
+  "source": "BANK",
+  "topic_tags": ["animals"],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 23,
+  "text_content": "Rain fell on the farm. Tunde ran to bring the goats inside. The goats were wet but safe. Tunde gave them dry grass.",
+  "audio_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/listening/bank_l3_rain.mp3",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    { "token_index": 0, "sentence_index": 0, "text": "Rain", "clean_text": "rain", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rain.mp3" },
+    { "token_index": 1, "sentence_index": 0, "text": "fell", "clean_text": "fell", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/fell.mp3" },
+    { "token_index": 2, "sentence_index": 0, "text": "on", "clean_text": "on", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3" },
+    { "token_index": 3, "sentence_index": 0, "text": "the", "clean_text": "the", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3" },
+    { "token_index": 4, "sentence_index": 0, "text": "farm.", "clean_text": "farm", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/farm.mp3" },
+    { "token_index": 5, "sentence_index": 1, "text": "Tunde", "clean_text": "tunde", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": "ˈtundɛ", "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tunde~%CB%88tund%C9%9B.mp3" },
+    { "token_index": 6, "sentence_index": 1, "text": "ran", "clean_text": "ran", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ran.mp3" },
+    { "token_index": 7, "sentence_index": 1, "text": "to", "clean_text": "to", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3" },
+    { "token_index": 8, "sentence_index": 1, "text": "bring", "clean_text": "bring", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bring.mp3" },
+    { "token_index": 9, "sentence_index": 1, "text": "the", "clean_text": "the", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3" },
+    { "token_index": 10, "sentence_index": 1, "text": "goats", "clean_text": "goats", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goats.mp3" },
+    { "token_index": 11, "sentence_index": 1, "text": "inside.", "clean_text": "inside", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/inside.mp3" },
+    { "token_index": 12, "sentence_index": 2, "text": "The", "clean_text": "the", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3" },
+    { "token_index": 13, "sentence_index": 2, "text": "goats", "clean_text": "goats", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goats.mp3" },
+    { "token_index": 14, "sentence_index": 2, "text": "were", "clean_text": "were", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/were.mp3" },
+    { "token_index": 15, "sentence_index": 2, "text": "wet", "clean_text": "wet", "is_content_word": true, "syntactic_boundary_after": "CLAUSE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wet.mp3" },
+    { "token_index": 16, "sentence_index": 2, "text": "but", "clean_text": "but", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/but.mp3" },
+    { "token_index": 17, "sentence_index": 2, "text": "safe.", "clean_text": "safe", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/safe.mp3" },
+    { "token_index": 18, "sentence_index": 3, "text": "Tunde", "clean_text": "tunde", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": "ˈtundɛ", "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tunde~%CB%88tund%C9%9B.mp3" },
+    { "token_index": 19, "sentence_index": 3, "text": "gave", "clean_text": "gave", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gave.mp3" },
+    { "token_index": 20, "sentence_index": 3, "text": "them", "clean_text": "them", "is_content_word": false, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/them.mp3" },
+    { "token_index": 21, "sentence_index": 3, "text": "dry", "clean_text": "dry", "is_content_word": true, "syntactic_boundary_after": "NONE", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dry.mp3" },
+    { "token_index": 22, "sentence_index": 3, "text": "grass.", "clean_text": "grass", "is_content_word": true, "syntactic_boundary_after": "TERMINAL", "name_ipa": null, "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/grass.mp3" }
+  ],
+  "propositions": [
+    { "id": "p1", "sentence_index": 0, "category": "SETTING", "description": "It rained on the farm.", "weight": 1, "example_paraphrases": ["There was rain at the farm."] },
+    { "id": "p2", "sentence_index": 1, "category": "ACTION", "description": "Tunde brought the goats inside.", "weight": 2, "example_paraphrases": ["Tunde took the goats in."] },
+    { "id": "p3", "sentence_index": 2, "category": "DETAIL", "description": "The goats were wet but safe.", "weight": 1, "example_paraphrases": ["The goats got wet but they were okay."] },
+    { "id": "p4", "sentence_index": 3, "category": "RESOLUTION", "description": "Tunde gave the goats dry grass.", "weight": 2, "example_paraphrases": ["He fed them dry grass."] }
+  ],
+  "items": [
+    {
+      "item_id": "bank_l3_rain_q1",
+      "order": 1,
+      "type": "INFERENTIAL",
+      "target_sentence_index": 1,
+      "prompt_text": "Why do you think Tunde brought the goats inside?",
+      "prompt_audio_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/listening/bank_l3_rain_q1.mp3",
+      "max_points": 2,
+      "rubric": { "2": "Says it was raining or to keep the goats safe or dry.", "1": "Gives a reason that is not in the story, such as the goats were hungry.", "0": "No relevant answer." },
+      "exemplars": [
+        { "answer": "Because of the rain.", "points": 2 },
+        { "answer": "They wanted food.", "points": 1 },
+        { "answer": "I do not know.", "points": 0 }
+      ]
+    }
+  ],
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)"
+}

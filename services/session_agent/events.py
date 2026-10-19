@@ -13,7 +13,8 @@ from typing import Protocol
 from .machine.types import EmitEvent
 from .recording import AudioLog
 
-SCHEMA_VERSION = 1
+# The version of each event's data (schemas/event_envelope.schema.json).
+SCHEMA_VERSIONS = {"session.started": 1, "phase1.recorded": 1, "session.done": 2}
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,7 @@ def build_event(
     return {
         "event_id": event_id,
         "type": emit.type,
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": SCHEMA_VERSIONS[emit.type],
         "occurred_at": now.astimezone(UTC).isoformat().replace("+00:00", "Z"),
         "session_id": ctx.session_id,
         "data": _data(emit, ctx, audio),
@@ -79,11 +80,16 @@ def _data(emit: EmitEvent, ctx: SessionContext, audio: AudioLog) -> dict:
             "passage_id": d["passage_id"],
             "told_token_indices": d["told_token_indices"],
         }
-    return {
+    data = {
         "session_id": ctx.session_id,
+        "passage_id": d["passage_id"],
         "turn_audio_uris": audio.turn_audio_uris(),
         "capture_mode": ctx.capture_mode,
         "session_settings": d["session_settings"],
         "flags": d["flags"],
+        "reading_stopped_early": d["reading_stopped_early"],
         "listening_module_run": d["listening_module_run"],
     }
+    if "listening_passage_id" in d:
+        data["listening_passage_id"] = d["listening_passage_id"]
+    return data

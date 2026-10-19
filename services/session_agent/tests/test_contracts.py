@@ -104,12 +104,17 @@ def test_every_schema_has_a_fixture():
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
 
-def test_passage_fixture_validates():
-    _validator("passage.schema.json").validate(_fixture("passage.bank_p3_market_day.json"))
+PASSAGE_FIXTURES = ["passage.bank_p3_market_day.json", "passage.bank_l3_rain.json"]
 
 
-def test_passage_fixture_is_consistent():
-    passage = _fixture("passage.bank_p3_market_day.json")
+@pytest.mark.parametrize("name", PASSAGE_FIXTURES)
+def test_passage_fixture_validates(name):
+    _validator("passage.schema.json").validate(_fixture(name))
+
+
+@pytest.mark.parametrize("name", PASSAGE_FIXTURES)
+def test_passage_fixture_is_consistent(name):
+    passage = _fixture(name)
     tokens = passage["tokens"]
     assert [t["token_index"] for t in tokens] == list(range(len(tokens)))
     assert passage["word_count"] == len(tokens)
@@ -122,7 +127,73 @@ def test_passage_fixture_is_consistent():
         assert (token["syntactic_boundary_after"] == "TERMINAL") == ends
     assert all(p["sentence_index"] < len(sentences) for p in passage["propositions"])
     assert all(i["target_sentence_index"] < len(sentences) for i in passage["items"])
-    assert [i["order"] for i in passage["items"]] == [1, 2]
+    assert [i["order"] for i in passage["items"]] == list(range(1, len(passage["items"]) + 1))
+
+
+def test_fixtures_describe_one_session():
+    read = _fixture("passage.bank_p3_market_day.json")
+    listen = _fixture("passage.bank_l3_rain.json")
+    record = _fixture("session_record.session.json")
+    started = _fixture("event.session_started.json")["data"]
+    recorded = _fixture("event.phase1_recorded.json")["data"]
+    done = _fixture("event.session_done.json")["data"]
+    assert (
+        read["paired_listening_passage_id"] == listen["passage_id"] == done["listening_passage_id"]
+    )
+    assert listen["mode"] == "LISTEN"
+    assert read["passage_id"] == record["passage_id"] == recorded["passage_id"]
+    assert read["passage_id"] == started["passage_id"] == done["passage_id"]
+    assert all(0 <= i < len(read["tokens"]) for i in recorded["told_token_indices"])
+    assert read["length_profile"] == "DEMO"
+    assert record["session_profile"] == started["session_profile"] == "demo"
+    assert done["session_settings"]["session_profile"] == "demo"
+    assert read["voice_profile_id"] == record["voice_profile_id"] == started["voice_profile_id"]
+    questions = sorted(t["index"] for t in done["turn_audio_uris"] if t["phase"] == "QUESTION")
+    assert questions == list(range(len(read["items"])))
+    heard = [t["index"] for t in done["turn_audio_uris"] if t["phase"] == "LISTENING_QUESTION"]
+    assert heard == list(range(len(listen["items"])))
+
+
+@pytest.mark.parametrize(
+    ("name", "items", "valid"),
+    [
+        ("passage.bank_l3_rain.json", 1, True),
+        ("passage.bank_l3_rain.json", 0, False),
+        ("passage.bank_p3_market_day.json", 2, True),
+        ("passage.bank_p3_market_day.json", 1, False),
+    ],
+)
+def test_a_listening_passage_may_have_one_item_and_a_reading_passage_needs_two(name, items, valid):
+    passage = _fixture(name)
+    passage["items"] = passage["items"][:items]
+    assert _validator("passage.schema.json").is_valid(passage) is valid
+
+
+def test_a_reading_passage_names_its_listening_passage():
+    passage = _fixture("passage.bank_p3_market_day.json")
+    del passage["paired_listening_passage_id"]
+    assert not _validator("passage.schema.json").is_valid(passage)
+
+
+def test_session_done_names_the_listening_passage_only_when_it_ran():
+    validator = _validator("event_envelope.schema.json")
+    event = _fixture("event.session_done.json")
+    del event["data"]["listening_passage_id"]
+    assert not validator.is_valid(event)
+    event["data"]["listening_module_run"] = False
+    assert validator.is_valid(event)
+    event["data"]["listening_passage_id"] = "bank_l3_rain"
+    assert not validator.is_valid(event)
+
+
+@pytest.mark.parametrize("field", ["index", "part"])
+def test_every_turn_says_which_item_and_part_it_is(field):
+    event = _fixture("event.session_done.json")
+    del event["data"]["turn_audio_uris"][0][field]
+    assert not _validator("event_envelope.schema.json").is_valid(event)
+    turn = _fixture("session_record.turn.json")
+    del turn[field]
+    assert not _validator("session_record.schema.json").is_valid(turn)
 
 
 def test_passage_with_an_unknown_field_is_rejected():
@@ -143,10 +214,25 @@ def test_unknown_field_is_rejected():
     assert not _validator("event_envelope.schema.json").is_valid(event)
 
 
-def test_bad_schema_version_is_rejected():
-    event = _fixture("event.session_done.json")
-    event["schema_version"] = 2
+@pytest.mark.parametrize(
+    ("name", "version"),
+    [
+        ("event.session_done.json", 1),
+        ("event.session_done.json", 3),
+        ("event.phase1_recorded.json", 2),
+        ("event.session_started.json", 2),
+    ],
+)
+def test_bad_schema_version_is_rejected(name, version):
+    event = _fixture(name)
+    event["schema_version"] = version
     assert not _validator("event_envelope.schema.json").is_valid(event)
+
+
+def test_short_reading_is_not_a_session_agent_flag():
+    record = _fixture("session_record.session.json")
+    record["flags"] = ["SHORT_READING"]
+    assert not _validator("session_record.schema.json").is_valid(record)
 
 
 def test_non_uuid_event_id_is_rejected():

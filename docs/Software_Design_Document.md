@@ -174,7 +174,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 
 - **State machine as a pure function:** `step(state, event) -> (state, actions)`. The states are in the diagram below. Events include `turn_end(reason)`, `silence(ms)`, `passage_ready`, `passage_fallback`, `quick_score(result | timeout)`, `live_degraded`, `disconnected`, `reconnected`, `child_stop` and `timer`. Actions include `PlayClip`, `SpeakLive(text, fallback_clip)`, `StartRecording`, `StopRecording`, `ShowPassage`, `HidePassage`, `CallQuickScore`, `EmitEvent` and `SetLiveMode`. The session profile and voice mode are inputs to the machine, so both are unit-tested. A thin adapter executes the actions, so the whole protocol is tested without audio (PRD 13.5).
 
-- **Position tracker (reading phase):** Chirp 3 `StreamingRecognize` partials are fuzzy-matched to the passage tokens to follow where the child is. 3.0 s of silence on the same word emits `PlayClip(word_clip[word_key])` and logs the word `TOLD`. "That word is X." is always a clip, in both voice modes. Reading is capped at 90 s.
+- **Position tracker (reading phase):** Chirp 3 `StreamingRecognize` partials are fuzzy-matched to the passage tokens to follow where the child is. 5.0 s without progress on the same word (silence or sounding it out) emits `PlayClip(word_clip[word_key])` and logs the word `TOLD`. "That word is X." is always a clip, in both voice modes. Reading is capped at 90 s.
 
 - **Kindness and stop rules** are transitions, not prompts: fewer than 10 words correct in the first 30 s ends the reading and goes to the listening module; two silences over 8 s in one task move on; "stop" ends with praise and marks the session incomplete.
 
@@ -207,7 +207,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 ```mermaid
 flowchart LR
   A["Interest chat<br/>~15 s; becomes tags;<br/>skipped when returning"] --> B["Mic check<br/>~10 s; counts 1 to 5;<br/>one retry"]
-  B --> C["Reading<br/>Up to 90 s; told the word<br/>after 3 s silence"]
+  B --> C["Reading<br/>Up to 90 s; told the word<br/>after 5 s without progress"]
   C --> D["Retell<br/>Up to 45 s, own words;<br/>one 'Anything else?'"]
   D --> E["Questions<br/>3 in fixed order, demo 2;<br/>1 inference"]
   E -.->|"only if quick reading score below 78"| F["Listening module<br/>(conditional)"]
@@ -477,7 +477,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`session.started`|Session Agent|None in the hackathon (analytics later)|`session_id`, `child_ref`, `passage_id`, `context`, `voice_profile_id`, `voice_mode`, `session_profile`|
 |`phase1.recorded`|Session Agent|Reading Scorer|`session_id`, `audio_uri`, `passage_id`, `told_token_indices`|
 |`phase1.scored`|Reading Scorer|Core (report assembly)|`session_id`, `telemetry_ref`|
-|`session.done`|Session Agent|Core (Grader)|`session_id`, `turn_audio_uris`, `capture_mode`, `session_settings`, `flags`, `listening_module_run`|
+|`session.done`|Session Agent|Core (Grader)|`session_id`, `passage_id`, `turn_audio_uris` (each with `phase`, item `index` and `part`), `capture_mode`, `session_settings`, `flags`, `reading_stopped_early`, `listening_module_run`, `listening_passage_id` (when the listening module ran). Envelope `schema_version` 2|
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
 |`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
 
@@ -525,7 +525,7 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`consents/{consent_id}`|Verified consent record|guardian_id, child_id, text_version, attestation, sign_in_method, verified_email, timestamp, training_opt_in|Account and Payments|
 |`children/{child_id}`|Child profile|guardian_id, first_name, primary_class, birth_year, saved_tags, next_passage_arl, level_confirmed|Account and Payments, Core|
 |`sessions/{session_id}`|One session|child_id, status, context, capture_mode, voice_mode, session_profile, passage_id, passage_source, flags, voice_profile_id, created_at|Session Agent|
-|`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
+|`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, index, part, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
 |`sessions/{id}/phase1/telemetry`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
 |`sessions/{id}/quick/{turn_phase}_{index}`|Quick scores|points or credits, latency_ms|Core|
 |`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|

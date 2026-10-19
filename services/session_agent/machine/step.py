@@ -1,7 +1,7 @@
 """The Session Agent state machine: step(state, event) -> (state, actions).
 
-Pure. No I/O, no clock, no randomness, and no scores: it only branches on the
-numbers it is handed (words read, a quick RC from the Grader). The adapter turns
+Pure. No I/O, no clock, no randomness, and no scores: it only branches on what it
+is handed (words read, the Grader's listening decision). The adapter turns
 LiveKit, speech and timer callbacks into events and runs the actions.
 
 Timers are named "<kind>:<task_seq>". task_seq goes up every time a new task
@@ -127,10 +127,8 @@ def step(state: SessionState, event: Event) -> Result:
             return state, [StreamClipFromStore(clip_id)]
         case ClipAck():
             return state, []
-        case PassageReady(passage_id=passage_id):
-            return _passage(state, passage_id, fallback=False)
-        case PassageFallback(passage_id=passage_id):
-            return _passage(state, passage_id, fallback=True)
+        case PassageReady() | PassageFallback():
+            return _passage(state, event)
         case Timer(name="passage_wait"):
             return _passage_wait(state)
 
@@ -152,7 +150,12 @@ def _start(state: SessionState, event: Start) -> Result:
         state, more = _with_flag(state, "LIVE_FIRST")
         actions += more
     if event.passage_id is not None:
-        state = replace(state, passage_id=event.passage_id, passage_ready=True)
+        state = replace(
+            state,
+            passage_id=event.passage_id,
+            listening_passage_id=event.listening_passage_id,
+            passage_ready=True,
+        )
         state, more = _enter_mic_check(state)
         return state, actions + more
     state = replace(state, phase=Phase.INTEREST_CHAT)
@@ -181,12 +184,17 @@ def _end_incomplete(state: SessionState) -> Result:
 # ---- passage arrival
 
 
-def _passage(state: SessionState, passage_id: str, *, fallback: bool) -> Result:
+def _passage(state: SessionState, event: PassageReady | PassageFallback) -> Result:
     if state.passage_ready:
         return state, [Log("passage already chosen; late arrival ignored")]
-    state = replace(state, passage_id=passage_id, passage_ready=True)
+    state = replace(
+        state,
+        passage_id=event.passage_id,
+        listening_passage_id=event.listening_passage_id,
+        passage_ready=True,
+    )
     actions: list[Action] = []
-    if fallback:
+    if isinstance(event, PassageFallback):
         state, actions = _with_flag(state, "FALLBACK_PASSAGE")
     if state.phase is Phase.MIC_CHECK and state.mic_done and not state.disconnected:
         state, more = _enter_reading(state)
@@ -240,10 +248,8 @@ def _while_disconnected(state: SessionState, event: Event) -> Result:
             return _resume(state)
         case Timer(name="reconnect"):
             return _end_incomplete(state)
-        case PassageReady(passage_id=passage_id):
-            return _passage(state, passage_id, fallback=False)
-        case PassageFallback(passage_id=passage_id):
-            return _passage(state, passage_id, fallback=True)
+        case PassageReady() | PassageFallback():
+            return _passage(state, event)
         case Timer(name="passage_wait"):
             return _passage_wait(state)
     return state, [Log(f"{type(event).__name__} ignored while disconnected")]
@@ -381,12 +387,9 @@ def _reading(state: SessionState, event: Event) -> Result:
             if words_read < cfg.KINDNESS_MIN_WORDS:
                 return _finish_reading(state, kindly=True)
             return state, []
-        case ReadingDone(elapsed_ms=elapsed_ms):
-            actions: list[Action] = []
-            if elapsed_ms < cfg.SHORT_READING_MS:
-                state, actions = _with_flag(state, "SHORT_READING")
-            state, more = _finish_reading(state, kindly=False)
-            return state, actions + more
+        case ReadingDone():
+            # SHORT_READING is the Scorer's flag, from forced alignment (PRD 6.1).
+            return _finish_reading(state, kindly=False)
         case Timer() if _is_timer(event, "reading_cap", state):
             return _finish_reading(state, kindly=False)
     return _ignored(state, event)
@@ -402,8 +405,9 @@ def _finish_reading(state: SessionState, *, kindly: bool) -> Result:
         ),
     ]
     if kindly:
-        # Fewer than 10 words in 30 s: stop kindly, go to listening, next passage 2 levels lower.
-        state = replace(state, next_passage_lower=True)
+        # Fewer than 10 words in 30 s: stop kindly and go to listening. aloai_scoring sets
+        # the next passage level from reading_stopped_early (PRD 4.3, 6.6).
+        state = replace(state, reading_stopped_early=True)
         actions.append(_say(state, "kind_end"))
         state, more = _enter_listening(state)
         return state, actions + more
@@ -432,7 +436,7 @@ def _enter_retell(state: SessionState) -> Result:
 def _retell(state: SessionState, event: Event) -> Result:
     match event:
         case Timer() if _is_timer(event, "retell_cap", state):
-            return _finish_retell(state)
+            return _finish_retell(state, answered=True)
         case TurnEnd(reason="ANSWERED"):
             if state.sub == "main":
                 # One neutral follow-up, then done.
@@ -441,18 +445,19 @@ def _retell(state: SessionState, event: Event) -> Result:
                     _say(state, "anything_else"),
                     StartRecording("RETELL"),
                 ]
-            return _finish_retell(state)
+            return _finish_retell(state, answered=True)
         case TurnEnd(reason="SILENCE"):
             state = replace(state, silences=state.silences + 1)
             if state.sub == "main" and state.silences < cfg.MAX_SILENCES:
                 return state, [_say(state, "take_your_time")]
-            return _finish_retell(state)
+            # Silence after "Anything else?" still leaves the main retell answered.
+            return _finish_retell(state, answered=state.sub == "followup")
     return _ignored(state, event)
 
 
-def _finish_retell(state: SessionState) -> Result:
+def _finish_retell(state: SessionState, *, answered: bool) -> Result:
     state, actions = _ask_item(state, Phase.QUESTIONS, 0)
-    return state, [StopRecording(), CallQuickScore("RETELL", 0)] + actions
+    return state, [StopRecording(), CallQuickScore("RETELL", 0, answered)] + actions
 
 
 # ---- 2B. scripted items and 3. listening items (shared)
@@ -463,7 +468,7 @@ def _ask_item(state: SessionState, phase: Phase, index: int) -> Result:
     state = _next_task(state, phase=phase, sub="ask", index=index, repeat_used=False)
     return state, [
         _say(state, f"{prefix}:{index}"),
-        StartRecording(record),  # type: ignore[arg-type]
+        StartRecording(record, index),  # type: ignore[arg-type]
         _timer("answer_cap", state, cfg.ANSWER_CAP_MS),
     ]
 
@@ -487,7 +492,7 @@ def _item_event(state: SessionState, event: Event) -> Result:
             return state, [
                 StopRecording(),
                 _say(state, f"{prefix}:{state.index}"),
-                StartRecording(record),  # type: ignore[arg-type]
+                StartRecording(record, state.index),  # type: ignore[arg-type]
             ]
     return _ignored(state, event)
 
@@ -497,8 +502,9 @@ def _item_done(state: SessionState, *, answered: bool) -> Result:
     if not answered:
         actions.append(_say(state, "lets_go_next"))
     scored = state.phase is Phase.QUESTIONS
-    if answered and scored:
-        actions.append(CallQuickScore("QUESTION", state.index))
+    if scored:
+        # Every item is scored, answered or not, so the listening decision can complete.
+        actions.append(CallQuickScore("QUESTION", state.index, answered))
     count = state.profile.n_questions if scored else state.profile.n_listening_items
     if state.index + 1 < count:
         state, more = _ask_item(state, state.phase, state.index + 1)
@@ -509,7 +515,7 @@ def _item_done(state: SessionState, *, answered: bool) -> Result:
     return state, actions + more
 
 
-# ---- questions: waiting for the quick RC
+# ---- questions: waiting for the listening decision
 
 
 def _await_quick_score(state: SessionState) -> Result:
@@ -521,10 +527,10 @@ def _questions(state: SessionState, event: Event) -> Result:
     if state.sub == "ask":
         return _item_event(state, event)
     match event:
-        case QuickScore(quick_rc=quick_rc):
-            if quick_rc is not None and quick_rc >= cfg.LISTENING_RC_THRESHOLD:
-                return _enter_close(state)
-            return _enter_listening(state)
+        case QuickScore(run_listening_module=run_listening_module):
+            if run_listening_module:
+                return _enter_listening(state)
+            return _enter_close(state)
         case Timer() if _is_timer(event, "quick_score", state):
             return _enter_listening(state)  # no answer from the Grader in 6 s
     return _ignored(state, event)
@@ -590,18 +596,26 @@ def _enter_close(state: SessionState) -> Result:
 def _close(state: SessionState, event: Event) -> Result:
     if not _is_timer(event, "close", state):
         return _ignored(state, event)
-    done = EmitEvent(
-        "session.done",
-        {
-            "flags": list(state.flags),
-            "listening_module_run": state.listening_run,
-            "session_settings": {
-                "voice_mode": state.voice_mode,
-                "session_profile": state.profile.name,
-            },
+    data = {
+        "passage_id": state.passage_id,
+        "flags": list(state.flags),
+        "reading_stopped_early": state.reading_stopped_early,
+        "listening_module_run": state.listening_run,
+        "session_settings": {
+            "voice_mode": state.voice_mode,
+            "session_profile": state.profile.name,
         },
-    )
-    return replace(state, phase=Phase.ENDED, status="COMPLETE"), [
+    }
+    actions: list[Action] = []
+    if state.listening_run:
+        if state.listening_passage_id is None:
+            # A READ passage must name its pairing (passage schema), so this is a bug upstream.
+            actions.append(
+                Log("listening ran without a listening passage; session.done is invalid")
+            )
+        data["listening_passage_id"] = state.listening_passage_id
+    done = EmitEvent("session.done", data)
+    return replace(state, phase=Phase.ENDED, status="COMPLETE"), actions + [
         done,
         EndSession("COMPLETE"),
     ]

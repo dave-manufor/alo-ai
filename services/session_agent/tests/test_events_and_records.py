@@ -15,6 +15,7 @@ from services.session_agent.machine.types import (
     PassageReady,
     QuickScore,
     ReadingDone,
+    ReadingProgress,
     Silence,
     Start,
     StartRecording,
@@ -28,7 +29,7 @@ CTX = SessionContext(
     session_id="sess_demo_001",
     child_ref="child_demo_001",
     context="SCHOOL",
-    voice_profile_id="voice_demo_a",
+    voice_profile_id="vp_google_v1",
     capture_mode="LIVE",
 )
 NOW = datetime(2026, 1, 15, 9, 0, tzinfo=UTC)
@@ -78,25 +79,43 @@ def test_reading_uri_is_the_latest_reading_turn():
     assert log.reading_uri() == second.audio_uri
 
 
+def test_repeated_recordings_of_one_item_are_numbered_as_parts():
+    log = audio_log()
+    log.new_turn("RETELL")
+    log.new_turn("RETELL")  # "Anything else?"
+    log.new_turn("QUESTION", 0)
+    log.new_turn("QUESTION", 0)  # a repeat request
+    log.new_turn("QUESTION", 1)
+    assert [(t["phase"], t["index"], t["part"]) for t in log.turn_audio_uris()] == [
+        ("RETELL", 0, 0),
+        ("RETELL", 0, 1),
+        ("QUESTION", 0, 0),
+        ("QUESTION", 0, 1),
+        ("QUESTION", 1, 0),
+    ]
+
+
 def test_turn_audio_uris_are_schema_valid(validate):
     log = audio_log()
     log.new_turn("READING")
-    log.new_turn("QUESTION")
+    log.new_turn("QUESTION", 1)
     assert [t["phase"] for t in log.turn_audio_uris()] == ["READING", "QUESTION"]
     validate(
         "event_envelope.schema.json",
         {
             "event_id": str(uuid.uuid4()),
             "type": "session.done",
-            "schema_version": 1,
+            "schema_version": 2,
             "occurred_at": "2026-01-15T09:00:00Z",
             "session_id": "s",
             "data": {
                 "session_id": "s",
+                "passage_id": "p1",
                 "turn_audio_uris": log.turn_audio_uris(),
                 "capture_mode": "LIVE",
                 "session_settings": {"voice_mode": "cache_first", "session_profile": "standard"},
                 "flags": [],
+                "reading_stopped_early": False,
                 "listening_module_run": False,
             },
         },
@@ -149,9 +168,10 @@ def test_session_record_is_schema_valid(validate):
 
 
 def test_turn_record_is_schema_valid(validate):
-    turn = audio_log().new_turn("RETELL")
+    turn = audio_log().new_turn("QUESTION", 2)
     record = session_store.turn_record(turn, asr_transcript="the cat sat")
     assert record["live_transcript"] is None
+    assert (record["index"], record["part"]) == (2, 0)
     validate("session_record.schema.json", record)
 
 
@@ -171,7 +191,7 @@ def drive(state, event, log, publisher, validate):
     state, actions = step(state, event)
     for action in actions:
         if isinstance(action, StartRecording):
-            log.new_turn(action.turn_phase)
+            log.new_turn(action.turn_phase, action.index)
         elif isinstance(action, EmitEvent):
             built = build_event(action, CTX, log, event_id=str(uuid.uuid4()), now=NOW)
             validate("event_envelope.schema.json", built)
@@ -187,8 +207,8 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
         TurnEnd("ANSWERED"),
         PassageReady("gen1"),
         MicResult(True),
-        Silence(3000, 5),
-        Silence(3000, 8),
+        Silence(5000, 5),
+        Silence(5000, 8),
         ReadingDone(75_000),
     ]:
         state = drive(state, event, log, publisher, validate)
@@ -196,7 +216,7 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
     # Retell and its follow-up, then the three questions.
     for _ in range(5):
         state = drive(state, TurnEnd("ANSWERED"), log, publisher, validate)
-    state = drive(state, QuickScore(92.0), log, publisher, validate)
+    state = drive(state, QuickScore(False), log, publisher, validate)
     state = drive(state, Timer(f"close:{state.task_seq}"), log, publisher, validate)
 
     types = [e["type"] for e in publisher.events]
@@ -210,4 +230,38 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
         "MIC_CHECK",
         "READING",
     ]
+    answers = [(t["phase"], t["index"], t["part"]) for t in done["turn_audio_uris"][3:]]
+    assert answers == [
+        ("RETELL", 0, 0),
+        ("RETELL", 0, 1),
+        ("QUESTION", 0, 0),
+        ("QUESTION", 1, 0),
+        ("QUESTION", 2, 0),
+    ]
+    assert done["passage_id"] == "gen1" and "listening_passage_id" not in done
     assert state.status == "COMPLETE"
+
+
+def test_a_session_stopped_early_publishes_the_listening_passage(validate):
+    log, publisher = audio_log(), MemoryPublisher()
+    state = initial_state("demo", "cache_first")
+    for event in [
+        Start(),
+        TurnEnd("ANSWERED"),
+        PassageReady("gen1", "listen1"),
+        MicResult(True),
+        ReadingProgress(30_000, 4),  # the kindness rule ends the reading
+    ]:
+        state = drive(state, event, log, publisher, validate)
+    state = drive(state, Timer(f"listening_story:{state.task_seq}"), log, publisher, validate)
+    for _ in range(2):  # the listening retell and the demo's one item
+        state = drive(state, TurnEnd("ANSWERED"), log, publisher, validate)
+    state = drive(state, Timer(f"close:{state.task_seq}"), log, publisher, validate)
+
+    done = publisher.events[-1]["data"]
+    assert done["reading_stopped_early"] is True and done["listening_module_run"] is True
+    assert done["listening_passage_id"] == "listen1"
+    assert [t["phase"] for t in done["turn_audio_uris"]][-2:] == [
+        "LISTENING_RETELL",
+        "LISTENING_QUESTION",
+    ]
