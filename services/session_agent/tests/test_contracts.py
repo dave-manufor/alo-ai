@@ -91,6 +91,8 @@ def test_every_schema_has_a_fixture():
         "session_record.schema.json",
         "session_protocol.schema.json",
         "passage.schema.json",
+        "grade_quick_request.schema.json",
+        "grade_quick_response.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 

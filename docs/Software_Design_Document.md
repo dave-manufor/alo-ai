@@ -298,11 +298,11 @@ The Grader (in Core) scores meaning twice: a fast single pass during the session
 
 **Quick endpoint** (`POST /v1/grade:quick`, target ≤ 2 s p90):
 
-- Request: `{session_id, turn_id, kind: RETELL | ITEM, item_id?, transcript}`. The transcript is the live Chirp stream the agent keeps running through Phase 2.
+- Request: `{schema_version, session_id, passage_id, turn_phase: RETELL | QUESTION, index, transcript}` (`schemas/grade_quick_request.schema.json`). `index` is the item's position in the passage, 0 for the retell. The agent calls it for every item, with an empty transcript when the child didn't answer, which scores 0 without a model call. The transcript is the live Chirp stream the agent keeps running through Phase 2.
 
 - One Gemini Flash call, temperature 0, response schema `GraderOutput`, with the item's rubric and exemplars or the passage propositions.
 
-- Each result is written to `sessions/{id}/quick/{turn_id}`, because Cloud Run instances share no memory. When the retell and every item are in (3, or 2 in the demo profile), the endpoint also returns `quick_rc = comprehension_score(retell_coverage(…), item_score(…))`.
+- Each result is written to `sessions/{id}/quick/{turn_phase}_{index}`, because Cloud Run instances share no memory, so a repeated call returns the stored result. When the retell and every item are in (3, or 2 in the demo profile), the endpoint computes `quick_rc = comprehension_score(retell_coverage(…), item_score(…))`, stores it for the report, and returns `complete: true` with `run_listening_module` (PRD 6.5) (`schemas/grade_quick_response.schema.json`). The quick RC itself is never returned, so the Session Agent holds no [CAL] value.
 
 Quick scores never appear in a report except side by side with final scores.
 
@@ -463,7 +463,7 @@ Public endpoints take a Firebase ID token; service-to-service calls use Cloud Ru
 |Account and Payments|`POST /v1/checkout`|Web app|ID token|Initialize a Paystack transaction, return the access code|
 |Account and Payments|`POST /webhooks/paystack`|Paystack|HMAC-SHA512 signature|Receive payment and subscription events|
 |Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent, Reading Coach|IAM|Generate and gate a passage, or return a bank fallback|
-|Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; quick RC when complete|
+|Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; the listening decision when complete|
 |Reading Scorer, Core|`POST` `/pubsub/<subscription>`|Pub/Sub push|IAM (push service account)|Event handlers (below)|
 
 Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DELETE /v1/children/{id}` comes with the pilot.
@@ -527,7 +527,7 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`sessions/{session_id}`|One session|child_id, status, context, capture_mode, voice_mode, session_profile, passage_id, passage_source, flags, voice_profile_id, created_at|Session Agent|
 |`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
 |`sessions/{id}/phase1`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
-|`sessions/{id}/quick/{turn_id}`|Quick scores|points or credits, latency_ms|Core|
+|`sessions/{id}/quick/{turn_phase}_{index}`|Quick scores|points or credits, latency_ms|Core|
 |`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|
 |`plans/{plan_id}`|Two-week plan|child_id, activity_ids, book_ids, next_session_at, template_used|Core (Reading Coach)|
 |`passages/{passage_id}`|PassageArtifact (PRD 10.1)|as the schema; no child data|Core (Passage Generator)|
