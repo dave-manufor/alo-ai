@@ -115,7 +115,7 @@ def test_telemetry_reading_time_runs_from_first_onset_to_last_offset():
     telemetry = _fixture("phase1_telemetry.sess_demo_001.json")
     events = telemetry["word_events"]
     span = (events[-1]["end_ms"] - events[0]["start_ms"]) / 1000
-    assert round(span, 1) == telemetry["reading_seconds"]
+    assert span == telemetry["reading_seconds"]
 
 
 def test_grader_output_covers_the_passage():

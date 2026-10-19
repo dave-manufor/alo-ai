@@ -3,16 +3,16 @@
   "session_id": "sess_demo_001",
   "passage_id": "bank_p3_market_day",
   "passage_source": "BANK",
-  "reading_seconds": 19.6,
+  "reading_seconds": 19.65,
   "words_attempted": 23,
   "words_correct": 20,
   "error_counts": {"substitution": 1, "omission": 0, "told": 1, "mispronunciation": 0},
   "self_correction_count": 1,
   "uncertain_count": 1,
   "accuracy_pct": 90.9,
-  "wcpm": 61.2,
+  "wcpm": 61.1,
   "self_correction_ratio": 0.5,
-  "prosody": { "reported": true, "pause_intrusion_rate": 0.1, "f0_word_corr": null, "phrasing": 60.0, "expression": null, "overall": 60.0 },
+  "prosody": { "reported": true, "pause_intrusion_rate": 0.0, "f0_word_corr": null, "phrasing": 100, "expression": null, "overall": 100 },
   "word_events": [
     { "token_index": 0, "target_word": "ada", "chirp_hypothesis": "ada", "gemini_hypothesis": "ada", "chirp_confidence": 0.95, "start_ms": 1200, "end_ms": 1670, "label": "CORRECT", "is_self_corrected": false, "pre_word_latency_ms": null },
     { "token_index": 1, "target_word": "and", "chirp_hypothesis": "and", "gemini_hypothesis": "and", "chirp_confidence": 0.95, "start_ms": 1790, "end_ms": 2260, "label": "CORRECT", "is_self_corrected": false, "pre_word_latency_ms": 120 },
@@ -39,5 +39,5 @@
     { "token_index": 22, "target_word": "hat", "chirp_hypothesis": "hat", "gemini_hypothesis": "hat", "chirp_confidence": 0.95, "start_ms": 20380, "end_ms": 20850, "label": "CORRECT", "is_self_corrected": false, "pre_word_latency_ms": 120 }
   ],
   "flags": ["SHORT_READING"],
-  "model_versions": { "scoring_module": "1.0.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "alignment": "torchaudio-mms_fa" }
+  "model_versions": { "scoring_module": "1.0.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "transcription_prompt": "transcribe_v1", "alignment": "torchaudio-mms_fa", "vad": "silero-vad-5" }
 }

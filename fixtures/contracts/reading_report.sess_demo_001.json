@@ -16,13 +16,13 @@
   },
   "fluency": {
     "accuracy_pct": 90.9,
-    "wcpm": 61.2,
+    "wcpm": 61.1,
     "words_attempted": 23,
-    "reading_seconds": 19.6,
+    "reading_seconds": 19.65,
     "self_correction_ratio": 0.5,
     "word_reading_ok": false
   },
-  "prosody": { "reported": true, "phrasing": 60.0, "expression": null, "overall": 60.0 },
+  "prosody": { "reported": true, "phrasing": 100, "expression": null, "overall": 100 },
   "comprehension": {
     "reading_comprehension": 70.0,
     "retell_coverage": 1.0,
