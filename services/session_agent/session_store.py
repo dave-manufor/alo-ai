@@ -15,6 +15,7 @@ from .events import SessionContext
 from .recording import Turn
 
 SCHEMA_VERSION = 1
+TURN_SCHEMA_VERSION = 2  # turns carry index and part
 
 
 class Documents(Protocol):
@@ -71,8 +72,10 @@ def turn_record(
     turn: Turn, *, live_transcript: str | None = None, asr_transcript: str | None = None
 ) -> dict:
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": TURN_SCHEMA_VERSION,
         "phase": turn.phase,
+        "index": turn.index,
+        "part": turn.part,
         "audio_uri": turn.audio_uri,
         "live_transcript": live_transcript,
         "asr_transcript": asr_transcript,
