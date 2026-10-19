@@ -1,0 +1,117 @@
+{
+  "quick/RETELL_0": {
+    "passage_id": "bank_p3_market_day",
+    "propositions": [
+      {
+        "id": "p1",
+        "credit": 1,
+        "evidence": "ada and her mama went to the market"
+      },
+      {
+        "id": "p2",
+        "credit": 1,
+        "evidence": "she saw a red hat"
+      },
+      {
+        "id": "p3",
+        "credit": 1,
+        "evidence": "it was too much money"
+      },
+      {
+        "id": "p4",
+        "credit": 0.5,
+        "evidence": "she took the blue one"
+      }
+    ],
+    "items": [],
+    "inaccuracies": [],
+    "needs_review": false
+  },
+  "quick/QUESTION_0": {
+    "passage_id": "bank_p3_market_day",
+    "propositions": [],
+    "items": [
+      {
+        "item_id": "bank_p3_market_day_q1",
+        "points": 2,
+        "evidence": "it was red",
+        "rationale": "Says the first hat was red.",
+        "needs_review": false
+      }
+    ],
+    "inaccuracies": [],
+    "needs_review": false
+  },
+  "bank_p3_market_day/pass1": {
+    "passage_id": "bank_p3_market_day",
+    "propositions": [
+      {
+        "id": "p1",
+        "credit": 1,
+        "evidence": "ada and her mama went to the market"
+      },
+      {
+        "id": "p2",
+        "credit": 1,
+        "evidence": "she saw a red hat"
+      },
+      {
+        "id": "p3",
+        "credit": 1,
+        "evidence": "it was too much money"
+      },
+      {
+        "id": "p4",
+        "credit": 0.5,
+        "evidence": "she took the blue one"
+      }
+    ],
+    "items": [
+      {
+        "item_id": "bank_p3_market_day_q1",
+        "points": 2,
+        "evidence": "it was red",
+        "rationale": "Says the first hat was red.",
+        "needs_review": false
+      }
+    ],
+    "inaccuracies": [],
+    "needs_review": true
+  },
+  "bank_p3_market_day/pass2": {
+    "passage_id": "bank_p3_market_day",
+    "propositions": [
+      {
+        "id": "p1",
+        "credit": 1,
+        "evidence": "ada and her mama went to the market"
+      },
+      {
+        "id": "p2",
+        "credit": 1,
+        "evidence": "she saw a red hat"
+      },
+      {
+        "id": "p3",
+        "credit": 1,
+        "evidence": "it was too much money"
+      },
+      {
+        "id": "p4",
+        "credit": 1,
+        "evidence": "so she took the blue one"
+      }
+    ],
+    "items": [
+      {
+        "item_id": "bank_p3_market_day_q1",
+        "points": 2,
+        "evidence": "it was red",
+        "rationale": "Says the first hat was red.",
+        "needs_review": false
+      }
+    ],
+    "inaccuracies": [],
+    "needs_review": true
+  }
+}
