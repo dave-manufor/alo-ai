@@ -186,6 +186,13 @@ def test_a_passage_has_exactly_the_items_its_length_profile_asks(
     assert _validator("passage.schema.json").is_valid(passage) is valid
 
 
+@pytest.mark.parametrize(
+    "name", ["passage.bank_p3_school_garden.json", "passage.bank_l5_before_rain.json"]
+)
+def test_standard_bank_passages_validate(name):
+    _validator("passage.schema.json").validate(_fixture(name))
+
+
 def test_a_passage_must_say_its_length_profile():
     passage = _fixture("passage.bank_l3_rain.json")
     del passage["length_profile"]
