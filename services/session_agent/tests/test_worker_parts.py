@@ -13,7 +13,7 @@ from services.session_agent.intents import intent
 from services.session_agent.machine.profiles import DEMO, STANDARD
 from services.session_agent.machine.types import ChildStop, MicResult, RepeatRequest
 from services.session_agent.mic_check import MicMeter, block_dbfs
-from services.session_agent.passages import PassageBank, PassageError, folder_bank
+from services.session_agent.passages import DEFAULT_BANK, PassageBank, PassageError, folder_bank
 from services.session_agent.quick_grade import FixtureQuickGrader, decision, request_body
 from services.session_agent.turns import TurnTaker
 
@@ -230,6 +230,26 @@ def test_the_bank_refuses_unknown_and_listening_passages():
         bank.pair("bank_l3_rain", DEMO)
     lonely = {"passage_id": "p", "mode": "READ", "length_profile": "DEMO", "items": [{}, {}]}
     assert PassageBank({"p": lonely}.get).pair("p", DEMO).listening is None
+
+
+@pytest.mark.parametrize("profile", [STANDARD, DEMO])
+def test_each_profile_has_a_default_bank_pair_that_fits_it(profile):
+    pair = folder_bank(CONTRACTS).pair(DEFAULT_BANK[profile.name], profile)
+    assert len(pair.read["items"]) == profile.n_questions
+    assert len(pair.listening["items"]) == profile.n_listening_items
+
+
+def test_the_standard_bank_pair_is_a_whole_story_at_its_level():
+    pair = folder_bank(CONTRACTS).pair("bank_p3_school_garden", STANDARD)
+    read, listening = pair.read, pair.listening
+    # PRD 4.5 blueprint for ARL 5-6: 120-150 words; a standard listening story is
+    # about 80-120 words (PRD 4.1). Checked with the generator's code gate when written.
+    assert read["arl_level"] == listening["arl_level"] == 5
+    assert 120 <= read["word_count"] <= 150 and 80 <= listening["word_count"] <= 120
+    assert [i["type"] for i in read["items"]] == ["LITERAL", "LITERAL", "INFERENTIAL"]
+    assert [i["type"] for i in listening["items"]] == ["LITERAL", "INFERENTIAL"]
+    for passage in (read, listening):
+        assert " ".join(t["text"] for t in passage["tokens"]) == passage["text_content"]
 
 
 def test_the_bank_refuses_passages_that_do_not_fit_the_session_profile():

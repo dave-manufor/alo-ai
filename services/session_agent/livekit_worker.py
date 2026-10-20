@@ -30,7 +30,7 @@ from .clips.catalog import ClipCatalog
 from .clips.store import ClipStore
 from .driver import Driver, Ports
 from .machine.types import Profile, Timer
-from .passages import PassageBank, folder_bank
+from .passages import DEFAULT_BANK, PassageBank, folder_bank
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
@@ -164,11 +164,11 @@ async def entrypoint(ctx: JobContext) -> None:
     audio_bucket = cloud.GcsBucket(gcs, settings.audio_bucket)
     db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
     profile = config.PROFILES[cfg.session_profile]
-    passages = _Passages(_bank(settings, db), settings.bank_passage_id, profile)
+    bank_passage_id = settings.bank_passage_id or DEFAULT_BANK[profile.name]
+    passages = _Passages(_bank(settings, db), bank_passage_id, profile)
     # Fail before the child joins, not mid-session, if the fallback passage doesn't fit
-    # SESSION_PROFILE (only DEMO-length bank passages exist so far: run locally with
-    # SESSION_PROFILE=demo).
-    passages.pair(settings.bank_passage_id)
+    # SESSION_PROFILE.
+    passages.pair(bank_passage_id)
 
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
     child = await ctx.wait_for_participant()

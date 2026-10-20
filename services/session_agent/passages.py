@@ -21,6 +21,11 @@ class PassageError(LookupError):
     pass
 
 
+# The fallback READ passage for each session profile, until the bank chooser matches the
+# child's level and tags (PRD 4.5). BANK_PASSAGE_ID overrides it.
+DEFAULT_BANK = {"standard": "bank_p3_school_garden", "demo": "bank_p3_market_day"}
+
+
 @dataclass(frozen=True)
 class PassagePair:
     read: dict
