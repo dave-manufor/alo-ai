@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "topic_tag.schema.json",
+  "title": "TopicTag",
+  "description": "The fixed topic taxonomy (PRD 4.5 G1). Every interest tag, saved tag, story request tag and passage topic_tags entry is one of these. Producer: Passage Generator (W2). Consumers: Session Agent tagger (W2), Reading Coach (W3). Slugs: food = food and cooking, transport = cars and transport.",
+  "type": "string",
+  "enum": ["animals", "football", "space", "food", "market", "family", "school", "music", "transport", "farming", "weather", "adventure"]
+}

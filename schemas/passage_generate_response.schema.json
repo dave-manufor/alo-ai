@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "passage_generate_response.schema.json",
+  "title": "PassageGenerateResponse",
+  "description": "200 body of POST /v1/passages:generate (SDD 5, 11). Producer: Passage Generator in Core (W2). Consumer: Session Agent (W2), which loads the passage from passages/{passage_id}. A story that fails the gate twice, or runs past the deadline, is an error instead: {error: {code: GATE_FAILED | DEADLINE | INVALID_REQUEST, message, retryable: false}}, and the Session Agent chooses a bank passage and raises FALLBACK_PASSAGE. The generator never returns a bank passage itself.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "const": 1 },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "listening_passage_id": { "type": "string", "minLength": 1 },
+    "attempts": { "type": "integer", "minimum": 1, "maximum": 2 },
+    "estimated_arl": { "type": "number", "minimum": 1, "maximum": 12 }
+  },
+  "required": ["schema_version", "passage_id", "listening_passage_id", "attempts", "estimated_arl"],
+  "additionalProperties": false
+}

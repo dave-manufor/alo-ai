@@ -231,7 +231,7 @@ The Session Agent moves through these states one way only; the dashed step is de
 
 The Passage Generator (in Core) turns at most two topic tags into a stored, gated passage with its clips in under 20 s, or returns a bank passage at the same level.
 
-**Request** (from the Session Agent at the start of the interest chat): `{session_id, child_ref, target_arl, tags[≤2], detail?, genre_hint, voice_profile_id, length_profile: STANDARD | DEMO, deadline_ms: 20000}`. The child's own words are never sent: the agent maps the interest-chat transcript to tags with one Flash call against the fixed taxonomy, and keeps a detail only if it is a common noun that passes the safety check.
+**Request** (from the Session Agent when the interest chat ends; `schemas/passage_generate_request.schema.json`): `{schema_version, session_id, child_ref, target_arl, tags[≤2], detail?, genre_hint?, voice_profile_id, length_profile: STANDARD | DEMO, deadline_ms: 20000}`. **Response** (`passage_generate_response.schema.json`): `{schema_version, passage_id, listening_passage_id, attempts, estimated_arl}`; the Session Agent loads the passage from `passages/{passage_id}`. The child's own words are never sent: the agent maps the interest-chat transcript to tags with one Flash call against the fixed taxonomy, and keeps a detail only if it is a common noun that passes the safety check.
 
 **Pipeline** (G1–G6 in PRD 4.5):
 
@@ -239,7 +239,7 @@ The Passage Generator (in Core) turns at most two topic tags into a stored, gate
 
 2. **Artifact build in code:** tokens and sentence indices, content-word flags, and syntactic boundaries for phrasing: punctuation plus a spaCy dependency parse (`en_core_web_sm`), turned into `PHRASE`, `CLAUSE` or `TERMINAL` after each token by a small tested rule. Names carry their IPA from the curated list, for the voice.
 
-3. **Gate:** code checks first, then two Critic calls in parallel (table below). A failure goes back to the Writer **once**, with the failed checks as feedback.
+3. **Gate:** code checks first; only if they pass do the Critic calls run: A (given the story) and B (never given the story) in parallel, then C, which scores both answer sets against the rubrics (table below). A failure goes back to the Writer **once**, with the failed checks as feedback, if enough of the deadline remains. The loop is plain async code, not an ADK workflow, so the order of the checks and the deadline are exact.
 
 4. **Audio from the shared clip store:** list the passage's distinct words, check which "That word is X." clips already exist, synthesise only the missing ones with Chirp 3 HD (at most 16 requests at once), and write each with an only-if-absent condition. Question clips go under the passage.
 
@@ -258,9 +258,9 @@ The Passage Generator (in Core) turns at most two topic tags into a stored, gate
 
 **Shared clip store** (`gs://aloai-clips-eu/{voice_profile_id}/{tts_version}/words/{word_key}.mp3`): full-sentence "That word is X." clips that every story reuses, not tied to any story, child or account. The key is the word lowercased, punctuation stripped, Unicode NFC with accents kept ("Jàpá" ≠ "Japa"); names and a short list of homographs ("read", "live", "wind") add the IPA used. `tts_version` changes whenever the voice settings change. A seeding script fills the store before the mini-study with the ~2,000 most common children's-book words, every bank-passage word and every curated name.
 
-**Fallback:** if the gate still fails after the retry, or the deadline passes, the generator returns the best-matching bank passage at the same ARL and length profile (matching a tag if possible) with `FALLBACK_PASSAGE`. The bank holds 3 READ and 2 LISTEN passages, plus 1 of each at demo length, with their clips made at authoring time, so fallback costs no synthesis time.
+**Fallback:** if the gate still fails after the retry, or the deadline passes, the generator returns the error `GATE_FAILED` or `DEADLINE` (`retryable: false`). The Session Agent, which has its own 20 s timer and also treats an unreachable generator the same way, chooses the best-matching bank passage at the same ARL and length profile (matching a tag if possible) and raises `FALLBACK_PASSAGE`. So there is one bank chooser, in the Session Agent. The bank holds 3 READ and 2 LISTEN passages, plus 1 of each at demo length, with their clips made at authoring time, so fallback costs no synthesis time.
 
-**Pre-generation:** when a report is ready, the Reading Coach calls `queue_story`, which generates the child's next passage at `next_passage_arl` with their saved tags, so returning children skip the interest chat and never wait.
+**Pre-generation:** when a report is ready, the Reading Coach calls `queue_story`, which writes `story_requests/story_{session_id}` (`story_request.schema.json`) and later publishes `plan.ready`. The generator handles `plan.ready` on Core's existing session-events subscription, generates the child's next passage at `next_passage_arl` with their saved tags (no deadline, no bank fallback), sets `children/{child_id}.next_passage_id` and marks the request `DONE` or `FAILED`; a request that already has a `passage_id` is skipped, so redelivery is harmless. Returning children skip the interest chat and never wait.
 
 **Benchmark mode:** `passage_source = GENERATED | BANK` per session. School benchmarks default to BANK until the pilot shows the generated-versus-bank gap is small.
 
@@ -509,7 +509,9 @@ The session conductor's tools are listed in section 4.
 |Passage artifact, including `syntactic_boundary_after`|W2|W3|
 |`books/{book_id}` with its embedding|W2|W3|
 |`ReadingReport` in `reports/{session_id}`|W3|W1|
-|`queue_story` (Reading Coach to Passage Generator)|W2|W3|
+|`queue_story` (Reading Coach to Passage Generator): `story_requests/{id}` and `plan.ready`|W3 (request) / W2 (processing)|W2 / W3|
+|`POST /v1/passages:generate`: request, response and errors|W2|W2 (Session Agent)|
+|Topic taxonomy (`topic_tag`)|W2|W3|
 |`/internal/notify` (Reading Coach email)|W1|W3|
 |Entitlement in `subscriptions/{guardian_id}`|W1|W2|
 

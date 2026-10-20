@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "passage_generate_request.schema.json",
+  "title": "PassageGenerateRequest",
+  "description": "Body of POST /v1/passages:generate (SDD 5, 11). Producer: Session Agent (W2). Consumer: Passage Generator in Core (W2). The child's own words are never sent: tags come from the fixed taxonomy and detail is a single safe common noun (PRD 4.5 G1). child_ref is an opaque reference, never a name.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "const": 1 },
+    "session_id": { "type": "string", "minLength": 1 },
+    "child_ref": { "type": "string", "minLength": 1 },
+    "target_arl": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "tags": { "type": "array", "items": { "$ref": "topic_tag.schema.json" }, "maxItems": 2, "uniqueItems": true },
+    "detail": { "type": "string", "pattern": "^[a-z]{2,20}( [a-z]{2,20})?$" },
+    "genre_hint": { "type": "string", "enum": ["NARRATIVE", "EXPOSITORY"] },
+    "voice_profile_id": { "type": "string", "minLength": 1 },
+    "length_profile": { "type": "string", "enum": ["STANDARD", "DEMO"] },
+    "deadline_ms": { "type": "integer", "minimum": 1000, "maximum": 60000 }
+  },
+  "required": ["schema_version", "session_id", "child_ref", "target_arl", "tags", "voice_profile_id", "length_profile", "deadline_ms"],
+  "additionalProperties": false
+}
