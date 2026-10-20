@@ -16,6 +16,9 @@
 
 **Changes during the v1.8.0 sprint** (contract and rule changes agreed between workstreams; newest first):
 
+- **2026-10-20, scoring and the Reading Scorer (5.3, 6.1; review of #15):** 6.1 now carries the told-wait rule in the formula. Scores are exact and the report rounds them, so 94.99% no longer passes the 95% cut. Told waits that cannot fit in the reading time are refused. Words a child says after stopping are extra words, not misreadings of the rest of the passage. The guardrail also checks numbers written in words (ten or more), traces only results (not `schema_version`; a percentage only for a share field), and catches hyphenated or broken-up terms.
+- **2026-10-20, delivery and identity (SDD 11, 12.1; review of #15):** a push that is not a valid event is acknowledged and logged; an event that can never succeed is parked in `sessions/{id}/errors/{type}` and acknowledged; other failures still return 500 for Pub/Sub to retry. W3's events carry one `event_id` per session and type (a UUID derived from both), so repeats share it. The push routes accept only a Google-signed ID token for `PUSH_SERVICE_ACCOUNT`, which a Cloud Run service must set (W1), and recorded AI (`AI_MODE=fixtures`) is refused on Cloud Run services and jobs.
+- **2026-10-20, Reading Coach and authz (3.1, 12.1; review of #15):** the Coach keeps tags to `topic_tag`, stops after 15 s, and a template plan still queues the next story and sets the next check. A summary that cannot be spoken holds back neither the email nor `plan.ready`. `aloai_authz` now has policies for the Story Writer and Critic (no tools, as 3.1 says), the grading panel, and the Teacher Assistant, whose proposals are refused until the confirmation token exists.
 - **2026-10-19, evaluation and the child's name (3.1, 13.4, 13.5):** the Reading Coach set (10 reports), the red-team set (20 cases), the grading evaluation, the golden-recording check and the KPI table are in `eval/`. CI replays recorded model turns; a live run (`--live --record`) calls Gemini once per change and saves new recordings. The child's first name is typed by the parent, so one that doesn't look like a name (one to three words of letters, at most 30 characters) never reaches an agent or a summary: the Coach writes "Your child" instead, and a template summary the name makes fail the guardrail drops the name.
 - **2026-10-19, book ranking (9.3):** RankScore and its **[CAL]** weights are in `aloai_scoring` (`scoring_module` 1.0.0). The Grader embeds the child's saved tags (the passage's topic tags when there are none) with `text-embedding-005`, so the ingestion job (W2) must embed books with the same model, and reads `arl`, `embedding` and `west_african_setting` from `books/{book_id}`. The search filters on `arl`, so the vector index on `books` (Terraform, W1) must include it. A failed book search leaves the report without books instead of holding the report back.
 - **2026-10-19, Reading Coach (3.1, 12.1, SDD 8):** built with ADK. `get_activity_library` and `search_books` take no arguments: the profile, level and ranked books (9.3) come from the report, so the model can't ask for others. `schedule_session` stores `next_session_at` on the child. The activity library is `activities_v1` (30 activities). Until `queue_story` (W2) and `/internal/notify` (W1) exist, the Coach leaves its requests in Firestore (`story_requests/`, `outbox/`). The template plan is also used when the Coach is off (`COACH_ON`) or its run fails; the plan records `template_used`, and the report gets the `COACH_TEMPLATE_USED` flag.
@@ -718,12 +721,16 @@ words_attempted = passage tokens from the first token to the last token reached
 errors          = SUBSTITUTION + OMISSION + TOLD + MISPRONUNCIATION
                   (self-corrected and UNCERTAIN words excluded; MISPRONUNCIATION and
                    DIALECT_VARIANT aren't produced in the hackathon build, 5.3)
-reading_seconds = first word onset to last word offset, capped at 90 s
+reading_seconds = first word onset to last word offset, capped at 90 s (stored as measured)
+told_waits      = TOLD words after the first word; each 5.0 s wait (4.1) lies inside the
+                  reading time, so told_waits * 5 > reading_seconds is refused
 
 accuracy_pct = 100 * (words_attempted - errors) / words_attempted
-WCPM         = 60  * (words_attempted - errors) / reading_seconds
+WCPM         = 60  * (words_attempted - errors) / (reading_seconds - 2 * told_waits)
 SCR          = N_self_corrections / (N_self_corrections + SUBSTITUTION + OMISSION + MISPRONUNCIATION)
 ```
+
+The WCPM_CUT norms told a word after 3 s and the session waits 5 s, so WCPM takes the extra 2 s of each told wait off the reading time. A told first word's wait comes before the first onset, so it takes nothing off. Every value is exact: the cuts (6.2, 6.5, 6.7) compare the exact numbers, and the report rounds them for display.
 
 `SHORT_READING` flag: reading_seconds < 60. WCPM is then provisional, and the next session uses a longer passage.
 
@@ -1411,7 +1418,7 @@ Implemented in `aloai_authz.py` and tested in `tests/test_authz.py`. Every agent
 |---|---|---|---|---|---|
 | Session conductor | `end_turn`, `request_repeat`, `pause_session`, `move_on`, `end_kindly`, `switch_to_clips` | Session control | This session only | 50 | No; the state machine validates each call |
 | Story Writer | none | — | — | — | — |
-| Story Critic | `blueprint_stats`, `estimate_level`, `safety_check`, `blind_answer`, `inference_check` | Read | No user data | 20 each | No |
+| Story Critic | none: the code gate runs `blueprint_stats`, `estimate_level`, `safety_check` and `inference_check`, and the Critic's own calls answer the items (3.1) | — | No user data | — | — |
 | Grading panel | `get_rubric`, `get_transcript`; `queue_human_review` | Read; internal write | This session | 20; 5 | No |
 | Reading Coach | `get_report`, `get_history`, `get_activity_library`, `search_books` | Read | One child per run, consent required | 20 each | No |
 | | `queue_story`, `save_plan`, `schedule_session` | Internal write | Same child | 2, 2, 1 | No |

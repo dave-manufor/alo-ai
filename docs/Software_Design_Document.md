@@ -272,7 +272,7 @@ The Reading Scorer turns the reading-phase audio into Phase 1 telemetry (PRD 10.
 
 ### Pipeline:
 
-1. **Load:** the FLAC from Cloud Storage and the PassageArtifact from Firestore.
+1. **Load:** the FLAC from Cloud Storage and the PassageArtifact from Firestore, before either transcript is asked for, so audio not yet in the bucket costs nothing.
 
 2. **Two transcripts, in parallel:** Chirp 3 batch `Recognize` (passage names as speech adaptation; word confidence) and Gemini 2.5 Flash verbatim transcription (temperature 0, pinned). Both sit behind an `AsrProvider` interface.
 
@@ -280,7 +280,7 @@ The Reading Scorer turns the reading-phase audio into Phase 1 telemetry (PRD 10.
 
 4. **Miscue labels:** each transcript is aligned to the passage by edit distance. Both have the passage word: CORRECT. Both have the same other word: SUBSTITUTION; both skip it: OMISSION; TOLD comes from the agent's log. If they disagree, or Chirp's confidence on an agreed-correct word is under 0.5, the word is UNCERTAIN and left out of the counts (more than 5% sets `HIGH_UNCERTAINTY`). An error followed within 3 s by the correct word is self-corrected. MISPRONUNCIATION and DIALECT_VARIANT aren't produced without the phone check.
 
-5. **Counts and rates:** `fluency()` and `self_correction_ratio()` from `aloai_scoring.py`, so the scorer and the report use one implementation.
+5. **Counts and rates:** `fluency()` and `self_correction_ratio()` from `aloai_scoring.py`, so the scorer and the report use one implementation. WCPM takes 2 s off the reading time for each told word after the first (the session's 5 s wait against the norms' 3 s, PRD 6.1). The values are exact; the report rounds them for display.
 
 6. **Prosody (phrasing only):** pauses of 180 ms or more from Silero VAD, placed with the alignment timings and compared with the passage's stored spaCy boundaries, when accuracy is at least 90%. Expression stays null until a Nigerian English reference voice exists.
 
@@ -481,7 +481,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
 |`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
 
-Every event uses one envelope: `{event_id (UUID v4), type, schema_version, occurred_at, session_id, data}`. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
+Every event uses one envelope: `{event_id (a UUID), type, schema_version, occurred_at, session_id, data}`. The Reading Scorer, Grader and Reading Coach derive `event_id` from the session and the type, so every publication of one session's `phase1.scored`, `report.ready` or `plan.ready` carries the same id. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
 
 ### Agent tools (Reading Coach):
 
