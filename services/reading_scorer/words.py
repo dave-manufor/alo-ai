@@ -5,10 +5,12 @@ gets the word heard in its place, or nothing when it was skipped, together with 
 extra words heard just before it.
 
 A child may stop anywhere (the kindness rule, the reading cap, "I'm done"), so the
-passage words after the last one reached cost nothing: they were not attempted. A heard
-word only takes a passage word's place cheaply when it looks like an attempt at it; one
-that is nothing like it costs as much as a skip plus an extra word, so words said after
-stopping are kept as extra words instead of taking the place of passage words.
+passage words after the last one reached may cost nothing: they were not attempted. That
+reading is kept only when the child said fewer words after the last one reached than the
+passage had left. Saying as many or more means the child read on to the end, and those
+words are misreadings of the passage words they stand for. A heard word only takes a
+passage word's place cheaply when it looks like an attempt at it; one that is nothing
+like it costs as much as a skip plus an extra word.
 """
 
 import unicodedata
@@ -16,7 +18,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
-ATTEMPT_LIKENESS = 0.5  # how alike a heard word must be to a passage word to be its misreading
+ATTEMPT_LIKENESS = 0.5  # [CAL] PRD 5.3: how alike a heard word must be to be a misreading
 
 
 @dataclass(frozen=True)
@@ -59,11 +61,27 @@ def align(passage: Sequence[str], heard: Sequence[Heard]) -> list[Placed]:
                 cost[i - 1][j] + 1,
                 cost[i][j - 1] + 1,
             )
+    reached = min(range(rows + 1), key=lambda end: (cost[end][cols], -end))
+    placed, before, said_after = _walk(passage, heard, words, cost, reached)
+    if said_after >= rows - reached > 0:
+        placed, before, _ = _walk(passage, heard, words, cost, rows)
+    return [Placed(heard=placed[k], before=tuple(before[k])) for k in range(rows)]
 
+
+def _walk(
+    passage: Sequence[str],
+    heard: Sequence[Heard],
+    words: Sequence[str],
+    cost: list[list[int]],
+    end: int,
+) -> tuple[list[Heard | None], list[list[str]], int]:
+    """The alignment that ends at passage word `end`, and how many heard words came
+    after the last passage word it reached."""
+    rows = len(passage)
     placed: list[Heard | None] = [None] * rows
     before: list[list[str]] = [[] for _ in range(rows)]
-    i = min(range(rows + 1), key=lambda reached: (cost[reached][cols], -reached))
-    j = cols
+    said_after = 0
+    i, j = end, len(words)
     while i > 0 or j > 0:
         diagonal = i > 0 and j > 0
         if diagonal and cost[i][j] == cost[i - 1][j - 1] + substitution(
@@ -76,5 +94,7 @@ def align(passage: Sequence[str], heard: Sequence[Heard]) -> list[Placed]:
         else:
             if i < rows:
                 before[i].insert(0, words[j - 1])
+            if i == end:
+                said_after += 1
             j -= 1
-    return [Placed(heard=placed[k], before=tuple(before[k])) for k in range(rows)]
+    return placed, before, said_after

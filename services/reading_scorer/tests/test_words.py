@@ -66,9 +66,15 @@ def test_words_said_after_stopping_are_extra_words_not_misreadings():
     assert placed[2].before == ("done",)
 
 
-def test_a_misread_last_word_is_still_a_misreading():
-    placed = align(PASSAGE, heard("ada saw a red hut"))
-    assert placed[-1] == Placed(Heard("hut"))
+@pytest.mark.parametrize("said", ["ada saw a red hut", "ada saw a red cap"])
+def test_a_misread_last_word_is_still_a_misreading(said):
+    placed = align(PASSAGE, heard(said))
+    assert placed[-1] == Placed(Heard(said.split()[-1]))
+
+
+def test_words_said_up_to_the_end_stand_for_the_passage_words_left():
+    placed = align(PASSAGE, heard("ada saw a big cap"))
+    assert [p.heard.text for p in placed[3:]] == ["big", "cap"]
 
 
 def test_a_word_nothing_like_the_passage_word_still_takes_its_place_mid_passage():

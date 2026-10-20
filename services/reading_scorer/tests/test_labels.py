@@ -88,8 +88,19 @@ def test_a_reading_with_nothing_reached_has_no_labels():
     assert labels_of(silent, silent) == []
 
 
-def test_a_child_who_stops_and_says_something_else_has_only_the_words_read():
+@pytest.mark.parametrize(
+    "said, labels",
+    [
+        ("ada saw done", ["CORRECT", "CORRECT"]),
+        ("ada saw", ["CORRECT", "CORRECT"]),
+        ("ada saw a red cap", ["CORRECT"] * 4 + ["SUBSTITUTION"]),
+        ("ada saw a big cap", ["CORRECT"] * 3 + ["SUBSTITUTION"] * 2),
+        ("ada saw a red cat", ["CORRECT"] * 4 + ["SUBSTITUTION"]),
+    ],
+    ids=["stopped, then said a word", "stopped", "unlike last word", "two unlike", "near miss"],
+)
+def test_a_reading_that_stops_drops_the_rest_but_one_read_to_the_end_keeps_its_errors(said, labels):
     passage = ["ada", "saw", "a", "red", "hat"]
-    said = [Heard(word, 0.9) for word in ("ada", "saw", "done")]
-    labels = label_words(passage, align(passage, said), align(passage, said), told=set())
-    assert [label.label for label in labels] == ["CORRECT", "CORRECT"]
+    heard = [Heard(word, 0.9) for word in said.split()]
+    found = label_words(passage, align(passage, heard), align(passage, heard), told=set())
+    assert [label.label for label in found] == labels
