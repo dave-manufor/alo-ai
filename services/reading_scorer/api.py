@@ -7,15 +7,16 @@ event that can never be scored (a missing passage, counts aloai_scoring refuses,
 telemetry that fails its schema) is
 parked in sessions/{session_id}/errors/{type} and acknowledged; the log names the error
 only, never the transcripts. Any other failure returns 500, so Pub/Sub retries it and
-then sends it to the dead-letter topic.
+then sends it to the dead-letter topic. A push without the push service account's signed
+ID token is refused with 403 (aloai_events.pushed_by).
 """
 
 import logging
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from aloai_events import park, pushed_event
-from fastapi import APIRouter, Body
+from aloai_events import PushCheck, park, pushed_event
+from fastapi import APIRouter, Body, Header
 from fastapi.responses import Response
 from jsonschema import ValidationError
 
@@ -25,11 +26,16 @@ log = logging.getLogger(__name__)
 PERMANENT = (LookupError, ValueError, ValidationError)
 
 
-def router(scorer: Phase1Scorer) -> APIRouter:
+def router(scorer: Phase1Scorer, from_pubsub: PushCheck) -> APIRouter:
     routes = APIRouter()
 
     @routes.post("/pubsub/session-events")
-    def session_events(body: Annotated[Any, Body()]) -> Response:
+    def session_events(
+        body: Annotated[Any, Body()], authorization: Annotated[str | None, Header()] = None
+    ) -> Response:
+        if not from_pubsub(authorization):
+            log.warning("refused a push not signed by the push service account")
+            return Response(status_code=403)
         event = pushed_event(body)
         if event is None:
             log.warning("acknowledged a push that is not a valid event")

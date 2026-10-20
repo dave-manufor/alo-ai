@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import aloai_scoring as scoring
-from aloai_events import MemoryPublisher, envelope
+from aloai_events import MemoryPublisher, anyone, envelope
 from aloai_store import MemoryStore
 from fastapi import APIRouter
 from services.core.api import events_router
@@ -171,7 +171,7 @@ def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
         clock=lambda: NOW,
     )
     grader = FinalGrader(store, model, FixtureTranscriber(RECORDED / "asr"), reports)
-    return events_router(grader, reports, coach, store)
+    return events_router(grader, reports, coach, store, anyone)
 
 
 def grader_output(

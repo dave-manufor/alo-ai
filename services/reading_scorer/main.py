@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 import aloai_env
-from aloai_events import PubSubPublisher
+from aloai_events import PubSubPublisher, anyone, pushed_by
 from aloai_store import FirestoreStore
 from fastapi import FastAPI
 from google import genai
@@ -47,7 +47,8 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
         pause_finder=SileroPauses(),
     )
     app = FastAPI(title="Alo.ai Reading Scorer")
-    app.include_router(router(scorer))
+    account = settings.push_service_account
+    app.include_router(router(scorer, pushed_by(account) if account else anyone))
     return app
 
 

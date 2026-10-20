@@ -8,7 +8,14 @@ from types import SimpleNamespace
 import aloai_env
 import jsonschema
 import pytest
-from aloai_events import SCHEMA_VERSIONS, PubSubPublisher, envelope, park, stable_event_id
+from aloai_events import (
+    SCHEMA_VERSIONS,
+    PubSubPublisher,
+    envelope,
+    park,
+    pushed_by,
+    stable_event_id,
+)
 from aloai_store import FirestoreStore, MemoryStore
 from google.api_core.exceptions import AlreadyExists
 
@@ -26,8 +33,22 @@ def test_local_shortcuts_are_refused_on_cloud_run(cloud_run, shortcut):
         aloai_env.load(cloud_run | shortcut)
 
 
-def test_cloud_run_runs_with_live_ai():
-    assert aloai_env.load({"K_SERVICE": "aloai-core", "AI_MODE": "live"}).ai_mode == "live"
+def test_cloud_run_runs_with_live_ai_and_the_push_identity():
+    settings = aloai_env.load(
+        {"K_SERVICE": "aloai-core", "AI_MODE": "live", "PUSH_SERVICE_ACCOUNT": "push@aloai-dev.iam"}
+    )
+    assert (settings.ai_mode, settings.push_service_account) == ("live", "push@aloai-dev.iam")
+
+
+def test_a_cloud_run_service_needs_the_push_identity_but_a_job_does_not():
+    with pytest.raises(aloai_env.ConfigError, match="PUSH_SERVICE_ACCOUNT"):
+        aloai_env.load({"K_SERVICE": "aloai-core", "AI_MODE": "live"})
+    assert (
+        aloai_env.load(
+            {"CLOUD_RUN_JOB": "aloai-book-ingest", "AI_MODE": "live"}
+        ).push_service_account
+        is None
+    )
 
 
 def test_an_unknown_ai_mode_is_refused():
@@ -180,3 +201,24 @@ def test_many_documents_are_read_in_one_round_trip():
         None,
         {"points": 2},
     ]
+
+
+@pytest.mark.parametrize(
+    "authorization, claims, allowed",
+    [
+        ("Bearer t", {"email": "push@aloai-dev.iam", "email_verified": True}, True),
+        ("Bearer t", {"email": "push@aloai-dev.iam", "email_verified": False}, False),
+        ("Bearer t", {"email": "agent@aloai-dev.iam", "email_verified": True}, False),
+        ("Basic t", {"email": "push@aloai-dev.iam", "email_verified": True}, False),
+        (None, {}, False),
+    ],
+)
+def test_a_push_must_be_signed_for_the_push_service_account(authorization, claims, allowed):
+    assert pushed_by("push@aloai-dev.iam", lambda token: claims)(authorization) is allowed
+
+
+def test_a_token_google_refuses_is_refused():
+    def forged(token):
+        raise ValueError("Could not verify token signature.")
+
+    assert pushed_by("push@aloai-dev.iam", forged)("Bearer forged") is False

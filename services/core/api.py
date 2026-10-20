@@ -7,16 +7,17 @@ know included) is logged and acknowledged, and an event that can never be handle
 answer turn with no item, a missing document, a value aloai_scoring refuses, a report
 that fails its schema) is parked
 in sessions/{session_id}/errors/{type} and acknowledged. Any other failure returns 500,
-so Pub/Sub retries it and then sends it to the dead-letter topic.
+so Pub/Sub retries it and then sends it to the dead-letter topic. A push without the
+push service account's signed ID token is refused with 403 (aloai_events.pushed_by).
 """
 
 import logging
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from aloai_events import park, pushed_event
+from aloai_events import PushCheck, park, pushed_event
 from aloai_store import Store
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Header
 from fastapi.responses import Response
 from jsonschema import ValidationError
 
@@ -29,12 +30,21 @@ PERMANENT = (LookupError, ValueError, ValidationError)
 
 
 def events_router(
-    final: FinalGrader, assembler: ReportAssembler, coach: ReadingCoach, store: Store
+    final: FinalGrader,
+    assembler: ReportAssembler,
+    coach: ReadingCoach,
+    store: Store,
+    from_pubsub: PushCheck,
 ) -> APIRouter:
     routes = APIRouter()
 
     @routes.post("/pubsub/session-events")
-    def session_events(body: Annotated[Any, Body()]) -> Response:
+    def session_events(
+        body: Annotated[Any, Body()], authorization: Annotated[str | None, Header()] = None
+    ) -> Response:
+        if not from_pubsub(authorization):
+            log.warning("refused a push not signed by the push service account")
+            return Response(status_code=403)
         event = pushed_event(body)
         if event is None:
             log.warning("acknowledged a push that is not a valid event")

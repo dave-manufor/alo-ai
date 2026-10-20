@@ -6,7 +6,7 @@ import logging
 
 import aloai_env
 import pytest
-from aloai_events import MemoryPublisher, envelope
+from aloai_events import MemoryPublisher, anyone, envelope, pushed_by
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from services.reading_scorer.api import router
@@ -34,7 +34,7 @@ def unchecked(event_type: str, data: dict) -> dict:
 def client():
     store, publisher = seeded_store(), MemoryPublisher()
     app = FastAPI()
-    app.include_router(router(scorer(store, publisher)))
+    app.include_router(router(scorer(store, publisher), anyone))
     return TestClient(app), store, publisher
 
 
@@ -97,3 +97,19 @@ def test_told_waits_that_cannot_fit_are_parked_not_retried():
     assert response.status_code == 204
     assert store.get(f"sessions/{SESSION_ID}/errors/phase1.recorded")["error"] == "ValueError"
     assert publisher.events == []
+
+
+def test_a_push_from_another_caller_is_refused():
+    store, publisher = seeded_store(), MemoryPublisher()
+    app = FastAPI()
+    check = pushed_by(
+        "push@aloai-dev.iam", lambda token: {"email": "agent@aloai-dev.iam", "email_verified": True}
+    )
+    app.include_router(router(scorer(store, publisher), check))
+    response = TestClient(app).post(
+        "/pubsub/session-events",
+        json=pushed("phase1.recorded", recorded()),
+        headers={"Authorization": "Bearer token"},
+    )
+    assert response.status_code == 403
+    assert store.get(telemetry_path(SESSION_ID)) is None

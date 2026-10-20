@@ -5,7 +5,7 @@ import logging
 
 import aloai_contracts
 import pytest
-from aloai_events import MemoryPublisher
+from aloai_events import MemoryPublisher, anyone, pushed_by
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from services.core.api import events_router
@@ -138,7 +138,7 @@ def test_a_failure_that_may_pass_on_retry_is_left_to_pub_sub():
             raise ConnectionError("Firestore is unavailable")
 
     app = FastAPI()
-    app.include_router(events_router(Down(), None, None, store))
+    app.include_router(events_router(Down(), None, None, store, anyone))
     http = TestClient(app, raise_server_exceptions=False)
     response = http.post(
         "/pubsub/session-events", json=pushed(event("session.done", session_done()))
@@ -155,9 +155,48 @@ def test_a_value_aloai_scoring_refuses_is_parked():
             raise ValueError("item points must be 0, 1 or 2")
 
     app = FastAPI()
-    app.include_router(events_router(Refused(), None, None, store))
+    app.include_router(events_router(Refused(), None, None, store, anyone))
     response = TestClient(app).post(
         "/pubsub/session-events", json=pushed(event("session.done", session_done()))
     )
     assert response.status_code == 204
     assert store.get(f"sessions/{SESSION_ID}/errors/session.done")["error"] == "ValueError"
+
+
+def signed_by(email, verified=True):
+    return lambda token: {"email": email, "email_verified": verified} if token == "signed" else {}
+
+
+@pytest.mark.parametrize(
+    "authorization, check, status",
+    [
+        ("Bearer signed", pushed_by("push@aloai-dev.iam", signed_by("push@aloai-dev.iam")), 204),
+        ("Bearer signed", pushed_by("push@aloai-dev.iam", signed_by("agent@aloai-dev.iam")), 403),
+        (None, pushed_by("push@aloai-dev.iam", signed_by("push@aloai-dev.iam")), 403),
+    ],
+    ids=["the push service account", "another invoker", "no token"],
+)
+def test_only_the_push_service_account_may_post_events(authorization, check, status):
+    store = seeded_store()
+
+    class Ignored:
+        def handle(self, data):
+            pass
+
+    app = FastAPI()
+    app.include_router(events_router(Ignored(), None, None, store, check))
+    headers = {"Authorization": authorization} if authorization else {}
+    started = {
+        "session_id": SESSION_ID,
+        "child_ref": "child_demo_001",
+        "passage_id": "bank_p3_market_day",
+        "context": "SCHOOL",
+        "voice_profile_id": "vp_google_v1",
+        "voice_mode": "cache_first",
+        "session_profile": "demo",
+    }
+    body = pushed(event("session.started", started))
+    assert (
+        TestClient(app).post("/pubsub/session-events", json=body, headers=headers).status_code
+        == status
+    )

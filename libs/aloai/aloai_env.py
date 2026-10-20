@@ -3,7 +3,9 @@
 Local shortcuts must never run on Cloud Run, which sets K_SERVICE in a service and
 CLOUD_RUN_JOB in a job: ALO_ENV=local (emulators) is refused there, and so are the
 recorded AI responses (AI_MODE=fixtures, the default), so a deployment that forgets
-AI_MODE=live stops at start instead of replaying recordings.
+AI_MODE=live stops at start instead of replaying recordings. A Cloud Run service also
+needs PUSH_SERVICE_ACCOUNT, the identity Pub/Sub pushes with, so its push route can turn
+away any other caller (aloai_events.pushed_by).
 """
 
 from collections.abc import Mapping
@@ -22,6 +24,7 @@ class Config:
     ai_mode: str
     project: str
     location: str
+    push_service_account: str | None = None
 
 
 def load(env: Mapping[str, str]) -> Config:
@@ -34,9 +37,13 @@ def load(env: Mapping[str, str]) -> Config:
         raise ConfigError(f"AI_MODE={ai_mode!r} is not one of {sorted(AI_MODES)}")
     if ai_mode == "fixtures" and on_cloud_run:
         raise ConfigError("recorded AI responses (AI_MODE=fixtures) are not allowed on Cloud Run")
+    push_service_account = env.get("PUSH_SERVICE_ACCOUNT") or None
+    if env.get("K_SERVICE") and push_service_account is None:
+        raise ConfigError("PUSH_SERVICE_ACCOUNT must be set on a Cloud Run service")
     return Config(
         alo_env=alo_env,
         ai_mode=ai_mode,
         project=env.get("GOOGLE_CLOUD_PROJECT", "aloai-dev"),
         location=env.get("GOOGLE_CLOUD_LOCATION", "europe-west1"),
+        push_service_account=push_service_account,
     )

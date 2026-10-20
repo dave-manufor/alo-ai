@@ -12,10 +12,14 @@ is parked (park) and acknowledged instead.
 import base64
 import json
 import uuid
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
+from google.auth.exceptions import GoogleAuthError
+from google.auth.transport.requests import Request
 from google.cloud import pubsub_v1
+from google.oauth2 import id_token
 
 import aloai_contracts
 from aloai_store import Store
@@ -102,3 +106,34 @@ def park(store: Store, event: dict, error: Exception, now: datetime) -> str:
         },
     )
     return path
+
+
+PushCheck = Callable[[str | None], bool]
+
+
+def anyone(authorization: str | None) -> bool:
+    """Off Cloud Run (emulators, tests) a push is not signed."""
+    return True
+
+
+def pushed_by(
+    service_account: str, verify: Callable[[str], Mapping[str, Any]] | None = None
+) -> PushCheck:
+    """A check that a push carries a Google-signed ID token whose email is the push
+    service account. Cloud Run IAM lets every invoker in, the Session Agent included, so
+    this is what stops another caller posting a session.done."""
+
+    def check(authorization: str | None) -> bool:
+        if not authorization or not authorization.startswith("Bearer "):
+            return False
+        try:
+            claims = (verify or _google_claims)(authorization.removeprefix("Bearer "))
+        except (ValueError, GoogleAuthError):
+            return False
+        return claims.get("email") == service_account and claims.get("email_verified") is True
+
+    return check
+
+
+def _google_claims(token: str) -> Mapping[str, Any]:  # pragma: no cover - fetches Google's keys
+    return id_token.verify_oauth2_token(token, Request())

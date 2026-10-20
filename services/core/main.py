@@ -15,7 +15,7 @@ from pathlib import Path
 
 import aloai_env
 import requests
-from aloai_events import PubSubPublisher
+from aloai_events import PubSubPublisher, PushCheck, anyone, pushed_by
 from aloai_store import FirestoreStore, Store
 from fastapi import FastAPI
 from google import genai
@@ -78,9 +78,20 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     app = FastAPI(title="Alo.ai Core")
     app.include_router(router(QuickGrader(store, model)))
     app.include_router(
-        events_router(FinalGrader(store, model, transcriber, assembler), assembler, coach, store)
+        events_router(
+            FinalGrader(store, model, transcriber, assembler),
+            assembler,
+            coach,
+            store,
+            _push_check(settings),
+        )
     )
     return app
+
+
+def _push_check(settings: aloai_env.Config) -> PushCheck:
+    account = settings.push_service_account
+    return pushed_by(account) if account else anyone
 
 
 def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder]:
