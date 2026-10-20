@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol
 
 import aloai_contracts
+import httpx
 from google import genai
 from google.api_core.exceptions import GoogleAPIError
 from google.genai import errors as genai_errors
@@ -42,8 +43,9 @@ class GradingError(Exception):
     """The model gave no usable answer for the task."""
 
 
-# Vertex AI or Firestore did not answer: worth a retry, unlike a refused request.
-UpstreamErrors = (genai_errors.APIError, GoogleAPIError)
+# Vertex AI or Firestore did not answer, or not in time: worth a retry, unlike a refused
+# request. The Gemini client raises httpx's own errors for a timeout.
+UpstreamErrors = (genai_errors.APIError, GoogleAPIError, httpx.HTTPError)
 
 
 class GradingModel(Protocol):
@@ -55,7 +57,7 @@ _RESPONSE_SCHEMA = {
     for key, value in aloai_contracts.load("grader_output.schema.json").items()
     if key not in ("$schema", "$id")
 }
-QUICK_TIMEOUT_S = 5  # inside the Session Agent's 6 s quick-score wait
+QUICK_TIMEOUT_S = 2.5  # inside each of the Session Agent's two 3 s attempts
 GRADER_TIMEOUT_S = 60
 
 
@@ -69,7 +71,7 @@ def _config(model: str) -> types.GenerateContentConfig:
         response_json_schema=_RESPONSE_SCHEMA,
         thinking_config=types.ThinkingConfig(thinking_budget=0) if quick else None,
         http_options=types.HttpOptions(
-            timeout=1000 * (QUICK_TIMEOUT_S if quick else GRADER_TIMEOUT_S)
+            timeout=int(1000 * (QUICK_TIMEOUT_S if quick else GRADER_TIMEOUT_S))
         ),
     )
 

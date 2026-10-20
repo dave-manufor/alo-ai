@@ -139,6 +139,6 @@ def test_the_quick_call_answers_without_thinking_inside_five_seconds():
     flash, pro = models.calls
     assert (flash.config.thinking_config.thinking_budget, flash.config.http_options.timeout) == (
         0,
-        5000,
+        2500,
     )
     assert (pro.config.thinking_config, pro.config.http_options.timeout) == (None, 60000)

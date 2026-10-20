@@ -1,6 +1,7 @@
 """The Grader's quick endpoint (SDD 11)."""
 
 import aloai_contracts
+import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -65,12 +66,20 @@ class Unreachable:
         raise GoogleAPICallError("Vertex AI is unavailable")
 
 
-def test_vertex_or_firestore_not_answering_is_a_retryable_503():
-    http = client(Unreachable())
+class TooSlow:
+    def grade(self, task):
+        raise httpx.ReadTimeout("timed out")
+
+
+@pytest.mark.parametrize(
+    "model, error", [(Unreachable(), "GoogleAPICallError"), (TooSlow(), "ReadTimeout")]
+)
+def test_vertex_or_firestore_not_answering_is_a_retryable_503(model, error):
+    http = client(model)
     response = http.post("/v1/grade:quick", json=quick_request("RETELL", 0, "ada went to market"))
     assert response.status_code == 503
     assert response.json()["error"] == {
         "code": "UPSTREAM_UNAVAILABLE",
-        "message": "GoogleAPICallError",
+        "message": error,
         "retryable": True,
     }
