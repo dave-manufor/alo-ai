@@ -1,8 +1,11 @@
 import { Link, Route, Routes } from 'react-router-dom';
+import CheckoutPlaceholderPage from './pages/CheckoutPlaceholderPage';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SchoolChildPage from './pages/SchoolChildPage';
 import SchoolsPreviewPage from './pages/SchoolsPreviewPage';
+import ReportDetailPage from './pages/ReportDetailPage';
+import ReportsPage from './pages/ReportsPage';
 import SessionPlaceholderPage from './pages/SessionPlaceholderPage';
 
 // Routing skeleton. Kid-mode and grown-up-mode screens are separate routes
@@ -22,6 +25,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/session" element={<SessionPlaceholderPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
+        <Route path="/plan/checkout" element={<CheckoutPlaceholderPage />} />
         <Route path="/schools/preview" element={<SchoolsPreviewPage />} />
         <Route path="/schools/preview/children/:childId" element={<SchoolChildPage />} />
         <Route path="*" element={<NotFoundPage />} />
