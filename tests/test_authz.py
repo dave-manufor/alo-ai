@@ -73,8 +73,10 @@ def test_tools_outside_the_allowlist_are_refused():
 
 
 def test_an_unknown_agent_is_refused():
-    ctx = RunContext(agent="teacher_assistant", principal_id="teacher_demo_001")
-    assert not authorize(ctx, "end_turn", {}, RunState()).allowed
+    ctx = RunContext(agent="homework_helper", principal_id="guardian_demo_001")
+    assert authorize(ctx, "end_turn", {}, RunState()) == Decision(
+        False, "unknown agent homework_helper"
+    )
 
 
 @pytest.mark.parametrize("name", ["session_id", "child_id"])
@@ -162,3 +164,39 @@ def test_the_same_arguments_in_any_order_hash_the_same():
         coach(), "get_report", {"b": 2, "a": 1}, decision, result_size=None, at="t"
     )
     assert first["args_sha256"] == second["args_sha256"]
+
+
+def agent(name, **context):
+    return RunContext(agent=name, principal_id="teacher_demo_001", **context)
+
+
+@pytest.mark.parametrize("name", ["story_writer", "story_critic"])
+@pytest.mark.parametrize("tool", ["blueprint_stats", "blind_answer", "get_report"])
+def test_the_story_writer_and_critic_have_no_tools(name, tool):
+    assert not authorize(agent(name), tool, {}, RunState()).allowed
+
+
+@pytest.mark.parametrize(
+    "tool, limit", [("get_rubric", 20), ("get_transcript", 20), ("queue_human_review", 5)]
+)
+def test_the_grading_panel_keeps_to_this_session_and_its_limits(tool, limit):
+    ctx, state = agent("grading_panel", session_id="sess_demo_001"), RunState()
+    for _ in range(limit):
+        assert authorize(ctx, tool, {"session_id": "sess_demo_001"}, state).allowed
+    assert not authorize(ctx, tool, {"session_id": "sess_demo_001"}, state).allowed
+    assert not authorize(ctx, tool, {"session_id": "sess_other"}, RunState()).allowed
+
+
+def test_the_teacher_assistant_reads_only_the_teachers_classes():
+    ctx = agent("teacher_assistant", class_ids=frozenset({"p3b"}))
+    assert authorize(ctx, "query_class", {"class_id": "p3b"}, RunState()).allowed
+    refused = authorize(ctx, "query_class", {"class_id": "p4a"}, RunState())
+    assert refused == Decision(False, "class_id is outside the teacher's classes")
+
+
+@pytest.mark.parametrize("tool", ["propose_groups", "propose_assignment"])
+def test_teacher_assistant_proposals_wait_for_the_confirmation_token(tool):
+    ctx = agent("teacher_assistant", class_ids=frozenset({"p3b"}))
+    assert authorize(ctx, tool, {"class_id": "p3b"}, RunState()) == Decision(
+        False, f"{tool} needs the teacher's confirmation token"
+    )

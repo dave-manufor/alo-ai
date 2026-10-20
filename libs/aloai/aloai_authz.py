@@ -3,9 +3,13 @@
 Every agent tool call passes through authorize() before the tool runs. The run
 context is built by the server from the verified token and the trigger, never by
 the model; the model supplies only business arguments, and each one that names a
-session or a child must match the context. Tools that change a score, consent or
-a payment are refused for every agent. Every call is written to the audit log with
+session, a child or a class must match the context. Tools that change a score, consent
+or a payment are refused for every agent. Every call is written to the audit log with
 audit_entry().
+
+The Story Writer and Critic have no tools: the generator's code gate runs the checks
+(PRD 3.1). The Teacher Assistant's proposals need the teacher's single-use confirmation
+token (PRD 12.1), which comes with that agent, so they are refused until then.
 """
 
 import hashlib
@@ -38,6 +42,7 @@ class AgentPolicy:
     tool_limits: Mapping[str, int | None]
     run_limit: int | None = None
     requires_consent: bool = False
+    needs_confirmation: frozenset[str] = frozenset()
 
 
 POLICIES: Mapping[str, AgentPolicy] = {
@@ -67,6 +72,21 @@ POLICIES: Mapping[str, AgentPolicy] = {
         },
         requires_consent=True,
     ),
+    "story_writer": AgentPolicy(tool_limits={}),
+    "story_critic": AgentPolicy(tool_limits={}),
+    "grading_panel": AgentPolicy(
+        tool_limits={"get_rubric": 20, "get_transcript": 20, "queue_human_review": 5}
+    ),
+    "teacher_assistant": AgentPolicy(
+        tool_limits={
+            "query_class": 20,
+            "get_child_reports": 20,
+            "get_profiles": 20,
+            "propose_groups": 5,
+            "propose_assignment": 5,
+        },
+        needs_confirmation=frozenset({"propose_groups", "propose_assignment"}),
+    ),
 }
 
 SCOPED_ARGUMENTS = ("session_id", "child_id")
@@ -79,6 +99,7 @@ class RunContext:
     session_id: str | None = None
     child_id: str | None = None
     consent_on_file: bool = False
+    class_ids: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -103,11 +124,15 @@ def authorize(ctx: RunContext, tool: str, args: Mapping[str, Any], state: RunSta
         return Decision(False, f"unknown agent {ctx.agent}")
     if tool not in policy.tool_limits:
         return Decision(False, f"{tool} is not allowed for {ctx.agent}")
+    if tool in policy.needs_confirmation:
+        return Decision(False, f"{tool} needs the teacher's confirmation token")
     if policy.requires_consent and not ctx.consent_on_file:
         return Decision(False, "no consent is on file for this child")
     for name in SCOPED_ARGUMENTS:
         if name in args and args[name] != getattr(ctx, name):
             return Decision(False, f"{name} is outside this run")
+    if "class_id" in args and args["class_id"] not in ctx.class_ids:
+        return Decision(False, "class_id is outside the teacher's classes")
     limit = policy.tool_limits[tool]
     if limit is not None and state.calls[tool] >= limit:
         return Decision(False, f"{tool} reached its limit of {limit} calls in a run")
