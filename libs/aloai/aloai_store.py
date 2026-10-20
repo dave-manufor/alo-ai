@@ -2,7 +2,8 @@
 
 Paths are full document paths such as "sessions/{session_id}". FirestoreStore talks
 to Firestore, or to its emulator when FIRESTORE_EMULATOR_HOST is set; MemoryStore
-stands in for it in tests.
+stands in for it in tests. merge works as Firestore's set(merge=True): nested maps are
+merged field by field, and any other value, a list included, is replaced.
 """
 
 import copy
@@ -45,7 +46,7 @@ class MemoryStore:
         self.docs[path] = copy.deepcopy(data)
 
     def merge(self, path: str, data: dict) -> None:
-        self.docs[path] = {**self.docs.get(path, {}), **copy.deepcopy(data)}
+        self.docs[path] = _merged(self.docs.get(path, {}), copy.deepcopy(data))
 
     def create(self, path: str, data: dict) -> bool:
         if path in self.docs:
@@ -62,6 +63,16 @@ class MemoryStore:
             and "/" not in path[len(prefix) :]
             and doc.get(field) == value
         ]
+
+
+def _merged(base: dict, changes: dict) -> dict:
+    merged = dict(base)
+    for key, value in changes.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _merged(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
 
 
 class FirestoreStore:

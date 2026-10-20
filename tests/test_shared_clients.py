@@ -140,3 +140,14 @@ def test_an_event_that_can_never_succeed_is_kept_by_session_and_type():
         "message": "no document passages/x",
         "at": "2026-01-15T09:09:05Z",
     }
+
+
+def test_memory_merge_works_like_firestore():
+    store = MemoryStore({"children/c": {"guardian_id": "g", "levels": {"next": 2, "last": 3}}})
+    store.merge("children/c", {"levels": {"next": 4}, "saved_tags": ["food"]})
+    store.merge("children/c", {"saved_tags": ["music"]})
+    assert store.get("children/c") == {
+        "guardian_id": "g",
+        "levels": {"next": 4, "last": 3},
+        "saved_tags": ["music"],
+    }
