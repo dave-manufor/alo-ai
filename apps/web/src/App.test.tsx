@@ -31,11 +31,10 @@ describe('App routing skeleton', () => {
     fetchSpy.mockRestore();
   });
 
-  it('shows the kid session scaffold with a story and no score or timer', () => {
+  it('opens the kid session with the call and response and no score or timer', () => {
     const { container } = renderAt('/session');
     expect(screen.getByText('Àlọ́ o!')).toBeInTheDocument();
-    expect(screen.getByText(/Ada had a small brown goat/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /start reading/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ààlọ̀!' })).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\d+\s?%|score|timer/i);
   });
 

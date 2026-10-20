@@ -8,7 +8,7 @@ import SchoolChildPage from './pages/SchoolChildPage';
 import SchoolsPreviewPage from './pages/SchoolsPreviewPage';
 import ReportDetailPage from './pages/ReportDetailPage';
 import ReportsPage from './pages/ReportsPage';
-import SessionPlaceholderPage from './pages/SessionPlaceholderPage';
+import SessionPage from './pages/SessionPage';
 import SignInPage from './pages/SignInPage';
 
 // Routing skeleton. Kid-mode and grown-up-mode screens are separate routes
@@ -30,7 +30,7 @@ export default function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/consent" element={<ConsentPage />} />
         <Route path="/children" element={<ChildrenPage />} />
-        <Route path="/session" element={<SessionPlaceholderPage />} />
+        <Route path="/session" element={<SessionPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
         <Route path="/plan/checkout" element={<CheckoutPlaceholderPage />} />
