@@ -1,0 +1,11 @@
+# Session Agent runtime. Pinned; update deliberately and rerun the session tests.
+livekit-agents==1.8.8
+livekit-plugins-silero==1.8.8
+livekit-plugins-google==1.8.8
+google-cloud-storage==3.17.1
+google-cloud-firestore==2.34.1
+google-cloud-pubsub==2.43.0
+google-auth==2.62.0
+httpx==0.28.1
+numpy==2.4.6
+soundfile==0.14.0

@@ -1,0 +1,11 @@
+# Used by BuildKit for services/session_agent/Dockerfile only (context: repo root).
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.coverage
+**/*.pyc
+.git
+.env*
+**/*.wav
+**/*.flac
+**/*.mp3

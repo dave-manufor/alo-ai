@@ -1,2 +1,4 @@
+-r requirements.txt
 pytest>=8,<9
+pytest-cov>=7,<8
 jsonschema[format]>=4.23,<5
