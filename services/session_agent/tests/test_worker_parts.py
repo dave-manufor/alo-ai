@@ -192,6 +192,12 @@ def test_every_session_clip_says_what_kemi_says(catalog):
     assert all(text for clip_id, text in texts.items() if clip_id != "listening_story")
 
 
+def test_question_texts_follow_the_asking_order_not_the_list_order(catalog):
+    read = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
+    shuffled = {**read, "items": list(reversed(read["items"]))}
+    assert catalog.text("question:0", shuffled) == read["items"][0]["prompt_text"]
+
+
 def test_every_prompt_has_its_text():
     assert set(PROMPT_TEXTS) == set(PROMPTS)
 

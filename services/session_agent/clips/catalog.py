@@ -86,9 +86,9 @@ class ClipCatalog:
         if clip_id == "listening_story" and listening is not None:
             return None
         if role == "question" and number.isdigit() and read is not None:
-            return read["items"][int(number)]["prompt_text"]
+            return _asked(read)[int(number)]["prompt_text"]
         if role == "listening_item" and number.isdigit() and listening is not None:
-            return listening["items"][int(number)]["prompt_text"]
+            return _asked(listening)[int(number)]["prompt_text"]
         if clip_id.startswith("word_") and read is not None:
             for token in _words(read["tokens"]):
                 if self.word_clip_id(token) == clip_id:
@@ -118,6 +118,12 @@ class ClipCatalog:
 
 def _words(tokens: Sequence[dict]) -> list[dict]:
     return [t for t in tokens if clean_word(t.get("clean_text") or t["text"])]
+
+
+def _asked(passage: dict) -> list[dict]:
+    """Items in the order they are asked, as the Grader indexes them: question:0 is the
+    item with the lowest `order`."""
+    return sorted(passage["items"], key=lambda item: item["order"])
 
 
 def _unique(items) -> list[str]:
