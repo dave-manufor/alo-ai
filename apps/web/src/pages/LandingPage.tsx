@@ -24,6 +24,11 @@ export default function LandingPage() {
               For schools (preview)
             </Button>
           </Link>
+          <Link to="/reports" aria-label="See reading reports">
+            <Button variant="secondary" size="grown">
+              See reports
+            </Button>
+          </Link>
         </div>
       </section>
 

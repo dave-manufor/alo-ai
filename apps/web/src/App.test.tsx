@@ -38,6 +38,15 @@ describe('App routing skeleton', () => {
     expect(container.textContent).not.toMatch(/\d+\s?%|score|timer/i);
   });
 
+  it('routes the full MVP: sign-in, reports and checkout', () => {
+    const { unmount } = renderAt('/signin');
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
+    unmount();
+
+    renderAt('/reports');
+    expect(screen.getByRole('heading', { name: 'Reading reports' })).toBeInTheDocument();
+  });
+
   it('shows a friendly page for unknown routes', () => {
     renderAt('/no-such-page');
     expect(

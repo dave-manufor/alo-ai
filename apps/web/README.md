@@ -26,14 +26,22 @@ Followed as closely as possible, through exactly one consumption layer —
 see `src/design-system/README.md` for W1's decision (verbatim bundle +
 generated `tokens.css` + synced assets; no hard-coded token values).
 
-## Routes (scaffold)
+## Routes (fixture-backed MVP)
 
-| Route | Mode | Status |
-|---|---|---|
-| `/` | Grown-up | Landing placeholder |
-| `/session` | Kid | Session-screen scaffold with sample story; LiveKit + W2's session protocol arrive in `feat/web-session-screen` |
-| `/schools/preview` | Grown-up | Teacher view preview shell with the mandatory sample-data banner (PRD 4.7); full preview in its own branch |
+The MVP UI is complete against fixtures, ready to swap each fixture for
+its live service without changing the screens:
 
-Sign-in, consent, child profiles, the real report screen and Paystack
-checkout are follow-up branches (`feat/web-auth-consent`,
-`feat/web-report-screen`, `feat/payments-paystack-checkout`, …).
+| Route | Mode | What it does | Live replacement |
+|---|---|---|---|
+| `/` | Grown-up | Landing | — |
+| `/signin` | Grown-up | Sample Google / email-link sign-in | Firebase Authentication |
+| `/consent` | Grown-up | Consent record (text, version, time, sign-in method, email); gates everything after it | Account service consent records (PRD 12) |
+| `/children` | Grown-up | Child profiles (first name, Primary 1–6, birth year) | Account service `children/` |
+| `/session` | Kid | Full session flow on W2's protocol: `clip_list` downloads, `show/hide_passage`, told-word `play` with `played`/`missing` acks, retell, questions, reward close | LiveKit room + `POST /v1/sessions` driver |
+| `/reports`, `/reports/:sessionId` | Grown-up | Report list and detail from the `ReadingReport` shape (PRD 10.4): strength first, profile, level guide, books, weekly plan | `reports/{session_id}` written by W3's Grader |
+| `/plan/checkout` | Grown-up | Weekly-plan checkout placeholder | Paystack inline checkout, initialized by the Account service (PRD 11.1) |
+| `/schools/preview`, `/schools/preview/children/:childId` | Grown-up | Full teacher view preview: sample P3B class of 23, sortable table, groups, child pages, scripted assistant. No network calls (tested) | Real teacher view comes after the hackathon (PRD 4.7) |
+
+Fixture stores live beside their screens (`src/account/store.ts`,
+`src/report/reportFixture.ts`, `src/preview/teacherFixture.ts`,
+`src/session/`) and are the only places sample data enters the app.
