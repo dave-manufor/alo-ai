@@ -50,9 +50,28 @@ def test_main_needs_a_mode(capsys):
     assert "usage" in capsys.readouterr().err
 
 
-def test_main_reports_that_the_worker_is_not_wired_yet(capsys):
-    assert main(["dev"], {}) == 3
-    assert "not wired" in capsys.readouterr().err
+@pytest.mark.parametrize("mode", ["dev", "start", "console"])
+def test_main_hands_good_settings_to_the_worker(mode):
+    ran = []
+    assert main([mode], {}, run=ran.append) == 0
+    assert ran == [[mode]]
+
+
+def test_main_does_not_start_the_worker_with_bad_settings():
+    ran = []
+    assert main(["start"], {"ALO_ENV": "local", "K_SERVICE": "x"}, run=ran.append) == 1
+    assert ran == []
+
+
+def test_worker_settings_default_to_the_dev_project_and_can_be_overridden():
+    defaults = config.worker_settings({})
+    assert (defaults.audio_bucket, defaults.clips_bucket) == ("aloai-dev-audio", "aloai-dev-clips")
+    assert defaults.clips_base_url == "https://storage.googleapis.com/aloai-dev-clips"
+    assert (defaults.stt_language, defaults.stt_location) == ("en-GB", "eu")
+    local = config.worker_settings(
+        {"CLIPS_BUCKET": "c", "CLIPS_BASE_URL": "http://localhost:4443/c", "BANK_DIR": "x"}
+    )
+    assert (local.clips_base_url, local.bank_dir) == ("http://localhost:4443/c", "x")
 
 
 def test_main_reads_the_process_environment_by_default(monkeypatch):
