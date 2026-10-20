@@ -141,8 +141,10 @@ def test_report_repeats_the_passage_telemetry_and_event():
         "topic_tags": passage["topic_tags"],
     }
     assert report["level"]["passage_arl"] == passage["arl_level"]
-    for field in ("accuracy_pct", "wcpm", "words_attempted", "reading_seconds"):
+    for field in ("words_attempted", "reading_seconds"):
         assert report["fluency"][field] == telemetry[field]
+    for field in ("accuracy_pct", "wcpm"):  # telemetry is exact; the report shows one decimal
+        assert report["fluency"][field] == round(telemetry[field], 1)
     assert set(telemetry["flags"]) <= set(report["flags"])
     assert (ready["profile"], ready["provisional"]) == (
         report["profile"]["code"],

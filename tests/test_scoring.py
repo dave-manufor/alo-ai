@@ -39,6 +39,11 @@ def reading(**counts):
     return scoring.fluency(**(values | counts))
 
 
+def shown(value, digits=1):
+    """A number as the report shows it; the library itself keeps it exact."""
+    return None if value is None else round(value, digits)
+
+
 def profile(d_ok=True, rc=None, lc=None, *, flags=(), stopped=False):
     return scoring.assign_profile(
         flags=flags, reading_stopped_early=stopped, d_ok=d_ok, rc=rc, lc=lc
@@ -49,20 +54,20 @@ def profile(d_ok=True, rc=None, lc=None, *, flags=(), stopped=False):
 
 
 def test_chidi_fluency_matches_the_worked_session():
+    # The worked session timed 80 s under the old 3 s wait. Chidi's told word is token 35,
+    # mid-passage, so under today's 5 s wait the same reading measures 82 s, and WCPM
+    # takes the extra 2 s off again: 60 x 125 / 80 s.
     f = reading(
         words_attempted=128,
-        reading_seconds=80.0,
+        reading_seconds=82.0,
         substitutions=1,
         omissions=1,
         told=1,
+        told_waits=1,
         self_corrections=1,
     )
-    assert (f.words_correct, f.accuracy_pct, f.wcpm, f.self_correction_ratio) == (
-        125,
-        97.7,
-        93.8,
-        0.33,
-    )
+    assert (f.words_correct, shown(f.accuracy_pct), shown(f.wcpm)) == (125, 97.7, 93.8)
+    assert (shown(f.self_correction_ratio, 2), f.reading_seconds) == (0.33, 82.0)
     assert f.flags == ()
 
 
@@ -72,7 +77,7 @@ def test_chidi_profile_and_levels_match_the_worked_session():
         scoring.retell_coverage(6.5, 15), scoring.item_score([1, 2, 0])
     )
     lc = scoring.comprehension_score(scoring.retell_coverage(4.0, 12), scoring.item_score([2, 0]))
-    assert (d_ok, rc, lc) == (True, 58.9, 52.2)
+    assert (d_ok, shown(rc), shown(lc)) == (True, 58.9, 52.2)
     assert scoring.run_listening_module(rc)
     assert scoring.listening_outcome(True, rc) == ListeningOutcome(lc_used=True, flag=None)
     assert profile(d_ok, rc, lc) == Profile("FLUENT_NEEDS_LANGUAGE_SUPPORT", provisional=False)
@@ -91,7 +96,7 @@ def test_chidi_profile_and_levels_match_the_worked_session():
 def test_scores_divide_by_words_attempted_not_passage_length():
     # PRD 0, v1.1 row 1: 30 of 100 words reached, 2 errors, 60 s.
     f = reading(words_attempted=30, substitutions=2)
-    assert (f.accuracy_pct, f.wcpm) == (93.3, 28.0)
+    assert (shown(f.accuracy_pct), f.wcpm) == (93.3, 28.0)
 
 
 def test_every_error_type_counts_against_the_child():
@@ -101,12 +106,12 @@ def test_every_error_type_counts_against_the_child():
 
 def test_uncertain_words_count_neither_for_nor_against():
     f = reading(substitutions=5, uncertain=5)
-    assert (f.words_correct, f.accuracy_pct, f.wcpm) == (90, 94.7, 90.0)
+    assert (f.words_correct, shown(f.accuracy_pct), f.wcpm) == (90, 94.7, 90.0)
 
 
 def test_reading_time_is_capped_at_90_seconds():
     f = reading(reading_seconds=120.0)
-    assert (f.reading_seconds, f.wcpm) == (90, 66.7)
+    assert (f.reading_seconds, shown(f.wcpm)) == (90, 66.7)
 
 
 def test_wcpm_leaves_out_the_told_wait_beyond_the_norms_3_seconds():
@@ -117,11 +122,21 @@ def test_wcpm_leaves_out_the_told_wait_beyond_the_norms_3_seconds():
 
 def test_a_told_first_word_has_no_wait_inside_the_reading():
     f = reading(reading_seconds=64.0, told=1, told_waits=0)
-    assert f.wcpm == round(60 * 99 / 64, 1)
+    assert f.wcpm == 60 * 99 / 64
 
 
-def test_no_reading_time_left_after_the_waits_gives_no_wcpm():
-    assert reading(reading_seconds=4.0, told=2, told_waits=2).wcpm is None
+def test_told_waits_that_cannot_fit_in_the_reading_are_refused():
+    with pytest.raises(ValueError, match="cannot fit"):
+        reading(reading_seconds=9.9, told=2, told_waits=2)
+    assert reading(reading_seconds=10.0, told=2, told_waits=2).wcpm == 60 * 98 / 6
+
+
+def test_the_cuts_compare_the_exact_number_not_the_one_shown():
+    # 949 of 999 words is 94.995%: shown as 95.0, still below the 95% cut.
+    f = reading(words_attempted=999, substitutions=50, reading_seconds=600.0)
+    assert shown(f.accuracy_pct) == 95.0
+    assert scoring.word_reading_ok(f.accuracy_pct, f.wcpm, 1) is False
+    assert scoring.run_listening_module(77.96) is True
 
 
 def test_told_words_are_left_out_of_the_self_correction_ratio():

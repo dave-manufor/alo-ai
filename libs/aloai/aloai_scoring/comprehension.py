@@ -39,10 +39,11 @@ def item_score(points: Sequence[int]) -> float:
 
 
 def comprehension_score(coverage: float, items: float) -> float:
-    """RC on the read passage, LC on the listening passage, from 0 to 100."""
+    """RC on the read passage, LC on the listening passage, from 0 to 100, exact: the
+    cuts compare the true score, and the report rounds it for display."""
     if not (0 <= coverage <= 1 and 0 <= items <= 1):
         raise ValueError("coverage and item score must be between 0 and 1")
-    return round(100 * (RETELL_WEIGHT * coverage + ITEM_WEIGHT * items), 1)
+    return 100 * (RETELL_WEIGHT * coverage + ITEM_WEIGHT * items)
 
 
 @dataclass(frozen=True)
@@ -53,13 +54,11 @@ class Comprehension:
 
 
 def comprehension(credit: float, total_weight: int, points: Sequence[int]) -> Comprehension:
-    """The score with the coverage and item score it came from, as the report shows them."""
+    """The score with the coverage and item score it came from."""
     coverage = retell_coverage(credit, total_weight)
     items = item_score(points)
     return Comprehension(
-        score=comprehension_score(coverage, items),
-        retell_coverage=round(coverage, 2),
-        item_score=round(items, 2),
+        score=comprehension_score(coverage, items), retell_coverage=coverage, item_score=items
     )
 
 

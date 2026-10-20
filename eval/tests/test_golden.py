@@ -13,11 +13,11 @@ DEMO_HAND = {"words_attempted": 23, "errors": 3, "told": 1, "reading_seconds": 1
 
 def test_the_hand_count_follows_the_scoring_rules():
     hand = hand_fluency(DEMO_HAND)
-    assert (hand.wcpm, hand.accuracy_pct) == (68.0, 87.0)
+    assert (hand.wcpm, hand.accuracy_pct) == (60 * 20 / 17.65, 100 * 20 / 23)
 
 
 def test_a_told_first_word_has_no_wait_to_take_off():
-    assert hand_fluency(DEMO_HAND | {"told_waits": 0}).wcpm == 61.1
+    assert hand_fluency(DEMO_HAND | {"told_waits": 0}).wcpm == 60 * 20 / 19.65
 
 
 def scored(store, session_id, wcpm, accuracy):
@@ -26,7 +26,7 @@ def scored(store, session_id, wcpm, accuracy):
 
 @pytest.mark.parametrize(
     "wcpm, accuracy, within",
-    [(68.0, 87.0, True), (73.0, 90.0, True), (73.1, 87.0, False), (68.0, 83.9, False)],
+    [(68.0, 87.0, True), (72.9, 89.9, True), (73.1, 87.0, False), (68.0, 83.9, False)],
 )
 def test_the_scorer_must_land_within_five_wcpm_and_three_points(wcpm, accuracy, within):
     store = MemoryStore()

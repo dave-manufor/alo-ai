@@ -139,9 +139,20 @@ def _flags(grading: dict, telemetry: dict, listening: scoring.ListeningOutcome) 
     return list(dict.fromkeys(raised))
 
 
+def _shown(value: float | None, digits: int) -> float | None:
+    """How the report shows an exact number; the decisions were taken on the exact one."""
+    return None if value is None else round(value, digits)
+
+
 def _fluency(telemetry: dict, d_ok: bool | None) -> dict:
-    fields = ("accuracy_pct", "wcpm", "words_attempted", "reading_seconds", "self_correction_ratio")
-    return {field: telemetry[field] for field in fields} | {"word_reading_ok": d_ok}
+    return {
+        "accuracy_pct": _shown(telemetry["accuracy_pct"], 1),
+        "wcpm": _shown(telemetry["wcpm"], 1),
+        "words_attempted": telemetry["words_attempted"],
+        "reading_seconds": telemetry["reading_seconds"],
+        "self_correction_ratio": _shown(telemetry["self_correction_ratio"], 2),
+        "word_reading_ok": d_ok,
+    }
 
 
 def _comprehension_section(
@@ -158,12 +169,12 @@ def _comprehension_section(
         else None
     )
     return {
-        "reading_comprehension": rc.score if rc else None,
-        "retell_coverage": rc.retell_coverage if rc else None,
-        "item_score": rc.item_score if rc else None,
-        "quick_reading_comprehension": quick["quick_rc"] if quick else None,
+        "reading_comprehension": _shown(rc.score, 1) if rc else None,
+        "retell_coverage": _shown(rc.retell_coverage, 2) if rc else None,
+        "item_score": _shown(rc.item_score, 2) if rc else None,
+        "quick_reading_comprehension": _shown(quick["quick_rc"], 1) if quick else None,
         "listening_module_run": grading["listening_module_run"],
-        "listening_comprehension": lc.score if lc else None,
+        "listening_comprehension": _shown(lc.score, 1) if lc else None,
         "listening_used": listening.lc_used and lc is not None,
         "quick_vs_final_item_agreement": agreement,
     }

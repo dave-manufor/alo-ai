@@ -42,7 +42,11 @@ def fluency(
 
     told_waits: the told words whose wait fell inside the reading time (all but a told
     first word). WCPM leaves out the part of each wait beyond the norms' 3 s, so it stays
-    comparable with WCPM_CUT; reading_seconds stays as measured."""
+    comparable with WCPM_CUT; reading_seconds stays as measured. Waits that cannot fit in
+    the reading time are refused.
+
+    The values are exact, so the cuts compare the true numbers; the report rounds them
+    for display."""
     counts = (
         words_attempted,
         substitutions,
@@ -63,7 +67,9 @@ def fluency(
         raise ValueError("more errors and uncertain words than words attempted")
 
     seconds = min(reading_seconds, READING_CAP_S)
-    wcpm_seconds = max(0, seconds - told_waits * (TOLD_WAIT_S - NORM_TOLD_WAIT_S))
+    if told_waits * TOLD_WAIT_S > seconds:
+        raise ValueError(f"{told_waits} told waits of {TOLD_WAIT_S} s cannot fit in {seconds} s")
+    wcpm_seconds = seconds - told_waits * (TOLD_WAIT_S - NORM_TOLD_WAIT_S)
     correct = scored - errors
     misreads = substitutions + omissions + mispronunciations
     flags = []
@@ -75,10 +81,10 @@ def fluency(
         words_attempted=words_attempted,
         words_correct=correct,
         reading_seconds=seconds,
-        accuracy_pct=round(100 * correct / scored, 1) if scored else None,
-        wcpm=round(60 * correct / wcpm_seconds, 1) if scored and wcpm_seconds else None,
+        accuracy_pct=100 * correct / scored if scored else None,
+        wcpm=60 * correct / wcpm_seconds if scored and wcpm_seconds else None,
         self_correction_ratio=(
-            round(self_corrections / (self_corrections + misreads), 2)
+            self_corrections / (self_corrections + misreads)
             if self_corrections + misreads
             else None
         ),

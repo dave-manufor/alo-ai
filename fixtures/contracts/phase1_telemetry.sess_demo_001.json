@@ -9,8 +9,8 @@
   "error_counts": {"substitution": 1, "omission": 0, "told": 1, "mispronunciation": 0},
   "self_correction_count": 1,
   "uncertain_count": 1,
-  "accuracy_pct": 90.9,
-  "wcpm": 68.0,
+  "accuracy_pct": 90.9090909090909,
+  "wcpm": 67.98866855524079,
   "self_correction_ratio": 0.5,
   "prosody": { "reported": true, "pause_intrusion_rate": 0.0, "f0_word_corr": null, "phrasing": 100, "expression": null, "overall": 100 },
   "word_events": [

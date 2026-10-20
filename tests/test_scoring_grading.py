@@ -11,10 +11,12 @@ from aloai_scoring import CombinedItems, CombinedRetell, Comprehension
 # ---- 6.3 the comprehension numbers the report shows
 
 
-def test_chidi_comprehension_shows_coverage_and_item_score_as_the_report_does():
-    assert scoring.comprehension(6.5, 15, [1, 2, 0]) == Comprehension(
-        score=58.9, retell_coverage=0.72, item_score=0.5
+def test_chidi_comprehension_keeps_the_numbers_exact():
+    found = scoring.comprehension(6.5, 15, [1, 2, 0])
+    assert found == Comprehension(
+        score=100 * (0.4 * 6.5 / 9 + 0.6 * 0.5), retell_coverage=6.5 / 9, item_score=0.5
     )
+    assert (round(found.score, 1), round(found.retell_coverage, 2)) == (58.9, 0.72)
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "phase1_telemetry.schema.json",
   "title": "Phase1Telemetry",
-  "description": "Firestore sessions/{session_id}/phase1/telemetry (PRD 10.2). Producer: Reading Scorer (W3). Consumer: Grader (W3). A word is labelled only where the Chirp 3 and Gemini transcripts agree; otherwise it is UNCERTAIN and left out of every count. Accuracy and WCPM are null when no word could be scored. Every number comes from aloai_scoring, whose version is in model_versions.",
+  "description": "Firestore sessions/{session_id}/phase1/telemetry (PRD 10.2). Producer: Reading Scorer (W3). Consumer: Grader (W3). A word is labelled only where the Chirp 3 and Gemini transcripts agree; otherwise it is UNCERTAIN and left out of every count. Accuracy and WCPM are null when no word could be scored. Every number comes from aloai_scoring, whose version is in model_versions, and is exact (not rounded), so the Grader compares the true values with the cuts; the ReadingReport rounds them for display.",
   "type": "object",
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },
