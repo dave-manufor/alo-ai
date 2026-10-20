@@ -13,9 +13,21 @@ from aloai_store import FirestoreStore, MemoryStore
 from google.api_core.exceptions import AlreadyExists
 
 
-def test_local_shortcuts_are_refused_on_cloud_run():
+@pytest.mark.parametrize(
+    "cloud_run", [{"K_SERVICE": "aloai-core"}, {"CLOUD_RUN_JOB": "aloai-book-ingest"}]
+)
+@pytest.mark.parametrize(
+    "shortcut",
+    [{"ALO_ENV": "local", "AI_MODE": "live"}, {"AI_MODE": "fixtures"}, {}],
+    ids=["emulators", "recorded AI", "recorded AI by default"],
+)
+def test_local_shortcuts_are_refused_on_cloud_run(cloud_run, shortcut):
     with pytest.raises(aloai_env.ConfigError):
-        aloai_env.load({"ALO_ENV": "local", "K_SERVICE": "aloai-core"})
+        aloai_env.load(cloud_run | shortcut)
+
+
+def test_cloud_run_runs_with_live_ai():
+    assert aloai_env.load({"K_SERVICE": "aloai-core", "AI_MODE": "live"}).ai_mode == "live"
 
 
 def test_an_unknown_ai_mode_is_refused():
