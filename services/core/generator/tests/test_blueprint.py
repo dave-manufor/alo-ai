@@ -1,3 +1,5 @@
+from itertools import pairwise
+
 import pytest
 from services.core.generator import blueprint
 
@@ -9,7 +11,7 @@ def test_the_rows_cover_arl_1_to_12_once():
 
 def test_every_limit_gets_easier_to_harder_down_the_rows():
     rows = blueprint.ROWS
-    for easier, harder in zip(rows, rows[1:], strict=False):
+    for easier, harder in pairwise(rows):
         assert easier.words[1] <= harder.words[1]
         assert easier.max_mean_sentence < harder.max_mean_sentence
         assert easier.max_long_share < harder.max_long_share

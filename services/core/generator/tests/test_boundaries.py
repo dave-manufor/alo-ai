@@ -24,8 +24,16 @@ def labels(sentence, nlp):
         ("It cost too much.", "---T"),
         ("The goat ate the leaves and the grass.", "-------T"),
         # a prepositional phrase of three words after three words, no punctuation
-        ("Ada and Mama went to the market.", "---P--T"),
         ("The boy ran to the old market near the river.", "--P---P--T"),
+        # a subject of three or more words, before its verb; a phrase inside it stays whole
+        ("Ada and Mama went to the market.", "--P---T"),
+        ("The old man with the goat ran home.", "-----P-T"),
+        ("My big brother Tunde kicked the ball.", "---P--T"),
+        ("The children in the class sang a song.", "----P--T"),
+        ("The old man ran home.", "--P-T"),
+        # a fronted adverbial of two or more words; one word is not enough
+        ("Every morning the farmer feeds his goats.", "-P----T"),
+        ("Today the farmer feeds his goats.", "-----T"),
         # a new clause starts: "and" between verbs, a subordinator
         ("Ada ran and Tunde laughed.", "-C--T"),
         ("Ada went to the market and she bought a hat.", "----C----T"),
@@ -46,7 +54,7 @@ def test_boundaries_after_each_token(nlp, sentence, expected):
 
 
 def test_a_lone_dash_is_a_token_with_no_boundary_of_its_own(nlp):
-    tokens = "Ada waited — and then she left.".split()
+    tokens = ["Ada", "waited", "—", "and", "then", "she", "left."]
     found = boundaries("Ada waited — and then she left.", nlp)
     assert len(found) == len(tokens)
     assert found[2] == "NONE"

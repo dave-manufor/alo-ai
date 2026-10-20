@@ -10,9 +10,17 @@ rule is small, deterministic and tested. It uses punctuation plus a spaCy depend
   subject of a subordinate or coordinated clause, or "and"/"but"/"or" joining two
   verbs) the boundary is CLAUSE, with or without a comma;
 - after a comma, semicolon, colon or dash that does not start a clause it is PHRASE;
+- after a subject of 3+ words, before its verb, it is PHRASE ("Ada and Mama | went",
+  "The old man with the goat | ran");
+- after a fronted adverbial of 2+ words, before the rest of the clause, it is PHRASE
+  ("Every morning | the farmer feeds his goats");
 - with no punctuation, a prepositional phrase of 3+ words that follows 3+ words since the
-  last boundary starts after a PHRASE boundary ("The boy ran | to the old market");
+  last boundary starts after a PHRASE boundary ("The boy ran | to the old market"), unless
+  the phrase is inside the subject ("The old man with the goat" stays whole);
 - anything else is NONE.
+
+A child pauses at these breaks, and the Scorer counts a pause as phrasing only after one,
+so a missed break makes a natural pause count against them.
 """
 
 from spacy.language import Language
@@ -25,6 +33,10 @@ CLAUSE_DEPS = frozenset({"advcl", "ccomp", "relcl", "conj"})
 VERBAL = frozenset({"VERB", "AUX"})
 WH_TAGS = frozenset({"WDT", "WP", "WP$", "WRB"})
 MIN_PHRASE = 3  # words in the phrase, and words since the last boundary
+MIN_SUBJECT = 3  # words in a subject that is followed by a break before its verb
+MIN_FRONTED = 2  # words in a fronted adverbial that is followed by a break
+SUBJECT_DEPS = frozenset({"nsubj", "nsubjpass"})
+FRONTED_DEPS = frozenset({"npadvmod", "advmod", "prep", "obl"})
 
 
 def boundaries(sentence: str, nlp: Language) -> list[str]:
@@ -98,13 +110,54 @@ def _label(current: Token, following: Token | None, trail: str, since: int, *, l
         return "CLAUSE"
     if punctuated:
         return "CLAUSE" if _ends_subordinate_clause(current) else "PHRASE"
-    if following.dep_ == "prep" and since >= MIN_PHRASE and _size(following) >= MIN_PHRASE:
+    if _ends_long_subject(current) or _ends_fronted_adverbial(current):
+        return "PHRASE"
+    if (
+        following.dep_ == "prep"
+        and since >= MIN_PHRASE
+        and _size(following) >= MIN_PHRASE
+        and not _in_subject(following)
+    ):
         return "PHRASE"
     return "NONE"
 
 
 def _size(token: Token) -> int:
     return sum(1 for t in token.subtree if not t.is_punct)
+
+
+def _last_word(token: Token) -> int:
+    return max(t.i for t in token.subtree if not t.is_punct)
+
+
+def _ends_long_subject(token: Token) -> bool:
+    """Is this the last word of a subject of 3+ words that comes before its verb?"""
+    for candidate in (token, *token.ancestors):
+        if candidate.dep_ in SUBJECT_DEPS:
+            return (
+                _last_word(candidate) == token.i
+                and _size(candidate) >= MIN_SUBJECT
+                and candidate.head.pos_ in VERBAL
+                and candidate.head.i > token.i
+            )
+    return False
+
+
+def _ends_fronted_adverbial(token: Token) -> bool:
+    """Is this the last word of a 2+ word modifier that opens the sentence ("Every
+    morning", "After the rain") and hangs off a verb that comes later?"""
+    for candidate in (token, *token.ancestors):
+        if candidate.dep_ in FRONTED_DEPS and candidate.left_edge.i == 0:
+            return (
+                _last_word(candidate) == token.i
+                and _size(candidate) >= MIN_FRONTED
+                and candidate.head.i > token.i
+            )
+    return False
+
+
+def _in_subject(token: Token) -> bool:
+    return any(candidate.dep_ in SUBJECT_DEPS for candidate in (token, *token.ancestors))
 
 
 def _introduces_clause(token: Token) -> bool:
