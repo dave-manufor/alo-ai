@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "session_id": "sess_demo_001",
+  "child_ref": "child_demo_001",
+  "target_arl": 4,
+  "tags": ["animals", "adventure"],
+  "detail": "goat",
+  "genre_hint": "NARRATIVE",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "deadline_ms": 20000
+}

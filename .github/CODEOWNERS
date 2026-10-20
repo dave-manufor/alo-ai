@@ -1,6 +1,5 @@
 # Review ring (docs/CONTRIBUTING.md):
-#   W1 (Anthony) is reviewed by W2 or W3; W2 (David) reviews W3; W3 (Nelson) reviews W2.
-# TODO: replace @W1-GITHUB-USERNAME with Anthony's GitHub username.
+#   W1 (Anthony, @dhtml) is reviewed by W2 or W3; W2 (David) reviews W3; W3 (Nelson) reviews W2.
 
 # W1: web, accounts and payments, platform
 /apps/web/                @dave-manufor @SmartWebCodder
@@ -25,11 +24,11 @@
 /tests/                   @dave-manufor
 
 # Shared: all three
-/schemas/                 @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/schemas/                 @dhtml @dave-manufor @SmartWebCodder
 /eval/                    @dave-manufor @SmartWebCodder
-/fixtures/contracts/      @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
-/docs/                    @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
-/AGENTS.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
-/CLAUDE.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
-/GEMINI.md                @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
-/.agents/                 @W1-GITHUB-USERNAME @dave-manufor @SmartWebCodder
+/fixtures/contracts/      @dhtml @dave-manufor @SmartWebCodder
+/docs/                    @dhtml @dave-manufor @SmartWebCodder
+/AGENTS.md                @dhtml @dave-manufor @SmartWebCodder
+/CLAUDE.md                @dhtml @dave-manufor @SmartWebCodder
+/GEMINI.md                @dhtml @dave-manufor @SmartWebCodder
+/.agents/                 @dhtml @dave-manufor @SmartWebCodder

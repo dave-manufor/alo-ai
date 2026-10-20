@@ -100,6 +100,10 @@ def test_every_schema_has_a_fixture():
         "report_ready.schema.json",
         "plan_ready.schema.json",
         "plan.schema.json",
+        "topic_tag.schema.json",
+        "passage_generate_request.schema.json",
+        "passage_generate_response.schema.json",
+        "story_request.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
@@ -256,3 +260,83 @@ def test_audio_uri_must_be_gcs():
 def test_protocol_message_with_extra_field_is_rejected():
     message = {"schema_version": 1, "cmd": "play", "clip_id": "x", "score": 90}
     assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+def test_generator_request_and_response_fixtures_validate():
+    _validator("passage_generate_request.schema.json").validate(
+        _fixture("passage_generate.request.json")
+    )
+    _validator("passage_generate_response.schema.json").validate(
+        _fixture("passage_generate.response.json")
+    )
+
+
+@pytest.mark.parametrize("name", ["story_request.queued.json", "story_request.done.json"])
+def test_story_request_fixtures_validate(name):
+    _validator("story_request.schema.json").validate(_fixture(name))
+
+
+def test_every_topic_tag_validates_and_the_fixture_lists_them_all():
+    validator = _validator("topic_tag.schema.json")
+    tags = _fixture("topic_tags.json")
+    assert len(tags) == 12
+    assert all(validator.is_valid(tag) for tag in tags)
+    assert tags == _load(SCHEMAS / "topic_tag.schema.json")["enum"]
+
+
+@pytest.mark.parametrize("tag", ["dyslexia", "Animals", "food and cooking", "", None])
+def test_a_tag_outside_the_taxonomy_is_rejected(tag):
+    assert not _validator("topic_tag.schema.json").is_valid(tag)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"tags": ["animals", "space", "music"]},
+        {"tags": ["animals", "animals"]},
+        {"tags": ["dyslexia"]},
+        {"detail": "Goat"},
+        {"detail": "a very small goat"},
+        {"target_arl": 13},
+        {"length_profile": "SHORT"},
+        {"deadline_ms": 0},
+        {"child_name": "not allowed"},
+    ],
+)
+def test_a_bad_generate_request_is_rejected(change):
+    request = {**_fixture("passage_generate.request.json"), **change}
+    assert not _validator("passage_generate_request.schema.json").is_valid(request)
+
+
+@pytest.mark.parametrize("field", ["detail", "genre_hint"])
+def test_the_optional_request_fields_may_be_left_out(field):
+    request = _fixture("passage_generate.request.json")
+    del request[field]
+    assert _validator("passage_generate_request.schema.json").is_valid(request)
+
+
+@pytest.mark.parametrize("change", [{"attempts": 3}, {"attempts": 0}, {"score": 90}])
+def test_a_bad_generate_response_is_rejected(change):
+    response = {**_fixture("passage_generate.response.json"), **change}
+    assert not _validator("passage_generate_response.schema.json").is_valid(response)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"tags": []},
+        {"tags": ["food", "food"]},
+        {"tags": ["food", "music", "space"]},
+        {"status": "OK"},
+    ],
+)
+def test_a_bad_story_request_is_rejected(change):
+    request = {**_fixture("story_request.queued.json"), **change}
+    assert not _validator("story_request.schema.json").is_valid(request)
+
+
+def test_a_pre_generated_passage_never_reuses_an_id_in_the_same_session():
+    request = _fixture("story_request.done.json")
+    in_session = _fixture("passage_generate.response.json")["passage_id"]
+    assert request["passage_id"] == f"gen_next_{request['session_id']}"
+    assert request["passage_id"] not in (f"story_{request['session_id']}", in_session)

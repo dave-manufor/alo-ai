@@ -1,0 +1,9 @@
+{
+  "child_id": "child_demo_001",
+  "arl": 2,
+  "tags": ["food", "music"],
+  "session_id": "sess_demo_001",
+  "status": "DONE",
+  "passage_id": "gen_next_sess_demo_001",
+  "processed_at": "2026-01-15T09:20:00Z"
+}

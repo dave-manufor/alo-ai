@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "story_request.schema.json",
+  "title": "StoryRequest",
+  "description": "Document story_requests/story_{session_id} (SDD 8, 11): the Reading Coach's queue_story request. Producer of the request fields: Reading Coach (W3), written before it publishes plan.ready. Consumer: Passage Generator (W2), which handles plan.ready, generates the child's next passage with no deadline and no bank fallback, then adds status, passage_id and processed_at and sets children/{child_id}.next_passage_id. Idempotent: a request that already has a passage_id is skipped. The passage_id of a pre-generated passage is gen_next_{session_id}, so it never equals this document's own id (story_{session_id}) or the in-session passage of the same session (gen_{session_id}). tags always holds one or two different tags: with none to send, the Coach writes no request.",
+  "type": "object",
+  "properties": {
+    "child_id": { "type": "string", "minLength": 1 },
+    "arl": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "tags": { "type": "array", "items": { "$ref": "topic_tag.schema.json" }, "minItems": 1, "maxItems": 2, "uniqueItems": true },
+    "session_id": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["DONE", "FAILED"] },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "processed_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["child_id", "arl", "tags", "session_id"],
+  "additionalProperties": false
+}
