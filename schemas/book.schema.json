@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "book.schema.json",
+  "title": "Book",
+  "description": "A catalogue book in Firestore books/{book_id} (PRD 9). Real open-licence African children's books only: title, author, licence, attribution and the publisher's level come from the book and its publisher, never invented. Producer: the book ingestion job aloai-book-ingest (W2), idempotent on file_hash. Consumers: book ranking and the Reading Coach's search_books (W3: vector search on embedding, then aloai_scoring.rank_books), and the web app's report screen (W1: title, author and attribution). A book whose estimated level is more than 2 ARL from its publisher level is held for a person to check and is never recommended while held. Contains no child data.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "book_id": { "type": "string", "pattern": "^book_[a-z0-9_]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "author": { "type": "string", "minLength": 1 },
+    "illustrator": { "type": "string" },
+    "publisher": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Where the book comes from, e.g. African Storybook, Book Dash, StoryWeaver."
+    },
+    "source_url": { "type": "string", "format": "uri" },
+    "licence": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The licence as the publisher states it, e.g. CC BY 4.0. Checked per title at ingestion."
+    },
+    "attribution": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The attribution text the licence requires, shown wherever the book is shown."
+    },
+    "language": { "type": "string", "minLength": 2 },
+    "publisher_level": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The publisher's own reading level, as the publisher writes it (e.g. 'Level 2')."
+    },
+    "arl": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "The publisher level mapped to the Alo Reading Level. The level used for ranking."
+    },
+    "estimated_arl": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "The rule-based text-level estimate (PRD 9.2), as a cross-check on arl."
+    },
+    "held_for_review": {
+      "type": "boolean",
+      "description": "true when |estimated_arl - arl| > 2, until a person checks it. Held books are not recommended."
+    },
+    "topic_tags": {
+      "type": "array",
+      "items": { "$ref": "topic_tag.schema.json" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "west_african_setting": {
+      "type": "boolean",
+      "description": "The book is set in Nigeria or West Africa (PRD 9.3 Culture term)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A short description of the book. With the topic tags, it is the text that is embedded."
+    },
+    "embedding": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 768,
+      "maxItems": 768,
+      "description": "The Vertex AI text embedding of description plus topic tags, stored as a Firestore vector field (cosine distance)."
+    },
+    "embedding_model": {
+      "type": "string",
+      "const": "text-embedding-005",
+      "description": "Pinned. A new model means re-embedding every book (and the interest queries) together."
+    },
+    "page_count": { "type": "integer", "minimum": 1 },
+    "illustration_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "word_count": { "type": "integer", "minimum": 1 },
+    "raw_uri": { "type": "string", "pattern": "^gs://" },
+    "file_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the raw file; re-running ingestion on the same file changes nothing."
+    },
+    "ingested_at": { "type": "string", "format": "date-time" }
+  },
+  "required": [
+    "schema_version",
+    "book_id",
+    "title",
+    "author",
+    "publisher",
+    "licence",
+    "attribution",
+    "publisher_level",
+    "arl",
+    "estimated_arl",
+    "held_for_review",
+    "topic_tags",
+    "west_african_setting",
+    "description",
+    "embedding",
+    "embedding_model",
+    "page_count",
+    "raw_uri",
+    "file_hash",
+    "ingested_at"
+  ],
+  "additionalProperties": false
+}
