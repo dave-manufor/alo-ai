@@ -6,7 +6,12 @@ from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
-from services.core.grader.asr import ChirpTranscriber, FixtureTranscriber, transcript
+from services.core.grader.asr import (
+    ChirpTranscriber,
+    FixtureTranscriber,
+    transcript,
+    without_unset_confidence,
+)
 from services.core.grader.models import (
     FixtureGradingModel,
     GradingError,
@@ -84,6 +89,13 @@ def test_recorded_grading_needs_a_recording_for_the_call():
 
 def test_low_confidence_words_are_marked_for_the_grader():
     assert transcript([("a", 0.9), ("red", 0.49), ("hat", 0.5)]) == "a [?red?] hat"
+
+
+def test_a_transcript_with_no_confidence_marks_no_word():
+    assert without_unset_confidence([("a", 0.0), ("red", 0.0)]) == [("a", None), ("red", None)]
+    assert transcript([("a", None), ("red", None)]) == "a red"
+    assert without_unset_confidence([("a", 0.0), ("red", 0.9)]) == [("a", 0.0), ("red", 0.9)]
+    assert without_unset_confidence([]) == []
 
 
 def test_chirp_is_asked_for_word_confidence_in_the_eu():

@@ -48,6 +48,22 @@ def test_chirp_batch_recognition_boosts_the_passage_names_and_returns_word_confi
     assert [phrase.value for phrase in phrases] == ["ada"]
 
 
+def test_chirp_without_word_confidence_leaves_every_word_sure():
+    results = [
+        SimpleNamespace(alternatives=[SimpleNamespace(words=[word("ada", 0.0), word("and", 0.0)])])
+    ]
+    response = SimpleNamespace(
+        results={READING: SimpleNamespace(transcript=SimpleNamespace(results=results))}
+    )
+    client = SimpleNamespace(
+        batch_recognize=lambda request: SimpleNamespace(result=lambda timeout: response)
+    )
+    assert ChirpReading(client, "aloai-dev").heard(READING, passage()) == [
+        Heard("ada", None),
+        Heard("and", None),
+    ]
+
+
 def test_a_passage_without_names_needs_no_adaptation():
     unnamed = passage()
     for token in unnamed["tokens"]:

@@ -59,12 +59,15 @@ class ChirpReading:
             ),
         )
         response = self._client.batch_recognize(request=request).result(timeout=CHIRP_TIMEOUT_S)
-        return [
-            Heard(word.word, word.confidence)
+        words = [
+            word
             for result in response.results[audio_uri].transcript.results
             if result.alternatives
             for word in result.alternatives[0].words
         ]
+        # 0.0 everywhere means Speech-to-Text computed no confidence: no word is unsure.
+        unset = bool(words) and all(word.confidence == 0.0 for word in words)
+        return [Heard(word.word, None if unset else word.confidence) for word in words]
 
 
 def _names(passage: Mapping) -> cloud_speech.SpeechAdaptation | None:
