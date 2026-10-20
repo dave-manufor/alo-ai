@@ -12,6 +12,7 @@ from services.session_agent.clips.catalog import ClipCatalog
 from services.session_agent.clips.store import ClipStore, MemoryBucket
 from services.session_agent.driver import Driver, Ports
 from services.session_agent.events import MemoryPublisher, SessionContext
+from services.session_agent.machine.profiles import DEMO
 from services.session_agent.machine.types import Phase, Timer
 from services.session_agent.passages import folder_bank
 from services.session_agent.quick_grade import FixtureQuickGrader
@@ -19,7 +20,7 @@ from services.session_agent.recording import AudioLog
 
 ROOT = Path(__file__).resolve().parents[3]
 BANK = folder_bank(ROOT / "fixtures" / "contracts")
-PAIR = BANK.pair("bank_p3_market_day")
+PAIR = BANK.pair("bank_p3_market_day", DEMO)
 SESSION_UUID = "3f2b9c1e-7d44-4c0b-8a52-0e6f1d9a7b10"
 CTX = SessionContext("sess_demo_001", "child_demo_001", "SCHOOL", "vp_google_v1", "LIVE")
 
@@ -342,7 +343,7 @@ def test_a_bank_fallback_flags_the_session_and_a_late_story_is_ignored():
     fire(driver, ports.timers, "passage_wait")
     assert ports.passages.calls[-1] == ("bank",)
     driver.passage_arrived(PAIR, fallback=True)
-    driver.passage_arrived(BANK.pair("bank_p3_market_day"), fallback=False)
+    driver.passage_arrived(BANK.pair("bank_p3_market_day", DEMO), fallback=False)
     assert "FALLBACK_PASSAGE" in driver.state.flags
 
 

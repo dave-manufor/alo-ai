@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "passage_id": "bank_p3_market_day",
   "title": "Market Day",
   "mode": "READ",

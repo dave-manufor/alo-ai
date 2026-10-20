@@ -164,6 +164,34 @@ def test_a_listening_passage_may_have_one_item_and_a_reading_passage_needs_two(n
     assert _validator("passage.schema.json").is_valid(passage) is valid
 
 
+@pytest.mark.parametrize(
+    ("name", "length_profile", "items", "valid"),
+    [
+        ("passage.bank_p3_market_day.json", "DEMO", 2, True),
+        ("passage.bank_p3_market_day.json", "DEMO", 3, False),
+        ("passage.bank_p3_market_day.json", "STANDARD", 2, False),
+        ("passage.bank_p3_market_day.json", "STANDARD", 3, True),
+        ("passage.bank_l3_rain.json", "DEMO", 1, True),
+        ("passage.bank_l3_rain.json", "DEMO", 2, False),
+        ("passage.bank_l3_rain.json", "STANDARD", 1, False),
+        ("passage.bank_l3_rain.json", "STANDARD", 2, True),
+    ],
+)
+def test_a_passage_has_exactly_the_items_its_length_profile_asks(
+    name, length_profile, items, valid
+):
+    passage = _fixture(name)
+    passage["length_profile"] = length_profile
+    passage["items"] = [passage["items"][0]] * items
+    assert _validator("passage.schema.json").is_valid(passage) is valid
+
+
+def test_a_passage_must_say_its_length_profile():
+    passage = _fixture("passage.bank_l3_rain.json")
+    del passage["length_profile"]
+    assert not _validator("passage.schema.json").is_valid(passage)
+
+
 def test_a_reading_passage_names_its_listening_passage():
     passage = _fixture("passage.bank_p3_market_day.json")
     del passage["paired_listening_passage_id"]

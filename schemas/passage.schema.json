@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "passage.schema.json",
   "title": "PassageArtifact",
-  "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). A READ passage has 2 to 3 items and names its paired listening passage; a LISTEN passage has 1 to 3 (the demo listening module asks 1). Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
+  "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). A passage has exactly as many items as its length profile asks (PRD 4.1, 4.5): a READ passage 3 (STANDARD) or 2 (DEMO), and names its paired listening passage; a LISTEN passage 2 (STANDARD) or 1 (DEMO). The Session Agent asks every item and the Grader grades every item, so the counts must agree. Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
   "type": "object",
   "properties": {
-    "schema_version": { "type": "integer", "const": 2 },
+    "schema_version": { "type": "integer", "const": 3 },
     "passage_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string" },
     "mode": { "type": "string", "enum": ["READ", "LISTEN"] },
@@ -112,11 +112,28 @@
     "paired_listening_passage_id": { "type": "string" },
     "licence": { "type": "string" }
   },
-  "required": ["schema_version", "passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "tokens", "propositions", "items"],
+  "required": ["schema_version", "passage_id", "mode", "source", "genre", "arl_level", "word_count", "text_content", "length_profile", "tokens", "propositions", "items"],
   "additionalProperties": false,
-  "if": { "properties": { "mode": { "const": "READ" } } },
-  "then": {
-    "properties": { "items": { "minItems": 2 } },
-    "required": ["paired_listening_passage_id"]
-  }
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "READ" } } },
+      "then": { "required": ["paired_listening_passage_id"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "READ" }, "length_profile": { "const": "STANDARD" } } },
+      "then": { "properties": { "items": { "minItems": 3, "maxItems": 3 } } }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "READ" }, "length_profile": { "const": "DEMO" } } },
+      "then": { "properties": { "items": { "minItems": 2, "maxItems": 2 } } }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "LISTEN" }, "length_profile": { "const": "STANDARD" } } },
+      "then": { "properties": { "items": { "minItems": 2, "maxItems": 2 } } }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "LISTEN" }, "length_profile": { "const": "DEMO" } } },
+      "then": { "properties": { "items": { "minItems": 1, "maxItems": 1 } } }
+    }
+  ]
 }
