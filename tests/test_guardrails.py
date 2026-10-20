@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 import pytest
-from aloai_guardrails import traceable_numbers, validate_parent_summary
+from aloai_guardrails import number_words, traceable_numbers, validate_parent_summary
 
 REPORT = json.loads(
     (
@@ -59,8 +59,11 @@ def test_numbers_from_the_plan_are_allowed():
         "behind",
         "failing",
         "a slow learner",
+        "a slow-learner",
+        "a slow\nlearner",
         "hyperlexic",
         "a word caller",
+        "a Word-Caller",
     ],
 )
 def test_terms_that_sound_like_a_diagnosis_are_refused(term):
@@ -89,3 +92,40 @@ def test_true_and_false_are_not_numbers():
 def test_numbers_are_found_anywhere_in_a_full_report():
     numbers = traceable_numbers(REPORT)
     assert {90.9, 68.0, 70.0, 2.0, 50.0} <= numbers
+
+
+@pytest.mark.parametrize(
+    "said, value",
+    [("ninety-five", 95), ("eighty", 80), ("one hundred and five", 105), ("a hundred", 100)],
+)
+def test_a_made_up_score_in_words_is_refused(said, value):
+    problems = validate_parent_summary(f"Chidi scored {said} today.", CHIDI)
+    assert problems == [
+        f"'{said.removeprefix('a ').replace('-', ' ')}' ({value}) is in neither the report nor the plan"
+    ]
+
+
+def test_a_report_number_in_words_passes():
+    assert (
+        validate_parent_summary("Chidi read sixty-eight words correctly in a minute.", REPORT) == []
+    )
+
+
+def test_everyday_counts_in_words_are_not_checked():
+    assert validate_parent_summary("Find three things, then read five word cards.", {}) == []
+    assert number_words("ten and twenty and") == {"ten and twenty": 30.0}
+
+
+def test_schema_version_is_not_a_result():
+    report = {"schema_version": 1, "fluency": {"wcpm": 68.0}}
+    assert validate_parent_summary("Chidi got 100% right.", report) == [
+        "100 is in neither the report nor the plan"
+    ]
+
+
+def test_only_shares_may_be_said_as_a_percentage():
+    assert validate_parent_summary("72% of the story", CHIDI) == []
+    ratio = {"fluency": {"self_correction_ratio": 0.5}}
+    assert validate_parent_summary("50% of the time", ratio) == [
+        "50 is in neither the report nor the plan"
+    ]
