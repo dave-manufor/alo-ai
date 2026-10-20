@@ -50,13 +50,15 @@ def first_name(store: Store, report: dict) -> str:
 
 
 def catalogue_books(store: Store, report: dict) -> list[dict]:
-    """The report's ranked books that are in the catalogue."""
+    """The report's ranked books that are in the catalogue and not held for review, with
+    what the plan needs to credit them (the licence requires the attribution)."""
     books = []
     for book_id in report["recommendations"]["book_ids"]:
         book = store.get(f"books/{book_id}")
-        if book is not None:
+        if book is not None and not book.get("held_for_review", False):
             books.append(
-                {"book_id": book_id, "title": book["title"], "licence": book.get("licence")}
+                {"book_id": book_id}
+                | {key: book.get(key) for key in ("title", "author", "licence", "attribution")}
             )
     return books
 

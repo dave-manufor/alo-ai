@@ -63,8 +63,9 @@ def test_firestore_finds_the_nearest_books_at_the_candidate_levels():
         ("b1", 2, 0.75, True),
         ("b2", 3, 0.5, False),
     ]
-    collection, where, (_, nearest) = client.calls
-    assert (collection, where) == (("collection", "books"), ("where", "arl", "in", [1, 2, 3]))
+    collection, levels, ready, (_, nearest) = client.calls
+    assert (collection, levels) == (("collection", "books"), ("where", "arl", "in", [1, 2, 3]))
+    assert ready == ("where", "held_for_review", "==", False)
     assert nearest["vector_field"] == "embedding"
     assert list(nearest["query_vector"]) == [0.1, 0.2]
     assert (nearest["distance_measure"], nearest["limit"]) == (DistanceMeasure.COSINE, 15)

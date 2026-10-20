@@ -42,19 +42,28 @@ def contract(name: str) -> dict:
 
 
 # Fictional catalogue books. For the demo session ("food", band 1 to 2) they rank 001,
-# 002, 003; 004 sits a level above the band and 005 is too far to be a candidate.
+# 002, 003; 004 sits a level above the band, 005 is too far to be a candidate, and 006
+# would rank first but is held for review.
 BOOKS = {
     "book_demo_001": {"arl": 2, "embedding": [0.9, 0.1, 0.0, 0.0], "west_african_setting": True},
     "book_demo_002": {"arl": 1, "embedding": [0.6, 0.8, 0.0, 0.0], "west_african_setting": True},
     "book_demo_003": {"arl": 2, "embedding": [0.8, 0.0, 0.6, 0.0], "west_african_setting": False},
     "book_demo_004": {"arl": 3, "embedding": [1.0, 0.0, 0.0, 0.0], "west_african_setting": True},
     "book_demo_005": {"arl": 6, "embedding": [1.0, 0.0, 0.0, 0.0], "west_african_setting": True},
+    "book_demo_006": {"arl": 2, "embedding": [1.0, 0.0, 0.0, 0.0], "west_african_setting": True},
 }
 
 
 def catalogue() -> dict[str, dict]:
     return {
-        f"books/{book_id}": book | {"title": f"Demo Book {book_id[-1]}", "licence": "CC BY"}
+        f"books/{book_id}": book
+        | {
+            "title": f"Demo Book {book_id[-1]}",
+            "author": "Demo Author",
+            "licence": "CC BY 4.0",
+            "attribution": f"Demo Book {book_id[-1]} by Demo Author, CC BY 4.0",
+            "held_for_review": book_id == "book_demo_006",
+        }
         for book_id, book in BOOKS.items()
     }
 
@@ -91,7 +100,7 @@ class MemoryBookSearch:
                 west_african=book.get("west_african_setting", False),
             )
             for path, book in self._store.docs.items()
-            if path.startswith("books/") and book["arl"] in levels
+            if path.startswith("books/") and book["arl"] in levels and not book["held_for_review"]
         ]
         return sorted(candidates, key=lambda book: -book.similarity)[:limit]
 

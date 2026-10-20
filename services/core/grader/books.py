@@ -4,8 +4,9 @@ The child's interest tags are embedded with the same pinned Vertex AI model the 
 ingestion job uses (W2), Firestore vector search returns the nearest catalogue books
 within the profile's band and one level either side, and aloai_scoring ranks them.
 
-Fields read from books/{book_id}: arl, embedding (a vector field) and
-west_african_setting. Only books in the catalogue can be returned.
+Fields read from books/{book_id} (schemas/book.schema.json): arl, embedding (a vector
+field), west_african_setting and held_for_review. Only catalogue books can be returned,
+and never one held for a person to check its level.
 """
 
 import json
@@ -76,6 +77,7 @@ class FirestoreBookSearch:
         query = (
             self.client.collection("books")
             .where(filter=FieldFilter("arl", "in", list(levels)))
+            .where(filter=FieldFilter("held_for_review", "==", False))
             .find_nearest(
                 vector_field="embedding",
                 query_vector=Vector(list(vector)),

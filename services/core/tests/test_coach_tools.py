@@ -124,7 +124,20 @@ def test_search_books_offers_only_books_in_the_catalogue():
     store.docs.pop("books/book_demo_002")
     books = coach_tools(store).search_books()["books"]
     assert [book["book_id"] for book in books] == ["book_demo_001", "book_demo_003"]
-    assert books[0] == {"book_id": "book_demo_001", "title": "Demo Book 1", "licence": "CC BY"}
+    assert books[0] == {
+        "book_id": "book_demo_001",
+        "title": "Demo Book 1",
+        "author": "Demo Author",
+        "licence": "CC BY 4.0",
+        "attribution": "Demo Book 1 by Demo Author, CC BY 4.0",
+    }
+
+
+def test_a_book_held_for_review_is_never_offered():
+    store = coach_store()
+    store.merge("books/book_demo_001", {"held_for_review": True})
+    books = coach_tools(store).search_books()["books"]
+    assert [book["book_id"] for book in books] == ["book_demo_002", "book_demo_003"]
 
 
 def test_queue_story_asks_for_the_next_story_at_the_next_level():
