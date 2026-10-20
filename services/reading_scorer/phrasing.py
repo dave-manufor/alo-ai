@@ -12,6 +12,7 @@ import aloai_scoring as scoring
 from .labels import ERRORS, WordLabel
 
 Span = tuple[int, int]
+CLOSERS = "\"'”’)]"  # what may follow a sentence's full stop, as in: "Thank you, Tunde."
 
 
 def phrasing(
@@ -55,7 +56,7 @@ def _eligible_tokens(read: Sequence[dict], errors: set[int]) -> set[int]:
         if scoring.sentence_eligible(
             words=len(indices),
             errors=len(errors.intersection(indices)),
-            declarative=last["text"].endswith("."),
+            declarative=last["text"].rstrip(CLOSERS).endswith("."),
         ):
             eligible.update(indices)
     return eligible

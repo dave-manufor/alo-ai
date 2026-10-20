@@ -12,7 +12,14 @@ def heard(text: str) -> list[Heard]:
 
 @pytest.mark.parametrize(
     "word, normalized",
-    [("Jàpá,", "japa"), ("Market.", "market"), ("we'll", "we'll"), ("'quoted'", "quoted")],
+    [
+        ("Jàpá,", "japa"),
+        ("Market.", "market"),
+        ("we'll", "we'll"),
+        ("we’ll", "we'll"),
+        ("‘quoted’", "quoted"),
+        ("'quoted'", "quoted"),
+    ],
 )
 def test_words_match_without_case_accents_or_punctuation(word, normalized):
     assert normalize(word) == normalized

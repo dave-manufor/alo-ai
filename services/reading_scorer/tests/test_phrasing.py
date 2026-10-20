@@ -76,3 +76,17 @@ def test_a_sentence_not_read_to_the_end_is_left_out():
 
 def test_phrasing_needs_90_percent_accuracy():
     assert score([], accuracy=89.0).reported is False
+
+
+def test_a_sentence_ending_in_a_closing_quote_is_still_declarative():
+    quoted = [dict(token) for token in TOKENS]
+    quoted[4]["text"] = "home.”"
+    quoted[9]["text"] = "beans.')"
+    result = phrasing(quoted, labels(), TIMES, [pause_after(4), pause_after(7)], 96.0)
+    assert (result.reported, result.phrasing) == (True, 100)
+
+
+def test_a_question_is_not_declarative():
+    asked = [dict(token) for token in TOKENS]
+    asked[9]["text"] = "beans?”"
+    assert phrasing(asked, labels(), TIMES, [], 96.0).reported is False

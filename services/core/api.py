@@ -4,7 +4,8 @@ session.done starts final grading, phase1.scored retries report assembly, report
 starts the Reading Coach, and other types are ignored. Pub/Sub redelivers anything that
 is not acknowledged, so a push that is not a valid event (a type the envelope doesn't
 know included) is logged and acknowledged, and an event that can never be handled (an
-answer turn with no item, a missing document, a report that fails its schema) is parked
+answer turn with no item, a missing document, a value aloai_scoring refuses, a report
+that fails its schema) is parked
 in sessions/{session_id}/errors/{type} and acknowledged. Any other failure returns 500,
 so Pub/Sub retries it and then sends it to the dead-letter topic.
 """
@@ -21,10 +22,10 @@ from jsonschema import ValidationError
 
 from .coach.run import ReadingCoach
 from .grader.assembly import ReportAssembler
-from .grader.final import FinalGrader, TurnMismatch
+from .grader.final import FinalGrader
 
 log = logging.getLogger(__name__)
-PERMANENT = (TurnMismatch, LookupError, ValidationError)
+PERMANENT = (LookupError, ValueError, ValidationError)
 
 
 def events_router(

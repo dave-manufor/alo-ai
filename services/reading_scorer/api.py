@@ -3,7 +3,8 @@
 phase1.recorded (checked against its schema with the envelope) is scored; other event
 types are acknowledged and ignored. Pub/Sub redelivers anything that is not
 acknowledged, so a push that is not a valid event is logged and acknowledged, and an
-event that can never be scored (a missing passage, telemetry that fails its schema) is
+event that can never be scored (a missing passage, counts aloai_scoring refuses,
+telemetry that fails its schema) is
 parked in sessions/{session_id}/errors/{type} and acknowledged; the log names the error
 only, never the transcripts. Any other failure returns 500, so Pub/Sub retries it and
 then sends it to the dead-letter topic.
@@ -21,7 +22,7 @@ from jsonschema import ValidationError
 from .scorer import Phase1Scorer
 
 log = logging.getLogger(__name__)
-PERMANENT = (LookupError, ValidationError)
+PERMANENT = (LookupError, ValueError, ValidationError)
 
 
 def router(scorer: Phase1Scorer) -> APIRouter:

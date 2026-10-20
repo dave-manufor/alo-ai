@@ -145,3 +145,19 @@ def test_a_failure_that_may_pass_on_retry_is_left_to_pub_sub():
     )
     assert response.status_code == 500
     assert store.get(f"sessions/{SESSION_ID}/errors/session.done") is None
+
+
+def test_a_value_aloai_scoring_refuses_is_parked():
+    store = seeded_store()
+
+    class Refused:
+        def handle(self, data):
+            raise ValueError("item points must be 0, 1 or 2")
+
+    app = FastAPI()
+    app.include_router(events_router(Refused(), None, None, store))
+    response = TestClient(app).post(
+        "/pubsub/session-events", json=pushed(event("session.done", session_done()))
+    )
+    assert response.status_code == 204
+    assert store.get(f"sessions/{SESSION_ID}/errors/session.done")["error"] == "ValueError"

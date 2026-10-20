@@ -1,7 +1,8 @@
 # Reading Scorer (PRD 15.2): CPU only. Build from the repo root:
 #   docker build -f services/reading_scorer/Dockerfile .
 FROM python:3.11-slim
-ENV PYTHONUNBUFFERED=True DEBIAN_FRONTEND=noninteractive PYTHONPATH=/app:/app/libs/aloai
+ENV PYTHONUNBUFFERED=True DEBIAN_FRONTEND=noninteractive PYTHONPATH=/app:/app/libs/aloai \
+    TORCH_HOME=/opt/torch
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
@@ -16,5 +17,8 @@ COPY schemas schemas
 COPY libs libs
 COPY fixtures/ai/reading fixtures/ai/reading
 COPY services/reading_scorer services/reading_scorer
+# Run as a user that can read the baked models but not change the image.
+RUN useradd --no-create-home --shell /usr/sbin/nologin scorer && chmod -R a+rX /opt/torch
+USER scorer
 CMD ["uvicorn", "services.reading_scorer.main:create_app", "--factory", \
      "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]

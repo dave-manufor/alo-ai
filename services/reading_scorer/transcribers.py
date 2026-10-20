@@ -26,6 +26,7 @@ CHIRP_TIMEOUT_S = 120
 NAME_BOOST = 10
 
 GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_TIMEOUT_S = 60
 PROMPT_VERSION = "transcribe_v1"
 VERBATIM = (
     "Write exactly what the child said, including mistakes, repeats and unfinished words. "
@@ -86,7 +87,9 @@ class GeminiReading:
         response = self._client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[types.Part.from_uri(file_uri=audio_uri, mime_type="audio/flac"), VERBATIM],
-            config=types.GenerateContentConfig(temperature=0),
+            config=types.GenerateContentConfig(
+                temperature=0, http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_S * 1000)
+            ),
         )
         return [Heard(word) for word in (response.text or "").split()]
 

@@ -88,3 +88,12 @@ def test_a_recording_that_can_never_be_scored_is_parked_and_acknowledged(caplog)
 def test_the_scorer_refuses_to_start_with_local_shortcuts_on_cloud_run():
     with pytest.raises(aloai_env.ConfigError):
         create_app({"ALO_ENV": "local", "K_SERVICE": "aloai-reading-scorer"})
+
+
+def test_told_waits_that_cannot_fit_are_parked_not_retried():
+    http, store, publisher = client()
+    told = recorded(told_token_indices=[3, 6, 9, 12])
+    response = http.post("/pubsub/session-events", json=pushed("phase1.recorded", told))
+    assert response.status_code == 204
+    assert store.get(f"sessions/{SESSION_ID}/errors/phase1.recorded")["error"] == "ValueError"
+    assert publisher.events == []

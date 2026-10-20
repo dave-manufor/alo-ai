@@ -83,6 +83,7 @@ def test_gemini_is_asked_for_a_verbatim_transcript_of_the_audio():
     assert (audio.file_data.file_uri, audio.file_data.mime_type) == (READING, "audio/flac")
     assert prompt == VERBATIM
     assert (call.model, call.config.temperature) == ("gemini-2.5-flash", 0)
+    assert call.config.http_options.timeout == 60_000
 
 
 def test_gemini_returning_nothing_heard_nothing():

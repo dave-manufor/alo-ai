@@ -34,8 +34,9 @@ class Placed:
 
 
 def normalize(word: str) -> str:
-    """Lowercase, without accents or punctuation, so "Jàpá," and "japa" match."""
-    decomposed = unicodedata.normalize("NFKD", word.lower())
+    """Lowercase, without accents or punctuation, so "Jàpá," and "japa" match. A curly
+    apostrophe counts as a straight one, so "we’ll" stays "we'll"."""
+    decomposed = unicodedata.normalize("NFKD", word.lower().replace("’", "'").replace("‘", "'"))
     return "".join(ch for ch in decomposed if ch.isalnum() or ch == "'").strip("'")
 
 
