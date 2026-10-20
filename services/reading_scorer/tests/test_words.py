@@ -51,3 +51,19 @@ def test_a_reading_that_stops_leaves_the_rest_unplaced():
 
 def test_nothing_heard_places_nothing():
     assert align(PASSAGE, []) == [Placed(None)] * 5
+
+
+def test_words_said_after_stopping_are_extra_words_not_misreadings():
+    placed = align(PASSAGE, heard("ada saw done"))
+    assert [p.heard for p in placed] == [Heard("ada"), Heard("saw"), None, None, None]
+    assert placed[2].before == ("done",)
+
+
+def test_a_misread_last_word_is_still_a_misreading():
+    placed = align(PASSAGE, heard("ada saw a red hut"))
+    assert placed[-1] == Placed(Heard("hut"))
+
+
+def test_a_word_nothing_like_the_passage_word_still_takes_its_place_mid_passage():
+    placed = align(PASSAGE, heard("ada saw a big hat"))
+    assert placed[3] == Placed(Heard("big"))

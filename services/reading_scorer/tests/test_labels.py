@@ -2,7 +2,7 @@
 
 import pytest
 from services.reading_scorer.labels import label_words
-from services.reading_scorer.words import Heard, Placed
+from services.reading_scorer.words import Heard, Placed, align
 
 TARGETS = ["ada", "saw", "a", "red", "hat"]
 
@@ -86,3 +86,10 @@ def test_words_after_the_last_one_reached_were_not_attempted():
 def test_a_reading_with_nothing_reached_has_no_labels():
     silent = placed(None, None, None, None, None)
     assert labels_of(silent, silent) == []
+
+
+def test_a_child_who_stops_and_says_something_else_has_only_the_words_read():
+    passage = ["ada", "saw", "a", "red", "hat"]
+    said = [Heard(word, 0.9) for word in ("ada", "saw", "done")]
+    labels = label_words(passage, align(passage, said), align(passage, said), told=set())
+    assert [label.label for label in labels] == ["CORRECT", "CORRECT"]
