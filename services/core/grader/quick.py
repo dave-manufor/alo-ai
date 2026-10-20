@@ -81,11 +81,12 @@ class QuickGrader:
         )
 
     def _decision(self, session_id: str, passage: dict) -> dict:
-        retell = self.store.get(paths.quick(session_id, "RETELL", 0))
-        items = [
-            self.store.get(paths.quick(session_id, "QUESTION", index))
-            for index in range(len(passage["items"]))
-        ]
+        retell, *items = self.store.get_many(
+            [
+                paths.quick(session_id, "RETELL", 0),
+                *(paths.quick(session_id, "QUESTION", i) for i in range(len(passage["items"]))),
+            ]
+        )
         if retell is None or None in items:
             return {
                 "schema_version": SCHEMA_VERSION,

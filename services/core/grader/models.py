@@ -14,6 +14,8 @@ from typing import Protocol
 
 import aloai_contracts
 from google import genai
+from google.api_core.exceptions import GoogleAPIError
+from google.genai import errors as genai_errors
 from google.genai import types
 
 from .prompts import build_prompt
@@ -40,6 +42,10 @@ class GradingError(Exception):
     """The model gave no usable answer for the task."""
 
 
+# Vertex AI or Firestore did not answer: worth a retry, unlike a refused request.
+UpstreamErrors = (genai_errors.APIError, GoogleAPIError)
+
+
 class GradingModel(Protocol):
     def grade(self, task: GradingTask) -> dict: ...
 
@@ -49,11 +55,23 @@ _RESPONSE_SCHEMA = {
     for key, value in aloai_contracts.load("grader_output.schema.json").items()
     if key not in ("$schema", "$id")
 }
-_CONFIG = types.GenerateContentConfig(
-    temperature=0,
-    response_mime_type="application/json",
-    response_json_schema=_RESPONSE_SCHEMA,
-)
+QUICK_TIMEOUT_S = 5  # inside the Session Agent's 6 s quick-score wait
+GRADER_TIMEOUT_S = 60
+
+
+def _config(model: str) -> types.GenerateContentConfig:
+    """The quick call is on the 2 s path, so Flash answers without thinking; Pro grades
+    with its default thinking."""
+    quick = model == QUICK_MODEL
+    return types.GenerateContentConfig(
+        temperature=0,
+        response_mime_type="application/json",
+        response_json_schema=_RESPONSE_SCHEMA,
+        thinking_config=types.ThinkingConfig(thinking_budget=0) if quick else None,
+        http_options=types.HttpOptions(
+            timeout=1000 * (QUICK_TIMEOUT_S if quick else GRADER_TIMEOUT_S)
+        ),
+    )
 
 
 class VertexGradingModel:
@@ -69,7 +87,7 @@ class VertexGradingModel:
             pass_number=task.pass_number,
         )
         response = self._client.models.generate_content(
-            model=task.model, contents=prompt, config=_CONFIG
+            model=task.model, contents=prompt, config=_config(task.model)
         )
         return _parse(response.text)
 

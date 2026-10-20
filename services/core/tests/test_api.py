@@ -4,6 +4,7 @@ import aloai_contracts
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from google.api_core.exceptions import GoogleAPICallError
 from services.core.grader.api import router
 from services.core.grader.models import GradingError
 from services.core.grader.quick import QuickGrader
@@ -55,5 +56,21 @@ def test_a_model_failure_can_be_retried():
     assert response.json()["error"] == {
         "code": "GRADING_FAILED",
         "message": "the model timed out",
+        "retryable": True,
+    }
+
+
+class Unreachable:
+    def grade(self, task):
+        raise GoogleAPICallError("Vertex AI is unavailable")
+
+
+def test_vertex_or_firestore_not_answering_is_a_retryable_503():
+    http = client(Unreachable())
+    response = http.post("/v1/grade:quick", json=quick_request("RETELL", 0, "ada went to market"))
+    assert response.status_code == 503
+    assert response.json()["error"] == {
+        "code": "UPSTREAM_UNAVAILABLE",
+        "message": "GoogleAPICallError",
         "retryable": True,
     }

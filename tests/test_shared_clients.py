@@ -151,3 +151,32 @@ def test_memory_merge_works_like_firestore():
         "levels": {"next": 4, "last": 3},
         "saved_tags": ["music"],
     }
+
+
+def test_many_documents_are_read_in_one_round_trip():
+    client = FakeFirestore()
+    client.documents = {"quick/a": {"points": 2}, "quick/c": {"points": 0}}
+    calls = []
+
+    def get_all(references):
+        calls.append([r._path for r in references])
+        return [
+            SimpleNamespace(
+                reference=SimpleNamespace(path=r._path),
+                exists=r._path in client.documents,
+                to_dict=lambda r=r: client.documents.get(r._path),
+            )
+            for r in reversed(references)
+        ]
+
+    client.get_all = get_all
+    assert FirestoreStore(client).get_many(["quick/a", "quick/b", "quick/c"]) == [
+        {"points": 2},
+        None,
+        {"points": 0},
+    ]
+    assert calls == [["quick/a", "quick/b", "quick/c"]]
+    assert MemoryStore({"quick/a": {"points": 2}}).get_many(["quick/b", "quick/a"]) == [
+        None,
+        {"points": 2},
+    ]

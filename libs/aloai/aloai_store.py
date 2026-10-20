@@ -7,6 +7,7 @@ merged field by field, and any other value, a list included, is replaced.
 """
 
 import copy
+from collections.abc import Sequence
 from typing import Any, Protocol
 
 from google.api_core.exceptions import AlreadyExists
@@ -16,6 +17,10 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 
 class Store(Protocol):
     def get(self, path: str) -> dict | None: ...
+
+    def get_many(self, paths: Sequence[str]) -> list[dict | None]:
+        """The documents in the order asked, in one round trip."""
+        ...
 
     def set(self, path: str, data: dict) -> None: ...
 
@@ -41,6 +46,9 @@ class MemoryStore:
 
     def get(self, path: str) -> dict | None:
         return copy.deepcopy(self.docs.get(path))
+
+    def get_many(self, paths: Sequence[str]) -> list[dict | None]:
+        return [self.get(path) for path in paths]
 
     def set(self, path: str, data: dict) -> None:
         self.docs[path] = copy.deepcopy(data)
@@ -82,6 +90,11 @@ class FirestoreStore:
     def get(self, path: str) -> dict | None:
         snapshot = self._client.document(path).get()
         return snapshot.to_dict() if snapshot.exists else None
+
+    def get_many(self, paths: Sequence[str]) -> list[dict | None]:
+        snapshots = self._client.get_all([self._client.document(path) for path in paths])
+        found = {s.reference.path: s.to_dict() for s in snapshots if s.exists}
+        return [found.get(path) for path in paths]
 
     def set(self, path: str, data: dict) -> None:
         self._client.document(path).set(data)

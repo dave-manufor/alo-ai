@@ -1,5 +1,6 @@
 """The Grader's HTTP route (SDD 11): POST /v1/grade:quick, called by the Session Agent.
-Its errors use the SDD 11 shape."""
+Its errors use the SDD 11 shape; Vertex AI or Firestore not answering is a retryable
+503 UPSTREAM_UNAVAILABLE."""
 
 from typing import Annotated, Any
 
@@ -8,7 +9,7 @@ from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 from jsonschema import Draft202012Validator
 
-from .models import GradingError
+from .models import GradingError, UpstreamErrors
 from .quick import PassageNotFound, QuickGrader, UnknownItem
 
 
@@ -28,6 +29,8 @@ def router(quick: QuickGrader) -> APIRouter:
             return _error(400, "UNKNOWN_ITEM", str(error), retryable=False)
         except GradingError as error:
             return _error(502, "GRADING_FAILED", str(error), retryable=True)
+        except UpstreamErrors as error:
+            return _error(503, "UPSTREAM_UNAVAILABLE", type(error).__name__, retryable=True)
 
     return routes
 

@@ -115,3 +115,18 @@ def test_recorded_words_are_found_by_the_audio_object_name():
         ("was", 0.95),
         ("red", 0.95),
     ]
+
+
+def test_the_quick_call_answers_without_thinking_inside_five_seconds():
+    output = grader_output({}, {f"{PASSAGE_ID}_q1": 2})
+    models = FakeModels(json.dumps(output))
+    VertexGradingModel(SimpleNamespace(models=models)).grade(
+        replace(task(), model="gemini-2.5-flash")
+    )
+    VertexGradingModel(SimpleNamespace(models=models)).grade(task())
+    flash, pro = models.calls
+    assert (flash.config.thinking_config.thinking_budget, flash.config.http_options.timeout) == (
+        0,
+        5000,
+    )
+    assert (pro.config.thinking_config, pro.config.http_options.timeout) == (None, 60000)
