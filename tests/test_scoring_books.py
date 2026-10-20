@@ -1,7 +1,13 @@
 """Book ranking (PRD 9.3): RankScore = 0.50 Fit + 0.30 Sim + 0.20 Culture, top 3."""
 
 import pytest
-from aloai_scoring import BookCandidate, book_fit, candidate_levels, rank_books, rank_score
+from aloai_scoring import (
+    BookCandidate,
+    book_fit,
+    candidate_levels,
+    rank_books,
+    rank_score,
+)
 
 BAND = (2, 3)
 
