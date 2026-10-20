@@ -80,7 +80,7 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 12,
-          "description": "The passage's Alo Reading Level, for the reading text size (design system ReadingPanel: ARL 1-2 p1, 3-6 p3, 7-12 p5)."
+          "description": "The passage's Alo Reading Level, used only to pick the reading text size (design system ReadingPanel: ARL 1-2 p1, 3-6 p3, 7-12 p5). Never shown to the child: a level on the kid screen would read as a grade."
         }
       },
       "required": ["schema_version", "cmd", "passage_id", "title", "sentences", "arl"],
