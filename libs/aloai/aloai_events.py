@@ -117,17 +117,20 @@ def anyone(authorization: str | None) -> bool:
 
 
 def pushed_by(
-    service_account: str, verify: Callable[[str], Mapping[str, Any]] | None = None
+    service_account: str,
+    audience: str | None = None,
+    verify: Callable[[str, str | None], Mapping[str, Any]] | None = None,
 ) -> PushCheck:
     """A check that a push carries a Google-signed ID token whose email is the push
-    service account. Cloud Run IAM lets every invoker in, the Session Agent included, so
-    this is what stops another caller posting a session.done."""
+    service account, and whose audience is this endpoint's when one is given. Cloud Run
+    IAM lets every invoker in, the Session Agent included, so this is what stops another
+    caller posting a session.done."""
 
     def check(authorization: str | None) -> bool:
         if not authorization or not authorization.startswith("Bearer "):
             return False
         try:
-            claims = (verify or _google_claims)(authorization.removeprefix("Bearer "))
+            claims = (verify or _google_claims)(authorization.removeprefix("Bearer "), audience)
         except (ValueError, GoogleAuthError):
             return False
         return claims.get("email") == service_account and claims.get("email_verified") is True
@@ -135,5 +138,7 @@ def pushed_by(
     return check
 
 
-def _google_claims(token: str) -> Mapping[str, Any]:  # pragma: no cover - fetches Google's keys
-    return id_token.verify_oauth2_token(token, Request())
+def _google_claims(
+    token: str, audience: str | None
+) -> Mapping[str, Any]:  # pragma: no cover - fetches Google's keys
+    return id_token.verify_oauth2_token(token, Request(), audience=audience)

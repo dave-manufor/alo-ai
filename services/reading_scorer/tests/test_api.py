@@ -103,7 +103,8 @@ def test_a_push_from_another_caller_is_refused():
     store, publisher = seeded_store(), MemoryPublisher()
     app = FastAPI()
     check = pushed_by(
-        "push@aloai-dev.iam", lambda token: {"email": "agent@aloai-dev.iam", "email_verified": True}
+        "push@aloai-dev.iam",
+        verify=lambda token, audience: {"email": "agent@aloai-dev.iam", "email_verified": True},
     )
     app.include_router(router(scorer(store, publisher), check))
     response = TestClient(app).post(

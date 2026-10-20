@@ -5,7 +5,8 @@ CLOUD_RUN_JOB in a job: ALO_ENV=local (emulators) is refused there, and so are t
 recorded AI responses (AI_MODE=fixtures, the default), so a deployment that forgets
 AI_MODE=live stops at start instead of replaying recordings. A Cloud Run service also
 needs PUSH_SERVICE_ACCOUNT, the identity Pub/Sub pushes with, so its push route can turn
-away any other caller (aloai_events.pushed_by).
+away any other caller (aloai_events.pushed_by). PUSH_AUDIENCE, the subscription's token
+audience, is optional: set, it also refuses a token minted for another endpoint.
 """
 
 from collections.abc import Mapping
@@ -25,6 +26,7 @@ class Config:
     project: str
     location: str
     push_service_account: str | None = None
+    push_audience: str | None = None
 
 
 def load(env: Mapping[str, str]) -> Config:
@@ -46,4 +48,5 @@ def load(env: Mapping[str, str]) -> Config:
         project=env.get("GOOGLE_CLOUD_PROJECT", "aloai-dev"),
         location=env.get("GOOGLE_CLOUD_LOCATION", "europe-west1"),
         push_service_account=push_service_account,
+        push_audience=env.get("PUSH_AUDIENCE") or None,
     )

@@ -164,15 +164,18 @@ def test_a_value_aloai_scoring_refuses_is_parked():
 
 
 def signed_by(email, verified=True):
-    return lambda token: {"email": email, "email_verified": verified} if token == "signed" else {}
+    def verify(token, audience):
+        return {"email": email, "email_verified": verified} if token == "signed" else {}
+
+    return verify
 
 
 @pytest.mark.parametrize(
     "authorization, check, status",
     [
-        ("Bearer signed", pushed_by("push@aloai-dev.iam", signed_by("push@aloai-dev.iam")), 204),
-        ("Bearer signed", pushed_by("push@aloai-dev.iam", signed_by("agent@aloai-dev.iam")), 403),
-        (None, pushed_by("push@aloai-dev.iam", signed_by("push@aloai-dev.iam")), 403),
+        ("Bearer signed", pushed_by("push@a.iam", verify=signed_by("push@a.iam")), 204),
+        ("Bearer signed", pushed_by("push@a.iam", verify=signed_by("agent@a.iam")), 403),
+        (None, pushed_by("push@a.iam", verify=signed_by("push@a.iam")), 403),
     ],
     ids=["the push service account", "another invoker", "no token"],
 )

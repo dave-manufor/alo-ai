@@ -48,7 +48,8 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     )
     app = FastAPI(title="Alo.ai Reading Scorer")
     account = settings.push_service_account
-    app.include_router(router(scorer, pushed_by(account) if account else anyone))
+    check = pushed_by(account, settings.push_audience) if account else anyone
+    app.include_router(router(scorer, check))
     return app
 
 

@@ -214,11 +214,27 @@ def test_many_documents_are_read_in_one_round_trip():
     ],
 )
 def test_a_push_must_be_signed_for_the_push_service_account(authorization, claims, allowed):
-    assert pushed_by("push@aloai-dev.iam", lambda token: claims)(authorization) is allowed
+    assert (
+        pushed_by("push@aloai-dev.iam", verify=lambda token, audience: claims)(authorization)
+        is allowed
+    )
+
+
+def test_the_audience_is_checked_when_it_is_set():
+    asked = []
+
+    def verify(token, audience):
+        asked.append(audience)
+        return {"email": "push@aloai-dev.iam", "email_verified": True}
+
+    assert pushed_by("push@aloai-dev.iam", "https://core.run.app/pubsub", verify)("Bearer t")
+    assert asked == ["https://core.run.app/pubsub"]
+    settings = aloai_env.load({"PUSH_AUDIENCE": "https://core.run.app/pubsub"})
+    assert settings.push_audience == "https://core.run.app/pubsub"
 
 
 def test_a_token_google_refuses_is_refused():
-    def forged(token):
+    def forged(token, audience):
         raise ValueError("Could not verify token signature.")
 
-    assert pushed_by("push@aloai-dev.iam", forged)("Bearer forged") is False
+    assert pushed_by("push@aloai-dev.iam", verify=forged)("Bearer forged") is False

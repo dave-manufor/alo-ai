@@ -91,7 +91,7 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
 
 def _push_check(settings: aloai_env.Config) -> PushCheck:
     account = settings.push_service_account
-    return pushed_by(account) if account else anyone
+    return pushed_by(account, settings.push_audience) if account else anyone
 
 
 def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder]:
