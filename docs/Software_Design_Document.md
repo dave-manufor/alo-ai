@@ -507,7 +507,7 @@ The session conductor's tools are listed in section 4.
 |Quick endpoint `POST /v1/grade:quick`|W3|W2|
 |Events `phase1.recorded` and `session.done`, with turn audio paths, the TOLD log and the session settings|W2|W3|
 |Passage artifact, including `syntactic_boundary_after`|W2|W3|
-|`books/{book_id}` with its embedding|W2|W3|
+|`books/{book_id}` with its embedding (`book.schema.json`)|W2|W3, W1|
 |`ReadingReport` in `reports/{session_id}`|W3|W1|
 |`queue_story` (Reading Coach to Passage Generator): `story_requests/{id}` and `plan.ready`|W3 (request) / W2 (processing)|W2 / W3|
 |`POST /v1/passages:generate`: request, response and errors|W2|W2 (Session Agent)|

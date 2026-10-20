@@ -411,6 +411,15 @@ def test_missing_clip_is_streamed_from_the_store():
     assert step(at_reading(), ClipAck("word_x", "played"))[1] == []
 
 
+def test_missing_clip_is_streamed_only_once():
+    state, actions = step(at_reading(), ClipAck("word_x", "missing"))
+    assert actions == [StreamClipFromStore("word_x")]
+    again, actions = step(state, ClipAck("word_x", "missing"))
+    assert again == state and len(actions) == 1 and isinstance(actions[0], Log)
+    # Another clip still gets its one stream.
+    assert step(again, ClipAck("word_y", "missing"))[1] == [StreamClipFromStore("word_y")]
+
+
 # ---- transition and 2A retell
 
 
