@@ -14,7 +14,7 @@ export default function LandingPage() {
           thing to try each week.
         </p>
         <div className="row">
-          <Link to="/session" aria-label="Try the reading check">
+          <Link to="/signin" aria-label="Try the reading check">
             <Button variant="primary" size="grown">
               Start a reading check
             </Button>
