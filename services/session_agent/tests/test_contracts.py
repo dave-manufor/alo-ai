@@ -73,6 +73,7 @@ def test_session_protocol_fixture_messages_validate():
     assert {m["cmd"] for m in messages} == {
         "clip_list",
         "play",
+        "step",
         "show_passage",
         "hide_passage",
         "reconnecting",
@@ -249,7 +250,31 @@ def test_audio_uri_must_be_gcs():
 
 
 def test_protocol_message_with_extra_field_is_rejected():
-    message = {"schema_version": 1, "cmd": "play", "clip_id": "x", "score": 90}
+    message = {"schema_version": 2, "cmd": "play", "clip_id": "x", "score": 90}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+def test_protocol_version_1_is_rejected():
+    message = {"schema_version": 1, "cmd": "play", "clip_id": "x"}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+@pytest.mark.parametrize("leak", ["items", "propositions", "rubric", "score"])
+def test_show_passage_cannot_carry_answer_keys_or_scores(leak):
+    message = next(m for m in _fixture("session_protocol.json") if m["cmd"] == "show_passage")
+    assert not _validator("session_protocol.schema.json").is_valid({**message, leak: []})
+
+
+def test_every_clip_says_what_it_says_or_null():
+    clip_list = _fixture("session_protocol.json")[0]
+    without_text = {**clip_list, "clips": [{"clip_id": "x", "url": "u"}]}
+    assert not _validator("session_protocol.schema.json").is_valid(without_text)
+    empty_text = {**clip_list, "clips": [{"clip_id": "x", "url": "u", "text": ""}]}
+    assert not _validator("session_protocol.schema.json").is_valid(empty_text)
+
+
+def test_a_step_must_be_a_known_task():
+    message = {"schema_version": 2, "cmd": "step", "step": "SHOW_SCORE"}
     assert not _validator("session_protocol.schema.json").is_valid(message)
 
 
