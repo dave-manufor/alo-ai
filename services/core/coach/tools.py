@@ -15,23 +15,28 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
-from aloai_events import iso_utc
+import aloai_contracts
 from aloai_guardrails import validate_parent_summary
 from aloai_store import Store
 
 from ..grader import paths
 from . import library
 from .clients import REPORT_READY, Notifier, StoryRequests
-from .plan import next_session_at, write_plan, write_template_plan
+from .plan import save_next_check, write_plan, write_template_plan
 from .template import UNNAMED_CHILD, next_check_days
 
 ACTIVITIES_PER_PLAN = 3
 BOOKS_PER_PLAN = 3
 MAX_TAGS = 2
-TAG = re.compile(r"[a-z][a-z_]{1,30}")
 HIDDEN_REPORT_FIELDS = ("guardian_id", "versions")
 FIRST_NAME = re.compile(r"[^\W\d_]+(?:[ '-][^\W\d_]+){0,2}")
 MAX_NAME_LENGTH = 30
+
+
+def topic_tags(tags: Sequence[str]) -> list[str]:
+    """The tags in the topic taxonomy (schemas/topic_tag.schema.json), each once. Anything
+    else, such as free text that reached a tag field, is dropped."""
+    return [tag for tag in dict.fromkeys(tags) if tag in aloai_contracts.TOPIC_TAGS]
 
 
 def first_name(store: Store, report: dict) -> str:
@@ -97,7 +102,7 @@ class CoachTools:
         child = self.store.get(paths.child(child_id)) or {}
         return {
             "first_name": first_name(self.store, self.report),
-            "saved_tags": child.get("saved_tags", []),
+            "saved_tags": topic_tags(child.get("saved_tags", [])),
             "earlier_checks": [
                 {
                     "timestamp_iso": report["timestamp_iso"],
@@ -131,13 +136,14 @@ class CoachTools:
         Args:
             child_id: the child the plan is for.
             arl: the report's next_passage_arl.
-            tags: one or two topic tags, each one lowercase word such as animals.
+            tags: one or two different tags from the topic list, such as animals.
         """
         expected = self.report["level"]["next_passage_arl"]
         if arl != expected:
             return {"error": f"the next story is at level {expected}"}
-        if not 1 <= len(tags) <= MAX_TAGS or not all(TAG.fullmatch(tag) for tag in tags):
-            return {"error": "give one or two topic tags, each one lowercase word"}
+        if not 1 <= len(tags) <= MAX_TAGS or topic_tags(tags) != list(tags):
+            allowed = ", ".join(aloai_contracts.TOPIC_TAGS)
+            return {"error": f"give one or two different tags from: {allowed}"}
         request_id = self.stories.queue(
             session_id=self.report["session_id"], child_id=child_id, arl=arl, tags=tags
         )
@@ -154,9 +160,7 @@ class CoachTools:
         expected = next_check_days(self.report)
         if days != expected:
             return {"error": f"the next check for this report is in {expected} days"}
-        when = iso_utc(next_session_at(self.report, self.now))
-        self.store.merge(paths.child(child_id), {"next_session_at": when})
-        return {"next_session_at": when}
+        return {"next_session_at": save_next_check(self.store, self.report, self.now)}
 
     def save_plan(
         self,

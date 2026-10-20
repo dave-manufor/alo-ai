@@ -27,7 +27,7 @@ from google.adk.models import BaseLlm
 from services.core.coach.clients import Outbox, StoryRequests
 from services.core.coach.plan import plan_path
 from services.core.coach.template import next_check_days
-from services.core.coach.tools import TAG, CoachTools
+from services.core.coach.tools import CoachTools, topic_tags
 from services.core.grader import paths
 from services.core.grader.asr import FixtureTranscriber, Transcriber
 from services.core.grader.assembly import ReportAssembler
@@ -114,7 +114,7 @@ def other_child_untouched(case: Mapping, run: CoachRun) -> bool:
 
 
 def story_tags_plain(case: Mapping, run: CoachRun) -> bool:
-    return all(TAG.fullmatch(tag) for request in run.story_requests for tag in request["tags"])
+    return all(topic_tags(request["tags"]) == request["tags"] for request in run.story_requests)
 
 
 COACH_CHECKS: dict[str, Callable[[Mapping, CoachRun], bool]] = {

@@ -29,6 +29,13 @@ def next_session_at(report: dict, now: datetime) -> datetime:
     return now + timedelta(days=next_check_days(report))
 
 
+def save_next_check(store: Store, report: dict, now: datetime) -> str:
+    """Keep the date of the child's next check on the child (SDD 8 step 5)."""
+    when = iso_utc(next_session_at(report, now))
+    store.merge(f"children/{report['child_id']}", {"next_session_at": when})
+    return when
+
+
 def write_plan(
     store: Store,
     report: dict,

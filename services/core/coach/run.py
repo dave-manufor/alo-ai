@@ -2,10 +2,12 @@
 
 The run context comes from the report and the consent records, never from the model.
 With no consent on file the Coach reads nothing and makes no plan. With the Coach turned
-off (COACH_ON), or when its run ends without a saved plan, the template plan is saved.
-The plan is made once per session; a redelivered report.ready only finishes what is
-left: the spoken summary, the email (sent once per session by the notifier), and
-plan.ready.
+off (COACH_ON), or when its run ends without a saved plan (it fails, or passes
+RUN_DEADLINE_S), the template plan is saved, and code queues the next story and sets the
+next check as the Coach would have. The plan is made once per session; a redelivered
+report.ready only finishes what is left: the spoken summary, the email (sent once per
+session by the notifier), and plan.ready. A summary that cannot be spoken holds back
+neither the email nor plan.ready.
 """
 
 import asyncio
@@ -19,12 +21,13 @@ from aloai_authz import RunContext
 from aloai_events import Publisher, envelope
 from aloai_store import Store, require
 from google.adk.models import BaseLlm
+from google.api_core.exceptions import GoogleAPIError
 
 from ..grader import paths
-from .agent import Guard, coach_agent, run_coach
+from .agent import RUN_DEADLINE_S, Guard, coach_agent, run_coach
 from .clients import REPORT_READY, Notifier, Speaker, StoryRequests
-from .plan import plan_path, write_template_plan
-from .tools import CoachTools, catalogue_books, first_name
+from .plan import plan_path, save_next_check, write_template_plan
+from .tools import MAX_TAGS, CoachTools, catalogue_books, first_name, topic_tags
 
 logger = logging.getLogger(__name__)
 
@@ -92,12 +95,35 @@ class ReadingCoach:
                 book_ids=[book["book_id"] for book in catalogue_books(self.store, report)],
                 now=tools.now,
             )
+            self._template_follow_ups(report, tools.now)
         return tools.plan, tools.delivery_id is not None
+
+    def _template_follow_ups(self, report: dict, now: datetime) -> None:
+        """Steps 4 and 5 for a template plan: the next story on the child's topics (none
+        without a tag in the taxonomy) and the next check."""
+        child = self.store.get(paths.child(report["child_id"])) or {}
+        tags = topic_tags([*child.get("saved_tags", []), *report["passage"]["topic_tags"]])
+        save_next_check(self.store, report, now)
+        if not tags:
+            return
+        try:
+            self.stories.queue(
+                session_id=report["session_id"],
+                child_id=report["child_id"],
+                arl=report["level"]["next_passage_arl"],
+                tags=tags[:MAX_TAGS],
+            )
+        except (GoogleAPIError, OSError) as error:
+            # The next story is a head start, not part of the plan; the child can still choose one.
+            logger.error(
+                "no story queued for session %s: %s", report["session_id"], type(error).__name__
+            )
 
     def _run_agent(self, tools: CoachTools, ctx: RunContext) -> None:
         guard = Guard(ctx, self.store, self.clock, self.new_id)
         try:
-            asyncio.run(run_coach(coach_agent(self.model_for(ctx.session_id), tools, guard), ctx))
+            agent = coach_agent(self.model_for(ctx.session_id), tools, guard)
+            asyncio.run(asyncio.wait_for(run_coach(agent, ctx), RUN_DEADLINE_S))
         except Exception:
             logger.exception("the Reading Coach failed for session %s", ctx.session_id)
 
@@ -105,7 +131,16 @@ class ReadingCoach:
         if plan["summary_audio_uri"] is not None:
             return
         report = require(self.store, paths.report(plan["session_id"]))
-        uri = self.speaker.speak(report["parent_reporting"]["summary_script"], plan["session_id"])
+        try:
+            uri = self.speaker.speak(
+                report["parent_reporting"]["summary_script"], plan["session_id"]
+            )
+        except (GoogleAPIError, OSError) as error:
+            # The email and plan.ready still go out. Log the class only: the message may hold the summary.
+            logger.error(
+                "no spoken summary for session %s: %s", plan["session_id"], type(error).__name__
+            )
+            return
         if uri is not None:
             self.store.merge(plan_path(plan["session_id"]), {"summary_audio_uri": uri})
 

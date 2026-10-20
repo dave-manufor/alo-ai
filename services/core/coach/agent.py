@@ -28,6 +28,7 @@ COACH_MODEL = "gemini-2.5-flash"
 PROMPT_VERSION = "coach_v1"
 TOKEN_BUDGET = 30_000
 MAX_LLM_CALLS = 12
+RUN_DEADLINE_S = 15  # the plan is due within 20 s of report.ready (PRD 1.3)
 APP_NAME = "aloai_core"
 
 # No braces: ADK reads {name} in an instruction as a session-state variable.
