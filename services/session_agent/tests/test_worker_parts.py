@@ -202,6 +202,16 @@ def test_every_prompt_has_its_text():
     assert set(PROMPT_TEXTS) == set(PROMPTS)
 
 
+@pytest.mark.parametrize("clip_id", sorted(PROMPT_TEXTS))
+def test_prompts_keep_the_voice_rules_for_children(clip_id):
+    # Design-system README "To children": never "wrong", "no", "incorrect" or "fail",
+    # at most one exclamation mark, and nothing about scores or time.
+    text = PROMPT_TEXTS[clip_id]
+    words = {w.strip(".,!?:'").lower() for w in text.split()}
+    assert not words & {"wrong", "no", "incorrect", "fail", "score", "seconds", "timer"}
+    assert text.count("!") <= 1
+
+
 @pytest.mark.parametrize("clip_id", ["question:1", "listening_story", "word_zebra", "nonsense"])
 def test_a_clip_with_no_known_text_is_refused(catalog, clip_id):
     with pytest.raises(ValueError, match="no text"):
