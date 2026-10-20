@@ -124,7 +124,7 @@ def step(state: SessionState, event: Event) -> Result:
         case LiveError():
             return _live_fallback(state)
         case ClipAck(clip_id=clip_id, status="missing"):
-            return state, [StreamClipFromStore(clip_id)]
+            return _missing_clip(state, clip_id)
         case ClipAck():
             return state, []
         case PassageReady() | PassageFallback():
@@ -179,6 +179,14 @@ def _end_incomplete(state: SessionState) -> Result:
         StopRecording(),
         EndSession("INCOMPLETE"),
     ]
+
+
+def _missing_clip(state: SessionState, clip_id: str) -> Result:
+    """Stream a clip the web app doesn't have, once. If it is still missing after that,
+    move on: answering every `missing` with another stream can loop forever."""
+    if clip_id in state.streamed:
+        return state, [Log(f"clip {clip_id} still missing after streaming; moving on")]
+    return replace(state, streamed=(*state.streamed, clip_id)), [StreamClipFromStore(clip_id)]
 
 
 # ---- passage arrival
