@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
+import SchoolChildPage from './pages/SchoolChildPage';
 import SchoolsPreviewPage from './pages/SchoolsPreviewPage';
 import SessionPlaceholderPage from './pages/SessionPlaceholderPage';
 
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/session" element={<SessionPlaceholderPage />} />
         <Route path="/schools/preview" element={<SchoolsPreviewPage />} />
+        <Route path="/schools/preview/children/:childId" element={<SchoolChildPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>

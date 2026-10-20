@@ -1,32 +1,50 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '../design-system/alo';
+import AssistantPanel from '../preview/AssistantPanel';
+import ClassTable from '../preview/ClassTable';
+import GroupsPanel from '../preview/GroupsPanel';
+import { previewBannerText, previewClass } from '../preview/teacherFixture';
 
 // Teacher view PREVIEW (PRD 4.7): front-end only, fictional sample data,
 // no sign-in, and no network calls to Firestore, the agents or any other
-// data service. The full preview (class table, groups, child page,
-// scripted assistant) arrives in its own branch; this scaffold page keeps
-// the route and the mandatory banner in place from day one.
+// data service (a test checks this). Actions that would change something
+// say "Coming soon" instead of working.
 export default function SchoolsPreviewPage() {
+  const [notice, setNotice] = useState<string | null>(null);
+
+  function comingSoon(action: string) {
+    setNotice(`${action} is coming soon. This preview only shows sample data.`);
+  }
+
   return (
     <main className="app-main">
       <p className="preview-banner body" role="note">
-        Preview with sample data. Coming soon for schools.
+        {previewBannerText}
       </p>
 
       <section className="stack">
-        <h1 className="title">Alo.ai for schools</h1>
-        <p className="body">
-          Soon, teachers will see every child&apos;s reading check in one
-          place: who has been checked, what to practise next, and groups for
-          the week. This preview will use a fictional sample class, so you
-          can look around without any real child&apos;s information.
+        <h1 className="title">P3B reading checks</h1>
+        <p className="body muted">
+          Sample class only. Numbers come from the sample checks shown here.
         </p>
-        <Link to="/" aria-label="Back to the home page">
-          <Button variant="secondary" size="grown">
-            Back to home
+        <div className="row">
+          <Button variant="primary" size="grown" onClick={() => comingSoon('Run a check')}>
+            Run a check
           </Button>
-        </Link>
+          <Button variant="secondary" size="grown" onClick={() => comingSoon('Export')}>
+            Export
+          </Button>
+        </div>
+        {notice ? (
+          <p className="body" role="status">
+            {notice}
+          </p>
+        ) : null}
       </section>
+
+      <ClassTable children={previewClass} />
+      <GroupsPanel children={previewClass} />
+      <AssistantPanel />
     </main>
   );
 }
