@@ -88,6 +88,5 @@ def scorer(store: MemoryStore, publisher: MemoryPublisher, **changes) -> Phase1S
         "aligner": timing,
         "pause_finder": timing,
         "clock": lambda: NOW,
-        "new_event_id": lambda: "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1004",
     }
     return Phase1Scorer(**(parts | changes))

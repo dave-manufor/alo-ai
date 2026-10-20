@@ -7,7 +7,6 @@ report. A redelivered event is not scored again; phase1.scored is sent again, an
 report assembly ignores what it has already done.
 """
 
-import uuid
 from collections.abc import Callable, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -44,10 +43,6 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
-def _new_event_id() -> str:
-    return str(uuid.uuid4())
-
-
 @dataclass(frozen=True)
 class Phase1Scorer:
     store: Store
@@ -58,7 +53,6 @@ class Phase1Scorer:
     aligner: Aligner
     pause_finder: PauseFinder
     clock: Callable[[], datetime] = _now
-    new_event_id: Callable[[], str] = _new_event_id
 
     def handle(self, recorded: Mapping[str, Any]) -> None:
         """recorded is the data of a phase1.recorded event."""
@@ -69,20 +63,16 @@ class Phase1Scorer:
             aloai_contracts.PHASE1_TELEMETRY.validate(telemetry)
             self.store.set(path, telemetry)
         data = {"session_id": session_id, "telemetry_ref": path}
-        self.publisher.publish(
-            envelope(
-                "phase1.scored", session_id, data, event_id=self.new_event_id(), now=self.clock()
-            )
-        )
+        self.publisher.publish(envelope("phase1.scored", session_id, data, now=self.clock()))
 
     def _score(self, recorded: Mapping[str, Any]) -> dict:
         passage = require(self.store, f"passages/{recorded['passage_id']}")
         tokens = passage["tokens"]
         uri = recorded["audio_uri"]
+        audio = self.audio.load(uri)  # first, so audio not yet in the bucket costs no transcripts
         with ThreadPoolExecutor(max_workers=2) as pool:
             chirp = pool.submit(self.chirp.heard, uri, passage)
             gemini = pool.submit(self.gemini.heard, uri, passage)
-            audio = self.audio.load(uri)
             heard_chirp, heard_gemini = chirp.result(), gemini.result()
 
         targets = [token["clean_text"] for token in tokens]

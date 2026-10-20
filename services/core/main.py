@@ -78,7 +78,7 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     app = FastAPI(title="Alo.ai Core")
     app.include_router(router(QuickGrader(store, model)))
     app.include_router(
-        events_router(FinalGrader(store, model, transcriber, assembler), assembler, coach)
+        events_router(FinalGrader(store, model, transcriber, assembler), assembler, coach, store)
     )
     return app
 

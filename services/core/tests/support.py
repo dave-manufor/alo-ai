@@ -135,11 +135,7 @@ def quick_request(turn_phase: str, index: int, transcript: str) -> dict:
 
 
 def event(event_type: str, data: dict) -> dict:
-    """An event as its producer sends it; session.done is at schema_version 2."""
-    sent = envelope(
-        event_type, SESSION_ID, data, event_id="6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1009", now=NOW
-    )
-    return sent | {"schema_version": 2} if event_type == "session.done" else sent
+    return envelope(event_type, SESSION_ID, data, now=NOW)
 
 
 def pushed(message: dict) -> dict:
@@ -157,7 +153,6 @@ def assembler(store: MemoryStore, publisher: MemoryPublisher) -> ReportAssembler
         publisher,
         recommender(store),
         clock=lambda: NOW,
-        new_event_id=lambda: "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1005",
     )
 
 
@@ -176,7 +171,7 @@ def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
         clock=lambda: NOW,
     )
     grader = FinalGrader(store, model, FixtureTranscriber(RECORDED / "asr"), reports)
-    return events_router(grader, reports, coach)
+    return events_router(grader, reports, coach, store)
 
 
 def grader_output(

@@ -2,12 +2,14 @@
 clients only: no test reaches a Google service."""
 
 import json
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import aloai_env
+import jsonschema
 import pytest
-from aloai_events import PubSubPublisher
-from aloai_store import FirestoreStore
+from aloai_events import SCHEMA_VERSIONS, PubSubPublisher, envelope, park, stable_event_id
+from aloai_store import FirestoreStore, MemoryStore
 from google.api_core.exceptions import AlreadyExists
 
 
@@ -94,3 +96,35 @@ def test_events_are_published_with_their_type_as_an_attribute():
     assert topic == "projects/aloai-dev/topics/aloai.session-events"
     assert json.loads(data) == {"type": "report.ready", "session_id": "s"}
     assert attrs == {"type": "report.ready"}
+
+
+NOW = datetime(2026, 1, 15, 9, 9, 5, tzinfo=UTC)
+SCORED = {"session_id": "sess_demo_001", "telemetry_ref": "sessions/sess_demo_001/phase1/telemetry"}
+
+
+def test_an_event_carries_its_types_version_and_one_id_per_session():
+    event = envelope("phase1.scored", "sess_demo_001", SCORED, now=NOW)
+    assert (event["schema_version"], event["occurred_at"]) == (1, "2026-01-15T09:09:05Z")
+    assert event["event_id"] == stable_event_id("sess_demo_001", "phase1.scored")
+    assert event["event_id"] != stable_event_id("sess_demo_002", "phase1.scored")
+    assert event["event_id"] != stable_event_id("sess_demo_001", "report.ready")
+    assert SCHEMA_VERSIONS["session.done"] == 2
+
+
+def test_an_event_its_schema_refuses_is_never_built():
+    with pytest.raises(jsonschema.ValidationError):
+        envelope("phase1.scored", "sess_demo_001", {"session_id": "sess_demo_001"}, now=NOW)
+
+
+def test_an_event_that_can_never_succeed_is_kept_by_session_and_type():
+    store = MemoryStore()
+    event = envelope("phase1.scored", "sess_demo_001", SCORED, now=NOW)
+    path = park(store, event, LookupError("no document passages/x"), NOW)
+    assert path == "sessions/sess_demo_001/errors/phase1.scored"
+    assert store.get(path) == {
+        "event_id": event["event_id"],
+        "type": "phase1.scored",
+        "error": "LookupError",
+        "message": "no document passages/x",
+        "at": "2026-01-15T09:09:05Z",
+    }

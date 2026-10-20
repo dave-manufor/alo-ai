@@ -115,8 +115,4 @@ class ReadingCoach:
             "plan_ref": plan_path(plan["session_id"]),
             "template_used": plan["template_used"],
         }
-        self.publisher.publish(
-            envelope(
-                "plan.ready", plan["session_id"], data, event_id=self.new_id(), now=self.clock()
-            )
-        )
+        self.publisher.publish(envelope("plan.ready", plan["session_id"], data, now=self.clock()))

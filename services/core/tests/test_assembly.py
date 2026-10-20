@@ -101,5 +101,17 @@ def test_a_report_written_elsewhere_first_is_kept():
     publisher = MemoryPublisher()
     assembler(store, publisher).assemble(SESSION_ID)
     assert store.get(paths.report(SESSION_ID))["flags"] == ["written elsewhere"]
-    assert "next_passage_arl" not in store.get(paths.child("child_demo_001"))
+    assert store.get(paths.child("child_demo_001"))["next_passage_arl"] == 2
     assert len(publisher.events) == 1
+
+
+def test_a_crash_between_the_report_and_the_childs_level_is_mended_on_redelivery():
+    store, publisher = graded_store(), MemoryPublisher()
+    add_telemetry(store)
+    reports = assembler(store, publisher)
+    reports.assemble(SESSION_ID)
+    store.docs[paths.child("child_demo_001")].pop("next_passage_arl")
+    reports.assemble(SESSION_ID)
+    assert store.get(paths.child("child_demo_001"))["next_passage_arl"] == 2
+    first, again = publisher.events
+    assert first["event_id"] == again["event_id"]

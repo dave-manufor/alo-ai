@@ -3,14 +3,14 @@
 The report needs the reconciled grading and the Phase 1 telemetry, so assembly runs
 after both final grading and phase1.scored, and only the second of the two finds
 both. The report is created only if absent, so it is written once however often
-either event is delivered; report.ready is published whenever the report exists,
-and consumers drop duplicates. Book recommendations (step 5) are added before the
+either event is delivered. report.ready is published whenever the report exists, always
+with the same event_id, and the child's next passage level is saved every time, so a
+crash between the two writes is mended by the next delivery. Book recommendations (step 5) are added before the
 report is saved; a failed book search leaves the report without books rather than
 holding it back.
 """
 
 import logging
-import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -30,17 +30,12 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
-def _new_event_id() -> str:
-    return str(uuid.uuid4())
-
-
 @dataclass(frozen=True)
 class ReportAssembler:
     store: Store
     publisher: Publisher
     books: BookRecommender
     clock: Callable[[], datetime] = _now
-    new_event_id: Callable[[], str] = _new_event_id
 
     def assemble(self, session_id: str) -> bool:
         """True if the report exists after this call."""
@@ -51,17 +46,17 @@ class ReportAssembler:
         report = self.store.get(paths.report(session_id))
         if report is None:
             report = self._write(session_id, grading, telemetry)
+        self.store.merge(
+            paths.child(report["child_id"]),
+            {"next_passage_arl": report["level"]["next_passage_arl"]},
+        )
         data = {
             "session_id": session_id,
             "report_ref": paths.report(session_id),
             "profile": report["profile"]["code"],
             "provisional": report["profile"]["provisional"],
         }
-        self.publisher.publish(
-            envelope(
-                "report.ready", session_id, data, event_id=self.new_event_id(), now=self.clock()
-            )
-        )
+        self.publisher.publish(envelope("report.ready", session_id, data, now=self.clock()))
         return True
 
     def _write(self, session_id: str, grading: dict, telemetry: dict) -> dict:
@@ -85,10 +80,6 @@ class ReportAssembler:
         aloai_contracts.READING_REPORT.validate(report)
         if not self.store.create(paths.report(session_id), report):
             return require(self.store, paths.report(session_id))
-        self.store.merge(
-            paths.child(session["child_id"]),
-            {"next_passage_arl": report["level"]["next_passage_arl"]},
-        )
         return report
 
     def _book_ids(self, session_id: str, report: dict, child: dict, passage: dict) -> list[str]:
