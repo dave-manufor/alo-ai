@@ -100,9 +100,10 @@ def _env(**more):
     }
 
 
-def test_create_app_builds_from_the_environment_with_the_memory_free_local_store():
-    # CLOUD=gcp with FIRESTORE_EMULATOR_HOST needs no credentials; the client is never called.
-    app = create_app(_env(FIRESTORE_EMULATOR_HOST="localhost:8080"))
+def test_create_app_builds_from_the_environment(monkeypatch):
+    # The real store needs cloud credentials, so the test hands it an in-memory one.
+    monkeypatch.setattr("services.account.main.open_store", lambda config: MemoryStore())
+    app = create_app(_env())
     assert TestClient(app).get("/healthz").status_code == 200
 
 
