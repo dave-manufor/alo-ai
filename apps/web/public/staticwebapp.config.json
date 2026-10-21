@@ -1,0 +1,22 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/design-system/*", "/sw.js", "/workbox-*.js", "/manifest.webmanifest", "*.{css,js,svg,png,ico,map,json,mp3}"]
+  },
+  "routes": [
+    { "route": "/assets/*", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
+    { "route": "/design-system/*", "headers": { "cache-control": "public, max-age=86400" } },
+    { "route": "/sw.js", "headers": { "cache-control": "no-cache" } },
+    { "route": "/index.html", "headers": { "cache-control": "no-cache" } }
+  ],
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob: https://*.blob.core.windows.net; connect-src 'self' https://*.ciamlogin.com https://login.microsoftonline.com https://*.azurecontainerapps.io https://*.blob.core.windows.net wss:; frame-src https://*.ciamlogin.com; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self' https://*.ciamlogin.com; frame-ancestors 'none'; object-src 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "microphone=(self), camera=(), geolocation=(), payment=(self)",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+  },
+  "mimeTypes": {
+    ".webmanifest": "application/manifest+json"
+  }
+}

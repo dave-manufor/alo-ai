@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { authMode, type AuthUser, type SignInMethod } from '../auth';
 
 // Fixture-backed account store for the MVP UI phase. Shapes mirror what
 // the Account and Payments service will own (PRD 4.4, 12; SDD 12):
@@ -10,9 +11,9 @@ import { useSyncExternalStore } from 'react';
 // for a child with a consent record from this guardian.
 //
 // TODO(live): child first names and birth years must NOT stay in
-// localStorage on a shared family phone. Live: profiles live in Firestore
-// behind security rules (guardians see only their own children); only the
-// Firebase Auth session persists in the browser.
+// localStorage on a shared family phone. Live: profiles live in the Account service's
+// database behind its authorisation (guardians see only their own children); only the
+// sign-in session persists in the browser (Entra, in this tab only: src/auth).
 
 export const CONSENT_VERSION = 'consent_v1_2026-10';
 export const CONSENT_TEXT =
@@ -21,7 +22,7 @@ export const CONSENT_TEXT =
 export interface Guardian {
   guardian_id: string;
   email: string;
-  sign_in_method: 'google' | 'email_link';
+  sign_in_method: SignInMethod;
 }
 
 export interface ConsentRecord {
@@ -66,7 +67,25 @@ const emptyState: AccountState = {
   subscription: null,
 };
 
+// The sample build keeps its fixtures in localStorage. With real sign-in (Entra) nothing is
+// written to the browser: a guardian's children and consents must not stay on a shared family
+// phone, and there is no Account service to hold them yet, so in that mode they last only as
+// long as the tab. Anything an earlier sample build left on this origin is removed.
+let persist = authMode === 'fixture';
+
+function forgetStored() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable; there is then nothing to remove.
+  }
+}
+
 function load(): AccountState {
+  if (!persist) {
+    forgetStored();
+    return emptyState;
+  }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? { ...emptyState, ...(JSON.parse(raw) as AccountState) } : emptyState;
@@ -80,10 +99,12 @@ const listeners = new Set<() => void>();
 
 function setState(next: AccountState) {
   state = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Storage can be unavailable (private mode); in-memory state still works.
+  if (persist) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // Storage can be unavailable (private mode); in-memory state still works.
+    }
   }
   listeners.forEach((listener) => listener());
 }
@@ -115,8 +136,21 @@ export const accountStore = {
       guardian: { guardian_id: 'guardian_sample_001', email, sign_in_method: method },
     });
   },
+  /** Sets the guardian from an identity the sign-in provider has verified. The id is the
+   *  provider's stable one, never the email address. */
+  signInVerified(user: AuthUser) {
+    setState({
+      ...state,
+      guardian: { guardian_id: user.id, email: user.email, sign_in_method: user.method },
+    });
+  },
   signOut() {
     setState(emptyState);
+  },
+  /** For tests: whether the account is kept in the browser (the sample build) or not. */
+  setPersistence(keep: boolean) {
+    persist = keep;
+    if (!keep) forgetStored();
   },
   /**
    * Adds a child AND records that child's consent in one step, the way the
