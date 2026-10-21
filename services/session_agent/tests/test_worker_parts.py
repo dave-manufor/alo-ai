@@ -1,6 +1,7 @@
 """The pure parts the worker is built from: turns, mic levels, intents, clips,
 the grade:quick client and the passage bank."""
 
+import asyncio
 import json
 import math
 from array import array
@@ -284,3 +285,58 @@ def test_the_bank_refuses_a_pair_with_the_wrong_item_counts(read_items, listen_i
     }
     with pytest.raises(PassageError, match=message):
         PassageBank(docs.get).pair("p", DEMO)
+
+
+# ---- the story: the Passage Generator or the bank (livekit_worker._Passages)
+
+BANK = folder_bank(CONTRACTS)
+
+
+class _Driver:
+    def __init__(self):
+        self.arrived = []
+
+    def passage_arrived(self, pair, *, fallback):
+        self.arrived.append((pair.read["passage_id"], fallback))
+
+
+class _Requester:
+    def __init__(self, story):
+        self.story, self.asked, self.closed = story, [], False
+        self.client = self
+
+    async def request(self, interest, deadline_ms):
+        self.asked.append((interest, deadline_ms))
+        return self.story
+
+    async def aclose(self):
+        self.closed = True
+
+
+def _story_from(requester):
+    from services.session_agent.livekit_worker import _Passages
+
+    async def main():
+        passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, requester)
+        passages.driver = _Driver()
+        passages.generate("i like goats", 20_000)
+        await passages.close()
+        await asyncio.sleep(0)  # the bank passage arrives on the next loop turn
+        return passages.driver.arrived
+
+    return asyncio.run(main())
+
+
+def test_a_generated_story_arrives_as_no_fallback():
+    requester = _Requester(BANK.pair("bank_p3_market_day", DEMO))
+    assert _story_from(requester) == [("bank_p3_market_day", False)]
+    assert requester.asked == [("i like goats", 20_000)]
+    assert requester.closed
+
+
+def test_no_generated_story_means_the_bank_passage():
+    assert _story_from(_Requester(None)) == [(DEFAULT_BANK["demo"], True)]
+
+
+def test_with_recorded_ai_the_story_is_the_bank_passage():
+    assert _story_from(None) == [(DEFAULT_BANK["demo"], True)]

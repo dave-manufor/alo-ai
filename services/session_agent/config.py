@@ -42,7 +42,8 @@ class WorkerSettings:
     clips_base_url: str  # what the browser fetches clips from
     voice_profile_id: str
     tts_version: str
-    core_url: str  # the Grader's grade:quick lives in Core
+    core_url: str  # the Grader's grade:quick and the Passage Generator live in Core
+    vertex_location: str  # the tagger's Gemini region (EU, PRD 12)
     bank_passage_id: str  # "" = the profile's default (passages.DEFAULT_BANK)
     bank_dir: str  # local only: a folder of passage.*.json files, instead of Firestore
     stt_language: str
@@ -59,6 +60,7 @@ def worker_settings(env: Mapping[str, str]) -> WorkerSettings:
         voice_profile_id=env.get("VOICE_PROFILE_ID", "vp_google_v1"),
         tts_version=env.get("TTS_VERSION", "v1"),
         core_url=env.get("CORE_URL", "http://localhost:8080"),
+        vertex_location=env.get("GOOGLE_CLOUD_LOCATION", "europe-west1"),
         bank_passage_id=env.get("BANK_PASSAGE_ID", ""),
         bank_dir=env.get("BANK_DIR", ""),
         # Chirp 3 has no en-NG locale (PRD 1, decision 9); the day-3 benchmark picks one.

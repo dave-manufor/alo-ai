@@ -69,6 +69,7 @@ def test_worker_settings_default_to_the_dev_project_and_can_be_overridden():
     assert defaults.clips_base_url == "https://storage.googleapis.com/aloai-dev-clips"
     assert (defaults.stt_language, defaults.stt_location) == ("en-GB", "eu")
     assert defaults.bank_passage_id == ""  # the session profile's default bank passage
+    assert defaults.vertex_location == "europe-west1"
     local = config.worker_settings(
         {"CLIPS_BUCKET": "c", "CLIPS_BASE_URL": "http://localhost:4443/c", "BANK_DIR": "x"}
     )

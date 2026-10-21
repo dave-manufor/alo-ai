@@ -1,12 +1,13 @@
 """Bank passages for the session (PRD 4.5 fallback, 10.1).
 
-Until the Passage Generator is live (day 3) every session reads a bank passage.
-A READ passage names its listening passage (paired_listening_passage_id), so the
-pair is loaded together. Both must fit the session profile: the machine asks as many
-questions and listening items as the profile says, and the Grader grades every item the
-passage has, so a passage with a different count would make the report fail (PRD 4.5,
-passage.schema.json). Locally the bank is a folder of passage JSON files
-(fixtures/contracts/passage.*.json); in the cloud it is Firestore passages/{id}.
+The bank passage is the fallback when the Passage Generator gives no story; a generated
+story is loaded the same way (both are passages/{id}). A READ passage names its listening
+passage (paired_listening_passage_id), so the pair is loaded together. Both must fit the
+session profile: the machine asks as many questions and listening items as the profile
+says, and the Grader grades every item the passage has, so a passage with a different
+count would make the report fail (PRD 4.5, passage.schema.json). Locally the bank is a
+folder of passage JSON files (fixtures/contracts/passage.*.json); in the cloud it is
+Firestore passages/{id}.
 """
 
 import json

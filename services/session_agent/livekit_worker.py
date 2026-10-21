@@ -5,7 +5,8 @@ recorder, Silero VAD and Chirp 3 streaming STT; their events, data-channel acks,
 connection changes and timers go to the driver; the driver's messages go out on
 the data channel. All session logic is in machine/ and driver.py.
 
-Scripted-clip mode only (cache_first and the live_first fallback). The Gemini
+Scripted-clip mode only (cache_first and the live_first fallback). With AI_MODE=live
+the story comes from the Passage Generator in Core (generation.py). The Gemini
 Live conductor comes on day 3 and its tools will go through
 aloai_authz.authorize (AGENTS.md rule 9).
 """
@@ -19,16 +20,19 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+from google import genai
 from google.cloud import firestore
 from livekit import rtc
 from livekit.agents import AutoSubscribe, JobContext, JobProcess, WorkerOptions, cli, stt, vad
 from livekit.plugins import google, silero
 
-from . import cloud, config, metadata, quick_grade
+from . import cloud, config, generation, metadata, quick_grade
 from .background import Background
 from .clips.catalog import ClipCatalog
 from .clips.store import ClipStore
+from .core_client import CoreClient
 from .driver import Driver, Ports
+from .machine.profiles import PASSAGE_WAIT_MS
 from .machine.types import Profile, Timer
 from .passages import DEFAULT_BANK, PassageBank, folder_bank
 from .protocol import encode
@@ -127,25 +131,80 @@ def _id_token(settings: config.WorkerSettings):
 
 
 class _Passages:
-    """No Passage Generator yet (day 3): a story request falls back to the bank,
-    so the session is honestly flagged FALLBACK_PASSAGE."""
+    """The story from the Passage Generator (AI_MODE=live), or the bank passage: with
+    AI_MODE=fixtures, when the generator gives none, or when the machine's passage_wait
+    timer runs out first (the machine then drops a story that arrives late)."""
 
-    def __init__(self, bank: PassageBank, passage_id: str, profile: Profile) -> None:
+    def __init__(
+        self,
+        bank: PassageBank,
+        passage_id: str,
+        profile: Profile,
+        requester: generation.StoryRequester | None,
+    ) -> None:
         self._bank, self._passage_id, self._profile = bank, passage_id, profile
+        self._requester = requester
+        self._calls: set[asyncio.Task] = set()
         self.driver: Driver | None = None
 
     def pair(self, passage_id: str):
         return self._bank.pair(passage_id, self._profile)
 
-    def generate(self, with_tags: bool) -> None:
-        log.info("Passage Generator not wired yet; using the bank passage")
-        self.bank()
+    def generate(self, interest: str | None, deadline_ms: int) -> None:
+        if self._requester is None:
+            log.info("AI_MODE=fixtures: using the bank passage")
+            self.bank()
+            return
+
+        async def call() -> None:
+            pair = await self._requester.request(interest, deadline_ms)
+            if pair is None:
+                self.bank()
+            else:
+                self.driver.passage_arrived(pair, fallback=False)
+
+        task = asyncio.create_task(call())
+        self._calls.add(task)
+        task.add_done_callback(self._calls.discard)
 
     def bank(self) -> None:
-        pair = self._bank.pair(self._passage_id, self._profile)
+        pair = self.pair(self._passage_id)
         asyncio.get_running_loop().call_soon(
             functools.partial(self.driver.passage_arrived, pair, fallback=True)
         )
+
+    async def close(self) -> None:
+        if self._calls:
+            await asyncio.gather(*self._calls, return_exceptions=True)
+        if self._requester is not None:
+            await self._requester.client.aclose()
+
+
+def _story_requester(
+    settings: config.WorkerSettings,
+    cfg: config.Config,
+    start: metadata.SessionStart,
+    profile: Profile,
+    bank: PassageBank,
+    db: cloud.FirestoreDocuments,
+) -> generation.StoryRequester | None:
+    if cfg.ai_mode != "live":
+        return None
+    vertex = genai.Client(
+        vertexai=True, project=settings.project, location=settings.vertex_location
+    )
+    return generation.StoryRequester(
+        session_id=start.ctx.session_id,
+        child_ref=start.child_id,
+        voice_profile_id=settings.voice_profile_id,
+        length_profile=profile.name.upper(),
+        tagger=generation.VertexTagger(vertex),
+        child=lambda: db.get(f"children/{start.child_id}"),
+        client=CoreClient(
+            settings.core_url, generation.PATH, PASSAGE_WAIT_MS / 1000, _id_token(settings)
+        ),
+        load_pair=lambda passage_id: bank.pair(passage_id, profile),
+    )
 
 
 def _bank(settings: config.WorkerSettings, db: cloud.FirestoreDocuments) -> PassageBank:
@@ -165,7 +224,13 @@ async def entrypoint(ctx: JobContext) -> None:
     db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
     profile = config.PROFILES[cfg.session_profile]
     bank_passage_id = settings.bank_passage_id or DEFAULT_BANK[profile.name]
-    passages = _Passages(_bank(settings, db), bank_passage_id, profile)
+    bank = _bank(settings, db)
+    passages = _Passages(
+        bank,
+        bank_passage_id,
+        profile,
+        _story_requester(settings, cfg, start, profile, bank, db),
+    )
     # Fail before the child joins, not mid-session, if the fallback passage doesn't fit
     # SESSION_PROFILE.
     passages.pair(bank_passage_id)
@@ -252,6 +317,7 @@ async def entrypoint(ctx: JobContext) -> None:
     tick_task.cancel()
     await background.drain()
     await grader.close()
+    await passages.close()
     await asyncio.sleep(1)  # let the last data-channel messages go
     ctx.shutdown(reason="session ended")
 

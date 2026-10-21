@@ -80,8 +80,8 @@ class Passages:
     def __init__(self):
         self.calls = []
 
-    def generate(self, with_tags):
-        self.calls.append(("generate", with_tags))
+    def generate(self, interest, deadline_ms):
+        self.calls.append(("generate", interest, deadline_ms))
 
     def bank(self):
         self.calls.append(("bank",))
@@ -150,7 +150,7 @@ def fire(driver, timers, kind):
 def to_reading(driver, ports, clock):
     driver.start()
     speak(driver, clock, "i like football", then_quiet_ms=1_500)
-    assert ports.passages.calls == [("generate", True)]
+    assert ports.passages.calls == [("generate", "i like football", 20_000)]
     driver.passage_arrived(PAIR, fallback=False)
     driver.on_audio(tone(-20, 2_000))
     speak(driver, clock, "one two three four five", then_quiet_ms=1_000)
@@ -334,6 +334,24 @@ def test_an_answer_heard_only_as_an_interim_transcript_is_still_scored():
 
 
 # ---- passages, grader, connection
+
+
+def test_only_the_interest_chat_answer_goes_to_the_story_request():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    speak(driver, clock, "i like goats and space", then_quiet_ms=1_500)
+    ((_, interest, deadline_ms),) = ports.passages.calls
+    assert (interest, deadline_ms) == ("i like goats and space", 20_000)
+
+
+def test_a_child_who_says_nothing_still_gets_a_story_with_no_interest():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    for _ in range(4):
+        wait(driver, clock, 8_000)
+        if ports.passages.calls:
+            break
+    assert ports.passages.calls == [("generate", None, 20_000)]
 
 
 def test_a_bank_fallback_flags_the_session_and_a_late_story_is_ignored():
