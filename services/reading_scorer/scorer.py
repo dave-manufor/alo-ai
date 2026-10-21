@@ -23,7 +23,7 @@ from .labels import label_words
 from .phrasing import phrasing
 from .telemetry import build_telemetry, error_counts
 from .transcribers import CHIRP_MODEL, GEMINI_MODEL, PROMPT_VERSION, Transcriber
-from .words import align, normalize
+from .words import ALIGNMENT_VERSION, align, normalize
 
 MODEL_VERSIONS = {
     "scoring_module": scoring.SCORING_MODULE,
@@ -31,6 +31,7 @@ MODEL_VERSIONS = {
     "gemini_transcription": GEMINI_MODEL,
     "transcription_prompt": PROMPT_VERSION,
     "alignment": "torchaudio-mms_fa",
+    "word_alignment": ALIGNMENT_VERSION,
     "vad": "silero-vad-5",
 }
 

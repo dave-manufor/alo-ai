@@ -14,7 +14,9 @@ from .machine.types import ChildStop, RepeatRequest
 
 MAX_WORDS = 5
 
-_STOP = ("stop", "i want to stop", "i don't want to", "i'm done", "i am done", "no more")
+# Public: the Reading Scorer keeps a copy (services/reading_scorer/words.py).
+STOP_PHRASES = ("stop", "i want to stop", "i don't want to", "i'm done", "i am done", "no more")
+POLITE = ("please", "auntie", "aunty")  # dropped before matching
 _REPEAT = ("say it again", "say that again", "again", "repeat", "what", "pardon", "sorry what")
 
 
@@ -28,9 +30,9 @@ def intent(text: str) -> ChildStop | RepeatRequest | None:
     words = phrase.split()
     if not words or len(words) > MAX_WORDS:
         return None
-    for please in ("please", "auntie", "aunty"):
+    for please in POLITE:
         phrase = " ".join(w for w in phrase.split() if w != please)
-    if phrase in _STOP:
+    if phrase in STOP_PHRASES:
         return ChildStop()
     if phrase in _REPEAT:
         return RepeatRequest()

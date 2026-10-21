@@ -1,7 +1,8 @@
 """Placing what a transcript heard against the passage (PRD 5.3)."""
 
 import pytest
-from services.reading_scorer.words import Heard, Placed, align, normalize
+from services.reading_scorer.words import POLITE, STOP_PHRASES, Heard, Placed, align, normalize
+from services.session_agent import intents
 
 PASSAGE = ["ada", "saw", "a", "red", "hat"]
 
@@ -80,3 +81,48 @@ def test_words_said_up_to_the_end_stand_for_the_passage_words_left():
 def test_a_word_nothing_like_the_passage_word_still_takes_its_place_mid_passage():
     placed = align(PASSAGE, heard("ada saw a big hat"))
     assert placed[3] == Placed(Heard("big"))
+
+
+@pytest.mark.parametrize(
+    "said, read",
+    [
+        ("ada saw a im done", 3),
+        ("ada saw a red im done", 4),
+        ("Ada saw a, I'm done, Auntie.", 3),
+        ("ada saw a red please stop", 4),
+        ("ada saw a red i want to stop", 4),
+        ("ada saw a red auntie im done", 4),
+        ("ada saw a red hat i am done", 5),
+    ],
+)
+def test_saying_stop_at_the_end_is_not_reading_on(said, read):
+    placed = align(PASSAGE, heard(said))
+    assert [p.heard is not None for p in placed] == [True] * read + [False] * (5 - read)
+    assert all(p.before == () for p in placed)
+
+
+def test_saying_only_stop_places_nothing():
+    assert align(PASSAGE, heard("I'm done")) == [Placed(None)] * 5
+
+
+def test_a_passage_that_ends_in_a_stop_word_is_read_as_written():
+    passage = ["the", "bus", "had", "to", "stop"]
+    placed = align(passage, heard("the bus had to stop"))
+    assert [p.heard.text for p in placed] == passage
+
+
+def test_a_stop_phrase_partly_read_as_the_passage_stays_a_reading():
+    placed = align(["she", "had", "no", "money"], heard("she had no more"))
+    assert [p.heard.text for p in placed] == ["she", "had", "no", "more"]
+
+
+def test_a_polite_word_read_as_the_passage_stays_when_the_stop_after_it_is_dropped():
+    placed = align(["ada", "met", "auntie", "bola"], heard("ada met auntie im done"))
+    assert [p.heard.text for p in placed[:3]] == ["ada", "met", "auntie"]
+    assert placed[3] == Placed(None)
+
+
+def test_the_stop_phrases_and_polite_words_are_the_session_agents():
+    # The scorer image doesn't carry the Session Agent, so words.py keeps a copy.
+    assert set(STOP_PHRASES) == set(intents.STOP_PHRASES)
+    assert set(POLITE) == set(intents.POLITE)
