@@ -105,7 +105,7 @@ def test_turn_audio_uris_are_schema_valid(validate):
         {
             "event_id": str(uuid.uuid4()),
             "type": "session.done",
-            "schema_version": 2,
+            "schema_version": 3,
             "occurred_at": "2026-01-15T09:00:00Z",
             "session_id": "s",
             "data": {

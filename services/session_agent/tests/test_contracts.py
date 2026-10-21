@@ -287,8 +287,10 @@ def test_unknown_field_is_rejected():
     ("name", "version"),
     [
         ("event.session_done.json", 1),
-        ("event.session_done.json", 3),
-        ("event.phase1_recorded.json", 2),
+        ("event.session_done.json", 2),
+        ("event.session_done.json", 4),
+        ("event.phase1_recorded.json", 1),
+        ("event.phase1_recorded.json", 3),
         ("event.session_started.json", 2),
     ],
 )

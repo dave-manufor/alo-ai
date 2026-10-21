@@ -5,7 +5,7 @@
   "description": "Firestore plans/{plan_id}: the two-week home plan (PRD 3.1, SDD 8 and 12). Producer: Reading Coach (W3). Consumer: the report screen (W1). Activities come only from the activity library, named by its version; guardian_id is what the Firestore rules check. summary_audio_uri is the spoken parent summary, null until it is made. template_used is true when the Coach was off or its summary failed the guardrail twice (COACH_TEMPLATE_USED).",
   "type": "object",
   "properties": {
-    "schema_version": { "type": "integer", "const": 1 },
+    "schema_version": { "type": "integer", "const": 2 },
     "plan_id": { "type": "string", "minLength": 1 },
     "session_id": { "type": "string", "minLength": 1 },
     "child_id": { "type": "string", "minLength": 1 },
@@ -26,7 +26,7 @@
     },
     "book_ids": { "type": "array", "items": { "type": "string" }, "maxItems": 3 },
     "next_session_at": { "type": "string", "format": "date-time" },
-    "summary_audio_uri": { "type": ["string", "null"], "pattern": "^gs://" },
+    "summary_audio_uri": { "type": ["string", "null"], "pattern": "^(gs|az)://" },
     "template_used": { "type": "boolean" },
     "activity_library": { "type": "string", "minLength": 1 },
     "created_at": { "type": "string", "format": "date-time" }

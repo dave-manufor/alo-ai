@@ -5,7 +5,7 @@
   "description": "A reading or listening passage with its tokens, propositions and items (PRD 10.1). A passage has exactly as many items as its length profile asks (PRD 4.1, 4.5): a READ passage 3 (STANDARD) or 2 (DEMO), and names its paired listening passage; a LISTEN passage 2 (STANDARD) or 1 (DEMO). The Session Agent asks every item and the Grader grades every item, so the counts must agree. Producer: Passage Generator and bank passages (W2). Consumers: Session Agent (W2), Reading Scorer and Grader (W3). Contains no child data.",
   "type": "object",
   "properties": {
-    "schema_version": { "type": "integer", "const": 3 },
+    "schema_version": { "type": "integer", "const": 4 },
     "passage_id": { "type": "string", "minLength": 1 },
     "title": { "type": "string" },
     "mode": { "type": "string", "enum": ["READ", "LISTEN"] },
@@ -29,7 +29,7 @@
     "arl_level": { "type": "integer", "minimum": 1, "maximum": 12 },
     "word_count": { "type": "integer", "minimum": 1 },
     "text_content": { "type": "string", "minLength": 1 },
-    "audio_gcs_uri": { "type": "string", "pattern": "^gs://" },
+    "audio_gcs_uri": { "type": "string", "pattern": "^(gs|az)://" },
     "voice_profile_id": { "type": "string" },
     "tokens": {
       "type": "array",
@@ -44,7 +44,7 @@
           "is_content_word": { "type": "boolean" },
           "syntactic_boundary_after": { "type": "string", "enum": ["NONE", "PHRASE", "CLAUSE", "TERMINAL"] },
           "name_ipa": { "type": ["string", "null"] },
-          "word_clip_gcs_uri": { "type": "string", "pattern": "^gs://" }
+          "word_clip_gcs_uri": { "type": "string", "pattern": "^(gs|az)://" }
         },
         "required": ["token_index", "sentence_index", "text", "clean_text", "is_content_word", "syntactic_boundary_after", "word_clip_gcs_uri"],
         "additionalProperties": false
@@ -80,7 +80,7 @@
           "type": { "type": "string", "enum": ["LITERAL", "INFERENTIAL", "VOCABULARY"] },
           "target_sentence_index": { "type": "integer", "minimum": 0 },
           "prompt_text": { "type": "string" },
-          "prompt_audio_gcs_uri": { "type": "string", "pattern": "^gs://" },
+          "prompt_audio_gcs_uri": { "type": "string", "pattern": "^(gs|az)://" },
           "max_points": { "type": "integer", "const": 2 },
           "rubric": {
             "type": "object",

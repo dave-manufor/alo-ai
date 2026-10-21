@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "session_done.schema.json",
   "title": "SessionDoneData",
-  "description": "data of the session.done event (envelope schema_version 2). Producer: Session Agent (W2). Consumer: Core Grader (W3). Flags are the informational and blocking flags the Session Agent can raise (PRD 6.8); the Grader and Scorer raise the others. Each turn carries the item it answers: index is the 0-based position in the passage's items sorted by order (0 for a retell, the reading and the chat), and part counts the recordings of that phase and index in order (a repeat request, the retell's \"Anything else?\" or a reconnect starts a new part). reading_stopped_early is true when the kindness rule (PRD 4.3) ended the reading; the session then has no retell or questions.",
+  "description": "data of the session.done event (envelope schema_version 3). Producer: Session Agent (W2). Consumer: Core Grader (W3). Flags are the informational and blocking flags the Session Agent can raise (PRD 6.8); the Grader and Scorer raise the others. Each turn carries the item it answers: index is the 0-based position in the passage's items sorted by order (0 for a retell, the reading and the chat), and part counts the recordings of that phase and index in order (a repeat request, the retell's \"Anything else?\" or a reconnect starts a new part). reading_stopped_early is true when the kindness rule (PRD 4.3) ended the reading; the session then has no retell or questions.",
   "type": "object",
   "properties": {
     "session_id": { "type": "string", "minLength": 1 },
@@ -16,7 +16,7 @@
           "phase": { "$ref": "session_record.schema.json#/$defs/turn_phase" },
           "index": { "type": "integer", "minimum": 0, "maximum": 2 },
           "part": { "type": "integer", "minimum": 0 },
-          "audio_uri": { "type": "string", "pattern": "^gs://" }
+          "audio_uri": { "type": "string", "pattern": "^(gs|az)://" }
         },
         "required": ["turn_id", "phase", "index", "part", "audio_uri"],
         "additionalProperties": false

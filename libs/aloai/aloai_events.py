@@ -27,8 +27,8 @@ from aloai_store import Store
 TOPIC = "aloai.session-events"
 SCHEMA_VERSIONS = {
     "session.started": 1,
-    "phase1.recorded": 1,
-    "session.done": 2,
+    "phase1.recorded": 2,
+    "session.done": 3,
     "phase1.scored": 1,
     "report.ready": 1,
     "plan.ready": 1,

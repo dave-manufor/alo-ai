@@ -24,11 +24,11 @@
     },
     {
       "if": { "properties": { "type": { "const": "phase1.recorded" } } },
-      "then": { "properties": { "schema_version": { "const": 1 }, "data": { "$ref": "phase1_recorded.schema.json" } } }
+      "then": { "properties": { "schema_version": { "const": 2 }, "data": { "$ref": "phase1_recorded.schema.json" } } }
     },
     {
       "if": { "properties": { "type": { "const": "session.done" } } },
-      "then": { "properties": { "schema_version": { "const": 2 }, "data": { "$ref": "session_done.schema.json" } } }
+      "then": { "properties": { "schema_version": { "const": 3 }, "data": { "$ref": "session_done.schema.json" } } }
     },
     {
       "if": { "properties": { "type": { "const": "phase1.scored" } } },
