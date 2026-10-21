@@ -1,90 +1,104 @@
-import type { AgentMessage, ClientMessage } from './protocol';
+import type { AgentMessage, ClientMessage, SessionStep } from './protocol';
 
-// What the session screen shows, decided only by agent messages (W2's
-// protocol) and the phase the child is in. The web app never shows a
-// score, timer, percentage or red mark, in any state.
+// What the session screen shows, decided only by agent messages
+// (protocol v2). The client never advances the session itself: the step
+// comes from the agent, the passage from show_passage, and the bubble
+// text from the playing clip's `text`. Any later agent message clears
+// the reconnecting state (after a reconnect the agent re-sends the step
+// and a play). No score, timer, percentage or red mark, in any state.
 
-export type SessionPhase =
-  | 'welcome'
-  | 'interests'
-  | 'mic_check'
-  | 'getting_story'
-  | 'reading'
-  | 'retell'
-  | 'questions'
-  | 'done';
+export interface PassageOnScreen {
+  passage_id: string;
+  title: string;
+  sentences: string[];
+  arl: number;
+}
 
 export interface SessionViewState {
-  phase: SessionPhase;
+  step: SessionStep | null;
+  passage: PassageOnScreen | null;
   passageVisible: boolean;
-  passageId: string | null;
   reconnecting: boolean;
-  clipsReady: boolean;
-  toldWord: string | null;
+  /** The exact words of the clip now playing; null = keep last bubble,
+   *  and for the listening story there must never be a bubble update. */
+  bubbleText: string | null;
+  playingClipId: string | null;
   acksSent: ClientMessage[];
 }
 
 export const initialSessionState: SessionViewState = {
-  phase: 'welcome',
+  step: null,
+  passage: null,
   passageVisible: false,
-  passageId: null,
   reconnecting: false,
-  clipsReady: false,
-  toldWord: null,
+  bubbleText: null,
+  playingClipId: null,
   acksSent: [],
 };
 
 export function applyAgentMessage(
   state: SessionViewState,
   message: AgentMessage,
+  clipText: (clip_id: string) => string | null = () => null,
 ): SessionViewState {
+  // Any agent message after `reconnecting` means we are back.
+  const reconnecting = message.cmd === 'reconnecting';
   switch (message.cmd) {
+    case 'reconnecting':
+      return { ...state, reconnecting: true };
     case 'clip_list':
-      return { ...state, clipsReady: true, reconnecting: false };
+      return { ...state, reconnecting };
+    case 'step':
+      return { ...state, reconnecting, step: message.step };
     case 'show_passage':
       return {
         ...state,
-        phase: 'reading',
+        reconnecting,
+        passage: {
+          passage_id: message.passage_id,
+          title: message.title,
+          sentences: message.sentences,
+          arl: message.arl,
+        },
         passageVisible: true,
-        passageId: message.passage_id,
-        reconnecting: false,
       };
     case 'hide_passage':
-      return { ...state, passageVisible: false };
-    case 'reconnecting':
-      return { ...state, reconnecting: true };
-    case 'play':
-      return state;
+      return { ...state, reconnecting, passageVisible: false };
+    case 'play': {
+      const text = clipText(message.clip_id);
+      return {
+        ...state,
+        reconnecting,
+        playingClipId: message.clip_id,
+        // text null (listening story) leaves the bubble untouched.
+        bubbleText: text ?? state.bubbleText,
+      };
+    }
   }
 }
 
-export function recordAck(
-  state: SessionViewState,
-  ack: ClientMessage,
-  toldWord: string | null = state.toldWord,
-): SessionViewState {
-  return { ...state, acksSent: [...state.acksSent, ack], toldWord };
+export function recordAck(state: SessionViewState, ack: ClientMessage): SessionViewState {
+  return {
+    ...state,
+    playingClipId: state.playingClipId === ack.clip_id ? null : state.playingClipId,
+    acksSent: [...state.acksSent, ack],
+  };
 }
 
-/** The sample story used until the Passage Generator is connected. */
-export const sampleStory = {
-  passageId: 'bank_p3_market_day',
-  title: 'The Market Day',
-  sentences: [
-    'Ada had a small brown goat.',
-    'The goat loved to eat green leaves.',
-    'One morning, Ada took a basket to the market.',
-    'The goat ran quickly, and Ada chased it past the farm.',
-    'Ada laughed and gave the goat some grass to eat.',
-  ],
-  questions: [
-    'What did Ada take to the market?',
-    'Why did Ada chase the goat?',
-  ],
-};
+/** ReadingPanel level from the passage's ARL (never shown to the child). */
+export function readingLevelForArl(arl: number): 'p1' | 'p3' | 'p5' {
+  if (arl <= 2) return 'p1';
+  if (arl <= 6) return 'p3';
+  return 'p5';
+}
 
-export const sampleClips = [
-  { clip_id: 'greeting_1', url: '/clips/greeting_1.mp3' },
-  { clip_id: 'word_market', url: '/clips/words/market.mp3' },
-  { clip_id: 'question_1', url: '/clips/question_1.mp3' },
+export const STEP_ORDER: SessionStep[] = [
+  'INTEREST_CHAT',
+  'MIC_CHECK',
+  'READING',
+  'RETELL',
+  'QUESTIONS',
+  'LISTENING',
+  'CLOSE',
+  'ENDED',
 ];

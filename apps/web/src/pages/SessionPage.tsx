@@ -1,233 +1,236 @@
-import { useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { accountStore } from '../account/store';
 import {
   Button,
   Japa,
+  LanternStreak,
   MicButton,
   MoonProgress,
   ReadingPanel,
   RewardBadge,
   SpeechBubble,
 } from '../design-system/alo';
-import { createClipCache } from '../session/clipCache';
-import { parseAgentMessage, type ClientMessage } from '../session/protocol';
+import { createClipCache, unlockAudio } from '../session/clipCache';
+import {
+  closingMessages,
+  messagesFor,
+  type DriverEvent,
+} from '../session/fixtureDriver';
+import type { AgentMessage } from '../session/protocol';
 import {
   applyAgentMessage,
   initialSessionState,
+  readingLevelForArl,
   recordAck,
-  sampleClips,
-  sampleStory,
-  type SessionPhase,
 } from '../session/sessionState';
 
-const PHASE_STEP: Record<SessionPhase, number> = {
-  welcome: 0,
-  interests: 0,
-  mic_check: 0,
-  getting_story: 1,
-  reading: 1,
-  retell: 2,
-  questions: 3,
-  done: 3,
+const TOPICS: { label: string; icon: 'book' | 'star' | 'lantern' | 'ear' }[] = [
+  { label: 'Animals', icon: 'book' },
+  { label: 'Football', icon: 'star' },
+  { label: 'Space', icon: 'lantern' },
+  { label: 'Food', icon: 'ear' },
+];
+
+const STEP_INDEX: Record<string, number> = {
+  INTEREST_CHAT: 0,
+  MIC_CHECK: 0,
+  READING: 1,
+  RETELL: 2,
+  QUESTIONS: 3,
+  LISTENING: 3,
+  CLOSE: 3,
+  ENDED: 3,
 };
 
-const TOPICS = ['Animals', 'Football', 'Space', 'Food'];
-
-// Kid mode session screen (PRD 4.1, 4.4), fixture-driven in the MVP
-// phase: it follows W2's session protocol exactly (clip_list downloads
-// every clip before reading, play answers played/missing, the passage is
-// shown and hidden only on the agent's word, reconnecting is an agent
-// command). The fixture driver below stands in for the LiveKit data
-// channel; LiveKit replaces it without changing this screen's states.
+// Kid mode session screen (PRD 4.1, 4.4). The gate comes first: no
+// signed-in guardian + no per-child consent record, no session (PRD 12).
+// The screen follows the agent's protocol v2 messages only — step, clip
+// texts for the bubble, the story from show_passage — and never moves
+// the session on itself. In this phase a fixture driver emits those
+// messages; the LiveKit driver in #24's protocol replaces it. The told
+// word is the agent's decision during reading, never a child's button.
 // Children never see a score, timer, percentage or red mark.
 export default function SessionPage() {
+  const { childId } = useParams();
+  const [started, setStarted] = useState(false);
   const [state, setState] = useState(initialSessionState);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const acksRef = useRef<ClientMessage[]>([]);
+  const [starsCollected, setStarsCollected] = useState(false);
+  const answersRef = useRef(0);
+  const toldWordTimer = useRef<number | null>(null);
 
-  // Fixture clips are simulated locally; with the LiveKit driver the same
-  // cache loads each clip URL in full before reading starts (clipCache.ts).
   const clipCache = useMemo(
     () =>
       createClipCache({
-        load: async () => true,
-        playClip: () => undefined,
+        // Fixture clips are simulated locally; the live cache stores the
+        // bytes in Cache Storage (clipCache.loadClipIntoCache).
+        load: async (url) => `fixture:${url}`,
+        player: { play: async () => undefined },
       }),
     [],
   );
 
-  function dispatch(raw: unknown, toldWord: string | null = null) {
-    const message = parseAgentMessage(raw);
-    if (!message) return;
-    if (message.cmd === 'play') {
-      const ack = clipCache.play(message.clip_id);
-      acksRef.current.push(ack);
-      setState((current) => recordAck(current, ack, toldWord));
-      return;
+  async function dispatch(message: AgentMessage) {
+    if (message.cmd === 'clip_list') {
+      await clipCache.downloadAll(message.clips);
     }
-    setState((current) => applyAgentMessage(current, message));
+    setState((current) =>
+      applyAgentMessage(current, message, (clipId) => clipCache.textFor(clipId)),
+    );
+    if (message.cmd === 'play') {
+      const ack = await clipCache.play(message.clip_id);
+      setState((current) => recordAck(current, ack));
+    }
   }
 
-  async function startStory() {
-    setState((current) => ({ ...current, phase: 'getting_story' }));
-    const missing = await clipCache.downloadAll(sampleClips);
-    for (const clip_id of missing) {
-      acksRef.current.push({ schema_version: 1, cmd: 'missing', clip_id });
-    }
-    dispatch({ schema_version: 1, cmd: 'clip_list', clips: sampleClips });
-    dispatch({ schema_version: 1, cmd: 'show_passage', passage_id: sampleStory.passageId });
+  async function dispatchAll(messages: AgentMessage[]) {
+    for (const message of messages) await dispatch(message);
   }
+
+  function driverEvent(event: DriverEvent) {
+    if (event === 'child_spoke' && state.step === 'QUESTIONS') {
+      answersRef.current += 1;
+      if (answersRef.current >= 2) {
+        void dispatchAll(closingMessages());
+        return;
+      }
+    }
+    void dispatchAll(messagesFor(event, state.step));
+    if (event === 'child_spoke' && state.step === 'MIC_CHECK') {
+      // During reading, the agent tells a word after a pause (PRD 4.1).
+      toldWordTimer.current = window.setTimeout(() => {
+        void dispatchAll(messagesFor('reading_pause', 'READING'));
+      }, 900);
+    }
+  }
+
+  useEffect(
+    () => () => {
+      if (toldWordTimer.current !== null) window.clearTimeout(toldWordTimer.current);
+    },
+    [],
+  );
+
+  // The mic gate (PRD 12): this child's consent record must exist.
+  if (!childId || !accountStore.canStartSession(childId)) {
+    return <Navigate to="/children" replace />;
+  }
+
+  const step = state.step;
+  const listening =
+    state.playingClipId === null &&
+    (step === 'INTEREST_CHAT' ||
+      step === 'MIC_CHECK' ||
+      step === 'READING' ||
+      step === 'RETELL' ||
+      step === 'QUESTIONS' ||
+      step === 'LISTENING');
 
   return (
     <main className="app-main">
       <MoonProgress
         steps={['Say hello', 'Read', 'Tell', 'Answer']}
-        current={PHASE_STEP[state.phase]}
+        current={step ? STEP_INDEX[step] : 0}
       />
 
-      {state.reconnecting ? (
-        <SpeechBubble>Hold on, I&apos;m still listening.</SpeechBubble>
-      ) : null}
-
-      {state.phase === 'welcome' ? (
+      {!started ? (
         <section className="stack">
           <SpeechBubble tone="call">Àlọ́ o!</SpeechBubble>
           <Japa pose="happy" />
           <Button
             variant="call"
             size="kid"
-            onClick={() => setState((s) => ({ ...s, phase: 'interests' }))}
+            icon="star"
+            onClick={() => {
+              unlockAudio();
+              setStarted(true);
+              driverEvent('session_started');
+            }}
           >
             Ààlọ̀!
           </Button>
         </section>
       ) : null}
 
-      {state.phase === 'interests' ? (
+      {started && state.reconnecting ? (
         <section className="stack">
-          <SpeechBubble>What kind of stories do you like?</SpeechBubble>
+          <SpeechBubble>{state.bubbleText ?? 'Let’s wait for the internet.'}</SpeechBubble>
+          <Japa pose="thinking" />
+        </section>
+      ) : null}
+
+      {started && !state.reconnecting && step === 'INTEREST_CHAT' ? (
+        <section className="stack">
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <Japa pose="listening" />
           <div className="row">
             {TOPICS.map((topic) => (
               <Button
-                key={topic}
+                key={topic.label}
                 variant="secondary"
                 size="kid"
-                onClick={() => setState((s) => ({ ...s, phase: 'mic_check' }))}
+                icon={topic.icon}
+                onClick={() => driverEvent('topic_chosen')}
               >
-                {topic}
+                {topic.label}
               </Button>
             ))}
           </div>
         </section>
       ) : null}
 
-      {state.phase === 'mic_check' ? (
+      {started && !state.reconnecting && step === 'MIC_CHECK' ? (
         <section className="stack">
-          <SpeechBubble>Count with me: one, two, three, four, five.</SpeechBubble>
-          <MicButton state="listening" />
-          <Button variant="primary" size="kid" icon="check" onClick={startStory}>
-            I counted
-          </Button>
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
+          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
 
-      {state.phase === 'getting_story' ? (
+      {started && !state.reconnecting && step === 'READING' && state.passageVisible && state.passage ? (
         <section className="stack">
-          <SpeechBubble>Your story is almost ready!</SpeechBubble>
-          <Japa pose="thinking" />
+          <ReadingPanel
+            title={state.passage.title}
+            level={readingLevelForArl(state.passage.arl)}
+            text={state.passage.sentences}
+          />
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
+          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
 
-      {state.phase === 'reading' && state.passageVisible ? (
+      {started && !state.reconnecting && step === 'RETELL' ? (
         <section className="stack">
-          <ReadingPanel title={sampleStory.title} level="p3" text={sampleStory.sentences} />
-          {state.toldWord ? (
-            <SpeechBubble>That word is {state.toldWord}. Keep going!</SpeechBubble>
-          ) : (
-            <SpeechBubble>Read the story aloud for me.</SpeechBubble>
-          )}
-          <MicButton state="listening" />
-          <div className="row">
-            <Button
-              variant="call"
-              size="kid"
-              icon="replay"
-              onClick={() =>
-                dispatch({ schema_version: 1, cmd: 'play', clip_id: 'word_market' }, 'market')
-              }
-            >
-              Help with a word
-            </Button>
-            <Button
-              variant="primary"
-              size="kid"
-              icon="check"
-              onClick={() => {
-                dispatch({ schema_version: 1, cmd: 'hide_passage' });
-                setState((s) => ({ ...s, phase: 'retell' }));
-              }}
-            >
-              I have finished
-            </Button>
-          </div>
-        </section>
-      ) : null}
-
-      {state.phase === 'retell' ? (
-        <section className="stack">
-          <SpeechBubble>Tell me the story in your own words.</SpeechBubble>
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <Japa pose="listening" />
-          <MicButton state="listening" />
-          <Button
-            variant="primary"
-            size="kid"
-            icon="check"
-            onClick={() => setState((s) => ({ ...s, phase: 'questions' }))}
-          >
-            I have finished
-          </Button>
+          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
 
-      {state.phase === 'questions' ? (
+      {started && !state.reconnecting && step === 'QUESTIONS' ? (
         <section className="stack">
-          <SpeechBubble>{sampleStory.questions[questionIndex]}</SpeechBubble>
-          <MicButton state="listening" />
-          {questionIndex + 1 < sampleStory.questions.length ? (
-            <Button
-              variant="primary"
-              size="kid"
-              icon="check"
-              onClick={() => setQuestionIndex((i) => i + 1)}
-            >
-              Next question
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="kid"
-              icon="star"
-              onClick={() => setState((s) => ({ ...s, phase: 'done' }))}
-            >
-              Finish
-            </Button>
-          )}
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
+          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
 
-      {state.phase === 'done' ? (
+      {started && !state.reconnecting && step === 'CLOSE' ? (
         <section className="stack">
-          <SpeechBubble>You did a great job today!</SpeechBubble>
+          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <Japa pose="cheer" />
           <RewardBadge kind="teller" earned />
-          <Link to="/reports">
-            <Button variant="reward" size="kid" icon="star">
-              Collect stars
-            </Button>
-          </Link>
+          {starsCollected ? <LanternStreak weeks={[true]} /> : null}
+          <Button
+            variant="reward"
+            size="kid"
+            icon="star"
+            onClick={() => setStarsCollected(true)}
+          >
+            Collect stars
+          </Button>
+          <p className="kid-body">Give the phone back to a grown-up now.</p>
         </section>
       ) : null}
+
     </main>
   );
 }
