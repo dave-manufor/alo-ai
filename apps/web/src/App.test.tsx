@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { accountStore } from './account/store';
 import App from './App';
 
 function renderAt(path: string) {
@@ -11,14 +12,22 @@ function renderAt(path: string) {
   );
 }
 
-describe('App routing skeleton', () => {
+describe('App routing', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    accountStore.resetForTests();
+  });
+
   it('shows the grown-up landing page with the tagline', () => {
     renderAt('/');
     expect(
       screen.getByRole('heading', { name: 'Stories that listen back.' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Try the reading check' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'See the schools preview' })).toBeInTheDocument();
+    // Accessible names match the visible text (WCAG 2.5.3): NavButton
+    // renders one button per action, never a button inside a link.
+    expect(screen.getByRole('button', { name: 'Start a reading check' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'For schools (preview)' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'See reports' })).not.toBeInTheDocument();
   });
 
   it('labels the schools preview and makes no network calls', () => {
@@ -31,18 +40,19 @@ describe('App routing skeleton', () => {
     fetchSpy.mockRestore();
   });
 
-  it('opens the kid session with the call and response and no score or timer', () => {
-    const { container } = renderAt('/session');
-    expect(screen.getByText('Àlọ́ o!')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ààlọ̀!' })).toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/\d+\s?%|score|timer/i);
+  it('gates reports behind sign-in (PRD 12)', () => {
+    renderAt('/reports');
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Reading reports' })).not.toBeInTheDocument();
   });
 
-  it('routes the full MVP: sign-in, reports and checkout', () => {
-    const { unmount } = renderAt('/signin');
-    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
-    unmount();
+  it('gates the session per child: no consent record, no session', () => {
+    renderAt('/session/child_nope');
+    expect(screen.getByRole('heading', { name: 'Sign in first' })).toBeInTheDocument();
+  });
 
+  it('shows reports to a signed-in guardian', () => {
+    accountStore.signIn('google');
     renderAt('/reports');
     expect(screen.getByRole('heading', { name: 'Reading reports' })).toBeInTheDocument();
   });

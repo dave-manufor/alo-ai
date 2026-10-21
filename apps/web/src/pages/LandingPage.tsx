@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import { Button } from '../design-system/alo';
+import NavButton from '../design-system/NavButton';
 
-// Grown-up mode. The landing page for parents (PRD 4.4); sign-in, consent
-// and child profiles arrive in follow-up branches.
+// Grown-up mode. The landing page for parents (PRD 4.4). Reports are not
+// linked from here: they sit behind sign-in, in the guardian's own area
+// (PRD 12), reached from Your children after a check.
 export default function LandingPage() {
   return (
     <main className="app-main">
@@ -14,21 +14,12 @@ export default function LandingPage() {
           thing to try each week.
         </p>
         <div className="row">
-          <Link to="/signin" aria-label="Try the reading check">
-            <Button variant="primary" size="grown">
-              Start a reading check
-            </Button>
-          </Link>
-          <Link to="/schools/preview" aria-label="See the schools preview">
-            <Button variant="secondary" size="grown">
-              For schools (preview)
-            </Button>
-          </Link>
-          <Link to="/reports" aria-label="See reading reports">
-            <Button variant="secondary" size="grown">
-              See reports
-            </Button>
-          </Link>
+          <NavButton variant="primary" size="grown" to="/signin">
+            Start a reading check
+          </NavButton>
+          <NavButton variant="secondary" size="grown" to="/schools/preview">
+            For schools (preview)
+          </NavButton>
         </div>
       </section>
 
