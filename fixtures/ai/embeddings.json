@@ -1,0 +1,8 @@
+{
+  "model": "text-embedding-005",
+  "note": "Hand-made 4-dimension vectors for tests and local runs, matched to the demo books in services/core/tests/support.py. Replace them with recorded text-embedding-005 vectors once the book ingestion job (W2) embeds the real catalogue.",
+  "vectors": {
+    "food": [1.0, 0.0, 0.0, 0.0],
+    "animals": [0.0, 1.0, 0.0, 0.0]
+  }
+}
