@@ -340,3 +340,21 @@ def test_no_generated_story_means_the_bank_passage():
 
 def test_with_recorded_ai_the_story_is_the_bank_passage():
     assert _story_from(None) == [(DEFAULT_BANK["demo"], True)]
+
+
+def test_a_returning_childs_prepared_story_is_used_if_it_fits():
+    from services.session_agent.livekit_worker import _Passages, _prepared
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    assert _prepared(passages, "bank_p3_market_day").read["passage_id"] == "bank_p3_market_day"
+    assert _prepared(passages, None) is None
+
+
+@pytest.mark.parametrize(
+    "passage_id", ["gen_next_missing", "bank_l3_rain", "bank_p3_school_garden"]
+)
+def test_a_prepared_story_that_is_missing_or_does_not_fit_means_a_fresh_story(passage_id):
+    from services.session_agent.livekit_worker import _Passages, _prepared
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    assert _prepared(passages, passage_id) is None

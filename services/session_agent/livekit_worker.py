@@ -34,7 +34,7 @@ from .core_client import CoreClient
 from .driver import Driver, Ports
 from .machine.profiles import PASSAGE_WAIT_MS
 from .machine.types import Profile, Timer
-from .passages import DEFAULT_BANK, PassageBank, folder_bank
+from .passages import DEFAULT_BANK, PassageBank, PassageError, folder_bank
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
@@ -180,6 +180,18 @@ class _Passages:
             await self._requester.client.aclose()
 
 
+def _prepared(passages: _Passages, passage_id: str | None):
+    """A returning child's prepared story, or None for a fresh one: a prepared passage
+    that is missing or doesn't fit SESSION_PROFILE must not end the session."""
+    if not passage_id:
+        return None
+    try:
+        return passages.pair(passage_id)
+    except PassageError:
+        log.warning("prepared passage %s can't be used; starting a fresh story", passage_id)
+        return None
+
+
 def _story_requester(
     settings: config.WorkerSettings,
     cfg: config.Config,
@@ -301,7 +313,7 @@ async def entrypoint(ctx: JobContext) -> None:
     )
     ctx.room.on("track_subscribed", lambda track, publication, p: listen(track, p))
 
-    returning = passages.pair(start.passage_id) if start.passage_id else None
+    returning = _prepared(passages, start.passage_id)
     driver.start(returning=returning)
     for publication in child.track_publications.values():
         if publication.track is not None:
