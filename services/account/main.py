@@ -15,7 +15,8 @@ from aloai_store import Store, open_store
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import errors
+from . import children, errors
+from .access import Clock, NewId, ensure_guardian, utc_now
 from .auth import GuardianVerifier, Principal, current_guardian
 from .settings import AccountSettings
 
@@ -27,7 +28,13 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     return build_app(settings, open_store(config), GuardianVerifier(settings))
 
 
-def build_app(settings: AccountSettings, store: Store, verifier: GuardianVerifier) -> FastAPI:
+def build_app(
+    settings: AccountSettings,
+    store: Store,
+    verifier: GuardianVerifier,
+    now: Clock = utc_now,
+    new_id: NewId = children.default_id,
+) -> FastAPI:
     app = FastAPI(title="Alo.ai Account")
     errors.install(app)
     if settings.web_origin:
@@ -37,18 +44,15 @@ def build_app(settings: AccountSettings, store: Store, verifier: GuardianVerifie
             allow_methods=["GET", "POST", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
         )
-    guardian = Depends(current_guardian(verifier))
+    guardian = current_guardian(verifier)
 
     @app.get("/healthz")
     def healthz() -> dict[str, str]:
         return {"status": "ok"}
 
     @app.get("/v1/me")
-    def me(principal: Annotated[Principal, guardian]) -> dict[str, str | None]:
-        return {
-            "guardian_id": principal.guardian_id,
-            "email": principal.email,
-            "sign_in_method": principal.sign_in_method,
-        }
+    def me(principal: Annotated[Principal, Depends(guardian)]) -> dict:
+        return ensure_guardian(store, principal, now)
 
+    app.include_router(children.router(store, guardian, now, new_id))
     return app

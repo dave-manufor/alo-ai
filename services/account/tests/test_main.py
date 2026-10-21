@@ -28,11 +28,12 @@ def test_health_needs_no_sign_in():
 def test_me_is_the_verified_guardian():
     response = client().get("/v1/me", headers=bearer())
     assert response.status_code == 200
-    assert response.json() == {
-        "guardian_id": GUARDIAN,
-        "email": "guardian@example.com",
-        "sign_in_method": "email_code",
-    }
+    body = response.json()
+    assert (body["guardian_id"], body["email"], body["sign_in_method"]) == (
+        GUARDIAN,
+        "guardian@example.com",
+        "email_code",
+    )
 
 
 @pytest.mark.parametrize(
