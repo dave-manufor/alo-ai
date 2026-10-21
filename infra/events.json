@@ -1,0 +1,6 @@
+{
+  "queues": {
+    "core-events": ["session.done", "phase1.scored", "report.ready", "plan.ready"],
+    "scorer-events": ["phase1.recorded"]
+  }
+}

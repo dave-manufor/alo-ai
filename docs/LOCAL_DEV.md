@@ -36,7 +36,7 @@ One Docker Compose stack, three profiles: one per owner. Each person runs their 
 | `SESSION_PROFILE` | `standard`, `demo` | `standard` | `demo`: a 75-word story, 2 questions, a ~50-word listening story when triggered. In the cloud it comes from Terraform (`session_profile`). |
 | `demo_warm` | Terraform variable | n/a | The infrastructure toggle: min 1 instance on all four services from the evening before the demo. Never set locally. |
 
-`ALO_ENV=local` turns on the local-only shortcuts (no OIDC check on Pub/Sub pushes, emulator URLs for clips, fixture AI). **Every service refuses to start with `ALO_ENV=local` if `K_SERVICE` is set**, which Cloud Run always sets, so these shortcuts can never reach the cloud.
+`ALO_ENV=local` turns on the local-only shortcuts (no OIDC check on Pub/Sub pushes, emulator URLs for clips, fixture AI). **Every service refuses to start with `ALO_ENV=local` if `K_SERVICE` or `CLOUD_RUN_JOB` (Cloud Run) or `CONTAINER_APP_NAME` or `CONTAINER_APP_JOB_NAME` (Azure Container Apps) is set**, which those platforms always set, so these shortcuts can never reach the cloud. On Azure the emulator connections (`AZURE_STORAGE_CONNECTION_STRING`, `AZURE_COSMOS_KEY`, `AZURE_SERVICEBUS_CONNECTION_STRING`) are refused there too: a hosted service uses its managed identity.
 
 ## Repository layout this assumes
 

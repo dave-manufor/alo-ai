@@ -5,12 +5,25 @@ requires-python = ">=3.11"
 description = "Alo.ai shared libraries (W3): scoring, authorization, guardrails and shared clients"
 dependencies = [
     "jsonschema[format]==4.26.0",
-    "google-cloud-firestore==2.34.1",
-    "google-cloud-pubsub==2.43.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "ruff>=0.6"]
+# Each cloud's SDKs are imported only when that cloud is chosen (CLOUD=gcp|azure), so a
+# service installs the extra for the cloud it runs on. Tests need both.
+gcp = [
+    "google-cloud-firestore==2.34.1",
+    "google-cloud-pubsub==2.43.0",
+    "google-cloud-storage==3.17.1",
+    "google-auth==2.62.0",
+]
+azure = [
+    "azure-cosmos==4.17.1",
+    "azure-servicebus==7.15.0",
+    "azure-storage-blob==12.31.0",
+    "azure-identity==1.26.0",
+    "pyjwt[crypto]==2.15.1",
+]
+dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "ruff>=0.6", "aloai-libs[gcp,azure]"]
 
 [tool.pytest.ini_options]
 # Run from the repo root with: pytest -c libs/aloai/pyproject.toml tests
