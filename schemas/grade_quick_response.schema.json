@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grade_quick_response.schema.json",
+  "title": "GradeQuickResponse",
+  "description": "Response of POST /v1/grade:quick (PRD 7.4, SDD 7). Producer: Grader (W3). Consumer: Session Agent (W2). run_listening_module stays null until the retell and every item of the passage have a quick result, then carries the PRD 6.5 decision made by aloai_scoring. The quick RC is stored in sessions/{session_id}/quick for the report and is never returned. A failed call returns the SDD 11 error; the caller retries only when retryable is true.",
+  "oneOf": [
+    { "$ref": "#/$defs/result" },
+    { "$ref": "#/$defs/error" }
+  ],
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "complete": { "type": "boolean" },
+        "run_listening_module": { "type": ["boolean", "null"] }
+      },
+      "required": ["schema_version", "complete", "run_listening_module"],
+      "additionalProperties": false,
+      "if": { "properties": { "complete": { "const": true } } },
+      "then": { "properties": { "run_listening_module": { "type": "boolean" } } },
+      "else": { "properties": { "run_listening_module": { "type": "null" } } }
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string", "minLength": 1 },
+            "message": { "type": "string" },
+            "retryable": { "type": "boolean" }
+          },
+          "required": ["code", "message", "retryable"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["error"],
+      "additionalProperties": false
+    }
+  }
+}

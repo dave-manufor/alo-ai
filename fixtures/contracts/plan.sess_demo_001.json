@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "plan_id": "plan_sess_demo_001",
+  "session_id": "sess_demo_001",
+  "child_id": "child_demo_001",
+  "guardian_id": "guardian_demo_001",
+  "activities": [
+    {
+      "activity_id": "act_sound_hunt",
+      "title": "Sound hunt",
+      "text": "Pick a sound from a word your child found hard today, like the 'ch' in 'chose'. Find three things at home or at the market that start with that sound."
+    },
+    {
+      "activity_id": "act_word_cards",
+      "title": "Word cards",
+      "text": "Write five words your child paused on today on small cards. Read them together each day, and put a card away once the word feels easy."
+    },
+    {
+      "activity_id": "act_class_level_talk",
+      "title": "Talk about class-level stories",
+      "text": "Keep reading stories at your child's class level aloud to them and ask what happened and why. Understanding is a strength, so keep it growing."
+    }
+  ],
+  "book_ids": ["book_demo_001", "book_demo_002", "book_demo_003"],
+  "next_session_at": "2026-01-22T09:09:20Z",
+  "summary_audio_uri": "gs://aloai-dev-audio/sess_demo_001/summary/summary.mp3",
+  "template_used": false,
+  "activity_library": "activities_v1",
+  "created_at": "2026-01-15T09:09:20Z"
+}

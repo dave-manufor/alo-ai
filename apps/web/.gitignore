@@ -1,0 +1,5 @@
+*.tsbuildinfo
+
+# Generated from docs/Alo.ai_Design_System/ by scripts/sync-design-system.mjs
+src/design-system/vendor/
+public/design-system/

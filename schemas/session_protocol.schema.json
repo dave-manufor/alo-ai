@@ -2,23 +2,28 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "session_protocol.schema.json",
   "title": "SessionProtocolMessage",
-  "description": "LiveKit data-channel messages between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: play, show_passage, hide_passage, reconnecting, clip_list. Client to agent: played, missing. The client never shows a score, timer or red mark.",
+  "description": "LiveKit data-channel messages (topic aloai.session) between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: clip_list, play, step, show_passage, hide_passage, reconnecting. Client to agent: played, missing. The agent decides every step; the client only follows these messages and never moves the session on by itself. The client never shows a score, timer or red mark. schema_version 2 adds clip texts, the passage text on show_passage, and the step message.",
   "oneOf": [
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
+        "schema_version": { "type": "integer", "const": 2 },
         "cmd": { "const": "clip_list" },
         "clips": {
           "type": "array",
-          "description": "Clips the client should cache before the session starts.",
+          "description": "Clips the client caches (fully downloaded) before they are played. More than one clip_list can arrive in a session: the prompts at the start, the passage's clips when it is chosen, and a single clip streamed after a `missing`. Add each list to the cache.",
           "items": {
             "type": "object",
             "properties": {
               "clip_id": { "type": "string", "minLength": 1 },
-              "url": { "type": "string", "minLength": 1 }
+              "url": { "type": "string", "minLength": 1 },
+              "text": {
+                "type": ["string", "null"],
+                "minLength": 1,
+                "description": "Exactly what Auntie Kemi says in the clip, to show in the speech bubble while it plays. null for the listening story, whose words must stay audio-only (the listening module measures understanding without reading)."
+              }
             },
-            "required": ["clip_id", "url"],
+            "required": ["clip_id", "url", "text"],
             "additionalProperties": false
           }
         }
@@ -29,7 +34,7 @@
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
+        "schema_version": { "type": "integer", "const": 2 },
         "cmd": { "const": "play" },
         "clip_id": { "type": "string", "minLength": 1 }
       },
@@ -38,18 +43,53 @@
     },
     {
       "type": "object",
+      "description": "The task the session is in. Sent whenever the agent moves to a new task, and again after a reconnect, so the client can clear its waiting screen. The client shows the screen for this step; it never advances the step itself.",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
-        "cmd": { "const": "show_passage" },
-        "passage_id": { "type": "string", "minLength": 1 }
+        "schema_version": { "type": "integer", "const": 2 },
+        "cmd": { "const": "step" },
+        "step": {
+          "enum": [
+            "INTEREST_CHAT",
+            "MIC_CHECK",
+            "READING",
+            "RETELL",
+            "QUESTIONS",
+            "LISTENING",
+            "CLOSE",
+            "ENDED"
+          ]
+        }
       },
-      "required": ["schema_version", "cmd", "passage_id"],
+      "required": ["schema_version", "cmd", "step"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "description": "Show the story for reading. Carries display text only: never the items, propositions or rubrics.",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 2 },
+        "cmd": { "const": "show_passage" },
+        "passage_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "sentences": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "arl": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "The passage's Alo Reading Level, used only to pick the reading text size (design system ReadingPanel: ARL 1-2 p1, 3-6 p3, 7-12 p5). Never shown to the child: a level on the kid screen would read as a grade."
+        }
+      },
+      "required": ["schema_version", "cmd", "passage_id", "title", "sentences", "arl"],
       "additionalProperties": false
     },
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
+        "schema_version": { "type": "integer", "const": 2 },
         "cmd": { "enum": ["hide_passage", "reconnecting"] }
       },
       "required": ["schema_version", "cmd"],
@@ -57,8 +97,9 @@
     },
     {
       "type": "object",
+      "description": "Client to agent, only in reply to a `play`. `played`: the clip finished playing (the audio's `ended` event); the agent starts waiting for the child's answer from this moment. `missing`: the clip is not cached and could not be played; the agent streams it once with a one-clip clip_list followed by `play`. A client still downloading a clip waits for the download before answering.",
       "properties": {
-        "schema_version": { "type": "integer", "const": 1 },
+        "schema_version": { "type": "integer", "const": 2 },
         "cmd": { "enum": ["played", "missing"] },
         "clip_id": { "type": "string", "minLength": 1 }
       },

@@ -13,7 +13,8 @@ from typing import Protocol
 from .machine.types import EmitEvent
 from .recording import AudioLog
 
-# The version of each event's data (schemas/event_envelope.schema.json).
+# The version of each event's data (schemas/event_envelope.schema.json). Must match
+# aloai_events.SCHEMA_VERSIONS (tests/test_shared_contracts.py).
 SCHEMA_VERSIONS = {"session.started": 1, "phase1.recorded": 1, "session.done": 2}
 
 

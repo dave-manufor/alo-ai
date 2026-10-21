@@ -1,0 +1,61 @@
+/* Teacher view preview (PRD 4.7). Token variables only — no hard-coded
+   colour, spacing, radius or font values. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.preview-table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--surface-raised);
+}
+
+.preview-table th,
+.preview-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sort-button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  min-height: var(--tap-grown);
+  padding: 0;
+  text-decoration: underline;
+}
+
+.row-due {
+  background: var(--sky-soft);
+}
+
+.due-pill {
+  background: var(--sky);
+  border-radius: var(--radius-pill);
+  color: var(--on-bright);
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+}
+
+.preview-input {
+  background: var(--surface);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  min-height: var(--tap-grown);
+  padding: 0 var(--space-3);
+}
+
+.misread {
+  background: var(--sky-soft);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+}

@@ -11,8 +11,11 @@ PRD 4.5, SDD 5. This folder holds the generator's code. So far it has the parts 
 | `gate.py` | The nine code checks of the generation gate; each returns a name, pass or fail, and a reason | 4.5 G4 |
 | `detail.py` | Re-checks the safe detail from the interest chat before the Writer sees it | 4.5 G1 |
 | `names.py`, `text.py` | The name list and blocklist types; the clip store's word rule | 4.5, 4.6 |
+| `data.py`, `data/` | The curated names with IPA, the blocklist and the topic taxonomy, and their loaders | 4.5, 4.6 |
 
-The Writer, the Critic calls, the clip synthesis and the HTTP endpoint come in later PRs. The data files (taxonomy, names with IPA, blocklist, bank passages) come with the content PR.
+The Writer, the Critic calls, the clip synthesis and the HTTP endpoint come in later PRs.
+
+**The name IPA is a draft.** PRD 4.6 says each name is checked by ear in the voice before it is used. Once text-to-speech is available, listen to every entry in `data/names.json` and remove any name that still sounds wrong.
 
 ## Run the tests
 

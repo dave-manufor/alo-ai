@@ -166,6 +166,65 @@ def read_passage(driver, clock):
 # ---- a whole session
 
 
+def run_demo_session(driver, ports, clock):
+    """A whole demo-profile session in which the listening module runs."""
+    to_reading(driver, ports, clock)
+    read_passage(driver, clock)
+    fire(driver, ports.timers, "transition")
+    speak(driver, clock, "ada went to the market and saw a red hat", then_quiet_ms=4_000)
+    speak(driver, clock, "she got a blue one", then_quiet_ms=4_000)
+    speak(driver, clock, "it was red", then_quiet_ms=1_500)
+    wait(driver, clock, 16_000)
+    grader = FixtureQuickGrader(items=2, default=True)
+    for body in ports.grader.bodies:
+        driver.on_quick_response(grader.answer(body))
+    fire(driver, ports.timers, "listening_story")
+    speak(driver, clock, "it rained and tunde got the goats", then_quiet_ms=4_000)
+    speak(driver, clock, "because of the rain", then_quiet_ms=1_500)
+    fire(driver, ports.timers, "close")
+
+
+def test_the_web_app_can_follow_a_whole_session_from_the_protocol_alone(validate):
+    driver, ports, clock, ended = make_driver()
+    run_demo_session(driver, ports, clock)
+    assert ended == ["COMPLETE"]
+    sent = ports.channel.sent
+    for message in sent:
+        validate("session_protocol.schema.json", message)
+
+    steps = [m["step"] for m in sent if m["cmd"] == "step"]
+    assert steps == [
+        "INTEREST_CHAT",
+        "MIC_CHECK",
+        "READING",
+        "RETELL",
+        "QUESTIONS",
+        "LISTENING",
+        "CLOSE",
+        "ENDED",
+    ]
+    reading = next(i for i, m in enumerate(sent) if m.get("step") == "READING")
+    shown = sent[reading + 1]
+    assert shown["cmd"] == "show_passage" and shown["passage_id"] == "bank_p3_market_day"
+    assert " ".join(shown["sentences"]) == PAIR.read["text_content"]
+
+    texts = {c["clip_id"]: c["text"] for m in sent if m["cmd"] == "clip_list" for c in m["clips"]}
+    played = ports.channel.plays()
+    assert "listening_story" in played and texts["listening_story"] is None
+    assert all(texts[clip_id] for clip_id in played if clip_id != "listening_story")
+
+
+def test_a_reconnect_tells_the_web_app_which_step_it_is_back_in():
+    driver, ports, _clock, _ = make_driver()
+    driver.start()
+    driver.on_disconnected()
+    driver.on_reconnected()
+    after = ports.channel.sent[
+        ports.channel.sent.index({"schema_version": 2, "cmd": "reconnecting"}) :
+    ]
+    assert {"schema_version": 2, "cmd": "step", "step": "INTEREST_CHAT"} in after
+
+
 def test_a_demo_session_runs_end_to_end_and_publishes_valid_events(validate):
     driver, ports, clock, ended = make_driver()
     to_reading(driver, ports, clock)
@@ -311,8 +370,15 @@ def test_a_missing_clip_is_sent_again_from_the_store():
     driver.start()
     driver.on_client_message(b'{"schema_version":1,"cmd":"missing","clip_id":"interest_prompt"}')
     assert ports.channel.sent[-2]["cmd"] == "clip_list"
+    assert ports.channel.sent[-2]["clips"] == [
+        {
+            "clip_id": "interest_prompt",
+            "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/interest_prompt.mp3",
+            "text": "Before we read, tell me: what kind of stories do you like?",
+        }
+    ]
     assert ports.channel.sent[-1] == {
-        "schema_version": 1,
+        "schema_version": 2,
         "cmd": "play",
         "clip_id": "interest_prompt",
     }

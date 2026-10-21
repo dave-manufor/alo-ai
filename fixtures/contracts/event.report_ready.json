@@ -1,0 +1,13 @@
+{
+  "event_id": "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1005",
+  "type": "report.ready",
+  "schema_version": 1,
+  "occurred_at": "2026-01-15T09:09:05Z",
+  "session_id": "sess_demo_001",
+  "data": {
+    "session_id": "sess_demo_001",
+    "report_ref": "reports/sess_demo_001",
+    "profile": "UNDERSTANDS_BUILDING_WORD_READING",
+    "provisional": true
+  }
+}

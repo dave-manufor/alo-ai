@@ -160,7 +160,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 
 - Downloads every clip for the session into Cache Storage before reading starts: prompts, questions, the listening story, and one "That word is X." clip per distinct passage word from the shared clip store (about 80 clips, roughly 0.9 MB as 32 kbps MP3 on a first session; the bank-fallback clips download only if the fallback is used).
 
-- Plays a clip when the agent sends `{"cmd":"play","clip_id":…}` on the LiveKit data channel, and acks with `played` or `missing`. Shows and hides the passage on `show_passage` / `hide_passage`, and shows Jàpá waiting on `reconnecting`. Never shows a score, timer or red mark.
+- Follows the agent on the LiveKit data channel (topic `aloai.session`, `schemas/session_protocol.schema.json` v2) and never moves the session on by itself. Shows the screen for each `step` message. Plays a clip when the agent sends `{"cmd":"play","clip_id":…}`, shows the clip's `text` from its `clip_list` entry in the speech bubble (the listening story has none), and acks with `played` when the clip **finishes** or `missing` if it isn't cached (waiting for a download already under way). Shows the story from `show_passage` (title, sentences, ARL) and hides it on `hide_passage`, and shows Jàpá waiting on `reconnecting` until the next `step`. Never shows a score, timer or red mark.
 
 ### Session Agent:
 
@@ -272,7 +272,7 @@ The Reading Scorer turns the reading-phase audio into Phase 1 telemetry (PRD 10.
 
 ### Pipeline:
 
-1. **Load:** the FLAC from Cloud Storage and the PassageArtifact from Firestore.
+1. **Load:** the FLAC from Cloud Storage and the PassageArtifact from Firestore, before either transcript is asked for, so audio not yet in the bucket costs nothing.
 
 2. **Two transcripts, in parallel:** Chirp 3 batch `Recognize` (passage names as speech adaptation; word confidence) and Gemini 2.5 Flash verbatim transcription (temperature 0, pinned). Both sit behind an `AsrProvider` interface.
 
@@ -280,11 +280,11 @@ The Reading Scorer turns the reading-phase audio into Phase 1 telemetry (PRD 10.
 
 4. **Miscue labels:** each transcript is aligned to the passage by edit distance. Both have the passage word: CORRECT. Both have the same other word: SUBSTITUTION; both skip it: OMISSION; TOLD comes from the agent's log. If they disagree, or Chirp's confidence on an agreed-correct word is under 0.5, the word is UNCERTAIN and left out of the counts (more than 5% sets `HIGH_UNCERTAINTY`). An error followed within 3 s by the correct word is self-corrected. MISPRONUNCIATION and DIALECT_VARIANT aren't produced without the phone check.
 
-5. **Counts and rates:** `fluency()` and `self_correction_ratio()` from `aloai_scoring.py`, so the scorer and the report use one implementation.
+5. **Counts and rates:** `fluency()` and `self_correction_ratio()` from `aloai_scoring.py`, so the scorer and the report use one implementation. WCPM takes 2 s off the reading time for each told word after the first (the session's 5 s wait against the norms' 3 s, PRD 6.1). The values are exact; the report rounds them for display.
 
 6. **Prosody (phrasing only):** pauses of 180 ms or more from Silero VAD, placed with the alignment timings and compared with the passage's stored spaCy boundaries, when accuracy is at least 90%. Expression stays null until a Nigerian English reference voice exists.
 
-7. **Write:** telemetry to `sessions/{id}/phase1` and publish `phase1.scored`.
+7. **Write:** telemetry to `sessions/{id}/phase1/telemetry` and publish `phase1.scored`.
 
 **Runtime (hackathon):** Cloud Run, 2 vCPU and 4 GiB, no GPU; min 0, and min 1 from the evening before the demo. An estimated 10–20 s per session (measure on day 1). `MMS_FA` and Silero VAD are baked into the image at pinned versions, and `model_versions` in the telemetry records every model and the scoring module version. The same image runs on laptops under Docker Compose.
 
@@ -298,11 +298,11 @@ The Grader (in Core) scores meaning twice: a fast single pass during the session
 
 **Quick endpoint** (`POST /v1/grade:quick`, target ≤ 2 s p90):
 
-- Request: `{session_id, turn_id, kind: RETELL | ITEM, item_id?, transcript}`. The transcript is the live Chirp stream the agent keeps running through Phase 2.
+- Request: `{schema_version, session_id, passage_id, turn_phase: RETELL | QUESTION, index, transcript}` (`schemas/grade_quick_request.schema.json`). `index` is the item's position in the passage, 0 for the retell. The agent calls it for every item, with an empty transcript when the child didn't answer, which scores 0 without a model call. The transcript is the live Chirp stream the agent keeps running through Phase 2.
 
 - One Gemini Flash call, temperature 0, response schema `GraderOutput`, with the item's rubric and exemplars or the passage propositions.
 
-- Each result is written to `sessions/{id}/quick/{turn_id}`, because Cloud Run instances share no memory. When the retell and every item are in (3, or 2 in the demo profile), the endpoint also returns `quick_rc = comprehension_score(retell_coverage(…), item_score(…))`.
+- Each result is written to `sessions/{id}/quick/{turn_phase}_{index}`, because Cloud Run instances share no memory, so a repeated call returns the stored result. When the retell and every item are in (3, or 2 in the demo profile), the endpoint computes `quick_rc = comprehension_score(retell_coverage(…), item_score(…))`, stores it for the report, and returns `complete: true` with `run_listening_module` (PRD 6.5) (`schemas/grade_quick_response.schema.json`). The quick RC itself is never returned, so the Session Agent holds no [CAL] value.
 
 Quick scores never appear in a report except side by side with final scores.
 
@@ -463,7 +463,7 @@ Public endpoints take a Firebase ID token; service-to-service calls use Cloud Ru
 |Account and Payments|`POST /v1/checkout`|Web app|ID token|Initialize a Paystack transaction, return the access code|
 |Account and Payments|`POST /webhooks/paystack`|Paystack|HMAC-SHA512 signature|Receive payment and subscription events|
 |Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent, Reading Coach|IAM|Generate and gate a passage, or return a bank fallback|
-|Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; quick RC when complete|
+|Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; the listening decision when complete|
 |Reading Scorer, Core|`POST` `/pubsub/<subscription>`|Pub/Sub push|IAM (push service account)|Event handlers (below)|
 
 Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DELETE /v1/children/{id}` comes with the pilot.
@@ -481,7 +481,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
 |`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
 
-Every event uses one envelope: `{event_id (UUID v4), type, schema_version, occurred_at, session_id, data}`. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
+Every event uses one envelope: `{event_id (a UUID), type, schema_version, occurred_at, session_id, data}`. The Reading Scorer, Grader and Reading Coach derive `event_id` from the session and the type, so every publication of one session's `phase1.scored`, `report.ready` or `plan.ready` carries the same id. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
 
 ### Agent tools (Reading Coach):
 
@@ -489,10 +489,10 @@ Every event uses one envelope: `{event_id (UUID v4), type, schema_version, occur
 |---|---|---|---|
 |`get_report`|Read|`session_id`|The ReadingReport|
 |`get_history`|Read|`child_id`|Past sessions, saved tags, last plan|
-|`get_activity_library`|Read|`profile`, `arl`|Matching activity ids and texts|
-|`search_books`|Read|`arl_min`, `arl_max`, `tags`|Ranked book ids with titles and licences|
+|`get_activity_library`|Read|none: the report's profile and level|Matching activity ids and texts|
+|`search_books`|Read|none: the report's ranked books (PRD 9.3)|Book ids with titles and licences, from the catalogue only|
 |`queue_story`|Internal write|`child_id`, `arl`, `tags`|`passage_id`|
-|`schedule_session`|Internal write|`child_id`, `days` (7 or 14)|Reminder id|
+|`schedule_session`|Internal write|`child_id`, `days` (7 or 14)|`next_session_at`, stored on the child|
 |`save_plan`|Internal write|`child_id`, the plan (JSON schema)|`plan_id`|
 |`send_parent_email`|External write, once per run|`child_id`, `template_id`|Delivery id|
 
@@ -503,7 +503,7 @@ The session conductor's tools are listed in section 4.
 |Contract|Producer|Consumer|
 |---|---|---|
 |`POST /v1/sessions`: session record, LiveKit token, agent dispatch|W1|W2|
-|Session protocol: data-channel commands (`play`, `show_passage`, `hide_passage`, `reconnecting`) and the clip list|W2|W1|
+|Session protocol: data-channel commands (`play`, `step`, `show_passage`, `hide_passage`, `reconnecting`), the clip list with each clip's text, and the `played` / `missing` replies|W2|W1|
 |Quick endpoint `POST /v1/grade:quick`|W3|W2|
 |Events `phase1.recorded` and `session.done`, with turn audio paths, the TOLD log and the session settings|W2|W3|
 |Passage artifact, including `syntactic_boundary_after`|W2|W3|
@@ -528,9 +528,9 @@ Operational data, the audit log and the book embeddings live in Firestore (`eur3
 |`children/{child_id}`|Child profile|guardian_id, first_name, primary_class, birth_year, saved_tags, next_passage_arl, level_confirmed|Account and Payments, Core|
 |`sessions/{session_id}`|One session|child_id, status, context, capture_mode, voice_mode, session_profile, passage_id, passage_source, flags, voice_profile_id, created_at|Session Agent|
 |`sessions/{id}/turns/{turn_id}`|One recorded turn|phase, index, part, audio_uri, live_transcript, asr_transcript|Session Agent, Core|
-|`sessions/{id}/phase1`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
-|`sessions/{id}/quick/{turn_id}`|Quick scores|points or credits, latency_ms|Core|
-|`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes `parent_reporting` only)|
+|`sessions/{id}/phase1/telemetry`|Phase 1 telemetry (PRD 10.2)|as the schema|Reading Scorer|
+|`sessions/{id}/quick/{turn_phase}_{index}`|Quick scores|points or credits, latency_ms|Core|
+|`reports/{session_id}`|ReadingReport (PRD 10.4)|as the schema, plus child_id, guardian_id|Core (the Coach writes only `parent_reporting` and, for a template plan, the `COACH_TEMPLATE_USED` flag)|
 |`plans/{plan_id}`|Two-week plan|child_id, activity_ids, book_ids, next_session_at, template_used|Core (Reading Coach)|
 |`passages/{passage_id}`|PassageArtifact (PRD 10.1)|as the schema; no child data|Core (Passage Generator)|
 |`books/{book_id}`|Catalogue of about 30 real books|title, author, ARL (from the publisher level), tags, licence, attribution, description, `embedding` (vector field with a vector index)|Book ingestion job|
