@@ -33,6 +33,15 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 - **Container images.** CI builds and pushes them to the registry (`acr_login_server`) and passes each digest back in `var.images`. Until then the apps run a placeholder image.
 - **The first clips and books.** The seed command for clips and the ingestion run are not built yet.
 
+## Smoke test
+
+`services/session_agent/tools/cloud_smoke.py` drives a fictional child through a whole session and checks the result: the session ran to the end, the report and the parent plan were written, and both dead-letter queues (`core-events`, `scorer-events`) are empty. It exits non-zero if any check fails. Run it after an apply and after the images are deployed, and not during a rehearsal. The agent worker must be running, and so must Core, the Scorer and LiveKit.
+
+- It needs your `az login` to have `Cosmos DB Built-in Data Contributor` on the account and `Azure Service Bus Data Owner` on the namespace (the queue counts are a management call), and `Cognitive Services Speech User` on the Speech resource for the child's voice.
+- The settings are in the docstring: the Cosmos endpoint, the Service Bus namespace name, the Speech region and resource id, and the LiveKit address, key and secret. Read the key and secret from the vault into the shell (`az keyvault secret show`), not into a file.
+- It leaves one session, report and plan per run, and one fictional child (`child_smoke`, guardian `guardian_smoke`). Nothing of a real child is used and nothing is deleted.
+- `--silent` keeps the child's microphone silent: the session then ends early and may be INCOMPLETE. The default has the child speak, with Azure AI Speech making the audio at run time.
+
 ## Before you rely on it (checked against nothing yet)
 
 - **Model availability and EU processing.** `openai_deployments` asks for `DataZoneStandard`, which keeps processing in the EU data zone. The listed models and versions may not all be offered in `swedencentral`; `gpt-4o-transcribe` in particular may be `GlobalStandard` only. `GlobalStandard` may process outside the EU, which the EU rule and the NDPA transfer basis do not allow, and the variable's validation refuses it. If a model is only global, that is a decision for the team, not something to change quietly.
