@@ -83,7 +83,7 @@ a {
 }
 
 .preview-banner {
-  background: var(--moon-soft);
+  background: var(--sky-soft);
   color: var(--ink);
   border-radius: var(--radius-m);
   padding: var(--space-3) var(--space-4);
