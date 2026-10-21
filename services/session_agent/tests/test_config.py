@@ -5,8 +5,22 @@ from services.session_agent.main import main
 
 def test_defaults():
     assert config.load({}) == config.Config(
-        alo_env="", ai_mode="fixtures", voice_mode="cache_first", session_profile="standard"
+        alo_env="",
+        ai_mode="fixtures",
+        voice_mode="cache_first",
+        session_profile="standard",
+        generator_on=False,  # off until the generator's evaluation sets pass
     )
+
+
+@pytest.mark.parametrize(("value", "on"), [("true", True), ("false", False)])
+def test_the_generator_switch_is_a_strict_flag(value, on):
+    assert config.load({"GENERATOR_ON": value}).generator_on is on
+
+
+def test_an_unclear_generator_switch_is_refused():
+    with pytest.raises(config.ConfigError, match="GENERATOR_ON"):
+        config.load({"GENERATOR_ON": "yes"})
 
 
 def test_values_come_from_the_environment():
@@ -69,6 +83,7 @@ def test_worker_settings_default_to_the_dev_project_and_can_be_overridden():
     assert defaults.clips_base_url == "https://storage.googleapis.com/aloai-dev-clips"
     assert (defaults.stt_language, defaults.stt_location) == ("en-GB", "eu")
     assert defaults.bank_passage_id == ""  # the session profile's default bank passage
+    assert defaults.vertex_location == "europe-west1"
     local = config.worker_settings(
         {"CLIPS_BUCKET": "c", "CLIPS_BASE_URL": "http://localhost:4443/c", "BANK_DIR": "x"}
     )

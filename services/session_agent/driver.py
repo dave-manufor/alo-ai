@@ -87,8 +87,9 @@ class Grader(Protocol):
 
 
 class Passages(Protocol):
-    def generate(self, with_tags: bool) -> None:
-        """Start a story; call Driver.passage_arrived(pair, fallback=False) when ready."""
+    def generate(self, interest: str | None, deadline_ms: int) -> None:
+        """Start a story on the child's interest-chat answer (None: no answer); call
+        Driver.passage_arrived(pair, fallback=False) when ready."""
         ...
 
     def bank(self) -> None:
@@ -256,8 +257,9 @@ class Driver:
                 self.ports.grader.request(body)
             case EmitEvent():
                 self._emit(action)
-            case RequestPassage(with_tags=with_tags):
-                self.ports.passages.generate(with_tags)
+            case RequestPassage(with_tags=with_tags, deadline_ms=deadline_ms):
+                interest = self._interest_answer() if with_tags else None
+                self.ports.passages.generate(interest, deadline_ms)
             case UseBankPassage():
                 self.ports.passages.bank()
             case StartTimer(name=name, ms=ms):
@@ -309,6 +311,16 @@ class Driver:
         if phase == "MIC_CHECK":
             self.mic.reset()
         self.turns.start(_TURN_KIND.get(phase, "answer"), now)
+
+    def _interest_answer(self) -> str | None:
+        """What the child said in the interest chat, for the tagger only."""
+        parts = [
+            text
+            for (phase, _), texts in sorted(self._transcripts.items())
+            if phase == "INTEREST_CHAT"
+            for text in texts
+        ]
+        return " ".join(parts).strip() or None
 
     def _stop_turn(self) -> None:
         if self._turn is None:

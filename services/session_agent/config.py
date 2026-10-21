@@ -1,7 +1,8 @@
 """Session Agent settings, read once from the environment.
 
-VOICE_MODE and SESSION_PROFILE are server settings set in Terraform (PRD 15.1);
-the browser never chooses them. Local shortcuts (ALO_ENV=local) must never run
+VOICE_MODE, SESSION_PROFILE and GENERATOR_ON are server settings set in Terraform
+(PRD 15.1); the browser never chooses them. GENERATOR_ON stays false until the Writer +
+Critic and tagger evaluation sets pass: then every session reads a bank passage. Local shortcuts (ALO_ENV=local) must never run
 on Cloud Run, which sets K_SERVICE.
 """
 
@@ -23,6 +24,14 @@ class Config:
     ai_mode: str
     voice_mode: str
     session_profile: str
+    generator_on: bool  # false: every session reads a bank passage (FALLBACK_PASSAGE)
+
+
+FLAGS = {"true": True, "false": False}
+
+
+def _flag(env: Mapping[str, str], name: str, default: str) -> bool:
+    return FLAGS[_choice(env, name, default, FLAGS)]
 
 
 def _choice(env: Mapping[str, str], name: str, default: str, allowed) -> str:
@@ -42,7 +51,8 @@ class WorkerSettings:
     clips_base_url: str  # what the browser fetches clips from
     voice_profile_id: str
     tts_version: str
-    core_url: str  # the Grader's grade:quick lives in Core
+    core_url: str  # the Grader's grade:quick and the Passage Generator live in Core
+    vertex_location: str  # the tagger's Gemini region (EU, PRD 12)
     bank_passage_id: str  # "" = the profile's default (passages.DEFAULT_BANK)
     bank_dir: str  # local only: a folder of passage.*.json files, instead of Firestore
     stt_language: str
@@ -59,6 +69,7 @@ def worker_settings(env: Mapping[str, str]) -> WorkerSettings:
         voice_profile_id=env.get("VOICE_PROFILE_ID", "vp_google_v1"),
         tts_version=env.get("TTS_VERSION", "v1"),
         core_url=env.get("CORE_URL", "http://localhost:8080"),
+        vertex_location=env.get("GOOGLE_CLOUD_LOCATION", "europe-west1"),
         bank_passage_id=env.get("BANK_PASSAGE_ID", ""),
         bank_dir=env.get("BANK_DIR", ""),
         # Chirp 3 has no en-NG locale (PRD 1, decision 9); the day-3 benchmark picks one.
@@ -76,4 +87,5 @@ def load(env: Mapping[str, str]) -> Config:
         ai_mode=_choice(env, "AI_MODE", "fixtures", AI_MODES),
         voice_mode=_choice(env, "VOICE_MODE", "cache_first", VOICE_MODES),
         session_profile=_choice(env, "SESSION_PROFILE", "standard", PROFILES),
+        generator_on=_flag(env, "GENERATOR_ON", "false"),
     )

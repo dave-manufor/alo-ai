@@ -1,6 +1,7 @@
 """The pure parts the worker is built from: turns, mic levels, intents, clips,
 the grade:quick client and the passage bank."""
 
+import asyncio
 import json
 import math
 from array import array
@@ -326,3 +327,109 @@ def test_the_bank_refuses_a_pair_with_the_wrong_item_counts(read_items, listen_i
     }
     with pytest.raises(PassageError, match=message):
         PassageBank(docs.get).pair("p", DEMO)
+
+
+# ---- the story: the Passage Generator or the bank (livekit_worker._Passages)
+
+BANK = folder_bank(CONTRACTS)
+
+
+class _Driver:
+    def __init__(self):
+        self.arrived = []
+
+    def passage_arrived(self, pair, *, fallback):
+        self.arrived.append((pair.read["passage_id"], fallback))
+
+
+class _Requester:
+    def __init__(self, story):
+        self.story, self.asked, self.closed = story, [], False
+        self.client = self
+
+    async def request(self, interest, deadline_ms):
+        self.asked.append((interest, deadline_ms))
+        return self.story
+
+    async def aclose(self):
+        self.closed = True
+
+
+def _story_from(requester):
+    from services.session_agent.livekit_worker import _Passages
+
+    async def main():
+        passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, requester)
+        passages.driver = _Driver()
+        passages.generate("i like goats", 20_000)
+        await passages.close()
+        await asyncio.sleep(0)  # the bank passage arrives on the next loop turn
+        return passages.driver.arrived
+
+    return asyncio.run(main())
+
+
+def test_a_generated_story_arrives_as_no_fallback():
+    requester = _Requester(BANK.pair("bank_p3_market_day", DEMO))
+    assert _story_from(requester) == [("bank_p3_market_day", False)]
+    assert requester.asked == [("i like goats", 20_000)]
+    assert requester.closed
+
+
+def test_no_generated_story_means_the_bank_passage():
+    assert _story_from(_Requester(None)) == [(DEFAULT_BANK["demo"], True)]
+
+
+def test_with_recorded_ai_the_story_is_the_bank_passage():
+    assert _story_from(None) == [(DEFAULT_BANK["demo"], True)]
+
+
+def test_a_returning_childs_prepared_story_is_used_if_it_fits():
+    from services.session_agent.livekit_worker import _Passages, _prepared
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    assert _prepared(passages, "bank_p3_market_day").read["passage_id"] == "bank_p3_market_day"
+    assert _prepared(passages, None) is None
+
+
+@pytest.mark.parametrize(
+    "passage_id", ["gen_next_missing", "bank_l3_rain", "bank_p3_school_garden"]
+)
+def test_a_prepared_story_that_is_missing_or_does_not_fit_means_a_fresh_story(passage_id):
+    from services.session_agent.livekit_worker import _Passages, _prepared
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    assert _prepared(passages, passage_id) is None
+
+
+@pytest.mark.parametrize(
+    ("ai_mode", "generator_on"), [("fixtures", True), ("fixtures", False), ("live", False)]
+)
+def test_there_is_no_story_requester_with_recorded_ai_or_the_generator_off(ai_mode, generator_on):
+    from services.session_agent import config
+    from services.session_agent.livekit_worker import _story_requester
+
+    cfg = config.Config("", ai_mode, "cache_first", "demo", generator_on)
+    settings = config.worker_settings({})
+    assert _story_requester(settings, cfg, None, DEMO, BANK, None) is None
+
+
+class _Db:
+    def __init__(self):
+        self.merged = []
+
+    def merge(self, path, data):
+        self.merged.append((path, data))
+
+
+class _Background:
+    def run(self, fn, *args):
+        fn(*args)
+
+
+def test_a_used_prepared_story_is_cleared_from_the_child():
+    from services.session_agent.livekit_worker import _consume_prepared
+
+    db = _Db()
+    _consume_prepared(_Background(), db, "child_1")
+    assert db.merged == [("children/child_1", {"next_passage_id": None})]

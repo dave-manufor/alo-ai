@@ -3,13 +3,9 @@
 import asyncio
 
 import httpx
-from services.session_agent import quick_grade
-from services.session_agent.quick_grade import (
-    PATH,
-    TOKEN_TTL_S,
-    QuickGradeClient,
-    request_body,
-)
+from services.session_agent import core_client, quick_grade
+from services.session_agent.core_client import TOKEN_TTL_S
+from services.session_agent.quick_grade import PATH, QuickGradeClient, request_body
 
 BODY = request_body("sess_demo_001", "bank_p3_market_day", "QUESTION", 0, "Ada chose a hat")
 COMPLETE = {"schema_version": 1, "complete": True, "run_listening_module": False}
@@ -175,7 +171,7 @@ def test_without_a_client_one_is_made_once_with_the_attempt_timeout_and_closed(m
         made.append(kwargs)
         return mock
 
-    monkeypatch.setattr(quick_grade.httpx, "AsyncClient", make)
+    monkeypatch.setattr(core_client.httpx, "AsyncClient", make)
 
     async def main():
         grader = QuickGradeClient("https://core.example")
