@@ -54,3 +54,12 @@ Estimated about $35 to $50 of the $150 for the sprint (Container Apps, the regis
 ## Rollback
 
 Re-apply the previous commit's configuration (`git revert`, merge, CI applies). In an emergency move a service's traffic back to its previous revision in the portal first (`az containerapp revision activate` and `az containerapp ingress traffic set`), then make Terraform match the same day. To turn off live spend quickly set `demo_warm = false` and `agent_on = false`; the apps scale to zero.
+
+## After the first apply: seed the stores
+
+Two manual jobs, run when needed (`az containerapp job start --name <name> --resource-group aloai-rg`; the names are in the `jobs` output):
+
+1. **`seed`**: makes the clips with the Azure voice and writes the bank passages (`services/session_agent/seed.py`). Run it after the first apply, and again after changing `voice_profile_id`, `tts_voice` or the bank passages. Clips already there are never replaced, so it is safe to repeat. Until it has run, a session on Azure has no clips and no bank passage and cannot start. Check `az containerapp job execution list` for a failed run: the job exits non-zero if any clip or passage failed.
+2. **`book_ingest`**: embeds the catalogue with `text-embedding-3-small` once there is one in Cosmos DB (`services/core/books/reembed.py`). **There is no catalogue yet:** the ingestion job and the 30 real open-licence books it would load do not exist, so this job finds nothing to do. It needs a Core image, and there is no Core Dockerfile yet.
+
+Both jobs are untested against Azure.
