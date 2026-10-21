@@ -1,0 +1,177 @@
+{
+  "writer/1": {
+    "title": "The Lost Goat",
+    "sentences": [
+      "Bola and Femi had a little brown goat together.",
+      "One morning, the goat was not in its pen.",
+      "They looked under the big tree near the house.",
+      "They called and called, but it did not come.",
+      "Then they heard a noise from the school garden.",
+      "The hungry goat was eating all the green beans!",
+      "The teacher laughed and gave Femi a long rope.",
+      "That evening, Papa fixed the hole in the pen."
+    ],
+    "propositions": [
+      {
+        "id": "p1",
+        "sentence_index": 0,
+        "category": "SETTING",
+        "description": "Bola and Femi had a little goat.",
+        "weight": 1
+      },
+      {
+        "id": "p2",
+        "sentence_index": 1,
+        "category": "PROBLEM",
+        "description": "The goat was not in its pen.",
+        "weight": 2
+      },
+      {
+        "id": "p3",
+        "sentence_index": 2,
+        "category": "ACTION",
+        "description": "They looked for the goat under the tree.",
+        "weight": 1
+      },
+      {
+        "id": "p4",
+        "sentence_index": 4,
+        "category": "ACTION",
+        "description": "They heard a noise from the school garden.",
+        "weight": 1
+      },
+      {
+        "id": "p5",
+        "sentence_index": 5,
+        "category": "RESOLUTION",
+        "description": "The goat was in the garden eating the beans.",
+        "weight": 2
+      },
+      {
+        "id": "p6",
+        "sentence_index": 7,
+        "category": "RESOLUTION",
+        "description": "Papa fixed the hole in the pen.",
+        "weight": 1
+      }
+    ],
+    "items": [
+      {
+        "item_id": "q1",
+        "order": 1,
+        "type": "LITERAL",
+        "target_sentence_index": 5,
+        "prompt_text": "What was the goat eating in the school garden?",
+        "rubric": {
+          "2": "The green beans, or beans.",
+          "1": "Food or plants from the garden, without saying beans.",
+          "0": "Something else, or no answer."
+        },
+        "exemplars": [
+          {
+            "answer": "Green beans.",
+            "points": 2,
+            "variety": "STANDARD"
+          },
+          {
+            "answer": "Na beans the goat dey chop.",
+            "points": 2,
+            "variety": "PIDGIN"
+          },
+          {
+            "answer": "Some plants.",
+            "points": 1,
+            "variety": "STANDARD"
+          },
+          {
+            "answer": "Grass.",
+            "points": 0,
+            "variety": "STANDARD"
+          }
+        ]
+      },
+      {
+        "item_id": "q2",
+        "order": 2,
+        "type": "INFERENTIAL",
+        "target_sentence_index": 7,
+        "prompt_text": "Why did Papa fix the hole in the pen?",
+        "rubric": {
+          "2": "So the goat cannot get out and get lost again: links the hole to the goat going missing.",
+          "1": "Mentions the goat but not why the hole mattered.",
+          "0": "Something else, or no answer."
+        },
+        "exemplars": [
+          {
+            "answer": "So the goat will not run away again.",
+            "points": 2,
+            "variety": "STANDARD"
+          },
+          {
+            "answer": "Make the goat no comot again.",
+            "points": 2,
+            "variety": "PIDGIN"
+          },
+          {
+            "answer": "Because of the goat.",
+            "points": 1,
+            "variety": "NIGERIAN_ENGLISH"
+          },
+          {
+            "answer": "Because it was night.",
+            "points": 0,
+            "variety": "STANDARD"
+          }
+        ]
+      }
+    ]
+  },
+  "critic_a/1": {
+    "answers": [
+      {
+        "item_id": "q1",
+        "answer": "It was eating the green beans."
+      },
+      {
+        "item_id": "q2",
+        "answer": "So the goat could not get out through the hole and get lost again."
+      }
+    ]
+  },
+  "critic_b/1": {
+    "answers": [
+      {
+        "item_id": "q1",
+        "answer": "Grass."
+      },
+      {
+        "item_id": "q2",
+        "answer": "Because it was broken."
+      }
+    ]
+  },
+  "critic_c/1": {
+    "scores": [
+      {
+        "answer_set": "A",
+        "item_id": "q1",
+        "points": 2
+      },
+      {
+        "answer_set": "A",
+        "item_id": "q2",
+        "points": 2
+      },
+      {
+        "answer_set": "B",
+        "item_id": "q1",
+        "points": 0
+      },
+      {
+        "answer_set": "B",
+        "item_id": "q2",
+        "points": 0
+      }
+    ]
+  }
+}
