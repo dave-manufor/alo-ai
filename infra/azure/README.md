@@ -31,7 +31,7 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 - **LiveKit.** The server and its account are set up in LiveKit's dashboard; put its `wss://` address in `livekit_url`.
 - **Entra External ID sign-in for the web app** (an external tenant, an app registration, a user flow with email code and Google): set up by hand, steps in `apps/web/README.md`. Register the output `web_redirect_uri` as its redirect URI. The web app is deployed by `.github/workflows/web-deploy-azure.yml` (manual; it reads the Static Web Apps token at run time).
 - **Container images.** CI builds and pushes them to the registry (`acr_login_server`) and passes each digest back in `var.images`. Until then the apps run a placeholder image.
-- **The first clips and books.** The seed command for clips and the ingestion run are not built yet.
+- **The first clips and books.** The seed job makes the clips and writes the bank passages (see "After the first apply: seed the stores"); someone runs it after the first apply. The book ingestion run and the 30-book catalogue are not built yet.
 
 ## Smoke test
 
