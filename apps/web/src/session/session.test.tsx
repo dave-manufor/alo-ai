@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { accountStore } from '../account/store';
 import ChildrenPage from '../pages/ChildrenPage';
 import SessionPage from '../pages/SessionPage';
-import { createClipCache } from './clipCache';
+import { browserPlayer, createClipCache, unlockAudio } from './clipCache';
 import { fixtureClips } from './fixtureDriver';
 import { missingAck, parseAgentMessage, playedAck } from './protocol';
 import {
@@ -138,6 +138,43 @@ describe('clip cache (PRD 4.4, protocol v2)', () => {
 
     await expect(cache.play('bad_1')).resolves.toEqual(missingAck('bad_1'));
     await expect(cache.play('never_seen')).resolves.toEqual(missingAck('never_seen'));
+  });
+
+  it('plays through one audio element unlocked by the tap, for iOS Safari', async () => {
+    class FakeAudio {
+      static instances: FakeAudio[] = [];
+      src = '';
+      preload = '';
+      currentTime = 0;
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor() {
+        FakeAudio.instances.push(this);
+      }
+      play() {
+        return Promise.resolve();
+      }
+      pause() {
+        return undefined;
+      }
+    }
+    vi.stubGlobal('Audio', FakeAudio);
+    try {
+      unlockAudio();
+      expect(FakeAudio.instances).toHaveLength(1);
+      const element = FakeAudio.instances[0];
+      // The tap primes the shared element with the silent clip.
+      expect(element.src).toMatch(/^data:audio\/wav;base64,/);
+
+      const played = browserPlayer.play('mic_check_prompt', 'blob:clip');
+      // Same element reused, only the source swaps.
+      expect(FakeAudio.instances).toHaveLength(1);
+      expect(element.src).toBe('blob:clip');
+      element.onended?.();
+      await expect(played).resolves.toBeUndefined();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

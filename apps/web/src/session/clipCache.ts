@@ -98,7 +98,55 @@ export async function loadClipIntoCache(url: string): Promise<string | undefined
   return URL.createObjectURL(await response.blob());
 }
 
-/** Browser player: resolves on the audio element's `ended` event. */
+// One shared <audio> element for the whole session. iOS Safari only
+// unlocks an HTMLAudioElement that has played inside a user gesture —
+// unlocking an AudioContext does NOT unlock it — so the element that
+// will play the clips is the element primed by the "Ààlọ̀!" tap, and
+// every clip reuses it (swap src). A fresh `new Audio()` per clip can
+// have its first agent-driven play() rejected on iOS, which would be
+// answered `missing` and leave Kemi silent.
+let sharedAudio: HTMLAudioElement | null = null;
+
+function getSharedAudio(): HTMLAudioElement {
+  if (!sharedAudio) {
+    sharedAudio = new Audio();
+    sharedAudio.preload = 'auto';
+  }
+  return sharedAudio;
+}
+
+/** A tiny silent WAV (80 samples at 8 kHz), built in code so no asset
+ *  ships for it. Played inside the tap gesture to unlock the element. */
+function silentClipUrl(): string {
+  const sampleRate = 8000;
+  const samples = 80;
+  const buffer = new ArrayBuffer(44 + samples * 2);
+  const view = new DataView(buffer);
+  const writeAscii = (offset: number, text: string) => {
+    for (let i = 0; i < text.length; i += 1) view.setUint8(offset + i, text.charCodeAt(i));
+  };
+  writeAscii(0, 'RIFF');
+  view.setUint32(4, 36 + samples * 2, true);
+  writeAscii(8, 'WAVEfmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeAscii(36, 'data');
+  view.setUint32(40, samples * 2, true); // sample bytes stay zero: silence
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return `data:audio/wav;base64,${btoa(binary)}`;
+}
+
+/** Browser player: plays through the shared element and resolves on
+ *  its `ended` event, so `played` still means playback finished. */
 export const browserPlayer: ClipPlayer = {
   play(_clip_id, objectUrl) {
     return new Promise((resolve, reject) => {
@@ -106,28 +154,35 @@ export const browserPlayer: ClipPlayer = {
         reject(new Error('clip not downloaded'));
         return;
       }
-      const audio = new Audio(objectUrl);
-      audio.addEventListener('ended', () => resolve(), { once: true });
-      audio.addEventListener('error', () => reject(new Error('clip failed to play')), {
-        once: true,
-      });
+      const audio = getSharedAudio();
+      audio.onended = () => resolve();
+      audio.onerror = () => reject(new Error('clip failed to play'));
+      audio.pause();
+      audio.src = objectUrl;
       void audio.play().catch(reject);
     });
   },
 };
 
-/** iOS Safari only plays audio after a user gesture; the "Ààlọ̀!" tap
- *  unlocks the shared context for the whole session. */
+/** Called from the "Ààlọ̀!" tap (a user gesture): plays the silent
+ *  clip on the shared element so later agent-driven play() calls are
+ *  allowed on iOS Safari for the whole session. */
 export function unlockAudio(): void {
   try {
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (Ctor) {
-      const context = new Ctor();
-      void context.resume().catch(() => undefined);
-    }
+    const audio = getSharedAudio();
+    const silentUrl = silentClipUrl();
+    audio.src = silentUrl;
+    void audio
+      .play()
+      .then(() => {
+        // Only pause if a real clip has not already taken over the element.
+        if (audio.src === silentUrl) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      })
+      .catch(() => undefined);
   } catch {
-    // No audio context available; playback attempts will surface as missing.
+    // No audio available; playback attempts will surface as missing.
   }
 }
