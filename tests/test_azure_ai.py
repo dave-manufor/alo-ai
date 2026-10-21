@@ -12,10 +12,12 @@ import numpy as np
 import pytest
 import soundfile
 from aloai_azure import (
+    bearer_token,
     build_ssml,
     deployment,
     openai_base_url,
     pcm16,
+    speech_credentials,
     words_from_result,
 )
 
@@ -235,3 +237,38 @@ def test_an_ipa_word_that_is_not_in_the_text_is_refused():
         build_ssml(
             "That word is rain.", voice="v", locale="en-NG", ipa=("Tunde", "ˈtundɛ")
         )
+
+
+# ---- how to reach Azure AI Speech
+
+
+def test_a_local_run_reaches_speech_with_its_key():
+    settings = azure(AZURE_SPEECH_REGION="swedencentral", AZURE_SPEECH_KEY="k")
+    assert speech_credentials(settings) == {"region": "swedencentral", "key": "k"}
+
+
+def test_a_hosted_service_reaches_speech_with_the_managed_identitys_token():
+    settings = azure(
+        AZURE_SPEECH_REGION="swedencentral",
+        AZURE_SPEECH_RESOURCE_ID="/subscriptions/s/accounts/a",
+    )
+    credentials = speech_credentials(settings, token=lambda: "tok")
+    assert credentials == {
+        "region": "swedencentral",
+        "auth_token": "aad#/subscriptions/s/accounts/a#tok",
+    }
+
+
+def test_speech_needs_a_region_and_for_the_identity_a_resource_id():
+    with pytest.raises(aloai_env.ConfigError, match="AZURE_SPEECH_REGION"):
+        speech_credentials(azure(AZURE_SPEECH_KEY="k"))
+    with pytest.raises(aloai_env.ConfigError, match="AZURE_SPEECH_RESOURCE_ID"):
+        speech_credentials(
+            azure(AZURE_SPEECH_REGION="swedencentral"), token=lambda: "tok"
+        )
+
+
+def test_the_openai_credential_is_the_key_when_there_is_one(monkeypatch):
+    assert bearer_token(azure(AZURE_OPENAI_API_KEY="k")) == "k"
+    monkeypatch.setattr("aloai_azure.entra_token", lambda: "entra")
+    assert bearer_token(azure()) == "entra"

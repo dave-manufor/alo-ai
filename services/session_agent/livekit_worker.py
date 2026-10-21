@@ -1,7 +1,8 @@
 """The LiveKit Agents worker: one job per session room (SDD 4).
 
 Binds the room to the Driver and does nothing else: microphone audio goes to the
-recorder, Silero VAD and Chirp 3 streaming STT; their events, data-channel acks,
+recorder, Silero VAD and streaming STT (Chirp 3, or Azure AI Speech when CLOUD=azure);
+their events, data-channel acks,
 connection changes and timers go to the driver; the driver's messages go out on
 the data channel. All session logic is in machine/ and driver.py.
 
@@ -20,11 +21,16 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+import aloai_env
+from aloai_azure import speech_credentials
+from aloai_blobs import SCHEME_OF, open_blobs
+from aloai_events import open_publisher
+from aloai_service_auth import service_token
+from aloai_store import Store, open_store
 from google import genai
-from google.cloud import firestore
 from livekit import rtc
 from livekit.agents import AutoSubscribe, JobContext, JobProcess, WorkerOptions, cli, stt, vad
-from livekit.plugins import google, silero
+from livekit.plugins import silero
 
 from . import cloud, config, generation, metadata, quick_grade
 from .background import Background
@@ -85,14 +91,20 @@ class _Timers:
 
 
 class _Grader:
-    def __init__(self, settings: config.WorkerSettings, cfg: config.Config, items: int) -> None:
+    def __init__(
+        self,
+        settings: config.WorkerSettings,
+        cfg: config.Config,
+        shared: aloai_env.Config,
+        items: int,
+    ) -> None:
         self._live = cfg.ai_mode == "live"
         self._fixture = quick_grade.FixtureQuickGrader(
             items=items, fixtures_dir=Path("fixtures/ai/quick")
         )
         # One HTTP client and one ID token for the whole session (2 s p90 target).
         self._client = (
-            quick_grade.QuickGradeClient(settings.core_url, _id_token(settings))
+            quick_grade.QuickGradeClient(settings.core_url, _id_token(settings, shared))
             if self._live
             else None
         )
@@ -120,14 +132,13 @@ class _Grader:
             await self._client.aclose()
 
 
-def _id_token(settings: config.WorkerSettings):
-    """A Cloud Run ID token for Core, or None locally."""
-    if not os.environ.get("K_SERVICE"):
+def _id_token(settings: config.WorkerSettings, shared: aloai_env.Config):
+    """A token for Core from the cloud this runs on (a Google ID token, or an Entra access
+    token for CORE_AUDIENCE), or None when not hosted. A new one on each call."""
+    if not shared.hosted:
         return None
-    from google.auth.transport.requests import Request
-    from google.oauth2 import id_token
-
-    return lambda: id_token.fetch_id_token(Request(), settings.core_url)
+    audience = settings.core_audience or settings.core_url
+    return lambda: service_token(shared, audience)
 
 
 class _Passages:
@@ -193,7 +204,7 @@ def _prepared(passages: _Passages, passage_id: str | None):
         return None
 
 
-def _consume_prepared(background: Background, db: cloud.FirestoreDocuments, child_id: str) -> None:
+def _consume_prepared(background: Background, db: Store, child_id: str) -> None:
     """A prepared story is read once. Clearing next_passage_id when the session starts
     means a session that ends INCOMPLETE (no plan.ready) can't give the child the same
     story again next time; a failed write is logged by Background and never ends the
@@ -207,10 +218,15 @@ def _story_requester(
     start: metadata.SessionStart,
     profile: Profile,
     bank: PassageBank,
-    db: cloud.FirestoreDocuments,
+    db: Store,
+    shared: aloai_env.Config,
 ) -> generation.StoryRequester | None:
     if cfg.ai_mode != "live" or not cfg.generator_on:
         return None
+    if shared.cloud != "gcp":  # the Azure tagger comes with the generator's adapters
+        raise aloai_env.ConfigError(
+            f"GENERATOR_ON with AI_MODE=live is not built for CLOUD={shared.cloud} yet"
+        )
     vertex = genai.Client(
         vertexai=True, project=settings.project, location=settings.vertex_location
     )
@@ -222,13 +238,13 @@ def _story_requester(
         tagger=generation.VertexTagger(vertex),
         child=lambda: db.get(f"children/{start.child_id}"),
         client=CoreClient(
-            settings.core_url, generation.PATH, PASSAGE_WAIT_MS / 1000, _id_token(settings)
+            settings.core_url, generation.PATH, PASSAGE_WAIT_MS / 1000, _id_token(settings, shared)
         ),
         load_pair=lambda passage_id: bank.pair(passage_id, profile),
     )
 
 
-def _bank(settings: config.WorkerSettings, db: cloud.FirestoreDocuments) -> PassageBank:
+def _bank(settings: config.WorkerSettings, db: Store) -> PassageBank:
     if settings.bank_dir:
         return folder_bank(Path(settings.bank_dir))
     return PassageBank(lambda passage_id: db.get(f"passages/{passage_id}"))
@@ -240,9 +256,11 @@ async def entrypoint(ctx: JobContext) -> None:
     start = metadata.parse(ctx.job.metadata or ctx.job.room.metadata, settings.voice_profile_id)
     log.info("session %s starting", start.ctx.session_id)
 
-    gcs = cloud.storage_client(settings.project)
-    audio_bucket = cloud.GcsBucket(gcs, settings.audio_bucket)
-    db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
+    shared = aloai_env.load(os.environ, receives_pushes=False)
+    scheme = SCHEME_OF[settings.cloud]
+    blobs = open_blobs(shared)
+    audio_bucket = cloud.BlobBucket(blobs, settings.cloud, settings.audio_bucket)
+    db = open_store(shared)
     profile = config.PROFILES[cfg.session_profile]
     bank_passage_id = settings.bank_passage_id or DEFAULT_BANK[profile.name]
     bank = _bank(settings, db)
@@ -250,7 +268,7 @@ async def entrypoint(ctx: JobContext) -> None:
         bank,
         bank_passage_id,
         profile,
-        _story_requester(settings, cfg, start, profile, bank, db),
+        _story_requester(settings, cfg, start, profile, bank, db, shared),
     )
     # Fail before the child joins, not mid-session, if the fallback passage doesn't fit
     # SESSION_PROFILE.
@@ -263,7 +281,7 @@ async def entrypoint(ctx: JobContext) -> None:
     background = Background()
     timers = _Timers(loop)
     channel = _Channel(ctx.room)
-    grader = _Grader(settings, cfg, profile.n_questions)
+    grader = _Grader(settings, cfg, shared, profile.n_questions)
 
     def upload(audio_uri: str, flac: bytes) -> None:
         bucket, name = object_name(audio_uri)
@@ -273,7 +291,7 @@ async def entrypoint(ctx: JobContext) -> None:
         def set(self, path: str, data: dict) -> None:
             background.run(db.set, path, data)
 
-    publisher = cloud.PubSubPublisher(settings.project)
+    publisher = open_publisher(shared)
 
     class _Publish:
         def publish(self, event: dict) -> None:
@@ -284,17 +302,18 @@ async def entrypoint(ctx: JobContext) -> None:
     ended = asyncio.Event()
     started = time.monotonic()
     store = ClipStore(
-        cloud.GcsBucket(gcs, settings.clips_bucket),
+        cloud.BlobBucket(blobs, settings.cloud, settings.clips_bucket),
         settings.clips_bucket,
         settings.voice_profile_id,
         settings.tts_version,
+        scheme,
     )
     driver = Driver(
         ctx=start.ctx,
         child_id=start.child_id,
         profile=cfg.session_profile,
         voice_mode=cfg.voice_mode,
-        audio=AudioLog(settings.audio_bucket, str(uuid.uuid4())),
+        audio=AudioLog(settings.audio_bucket, str(uuid.uuid4()), scheme=scheme),
         catalog=ClipCatalog(store, settings.clips_base_url),
         ports=Ports(channel, FlacRecorder(upload), timers, grader, passages, _Publish(), _Docs()),
         clock_ms=lambda: int((time.monotonic() - started) * 1000),
@@ -313,7 +332,7 @@ async def entrypoint(ctx: JobContext) -> None:
         pumped.add(track.sid)
         if driver.state.disconnected:
             driver.on_reconnected()  # the child is back with a new microphone track
-        _pump(ctx, driver, track, cfg)
+        _pump(ctx, driver, track, cfg, shared)
 
     ctx.room.on("data_received", lambda packet: _on_data(driver, packet))
     ctx.room.on(
@@ -350,11 +369,17 @@ def _on_data(driver: Driver, packet: rtc.DataPacket) -> None:
         driver.on_client_message(packet.data)
 
 
-def _pump(ctx: JobContext, driver: Driver, track: rtc.Track, cfg: config.Config) -> None:
+def _pump(
+    ctx: JobContext,
+    driver: Driver,
+    track: rtc.Track,
+    cfg: config.Config,
+    shared: aloai_env.Config,
+) -> None:
     """Microphone frames -> recorder, VAD and STT; their events -> the driver."""
     audio = rtc.AudioStream.from_track(track=track, sample_rate=16_000, num_channels=1)
     vad_stream = ctx.proc.userdata["vad"].stream()
-    speech = _stt(cfg)
+    speech = _stt(cfg, shared)
 
     async def frames() -> None:
         async for event in audio:
@@ -386,12 +411,29 @@ def _pump(ctx: JobContext, driver: Driver, track: rtc.Track, cfg: config.Config)
         asyncio.create_task(transcripts())
 
 
-def _stt(cfg: config.Config):
-    """Chirp 3 streaming STT. AI_MODE=fixtures has none: no cloud calls locally, so
-    the reading runs to its 90 s cap and answers reach grade:quick empty."""
+def azure_stt_options(shared: aloai_env.Config) -> dict[str, str]:
+    """The LiveKit Azure plugin's options for this service's speech settings: the locale,
+    the region, and the key (local) or the managed identity's token (hosted)."""
+    credentials = speech_credentials(shared)
+    options = {"language": shared.speech_locale, "speech_region": credentials["region"]}
+    if "key" in credentials:
+        return options | {"speech_key": credentials["key"]}
+    return options | {"speech_auth_token": credentials["auth_token"]}
+
+
+def _stt(cfg: config.Config, shared: aloai_env.Config):
+    """Streaming STT: Chirp 3 on gcp, Azure AI Speech on azure. AI_MODE=fixtures has none:
+    no cloud calls locally, so the reading runs to its 90 s cap and answers reach
+    grade:quick empty."""
     if cfg.ai_mode != "live":
         log.warning("AI_MODE=fixtures: no speech to text; the position tracker will not move")
         return None
+    if shared.cloud == "azure":
+        from livekit.plugins import azure
+
+        return azure.STT(**azure_stt_options(shared)).stream()
+    from livekit.plugins import google
+
     settings = config.worker_settings(os.environ)
     return google.STT(
         model="chirp_3",

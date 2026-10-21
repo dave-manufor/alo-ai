@@ -71,6 +71,14 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
    - The report's `versions` now name the models actually called, so an Azure report says `azure-openai/<deployment>` and `azure-speech/<locale>`, not the Gemini and Chirp names.
    - `UpstreamErrors` also counts OpenAI and azure-core errors, so the quick endpoint still answers 503 with `retryable: true`.
    - **Not run, so not claimed:** the evaluation sets (hard rule 6), the day-1 Azure Speech check, and every call to a real Azure service. Unit tests use fake clients. The Speech SDK calls (`recognize_words`, `synthesize`) and the parse of Speech's detailed JSON follow the SDK's documented shapes and are the least certain parts: check that Speech returns a confidence for each word (without one, every word is left unmarked), that the transcription model keeps a child's mistakes instead of correcting them to the passage, and the 2.5 s quick-grade timeout on the quick deployment.
+   - **W2 part built (Session Agent, clips), also not run against Azure:**
+     - The worker takes its storage, documents and events from the shared clients (`open_blobs`, `open_store`, `open_publisher`), chosen by `CLOUD`. `cloud.py` is now one `BlobBucket` over any `Blobs`; the Google-only copies are gone.
+     - Turn audio and clip URIs follow the cloud (`az://` on Azure) through a `scheme` on `AudioLog` and `ClipStore`.
+     - Streaming STT is `livekit.plugins.azure.STT` on Azure, with the key locally or the managed identity's token (`aad#{resource id}#{token}`) when hosted; Chirp 3 stays on GCP.
+     - The call to Core gets a token from the cloud it runs on (`service_token`). On Azure the audience is `CORE_AUDIENCE` (an app ID URI), not Core's URL.
+     - The Session Agent now refuses `ALO_ENV=local` on Container Apps too, and `aloai_env.load(..., receives_pushes=False)` lets it start on Cloud Run without a push identity.
+     - Clips: `clips/azure.py` makes the `synthesize(text, ipa)` that `seed_words` takes from an Azure voice, with an IPA `phoneme` for names. Use a new `VOICE_PROFILE_ID` for an Azure voice. There is still no seed command (it was not started), so nothing makes clips yet.
+     - The image now ships `libs/aloai` and `schemas/` (as the Scorer's does) and the Azure pins. Not built: no Docker build was run.
    - **Waiting on the generator reaching `main`:** the generator's `Model` (writer, critic, scoring call) and the Session Agent's `Tagger` are on the stacked branches of #28 to #31, which were merged into each other, not into `main`. Their Azure adapters (W2) follow once that chain is on `main`.
 5. `infra/azure/` Terraform.
 6. Web sign-in and hosting.

@@ -10,3 +10,12 @@ google-auth==2.62.0
 httpx==0.28.1
 numpy==2.4.6
 soundfile==0.14.0
+# libs/aloai (the shared clients and the event envelope schema)
+jsonschema[format]==4.26.0
+# Azure (CLOUD=azure): Cosmos DB, Service Bus, Blob Storage, Azure AI Speech streaming STT
+livekit-plugins-azure==1.8.8
+azure-cosmos==4.17.1
+azure-servicebus==7.15.0
+azure-storage-blob==12.31.0
+azure-identity==1.26.0
+pyjwt[crypto]==2.15.1

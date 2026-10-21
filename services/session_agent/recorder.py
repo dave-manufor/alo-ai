@@ -24,8 +24,8 @@ def encode_flac(pcm: bytes) -> bytes:
 
 
 def object_name(audio_uri: str) -> tuple[str, str]:
-    """gs://bucket/path -> (bucket, path)."""
-    bucket, _, name = audio_uri.removeprefix("gs://").partition("/")
+    """gs://bucket/path or az://container/path -> (bucket, path)."""
+    bucket, _, name = audio_uri.partition("://")[2].partition("/")
     return bucket, name
 
 

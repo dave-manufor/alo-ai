@@ -33,10 +33,12 @@ class AudioLog:
         bucket_name: str,
         session_uuid: str,
         new_uuid: Callable[[], uuid.UUID] = uuid.uuid4,
+        scheme: str = "gs",
     ) -> None:
         if uuid.UUID(session_uuid).version != 4:
             raise ValueError("session_uuid must be a UUID v4")
         self._bucket_name = bucket_name
+        self._scheme = scheme
         self._session_uuid = session_uuid
         self._new_uuid = new_uuid
         self._turns: list[Turn] = []
@@ -53,7 +55,7 @@ class AudioLog:
             phase,
             index,
             part,
-            f"gs://{self._bucket_name}/{name}",
+            f"{self._scheme}://{self._bucket_name}/{name}",
         )
         self._turns.append(turn)
         return turn

@@ -13,6 +13,7 @@ from typing import Protocol
 from aloai_env import Config, require_setting
 
 SCHEMES = ("gs", "az")
+SCHEME_OF = {"gcp": "gs", "azure": "az"}  # the URI scheme of each cloud's storage
 
 
 class BlobNotFound(LookupError):
@@ -42,7 +43,7 @@ def split_uri(uri: str) -> tuple[str, str, str]:
 
 def blob_uri(cloud: str, container: str, name: str) -> str:
     """The URI of a blob on this cloud: gs:// for gcp, az:// for azure."""
-    scheme = {"gcp": "gs", "azure": "az"}.get(cloud)
+    scheme = SCHEME_OF.get(cloud)
     if scheme is None:
         raise ValueError(f"unknown cloud {cloud!r}")
     return f"{scheme}://{container}/{name}"
@@ -167,8 +168,16 @@ def open_blobs(config: Config) -> Blobs:  # pragma: no cover - builds a real cli
     """The storage client for this cloud. Google picks up Application Default Credentials
     (or STORAGE_EMULATOR_HOST); Azure uses the managed identity, or Azurite locally."""
     if config.cloud == "gcp":
+        import os
+
         from google.cloud import storage
 
+        if os.environ.get("STORAGE_EMULATOR_HOST"):  # the emulator takes no credentials
+            from google.auth.credentials import AnonymousCredentials
+
+            return GcsBlobs(
+                storage.Client(project=config.project, credentials=AnonymousCredentials())
+            )
         return GcsBlobs(storage.Client(project=config.project))
     from azure.storage.blob import BlobServiceClient
 
