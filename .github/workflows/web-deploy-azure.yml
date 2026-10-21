@@ -1,0 +1,66 @@
+# Builds the web app and deploys it to Azure Static Web Apps (infra/azure/apps.tf).
+#
+# Manual only (workflow_dispatch): it needs the Azure side to exist first (infra/azure/README.md),
+# so it does not run on every push. It signs in to Azure with GitHub's OIDC token (no key files)
+# and reads the Static Web Apps deployment token at run time, so no token is stored anywhere.
+#
+# Not run yet: written without an Azure subscription to hand. Expect a first run to need fixes.
+#
+# Repository variables it reads (Settings > Secrets and variables > Actions > Variables), all
+# public values: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID (the CI identity),
+# AZURE_RESOURCE_GROUP (aloai-rg), AZURE_WEB_APP_NAME (output web_app_name), and for the build
+# VITE_ENTRA_CLIENT_ID, VITE_ENTRA_AUTHORITY and optionally VITE_ENTRA_API_SCOPE.
+name: Deploy web app to Azure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # the OIDC token for azure/login
+  contents: read
+
+concurrency:
+  group: web-deploy-azure
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+      # The build reads only public settings: the app is a public client with no secret.
+      - run: npm run build
+        env:
+          VITE_ENTRA_CLIENT_ID: ${{ vars.VITE_ENTRA_CLIENT_ID }}
+          VITE_ENTRA_AUTHORITY: ${{ vars.VITE_ENTRA_AUTHORITY }}
+          VITE_ENTRA_API_SCOPE: ${{ vars.VITE_ENTRA_API_SCOPE }}
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Static Web Apps
+        run: |
+          token=$(az staticwebapp secrets list \
+            --name "${{ vars.AZURE_WEB_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --query properties.apiKey --output tsv)
+          echo "::add-mask::$token"
+          npx --yes @azure/static-web-apps-cli@2.0.8 deploy dist \
+            --deployment-token "$token" --env production
