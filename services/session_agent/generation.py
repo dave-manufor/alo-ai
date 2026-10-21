@@ -53,6 +53,7 @@ TOPIC_TAGS = (
 DETAIL = re.compile(r"^[a-z]{2,20}( [a-z]{2,20})?$")  # as passage_generate_request
 MAX_TAGS = 2
 ARL_MIN, ARL_MAX = 1, 12
+CLASS_MIN, CLASS_MAX = 1, 6
 MIN_DEADLINE_MS = 1000  # the contract's floor; less than this is not worth asking
 MARGIN_MS = 1000  # [CAL] the story must reach the machine before its own timer fires
 
@@ -131,16 +132,22 @@ class VertexTagger:
 def start_arl(child: dict | None, today: date) -> int | None:
     """PRD 6.7: a returning child starts at the last report's next_passage_arl; a first
     session at 2 x class - 1 in term 1 (September to December) and 2 x class in terms 2
-    and 3 [CAL], clamped to 1..12. None when the record has neither."""
+    and 3 [CAL]. A copy of aloai_scoring.start_arl (test_shared_contracts keeps them in
+    step), which refuses a level outside 1..12 or a class outside 1..6: None here, so the
+    session uses the bank passage instead of a level picked from a broken record."""
     if not child:
         return None
     level = child.get("next_passage_arl")
-    if not isinstance(level, int) or isinstance(level, bool):
-        primary_class = child.get("primary_class")
-        if not isinstance(primary_class, int) or isinstance(primary_class, bool):
-            return None
-        level = 2 * primary_class - (1 if today.month >= 9 else 0)
-    return min(max(level, ARL_MIN), ARL_MAX)
+    if level is not None:
+        return level if _whole(level) and ARL_MIN <= level <= ARL_MAX else None
+    primary_class = child.get("primary_class")
+    if not _whole(primary_class) or not CLASS_MIN <= primary_class <= CLASS_MAX:
+        return None
+    return 2 * primary_class - (1 if today.month >= 9 else 0)
+
+
+def _whole(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
 
 
 @dataclass

@@ -62,9 +62,13 @@ def test_only_known_tags_and_a_detail_in_the_contracts_shape_are_kept(output, in
         ({"primary_class": 3}, date(2026, 9, 1), 5),
         ({"primary_class": 1}, OCTOBER, 1),
         ({"primary_class": 6}, FEBRUARY, 12),
-        ({"primary_class": 9}, FEBRUARY, 12),  # clamped
-        ({"next_passage_arl": 0}, OCTOBER, 1),
-        ({"next_passage_arl": True, "primary_class": 2}, OCTOBER, 3),  # not a level
+        # a broken record is not clamped to a level: the bank passage is used
+        ({"primary_class": 9}, FEBRUARY, None),
+        ({"primary_class": 0}, FEBRUARY, None),
+        ({"next_passage_arl": 0, "primary_class": 3}, OCTOBER, None),
+        ({"next_passage_arl": 15, "primary_class": 3}, OCTOBER, None),
+        ({"next_passage_arl": True, "primary_class": 2}, OCTOBER, None),
+        ({"next_passage_arl": "7", "primary_class": 2}, OCTOBER, None),
         ({"primary_class": "3"}, OCTOBER, None),
         ({"primary_class": False}, OCTOBER, None),
         ({}, OCTOBER, None),
