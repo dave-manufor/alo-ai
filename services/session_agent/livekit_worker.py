@@ -18,7 +18,7 @@ import logging
 import os
 import time
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import aloai_env
@@ -40,7 +40,7 @@ from .core_client import CoreClient
 from .driver import Driver, Ports
 from .machine.profiles import PASSAGE_WAIT_MS
 from .machine.types import Profile, Timer
-from .passages import DEFAULT_BANK, PassageBank, PassageError, folder_bank
+from .passages import PassageBank, PassageError, folder_bank, passage_id_for_level
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
@@ -197,6 +197,20 @@ class _Passages:
             await self._requester.client.aclose()
 
 
+async def _bank_by_level(db: Store, child_id: str, profile_name: str) -> str:
+    """The bank passage for this child's level: the last report's next level, else the
+    class's start level. A child record that can't be read must not end the session, so
+    the profile's default passage is used then."""
+    try:
+        child = await asyncio.get_running_loop().run_in_executor(
+            None, db.get, f"children/{child_id}"
+        )
+    except Exception:
+        log.exception("no child record for %s; using the default bank passage", child_id)
+        child = None
+    return passage_id_for_level(profile_name, generation.start_arl(child, date.today()))
+
+
 def _prepared(passages: _Passages, passage_id: str | None):
     """A returning child's prepared story, or None for a fresh one: a prepared passage
     that is missing or doesn't fit SESSION_PROFILE must not end the session."""
@@ -270,7 +284,9 @@ async def entrypoint(ctx: JobContext) -> None:
     audio_bucket = cloud.BlobBucket(blobs, settings.cloud, settings.audio_bucket)
     db = open_store(shared)
     profile = config.PROFILES[cfg.session_profile]
-    bank_passage_id = settings.bank_passage_id or DEFAULT_BANK[profile.name]
+    bank_passage_id = settings.bank_passage_id or await _bank_by_level(
+        db, start.child_id, profile.name
+    )
     bank = _bank(settings, db)
     passages = _Passages(
         bank,
