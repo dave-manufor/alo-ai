@@ -81,5 +81,10 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
      - The image now ships `libs/aloai` and `schemas/` (as the Scorer's does) and the Azure pins. Not built: no Docker build was run.
    - **Waiting on the generator reaching `main`:** the generator's `Model` (writer, critic, scoring call) and the Session Agent's `Tagger` are on the stacked branches of #28 to #31, which were merged into each other, not into `main`. Their Azure adapters (W2) follow once that chain is on `main`.
 5. `infra/azure/` Terraform.
-6. Web sign-in and hosting.
+6. Web sign-in and hosting. **Built, not run against Azure:**
+   - `apps/web/src/auth`: Entra External ID through MSAL (`@azure/msal-browser`, loaded only in a real build), as a public client with PKCE and its session in `sessionStorage`. "Continue with Google" and "Continue with email" (an emailed code) both go to Entra's hosted page, which verifies the guardian; nobody is signed in by the click itself. The build's mode comes from `VITE_ENTRA_*`, never from the browser, and without them the sample sign-in stays.
+   - In a real build the account (children, consents) is kept in memory for the tab, not in `localStorage`, because a child's name must not stay on a shared phone and there is no Account service to hold it yet. The real build cannot be used for real families until that exists.
+   - `sign_in_method` gains `email_code`. There is no consent schema in `schemas/` yet; W1 adds the value when it defines one with the Account service.
+   - Hosting: `azurerm_static_web_app` (Free, West Europe), `public/staticwebapp.config.json` (SPA fallback, caching, a Content-Security-Policy, the microphone permission), and a manual-dispatch deploy workflow that reads the deployment token at run time. The Entra tenant, app registration and Google provider are set up by hand (`apps/web/README.md`).
+   - Not verified: the Static Web Apps emulator would not start, so the policy and routing were not run, and the deploy workflow has not run.
 7. Seed clips, the book catalogue and bank passages.

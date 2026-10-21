@@ -48,6 +48,7 @@ locals {
   # Agent at Core, Core at the Account service), and one map would make every app depend on all.
   # AZURE_CLIENT_ID picks the app's own managed identity for DefaultAzureCredential.
   env_account = merge(local.base_env, {
+    WEB_ORIGIN      = "https://${azurerm_static_web_app.web.default_host_name}" # the only origin allowed to call it (CORS)
     LIVEKIT_URL     = var.livekit_url
     AZURE_CLIENT_ID = azurerm_user_assigned_identity.svc["account"].client_id
   })
@@ -398,4 +399,16 @@ resource "azurerm_container_app_job" "book_ingest" {
   }
 
   depends_on = [azurerm_role_assignment.rbac, azurerm_cosmosdb_sql_role_assignment.data]
+}
+
+# ---- the web app (PWA): Static Web Apps, Free tier. CI builds it and deploys with a token it
+# reads at run time (`az staticwebapp secrets list`), so no deployment token is in state.
+
+resource "azurerm_static_web_app" "web" {
+  name                = "${var.prefix}-web"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.web_location
+  sku_tier            = "Free"
+  sku_size            = "Free"
+  tags                = var.tags
 }

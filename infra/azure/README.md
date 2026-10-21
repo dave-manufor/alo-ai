@@ -9,7 +9,7 @@ Written and validated (`terraform fmt`, `terraform validate`) without an Azure s
 | File | What |
 |---|---|
 | `main.tf` | Resource group, a managed identity per service and one for CI (GitHub OIDC), Container Registry, Blob Storage (`audio` private with a 90-day lifecycle, `clips` public read, `books` private), Cosmos DB (`docs`, and `books` with a vector index through `azapi`), Service Bus queues from `../events.json`, Key Vault entries, Azure OpenAI and Speech with their deployments, every role assignment, the budget |
-| `apps.tf` | Log Analytics, the Container Apps environment, the four services, the book-ingestion job |
+| `apps.tf` | Log Analytics, the Container Apps environment, the four services, the book-ingestion job, and the Static Web Apps resource for the web app (West Europe, Free tier) |
 | `variables.tf`, `terraform.tfvars` | The server settings (`voice_mode`, `session_profile`, `demo_warm`, `agent_on`) and the rest |
 | `outputs.tf` | What CI and the web app need |
 
@@ -27,7 +27,7 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 - **Secret values.** Terraform creates the Key Vault entries with a placeholder and never overwrites a later value (`ignore_changes`). Set the real values once, so they never reach state:
   `az keyvault secret set --vault-name <key_vault output> --name paystack-secret-key --value ...`, and the same for `resend-api-key`, `livekit-api-key`, `livekit-api-secret`. Paystack stays in test mode. Container Apps read the latest version.
 - **LiveKit.** The server and its account are set up in LiveKit's dashboard; put its `wss://` address in `livekit_url`.
-- **Entra sign-in for the web app** (Entra External ID: email code, Google) and the **Static Web Apps** deployment: PR 6, W1.
+- **Entra External ID sign-in for the web app** (an external tenant, an app registration, a user flow with email code and Google): set up by hand, steps in `apps/web/README.md`. Register the output `web_redirect_uri` as its redirect URI. The web app is deployed by `.github/workflows/web-deploy-azure.yml` (manual; it reads the Static Web Apps token at run time).
 - **Container images.** CI builds and pushes them to the registry (`acr_login_server`) and passes each digest back in `var.images`. Until then the apps run a placeholder image.
 - **The first clips and books.** The seed command for clips and the ingestion run are not built yet.
 
