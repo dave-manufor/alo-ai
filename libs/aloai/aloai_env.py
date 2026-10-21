@@ -61,6 +61,8 @@ class Config:
     servicebus_connection_string: str | None = None
     # Event type -> the queues it goes to (infra/events.json, written into the app's env).
     event_routes: Mapping[str, tuple[str, ...]] | None = None
+    # The queue this service takes its events from (Azure): core-events, scorer-events.
+    event_queue: str | None = None
 
 
 def load(env: Mapping[str, str]) -> Config:
@@ -105,6 +107,7 @@ def load(env: Mapping[str, str]) -> Config:
         cosmos_key=env.get("AZURE_COSMOS_KEY") or None,
         servicebus_connection_string=env.get("AZURE_SERVICEBUS_CONNECTION_STRING") or None,
         event_routes=_routes(env.get("EVENT_ROUTES")),
+        event_queue=env.get("EVENT_QUEUE") or None,
     )
 
 

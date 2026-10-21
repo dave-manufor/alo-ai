@@ -23,8 +23,8 @@ import json
 import logging
 import threading
 import uuid
-from collections.abc import Callable, Mapping, Sequence
-from contextlib import AbstractContextManager, contextmanager
+from collections.abc import AsyncIterator, Callable, Mapping, Sequence
+from contextlib import AbstractContextManager, asynccontextmanager, contextmanager
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -245,6 +245,30 @@ def service_bus_pump(client, queue: str, handle: Handler, *, lock_s: float = 600
             renewer.close()
 
     return QueuePump(open_receiver, handle)
+
+
+def pump_lifespan(
+    config: Config,
+    handle: Handler,
+    open_pump: Callable[[Config, str, Handler], QueuePump] | None = None,
+):
+    """The lifespan of a service's app: on Azure, pump the service's own queue (EVENT_QUEUE)
+    into `handle` while the app runs; on GCP, nothing, because Pub/Sub pushes to the route."""
+    azure = config.cloud == "azure"
+    queue = require_setting(config.event_queue, "EVENT_QUEUE") if azure else ""  # fail at start
+
+    @asynccontextmanager
+    async def lifespan(app: Any) -> AsyncIterator[None]:
+        pump = (open_pump or open_queue_pump)(config, queue, handle) if azure else None
+        if pump:
+            pump.start()
+        try:
+            yield
+        finally:
+            if pump:
+                pump.stop()
+
+    return lifespan
 
 
 def open_publisher(config: Config) -> Publisher:  # pragma: no cover - builds a real client

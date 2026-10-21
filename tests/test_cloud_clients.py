@@ -4,6 +4,7 @@ Azure. The store and blob contracts run against every backend, so the Cosmos and
 adapters must behave as Firestore and Cloud Storage do for the services.
 """
 
+import asyncio
 import base64
 import copy
 import json
@@ -30,6 +31,7 @@ from aloai_events import (
     ServiceBusPublisher,
     bus_event,
     envelope,
+    pump_lifespan,
     pump_once,
     pushed_event,
     service_bus_pump,
@@ -916,3 +918,82 @@ def test_a_push_body_is_read_back_as_the_event_it_carries():
 
 def test_off_the_cloud_anyone_may_call():
     assert anyone(None) is True
+
+
+# ---- the app lifespan
+
+
+class PumpFake:
+    def __init__(self):
+        self.running = False
+
+    def start(self):
+        self.running = True
+
+    def stop(self):
+        self.running = False
+
+
+def _azure(**more):
+    return aloai_env.load({"ALO_ENV": "local", "CLOUD": "azure"} | more)
+
+
+def test_the_event_queue_is_read_from_the_environment():
+    assert _azure(EVENT_QUEUE="core-events").event_queue == "core-events"
+    assert _azure().event_queue is None
+
+
+def test_on_azure_the_app_pumps_its_own_queue_into_the_handler_while_it_runs():
+    pump, opened = PumpFake(), []
+
+    def open_pump(config, queue, handle):
+        opened.append((config.cloud, queue, handle))
+        return pump
+
+    def handle(event):
+        pass
+
+    lifespan = pump_lifespan(_azure(EVENT_QUEUE="core-events"), handle, open_pump)
+
+    async def run():
+        async with lifespan(None):
+            assert pump.running is True
+
+    asyncio.run(run())
+    assert opened == [("azure", "core-events", handle)]
+    assert pump.running is False
+
+
+def test_the_pump_is_stopped_when_the_app_fails():
+    pump = PumpFake()
+    lifespan = pump_lifespan(
+        _azure(EVENT_QUEUE="core-events"), lambda event: None, lambda *args: pump
+    )
+
+    async def run():
+        async with lifespan(None):
+            raise RuntimeError("the app failed")
+
+    with pytest.raises(RuntimeError, match="the app failed"):
+        asyncio.run(run())
+    assert pump.running is False
+
+
+def test_on_gcp_nothing_is_pumped_because_pub_sub_pushes():
+    def open_pump(*args):
+        raise AssertionError("pumped")
+
+    lifespan = pump_lifespan(
+        aloai_env.load({"EVENT_QUEUE": "core-events"}), lambda e: None, open_pump
+    )
+
+    async def run():
+        async with lifespan(None):
+            pass
+
+    asyncio.run(run())
+
+
+def test_on_azure_a_missing_queue_fails_at_start_not_on_the_first_event():
+    with pytest.raises(aloai_env.ConfigError, match="EVENT_QUEUE"):
+        pump_lifespan(_azure(), lambda event: None)
