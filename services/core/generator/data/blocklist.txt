@@ -1,0 +1,148 @@
+# Words that never appear in a story, a question or an answer (PRD 4.5 rules). One
+# lowercase word per line, as the clip store's word rule cleans it; lines starting
+# with # are comments. Vertex AI's safety filters run as well: this list catches what
+# they let through for a children's story. A blocked word fails the gate's safety
+# check, and the Writer retries once with the reason.
+
+# Violence and weapons
+blood
+bloody
+bomb
+dead
+death
+die
+died
+dies
+gun
+guns
+kidnap
+kidnapped
+kill
+killed
+killing
+kills
+knife
+knives
+murder
+punch
+robber
+robbers
+stab
+stabbed
+war
+weapon
+weapons
+
+# Frightening
+coffin
+corpse
+demon
+devil
+ghost
+ghosts
+grave
+haunted
+juju
+monster
+monsters
+nightmare
+skeleton
+terrified
+witch
+witches
+wizard
+
+# Religion
+allah
+angel
+bible
+christmas
+church
+eid
+god
+gods
+heaven
+hell
+imam
+jesus
+mosque
+pastor
+pray
+prayed
+prayer
+priest
+quran
+ramadan
+sallah
+shrine
+
+# Politics and the armed forces
+army
+election
+governor
+politician
+president
+senator
+soldier
+soldiers
+vote
+voted
+
+# Romance
+boyfriend
+girlfriend
+kiss
+kissed
+kisses
+kissing
+marriage
+married
+marry
+romance
+romantic
+sweetheart
+
+# Alcohol, tobacco and drugs
+alcohol
+beer
+cigarette
+cigarettes
+drugs
+drunk
+wine
+
+# Unkind words
+dumb
+hate
+idiot
+stupid
+ugly
+
+# Brands
+adidas
+airtel
+coke
+dangote
+fanta
+indomie
+iphone
+maggi
+milo
+mtn
+nike
+pepsi
+samsung
+shoprite
+tecno
+toyota
+
+# Real people
+buhari
+davido
+messi
+obasanjo
+okocha
+osimhen
+ronaldo
+tinubu
+wizkid
