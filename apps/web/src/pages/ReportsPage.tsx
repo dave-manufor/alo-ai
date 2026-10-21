@@ -1,10 +1,14 @@
-import { Link } from 'react-router-dom';
-import { Button, ParentReportCard, ProfilePill } from '../design-system/alo';
-import { formatReportDate, sampleReports } from '../report/reportFixture';
+import { ParentReportCard, ProfilePill } from '../design-system/alo';
+import NavButton from '../design-system/NavButton';
+import {
+  formatReportDate,
+  sampleChildren,
+  sampleReports,
+} from '../report/reportFixture';
 
-// Grown-up mode: a guardian's reports (PRD 4.4, 10.4). Fixture-backed in
-// the MVP phase; each card is written from a ReadingReport document and
-// every number shown comes from that report.
+// Grown-up mode, signed-in guardians only (gated in App). Every number
+// comes from the ReadingReport document; a report with no evidence shows
+// no numbers at all.
 export default function ReportsPage() {
   return (
     <main className="app-main">
@@ -16,28 +20,37 @@ export default function ReportsPage() {
         </p>
       </section>
 
-      {sampleReports.map((report) => (
-        <article key={report.session_id} className="stack">
-          <ParentReportCard
-            title={`${report.child_display_name}'s reading`}
-            date={`${formatReportDate(report.timestamp_iso)} · ${report.passage.title}`}
-            summary={report.profile.primary_need}
-            stats={[
-              { label: 'Words read correctly', value: `${report.fluency.accuracy_pct}%` },
-              { label: 'Words a minute', value: report.fluency.wcpm },
-            ]}
-            workingOn={report.profile.instructional_focus}
-          />
-          <div className="row">
-            <ProfilePill profile={report.profile.code} provisional={report.profile.provisional} />
-            <Link to={`/reports/${report.session_id}`}>
-              <Button variant="primary" size="grown">
+      {sampleReports.map((report) => {
+        const child = sampleChildren[report.child_id];
+        const name = child?.first_name ?? 'Your child';
+        const noEvidence = report.profile.code === 'INSUFFICIENT_EVIDENCE';
+        return (
+          <article key={report.session_id} className="stack">
+            <ParentReportCard
+              title={`${name}'s reading`}
+              date={`${formatReportDate(report.timestamp_iso)} · ${report.passage.title}`}
+              summary={
+                report.parent_reporting?.summary_script ?? report.profile.primary_need
+              }
+              stats={
+                noEvidence || report.fluency.accuracy_pct === null || report.fluency.wcpm === null
+                  ? []
+                  : [
+                      { label: 'Words read correctly', value: `${report.fluency.accuracy_pct}%` },
+                      { label: 'Words a minute', value: report.fluency.wcpm },
+                    ]
+              }
+              workingOn={noEvidence ? undefined : report.profile.instructional_focus}
+            />
+            <div className="row">
+              <ProfilePill profile={report.profile.code} provisional={report.profile.provisional} />
+              <NavButton variant="primary" size="grown" to={`/reports/${report.session_id}`}>
                 See the full report
-              </Button>
-            </Link>
-          </div>
-        </article>
-      ))}
+              </NavButton>
+            </div>
+          </article>
+        );
+      })}
     </main>
   );
 }
