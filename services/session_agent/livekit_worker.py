@@ -137,6 +137,11 @@ def _id_token(settings: config.WorkerSettings, shared: aloai_env.Config):
     token for CORE_AUDIENCE), or None when not hosted. A new one on each call."""
     if not shared.hosted:
         return None
+    if shared.cloud == "azure" and not settings.core_audience:
+        # An Entra token is for an app ID URI, not for Core's URL. Until Core has one
+        # (infra/azure/README.md, known gaps) only the environment's internal ingress protects it.
+        log.warning("CORE_AUDIENCE is not set: calling Core without a token")
+        return None
     audience = settings.core_audience or settings.core_url
     return lambda: service_token(shared, audience)
 
