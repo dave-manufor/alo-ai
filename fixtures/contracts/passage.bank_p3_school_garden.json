@@ -41,7 +41,7 @@
       "text": "Tunde",
       "clean_text": "tunde",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": "ˈtundɛ",
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tunde~%CB%88tund%C9%9B.mp3"
     },
@@ -61,7 +61,7 @@
       "text": "maize",
       "clean_text": "maize",
       "is_content_word": true,
-      "syntactic_boundary_after": "PHRASE",
+      "syntactic_boundary_after": "NONE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/maize.mp3"
     },
@@ -271,7 +271,7 @@
       "text": "shoots",
       "clean_text": "shoots",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shoots.mp3"
     },
@@ -281,7 +281,7 @@
       "text": "appeared",
       "clean_text": "appeared",
       "is_content_word": true,
-      "syntactic_boundary_after": "PHRASE",
+      "syntactic_boundary_after": "NONE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/appeared.mp3"
     },
@@ -371,7 +371,7 @@
       "text": "goat",
       "clean_text": "goat",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goat.mp3"
     },
@@ -381,7 +381,7 @@
       "text": "pushed",
       "clean_text": "pushed",
       "is_content_word": true,
-      "syntactic_boundary_after": "PHRASE",
+      "syntactic_boundary_after": "NONE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pushed.mp3"
     },
@@ -521,7 +521,7 @@
       "text": "thought",
       "clean_text": "thought",
       "is_content_word": true,
-      "syntactic_boundary_after": "PHRASE",
+      "syntactic_boundary_after": "NONE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/thought.mp3"
     },
@@ -1141,7 +1141,7 @@
       "text": "class",
       "clean_text": "class",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/class.mp3"
     },

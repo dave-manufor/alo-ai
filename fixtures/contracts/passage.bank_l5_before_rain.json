@@ -302,7 +302,7 @@
       "text": "breeze",
       "clean_text": "breeze",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/breeze.mp3"
     },
@@ -842,7 +842,7 @@
       "text": "clothes",
       "clean_text": "clothes",
       "is_content_word": true,
-      "syntactic_boundary_after": "NONE",
+      "syntactic_boundary_after": "PHRASE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/clothes.mp3"
     },
@@ -852,7 +852,7 @@
       "text": "piled",
       "clean_text": "piled",
       "is_content_word": true,
-      "syntactic_boundary_after": "PHRASE",
+      "syntactic_boundary_after": "NONE",
       "name_ipa": null,
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/piled.mp3"
     },
