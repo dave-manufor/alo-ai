@@ -2,7 +2,7 @@
 name = "aloai-core"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "Alo.ai Core service (Grader and Reading Coach: W3)"
+description = "Alo.ai Core service (Passage Generator: W2; Grader and Reading Coach: W3)"
 
 [project.optional-dependencies]
 # httpx2, not httpx: Starlette 1.x's TestClient imports httpx2 and calls httpx deprecated.

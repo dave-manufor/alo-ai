@@ -12,3 +12,9 @@ google-auth==2.62.0
 google-cloud-storage==3.17.1
 google-cloud-texttospeech==2.38.0
 requests==2.34.2
+# The Passage Generator (generator/requirements.txt has the same pins): spaCy for the
+# phrase boundaries and the gate, wordfreq for the text-level estimate.
+spacy==3.8.7
+click<9
+wordfreq==3.1.1
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl

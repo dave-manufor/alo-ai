@@ -21,6 +21,15 @@ def test_the_local_app_serves_the_quick_endpoint(monkeypatch):
     assert response.json()["error"]["code"] == "INVALID_REQUEST"
 
 
+def test_the_local_app_serves_the_generate_endpoint(monkeypatch):
+    monkeypatch.setenv("FIRESTORE_EMULATOR_HOST", "localhost:8080")
+    monkeypatch.setenv("PUBSUB_EMULATOR_HOST", "localhost:8085")
+    http = TestClient(create_app({"ALO_ENV": "local", "AI_MODE": "fixtures"}))
+    response = http.post("/v1/passages:generate", json={"tags": ["cars"]})
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "INVALID_REQUEST"
+
+
 @pytest.mark.parametrize(
     "env",
     [
