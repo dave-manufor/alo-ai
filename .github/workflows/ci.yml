@@ -30,23 +30,23 @@ jobs:
           # Each suite gets its own environment: session_agent pins openai 3.x, the others 2.x.
           - suite: libs
             install: pip install ./libs/aloai[dev]
-            command: pytest -c libs/aloai/pyproject.toml tests --cov=libs/aloai
+            command: pytest -c libs/aloai/pyproject.toml tests --cov=libs/aloai --cov-fail-under=100
           - suite: core
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
-            command: pytest -c services/core/pyproject.toml services/core --cov=services/core
+            command: pytest -c services/core/pyproject.toml services/core --cov=services/core --cov-fail-under=80
           - suite: generator
             # openai and azure-core: the Azure adapter test imports them (Core pins the same versions).
             install: pip install -r services/core/generator/requirements.txt openai==2.54.0 azure-cosmos==4.17.1 pytest pytest-cov
-            command: pytest -c services/core/generator/pyproject.toml services/core/generator --cov=services/core/generator
+            command: pytest -c services/core/generator/pyproject.toml services/core/generator --cov=services/core/generator --cov-fail-under=99
           - suite: reading_scorer
             # CPU wheels first, as the image does; silero-vad would otherwise pull the CUDA ones.
             install: >-
               pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
               && pip install -r services/reading_scorer/requirements.txt pytest pytest-cov httpx2
-            command: pytest -c services/reading_scorer/pyproject.toml services/reading_scorer --cov=services/reading_scorer
+            command: pytest -c services/reading_scorer/pyproject.toml services/reading_scorer --cov=services/reading_scorer --cov-fail-under=96
           - suite: session_agent
             install: pip install -r services/session_agent/requirements-dev.txt httpx2
-            command: pytest -c services/session_agent/pyproject.toml services/session_agent --cov=services/session_agent
+            command: pytest -c services/session_agent/pyproject.toml services/session_agent --cov=services/session_agent --cov-fail-under=97
           # The account suite and image are added when services/account is on main.
           - suite: eval
             # The evaluation sets run Core's grader and Coach, so they need Core's packages.
