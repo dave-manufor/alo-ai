@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useAccount } from '../account/store';
+import { accountStore, useAccount } from '../account/store';
 import { ParentReportCard, ProfilePill } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
 import {
@@ -38,11 +38,10 @@ export default function ReportDetailPage() {
   const child = sampleChildren[report.child_id];
   const name = child?.first_name ?? 'Your child';
   const noEvidence = report.profile.code === 'INSUFFICIENT_EVIDENCE';
-  const entitled =
-    guardian !== null &&
-    // subscriptions/{guardian_id} — sample data has no active subscription
-    // in the fixture phase, so the plan stays described, not shown.
-    (report as { entitled?: boolean }).entitled === true;
+  // Entitlement belongs to the guardian (subscriptions/{guardian_id}),
+  // not the report. Sample data has no active subscription in the
+  // fixture phase, so the plan stays described, not shown.
+  const entitled = guardian !== null && accountStore.hasActiveSubscription();
   const level = levelLabel(report);
 
   const stats: { label: string; value: string | number }[] = [];
