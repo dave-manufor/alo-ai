@@ -479,7 +479,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`phase1.scored`|Reading Scorer|Core (report assembly)|`session_id`, `telemetry_ref`|
 |`session.done`|Session Agent|Core (Grader)|`session_id`, `passage_id`, `turn_audio_uris` (each with `phase`, item `index` and `part`), `capture_mode`, `session_settings`, `flags`, `reading_stopped_early`, `listening_module_run`, `listening_passage_id` (when the listening module ran). Envelope `schema_version` 2|
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
-|`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
+|`plan.ready`|Core (Reading Coach)|Core (Passage Generator): pre-generates the next story from `story_requests/story_{session_id}`|`session_id`, `plan_ref`, `template_used`|
 
 Every event uses one envelope: `{event_id (a UUID), type, schema_version, occurred_at, session_id, data}`. The Reading Scorer, Grader and Reading Coach derive `event_id` from the session and the type, so every publication of one session's `phase1.scored`, `report.ready` or `plan.ready` carries the same id. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
 

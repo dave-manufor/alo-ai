@@ -18,7 +18,7 @@ PRD 4.5, SDD 5. This folder holds the generator's code. It has the code steps an
 | `clips.py` | Word clip URIs in the shared clip store, with the Session Agent's key rule | 4.5 G5 |
 | `data.py`, `data/` | The curated names with IPA, the blocklist and the topic taxonomy, and their loaders | 4.5, 4.6 |
 
-Making the missing clips (G5), storing the passage and the HTTP endpoint in Core come in later PRs.
+Core serves the loop at `POST /v1/passages:generate` (`services/core/generator_api.py`) and pre-generates the next story on `plan.ready` (`services/core/generator_requests.py`). Making the missing clips (G5) comes in a later PR.
 
 **The name IPA is a draft.** PRD 4.6 says each name is checked by ear in the voice before it is used. Once text-to-speech is available, listen to every entry in `data/names.json` and remove any name that still sounds wrong.
 

@@ -43,6 +43,7 @@ from .coach.run import ReadingCoach
 from .generator.models import FixtureModel, Model, VertexModel
 from .generator.pipeline import Generator
 from .generator_api import router as generator_router
+from .generator_requests import NextStories
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
@@ -81,8 +82,9 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
         model_for=_coach_model(settings),
         enabled=_flag(env, "COACH_ON"),
     )
+    generator = _generator(settings, env)
     app = FastAPI(title="Alo.ai Core")
-    app.include_router(generator_router(_generator(settings, env), store))
+    app.include_router(generator_router(generator, store))
     app.include_router(router(QuickGrader(store, model)))
     app.include_router(
         events_router(
@@ -91,6 +93,7 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
             coach,
             store,
             _push_check(settings),
+            NextStories(generator, store),
         )
     )
     return app

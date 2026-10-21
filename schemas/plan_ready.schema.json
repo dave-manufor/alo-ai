@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "plan_ready.schema.json",
   "title": "PlanReadyData",
-  "description": "data of the plan.ready event (SDD 11). Producer: Reading Coach (W3). No consumer in the hackathon. plan_ref is the Firestore path of the plan; template_used is true when the Coach's summary failed the validator twice (COACH_TEMPLATE_USED).",
+  "description": "data of the plan.ready event (SDD 11). Producer: Reading Coach (W3). Consumer: Passage Generator (W2), which pre-generates the next story from story_requests/story_{session_id} and reads nothing in data but the envelope's session_id. plan_ref is the Firestore path of the plan; template_used is true when the Coach's summary failed the validator twice (COACH_TEMPLATE_USED).",
   "type": "object",
   "properties": {
     "session_id": { "type": "string", "minLength": 1 },
