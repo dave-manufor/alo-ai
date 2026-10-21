@@ -20,7 +20,7 @@ LiveKit Agents worker that runs a reading session (PRD 4). Rules for working her
 - `recorder.py`: per-turn FLAC. `cloud.py`: Cloud Storage, Firestore and Pub/Sub (emulators locally). `metadata.py`: the session details the room is dispatched with (to agree with W1).
 - `clips/catalog.py`: clip ids to clip-store objects and the URLs the web app caches.
 
-The story: with `AI_MODE=live`, `generation.py` tags the interest-chat answer (one Flash call; only the tags and a safe detail leave the agent), works out the starting level from `children/{child_id}` (PRD 6.7) and asks Core's `POST /v1/passages:generate`. Any failure, or the 20 s passage wait running out, gives the bank passage and `FALLBACK_PASSAGE`. With `AI_MODE=fixtures` every session uses the bank passage.
+The story: with `AI_MODE=live` **and `GENERATOR_ON=true`** (a server setting from `terraform.tfvars`, false until the Writer + Critic and tagger evaluation sets pass), `generation.py` tags the interest-chat answer (one Flash call; only the tags and a safe detail leave the agent), works out the starting level from `children/{child_id}` (PRD 6.7) and asks Core's `POST /v1/passages:generate`. Any failure, or the 20 s passage wait running out, gives the bank passage and `FALLBACK_PASSAGE`. With `AI_MODE=fixtures`, or `GENERATOR_ON=false`, every session uses the bank passage. A returning child's prepared story (`children/{id}.next_passage_id`) is read once: the worker clears the field when it loads that story, so a session that ends INCOMPLETE can't repeat it.
 
 Not yet: the Gemini Live conductor (`SpeakLive` plays the clip) and LiveKit's turn detector (it runs inside the LLM pipeline, so it comes with the conductor).
 

@@ -1,7 +1,8 @@
 """Session Agent settings, read once from the environment.
 
-VOICE_MODE and SESSION_PROFILE are server settings set in Terraform (PRD 15.1);
-the browser never chooses them. Local shortcuts (ALO_ENV=local) must never run
+VOICE_MODE, SESSION_PROFILE and GENERATOR_ON are server settings set in Terraform
+(PRD 15.1); the browser never chooses them. GENERATOR_ON stays false until the Writer +
+Critic and tagger evaluation sets pass: then every session reads a bank passage. Local shortcuts (ALO_ENV=local) must never run
 on Cloud Run, which sets K_SERVICE.
 """
 
@@ -23,6 +24,14 @@ class Config:
     ai_mode: str
     voice_mode: str
     session_profile: str
+    generator_on: bool  # false: every session reads a bank passage (FALLBACK_PASSAGE)
+
+
+FLAGS = {"true": True, "false": False}
+
+
+def _flag(env: Mapping[str, str], name: str, default: str) -> bool:
+    return FLAGS[_choice(env, name, default, FLAGS)]
 
 
 def _choice(env: Mapping[str, str], name: str, default: str, allowed) -> str:
@@ -78,4 +87,5 @@ def load(env: Mapping[str, str]) -> Config:
         ai_mode=_choice(env, "AI_MODE", "fixtures", AI_MODES),
         voice_mode=_choice(env, "VOICE_MODE", "cache_first", VOICE_MODES),
         session_profile=_choice(env, "SESSION_PROFILE", "standard", PROFILES),
+        generator_on=_flag(env, "GENERATOR_ON", "false"),
     )

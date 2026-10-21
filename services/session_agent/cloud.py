@@ -54,6 +54,9 @@ class FirestoreDocuments:  # pragma: no cover
     def set(self, path: str, data: dict) -> None:
         self._client.document(path).set(data)
 
+    def merge(self, path: str, data: dict) -> None:
+        self._client.document(path).set(data, merge=True)
+
     def get(self, path: str) -> dict | None:
         snapshot = self._client.document(path).get()
         return snapshot.to_dict() if snapshot.exists else None

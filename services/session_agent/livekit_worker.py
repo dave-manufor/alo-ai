@@ -6,7 +6,7 @@ connection changes and timers go to the driver; the driver's messages go out on
 the data channel. All session logic is in machine/ and driver.py.
 
 Scripted-clip mode only (cache_first and the live_first fallback). With AI_MODE=live
-the story comes from the Passage Generator in Core (generation.py). The Gemini
+and GENERATOR_ON=true the story comes from the Passage Generator in Core (generation.py). The Gemini
 Live conductor comes on day 3 and its tools will go through
 aloai_authz.authorize (AGENTS.md rule 9).
 """
@@ -131,9 +131,10 @@ def _id_token(settings: config.WorkerSettings):
 
 
 class _Passages:
-    """The story from the Passage Generator (AI_MODE=live), or the bank passage: with
-    AI_MODE=fixtures, when the generator gives none, or when the machine's passage_wait
-    timer runs out first (the machine then drops a story that arrives late)."""
+    """The story from the Passage Generator (AI_MODE=live and GENERATOR_ON=true), or the
+    bank passage: with AI_MODE=fixtures, with the generator off, when it gives none, or
+    when the machine's passage_wait timer runs out first (the machine then drops a story
+    that arrives late)."""
 
     def __init__(
         self,
@@ -152,7 +153,7 @@ class _Passages:
 
     def generate(self, interest: str | None, deadline_ms: int) -> None:
         if self._requester is None:
-            log.info("AI_MODE=fixtures: using the bank passage")
+            log.info("no story requester (AI_MODE=fixtures or GENERATOR_ON=false): bank passage")
             self.bank()
             return
 
@@ -192,6 +193,14 @@ def _prepared(passages: _Passages, passage_id: str | None):
         return None
 
 
+def _consume_prepared(background: Background, db: cloud.FirestoreDocuments, child_id: str) -> None:
+    """A prepared story is read once. Clearing next_passage_id when the session starts
+    means a session that ends INCOMPLETE (no plan.ready) can't give the child the same
+    story again next time; a failed write is logged by Background and never ends the
+    session."""
+    background.run(db.merge, f"children/{child_id}", {"next_passage_id": None})
+
+
 def _story_requester(
     settings: config.WorkerSettings,
     cfg: config.Config,
@@ -200,7 +209,7 @@ def _story_requester(
     bank: PassageBank,
     db: cloud.FirestoreDocuments,
 ) -> generation.StoryRequester | None:
-    if cfg.ai_mode != "live":
+    if cfg.ai_mode != "live" or not cfg.generator_on:
         return None
     vertex = genai.Client(
         vertexai=True, project=settings.project, location=settings.vertex_location
@@ -314,6 +323,8 @@ async def entrypoint(ctx: JobContext) -> None:
     ctx.room.on("track_subscribed", lambda track, publication, p: listen(track, p))
 
     returning = _prepared(passages, start.passage_id)
+    if returning is not None:
+        _consume_prepared(background, db, start.child_id)
     driver.start(returning=returning)
     for publication in child.track_publications.values():
         if publication.track is not None:

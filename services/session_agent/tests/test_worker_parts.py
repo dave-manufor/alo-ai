@@ -400,3 +400,36 @@ def test_a_prepared_story_that_is_missing_or_does_not_fit_means_a_fresh_story(pa
 
     passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
     assert _prepared(passages, passage_id) is None
+
+
+@pytest.mark.parametrize(
+    ("ai_mode", "generator_on"), [("fixtures", True), ("fixtures", False), ("live", False)]
+)
+def test_there_is_no_story_requester_with_recorded_ai_or_the_generator_off(ai_mode, generator_on):
+    from services.session_agent import config
+    from services.session_agent.livekit_worker import _story_requester
+
+    cfg = config.Config("", ai_mode, "cache_first", "demo", generator_on)
+    settings = config.worker_settings({})
+    assert _story_requester(settings, cfg, None, DEMO, BANK, None) is None
+
+
+class _Db:
+    def __init__(self):
+        self.merged = []
+
+    def merge(self, path, data):
+        self.merged.append((path, data))
+
+
+class _Background:
+    def run(self, fn, *args):
+        fn(*args)
+
+
+def test_a_used_prepared_story_is_cleared_from_the_child():
+    from services.session_agent.livekit_worker import _consume_prepared
+
+    db = _Db()
+    _consume_prepared(_Background(), db, "child_1")
+    assert db.merged == [("children/child_1", {"next_passage_id": None})]
