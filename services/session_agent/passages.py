@@ -22,9 +22,28 @@ class PassageError(LookupError):
     pass
 
 
-# The fallback READ passage for each session profile, until the bank chooser matches the
-# child's level and tags (PRD 4.5). BANK_PASSAGE_ID overrides it.
+# The fallback READ passage for each session profile when the child's level is not known
+# (PRD 4.5). BANK_PASSAGE_ID overrides it.
 DEFAULT_BANK = {"standard": "bank_p3_school_garden", "demo": "bank_p3_market_day"}
+
+# The STANDARD READ passages by ARL: one for each primary class's term 1 start level
+# (2 x class - 1, PRD 6.7), Primary 1 to 5. Primary 6 (ARL 11) uses the nearest, ARL 9.
+STANDARD_BANK = {
+    1: "bank_p1_ada_and_the_dog",
+    3: "bank_p2_lost_ball",
+    5: "bank_p3_school_garden",
+    7: "bank_p4_night_bus",
+    9: "bank_p5_music_contest",
+}
+
+
+def passage_id_for_level(profile_name: str, level: int | None) -> str:
+    """The READ passage to fall back on: the STANDARD one nearest the child's level (the
+    easier one on a tie), or the profile's default when the level is not known. The demo
+    profile has one passage."""
+    if profile_name != "standard" or level is None:
+        return DEFAULT_BANK[profile_name]
+    return STANDARD_BANK[min(STANDARD_BANK, key=lambda arl: (abs(arl - level), arl))]
 
 
 @dataclass(frozen=True)
