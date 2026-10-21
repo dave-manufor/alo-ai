@@ -113,7 +113,17 @@ def test_every_schema_has_a_fixture():
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
 
-PASSAGE_FIXTURES = ["passage.bank_p3_market_day.json", "passage.bank_l3_rain.json"]
+PASSAGE_FIXTURES = [
+    "passage.bank_p3_market_day.json",
+    "passage.bank_l3_rain.json",
+    # The STANDARD bank by class (services/core/generator/bank_builder.py made them)
+    "passage.bank_p1_ada_and_the_dog.json",
+    "passage.bank_p2_lost_ball.json",
+    "passage.bank_p4_night_bus.json",
+    "passage.bank_p5_music_contest.json",
+    "passage.bank_l3_market.json",
+    "passage.bank_l9_rocket.json",
+]
 
 
 @pytest.mark.parametrize("name", PASSAGE_FIXTURES)

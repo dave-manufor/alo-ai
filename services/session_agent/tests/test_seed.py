@@ -16,7 +16,7 @@ from services.session_agent.clips.keys import word_key
 from services.session_agent.clips.prompts import PROMPT_TEXTS
 from services.session_agent.clips.store import ClipStore, MemoryBucket
 from services.session_agent.machine.profiles import DEMO, STANDARD
-from services.session_agent.passages import PassageBank
+from services.session_agent.passages import STANDARD_BANK, PassageBank
 
 ROOT = Path(__file__).resolve().parents[3]
 BANK_DIR = ROOT / "fixtures" / "contracts"
@@ -197,7 +197,8 @@ def test_every_clip_a_session_asks_for_exists_after_seeding():
     assert ok
     catalog = ClipCatalog(clips, "https://example.org/clips")
     bank = PassageBank(lambda passage_id: docs.get(f"passages/{passage_id}"))
-    for profile, read_id in ((DEMO, "bank_p3_market_day"), (STANDARD, "bank_p3_school_garden")):
+    standard = ((STANDARD, read_id) for read_id in STANDARD_BANK.values())
+    for profile, read_id in ((DEMO, "bank_p3_market_day"), *standard):
         pair = bank.pair(read_id, profile)
         ids = {
             "passage_id": pair.read["passage_id"],
@@ -234,7 +235,7 @@ def test_a_second_run_makes_and_writes_nothing_new():
 def test_the_passages_are_written_after_their_clips_and_each_validates():
     _, clips, docs, report = run()
     assert sorted(docs.docs) == sorted(f"passages/{p}" for p in BY_ID)
-    assert "passages: 4 written, 0 FAILED" in report
+    assert "passages: 10 written, 0 FAILED" in report
 
 
 @pytest.mark.parametrize(
@@ -249,7 +250,7 @@ def test_only_clips_or_only_passages(only, clips_made, passages_written):
 def test_a_dry_run_writes_nothing_and_says_what_it_would_do():
     ok, clips, docs, report = run(dry_run=True)
     assert ok and not clips.bucket.objects and not docs.docs
-    assert "would make" in report and "would write 4 passages" in report
+    assert "would make" in report and "would write 10 passages" in report
     clips2, docs2 = store(), MemoryStore()
     run(clips2, docs2)
     _, _, _, again = run(clips2, docs2, dry_run=True)
@@ -299,7 +300,7 @@ def test_the_command_seeds_silent_placeholders_with_recorded_responses(stores, c
     assert code == 0
     assert "lines:" in capsys.readouterr().out
     assert blobs.blobs and all(uri.startswith("az://clips/") for uri in blobs.blobs)
-    assert len(docs.docs) == 4
+    assert len(docs.docs) == 10  # the 4 original bank passages and the 6 for each class
 
 
 def test_the_command_speaks_with_the_azure_voice_when_live(stores, monkeypatch):

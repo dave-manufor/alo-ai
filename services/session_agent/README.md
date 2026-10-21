@@ -20,7 +20,18 @@ LiveKit Agents worker that runs a reading session (PRD 4). Rules for working her
 - `seed.py`: `python -m services.session_agent.seed [--dry-run] [--only clips|passages]` makes every clip a session can play and writes the bank passages, for the cloud `CLOUD` names (silent placeholders with `AI_MODE=fixtures`, the Azure voice live). `recorder.py`: per-turn FLAC. `cloud.py`: one `BlobBucket` over the shared `Blobs` (Cloud Storage or Blob Storage); the documents and events come from the shared clients chosen by `CLOUD` (`libs/aloai`). `metadata.py`: the session details the room is dispatched with (to agree with W1).
 - `clips/catalog.py`: clip ids to clip-store objects and the URLs the web app caches.
 
-The story: with `AI_MODE=live` **and `GENERATOR_ON=true`** (a server setting from `terraform.tfvars`, false until the Writer + Critic and tagger evaluation sets pass), `generation.py` tags the interest-chat answer (one Flash call; only the tags and a safe detail leave the agent), works out the starting level from `children/{child_id}` (PRD 6.7) and asks Core's `POST /v1/passages:generate`. Any failure, or the 20 s passage wait running out, gives the bank passage and `FALLBACK_PASSAGE`. With `AI_MODE=fixtures`, or `GENERATOR_ON=false`, every session uses the bank passage. A returning child's prepared story (`children/{id}.next_passage_id`) is read once: the worker clears the field when it loads that story, so a session that ends INCOMPLETE can't repeat it.
+The story: with `AI_MODE=live` **and `GENERATOR_ON=true`** (a server setting from `terraform.tfvars`, false until the Writer + Critic and tagger evaluation sets pass), `generation.py` tags the interest-chat answer (one Flash call; only the tags and a safe detail leave the agent), works out the starting level from `children/{child_id}` (PRD 6.7) and asks Core's `POST /v1/passages:generate`. Any failure, or the 20 s passage wait running out, gives the bank passage and `FALLBACK_PASSAGE`. With `AI_MODE=fixtures`, or `GENERATOR_ON=false`, every session uses the bank passage, the one for the child's level (below). A returning child's prepared story (`children/{id}.next_passage_id`) is read once: the worker clears the field when it loads that story, so a session that ends INCOMPLETE can't repeat it.
+
+The bank by class (`passages.STANDARD_BANK`): the worker reads `children/{child_id}` (the last report's `next_passage_arl`, else `2 x primary_class - 1` in term 1 and `2 x primary_class` after) and loads the nearest of these, the easier on a tie. No usable record gives `DEFAULT_BANK`; `BANK_PASSAGE_ID` overrides all of it. New passages are made with `python -m services.core.generator.bank_builder` (it runs the generator's code gate), then the image is rebuilt and the seed job re-run.
+
+| Class | Term 1 start ARL | READ passage | Paired LISTEN passage |
+|---|---|---|---|
+| P1 | 1 | `bank_p1_ada_and_the_dog` | `bank_l3_market` (ARL 3) |
+| P2 | 3 | `bank_p2_lost_ball` | `bank_l3_market` (ARL 3) |
+| P3 | 5 | `bank_p3_school_garden` | `bank_l5_before_rain` (ARL 5) |
+| P4 | 7 | `bank_p4_night_bus` | `bank_l9_rocket` (ARL 9) |
+| P5 | 9 | `bank_p5_music_contest` | `bank_l9_rocket` (ARL 9) |
+| P6 | 11 | the P5 passage, until P6 has its own | `bank_l9_rocket` |
 
 Not yet: the Gemini Live conductor (`SpeakLive` plays the clip) and LiveKit's turn detector (it runs inside the LLM pipeline, so it comes with the conductor).
 
