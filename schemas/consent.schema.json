@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "consent.schema.json",
+  "title": "Consent",
+  "description": "consents/{consent_id} (PRD 12, SDD 12): one guardian's consent for one child, recorded when the child is added and re-recorded when the consent text changes. Written by the Account service (W1) only; read by the Account service (the session gate) and the Session Agent (W2) and Reading Coach (W3) mic gate. Append-only: there is no withdrawal in v1, a guardian who withdraws is handled by ops/delete_child.py. sign_in_method email_code is the Entra External ID one-time code.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "consent_id": { "type": "string", "minLength": 1 },
+    "guardian_id": { "type": "string", "minLength": 1 },
+    "child_id": { "type": "string", "minLength": 1 },
+    "text_version": { "type": "string", "minLength": 1 },
+    "attestation": { "type": "string", "minLength": 1 },
+    "sign_in_method": { "type": "string", "enum": ["google", "email_code", "email_link"] },
+    "verified_email": { "type": "string", "format": "email" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "training_opt_in": { "type": "boolean" }
+  },
+  "required": ["schema_version", "consent_id", "guardian_id", "child_id", "text_version", "attestation", "sign_in_method", "verified_email", "timestamp", "training_opt_in"],
+  "additionalProperties": false
+}
