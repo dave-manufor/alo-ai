@@ -1,0 +1,151 @@
+name: CI
+
+# Pull requests cost nothing: no cloud login, no secrets, recorded AI only (tests/AGENTS.md).
+# One check, ci-ok, is the one branch protection requires.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AI_MODE: fixtures
+
+jobs:
+  python:
+    name: python (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Each suite gets its own environment: session_agent pins openai 3.x, the others 2.x.
+          - suite: libs
+            install: pip install ./libs/aloai[dev]
+            command: pytest -c libs/aloai/pyproject.toml tests --cov=libs/aloai
+          - suite: core
+            install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
+            command: pytest -c services/core/pyproject.toml services/core --cov=services/core
+          - suite: generator
+            install: pip install -r services/core/generator/requirements.txt pytest pytest-cov
+            command: pytest -c services/core/generator/pyproject.toml services/core/generator --cov=services/core/generator
+          - suite: reading_scorer
+            # CPU wheels first, as the image does; silero-vad would otherwise pull the CUDA ones.
+            install: >-
+              pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+              && pip install -r services/reading_scorer/requirements.txt pytest pytest-cov httpx2
+            command: pytest -c services/reading_scorer/pyproject.toml services/reading_scorer --cov=services/reading_scorer
+          - suite: session_agent
+            install: pip install -r services/session_agent/requirements-dev.txt httpx2
+            command: pytest -c services/session_agent/pyproject.toml services/session_agent --cov=services/session_agent
+          # The account suite and image are added when services/account is on main.
+          - suite: eval
+            install: pip install ./libs/aloai[dev]
+            command: pytest -c eval/pyproject.toml eval
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            services/*/requirements*.txt
+            services/core/generator/requirements.txt
+            libs/aloai/pyproject.toml
+      - name: Install
+        run: ${{ matrix.install }}
+      - name: Test
+        run: ${{ matrix.command }}
+
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # 0.12.0 is clean on main; a newer ruff reports findings in files this job does not own.
+      - run: pip install ruff==0.12.0
+      - run: ruff check libs tests services
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/azure
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: echo "value=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.version.outputs.value }}
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+
+  images:
+    name: image (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: core
+            dockerfile: services/core/Dockerfile
+            check: python -c "import services.core.main"
+          - image: reading_scorer
+            dockerfile: services/reading_scorer/Dockerfile
+            check: python -c "import services.reading_scorer.main"
+          - image: session_agent
+            dockerfile: services/session_agent/Dockerfile
+            check: python -c "import services.session_agent.main"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build (not pushed)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          load: true
+          tags: aloai-${{ matrix.image }}:ci
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,scope=${{ matrix.image }},mode=max
+      - name: Start it
+        run: docker run --rm aloai-${{ matrix.image }}:ci ${{ matrix.check }}
+
+  ci-ok:
+    if: always()
+    needs: [python, ruff, web, terraform, images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job passed
+        run: |
+          echo '${{ toJSON(needs) }}'
+          test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "false"
