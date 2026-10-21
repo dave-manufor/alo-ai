@@ -48,6 +48,19 @@ def open_openai(config: Config):  # pragma: no cover - builds a real client
     return OpenAI(base_url=openai_base_url(config), api_key=credential)
 
 
+def open_openai_async(config: Config):  # pragma: no cover - builds a real client
+    """The same client for async callers (the Session Agent's tagger runs in its event loop)."""
+    from openai import AsyncOpenAI
+
+    if config.openai_key:
+        credential = config.openai_key
+    else:
+        from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
+
+        credential = get_bearer_token_provider(DefaultAzureCredential(), COGNITIVE_SCOPE)
+    return AsyncOpenAI(base_url=openai_base_url(config), api_key=credential)
+
+
 def openai_base_url(config: Config) -> str:
     return (
         require_setting(config.openai_endpoint, "AZURE_OPENAI_ENDPOINT").rstrip("/") + "/openai/v1/"

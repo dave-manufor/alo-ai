@@ -66,6 +66,12 @@ variable "coach_on" {
   default     = true
 }
 
+variable "generator_on" {
+  description = "Lets plan.ready pre-generate a child's next story and the Session Agent ask the Passage Generator for the story. false: every session reads a bank passage. Stays false until the Writer + Critic and tagger evaluation sets pass on the Azure deployments, and until word clips are made for generated stories (G5)."
+  type        = bool
+  default     = false
+}
+
 # ---- images: CI builds and pushes them; Terraform receives only each image's digest
 
 variable "images" {
@@ -132,6 +138,8 @@ variable "openai_deployments" {
     coach      = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 30 }
     embedding  = { model = "text-embedding-3-small", version = "1", sku = "DataZoneStandard", capacity = 50 }
     transcribe = { model = "gpt-4o-transcribe", version = "2025-03-20", sku = "DataZoneStandard", capacity = 30 }
+    generator  = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
+    tagger     = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 20 }
   }
   validation {
     condition     = alltrue([for d in values(var.openai_deployments) : contains(["Standard", "DataZoneStandard"], d.sku)])
