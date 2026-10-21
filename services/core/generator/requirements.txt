@@ -1,0 +1,6 @@
+spacy==3.8.7
+click<9
+wordfreq==3.1.1
+jsonschema==4.26.0
+# The small English model spaCy uses for the phrase boundaries (PRD 4.5 G3).
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl

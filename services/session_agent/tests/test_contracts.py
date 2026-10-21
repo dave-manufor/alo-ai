@@ -95,6 +95,7 @@ def test_every_schema_has_a_fixture():
         "passage_generate_request.schema.json",
         "passage_generate_response.schema.json",
         "story_request.schema.json",
+        "book.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
@@ -224,6 +225,34 @@ def test_every_turn_says_which_item_and_part_it_is(field):
     turn = _fixture("session_record.turn.json")
     del turn[field]
     assert not _validator("session_record.schema.json").is_valid(turn)
+
+
+def test_book_fixture_validates():
+    _validator("book.schema.json").validate(_fixture("book.sample.json"))
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("arl", 13),
+        ("topic_tags", ["dinosaurs"]),
+        ("embedding", [0.1, 0.2]),
+        ("embedding_model", "some-other-model"),
+        ("file_hash", "not-a-hash"),
+        ("raw_uri", "https://example.org/book.pdf"),
+        ("child_name", "not allowed"),
+    ],
+)
+def test_book_with_a_bad_field_is_rejected(field, value):
+    book = {**_fixture("book.sample.json"), field: value}
+    assert not _validator("book.schema.json").is_valid(book)
+
+
+@pytest.mark.parametrize("field", ["licence", "attribution", "author", "held_for_review"])
+def test_a_book_must_say_its_licence_attribution_author_and_review_state(field):
+    book = _fixture("book.sample.json")
+    del book[field]
+    assert not _validator("book.schema.json").is_valid(book)
 
 
 def test_passage_with_an_unknown_field_is_rejected():

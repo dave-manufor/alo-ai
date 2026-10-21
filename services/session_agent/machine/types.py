@@ -71,6 +71,7 @@ class SessionState:
     live_slow_turns: int = 0
     listening_run: bool = False
     disconnected: bool = False
+    streamed: tuple[str, ...] = ()  # clips already streamed from the store after a `missing`
     status: SessionStatus = "STARTED"
 
 
