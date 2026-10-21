@@ -160,7 +160,7 @@ The Session Agent owns the order of every session through a pure state machine; 
 
 - Downloads every clip for the session into Cache Storage before reading starts: prompts, questions, the listening story, and one "That word is X." clip per distinct passage word from the shared clip store (about 80 clips, roughly 0.9 MB as 32 kbps MP3 on a first session; the bank-fallback clips download only if the fallback is used).
 
-- Plays a clip when the agent sends `{"cmd":"play","clip_id":…}` on the LiveKit data channel, and acks with `played` or `missing`. Shows and hides the passage on `show_passage` / `hide_passage`, and shows Jàpá waiting on `reconnecting`. Never shows a score, timer or red mark.
+- Follows the agent on the LiveKit data channel (topic `aloai.session`, `schemas/session_protocol.schema.json` v2) and never moves the session on by itself. Shows the screen for each `step` message. Plays a clip when the agent sends `{"cmd":"play","clip_id":…}`, shows the clip's `text` from its `clip_list` entry in the speech bubble (the listening story has none), and acks with `played` when the clip **finishes** or `missing` if it isn't cached (waiting for a download already under way). Shows the story from `show_passage` (title, sentences, ARL) and hides it on `hide_passage`, and shows Jàpá waiting on `reconnecting` until the next `step`. Never shows a score, timer or red mark.
 
 ### Session Agent:
 
@@ -503,7 +503,7 @@ The session conductor's tools are listed in section 4.
 |Contract|Producer|Consumer|
 |---|---|---|
 |`POST /v1/sessions`: session record, LiveKit token, agent dispatch|W1|W2|
-|Session protocol: data-channel commands (`play`, `show_passage`, `hide_passage`, `reconnecting`) and the clip list|W2|W1|
+|Session protocol: data-channel commands (`play`, `step`, `show_passage`, `hide_passage`, `reconnecting`), the clip list with each clip's text, and the `played` / `missing` replies|W2|W1|
 |Quick endpoint `POST /v1/grade:quick`|W3|W2|
 |Events `phase1.recorded` and `session.done`, with turn audio paths, the TOLD log and the session settings|W2|W3|
 |Passage artifact, including `syntactic_boundary_after`|W2|W3|

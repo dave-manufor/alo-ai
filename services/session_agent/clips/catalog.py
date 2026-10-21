@@ -9,12 +9,17 @@ session starts (the clip_list message), so ids and URLs come from one place:
     listening story   {voice}/{tts}/passages/{listening_passage_id}/story.mp3
     listening items   {voice}/{tts}/passages/{listening_passage_id}/item_{n}.mp3
     words             {voice}/{tts}/words/{word_key}.mp3, clip id "word_{word_key}"
+
+Each clip also carries the words it says (prompts.py, the passage items' prompt_text,
+"That word is X."), which the web app shows in the speech bubble. The listening story
+has no text: the child must hear it, not read it.
 """
 
 from collections.abc import Sequence
 from dataclasses import dataclass
 
 from .keys import clean_word, word_key
+from .prompts import PROMPT_TEXTS, WORD_CLIP_TEXT
 from .store import ClipStore
 
 # Every prompt the machine can say (machine/step.py). The web app caches all of them.
@@ -70,10 +75,30 @@ class ClipCatalog:
     def url(self, clip_id: str, **passages: str | None) -> str:
         return f"{self.base_url.rstrip('/')}/{self.object_name(clip_id, **passages)}"
 
+    def text(
+        self, clip_id: str, read: dict | None = None, listening: dict | None = None
+    ) -> str | None:
+        """What the clip says, or None for the listening story. Raises ValueError for an
+        id it can't place, like object_name."""
+        role, _, number = clip_id.partition(":")
+        if clip_id in PROMPT_TEXTS:
+            return PROMPT_TEXTS[clip_id]
+        if clip_id == "listening_story" and listening is not None:
+            return None
+        if role == "question" and number.isdigit() and read is not None:
+            return _asked(read)[int(number)]["prompt_text"]
+        if role == "listening_item" and number.isdigit() and listening is not None:
+            return _asked(listening)[int(number)]["prompt_text"]
+        if clip_id.startswith("word_") and read is not None:
+            for token in _words(read["tokens"]):
+                if self.word_clip_id(token) == clip_id:
+                    return WORD_CLIP_TEXT.format(word=_display_word(token))
+        raise ValueError(f"no text for clip {clip_id!r}")
+
     def session_clips(
         self, read: dict, listening: dict | None, n_questions: int, n_listening_items: int
-    ) -> list[tuple[str, str]]:
-        """(clip_id, url) for every clip a session on these passages can play."""
+    ) -> list[tuple[str, str, str | None]]:
+        """(clip_id, url, text) for every clip a session on these passages can play."""
         ids = {"passage_id": read["passage_id"]}
         if listening is not None:
             ids["listening_passage_id"] = listening["passage_id"]
@@ -82,7 +107,10 @@ class ClipCatalog:
             clip_ids += ["listening_story"]
             clip_ids += [f"listening_item:{n}" for n in range(n_listening_items)]
         clip_ids += _unique(self.word_clip_id(t) for t in _words(read["tokens"]))
-        return [(clip_id, self.url(clip_id, **ids)) for clip_id in clip_ids]
+        return [
+            (clip_id, self.url(clip_id, **ids), self.text(clip_id, read, listening))
+            for clip_id in clip_ids
+        ]
 
     def _word_key(self, token: dict) -> str:
         return word_key(token.get("clean_text") or token["text"], token.get("name_ipa"))
@@ -92,5 +120,19 @@ def _words(tokens: Sequence[dict]) -> list[dict]:
     return [t for t in tokens if clean_word(t.get("clean_text") or t["text"])]
 
 
+def _asked(passage: dict) -> list[dict]:
+    """Items in the order they are asked, as the Grader indexes them: question:0 is the
+    item with the lowest `order`."""
+    return sorted(passage["items"], key=lambda item: item["order"])
+
+
 def _unique(items) -> list[str]:
     return list(dict.fromkeys(items))
+
+
+def _display_word(token: dict) -> str:
+    """The word without the punctuation around it ("market." -> "market"). Names keep
+    their capital; other words are lowercased, so "It" at the start of a sentence reads
+    "That word is it."."""
+    word = token["text"].strip(".,;:!?\"'“”‘’()[]-—")
+    return word if token.get("name_ipa") else word.lower()

@@ -1,16 +1,44 @@
 [
   {
-    "schema_version": 1,
+    "schema_version": 2,
     "cmd": "clip_list",
     "clips": [
-      { "clip_id": "greeting_1", "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/greeting_1.mp3" },
-      { "clip_id": "word_market", "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/words/market.mp3" }
+      {
+        "clip_id": "interest_prompt",
+        "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/interest_prompt.mp3",
+        "text": "Before we read, tell me: what kind of stories do you like?"
+      },
+      {
+        "clip_id": "word_market",
+        "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/words/market.mp3",
+        "text": "That word is market."
+      },
+      {
+        "clip_id": "listening_story",
+        "url": "https://storage.googleapis.com/aloai-dev-clips/vp_google_v1/v1/passages/bank_l3_rain/story.mp3",
+        "text": null
+      }
     ]
   },
-  { "schema_version": 1, "cmd": "play", "clip_id": "word_market" },
-  { "schema_version": 1, "cmd": "show_passage", "passage_id": "bank_p3_market_day" },
-  { "schema_version": 1, "cmd": "hide_passage" },
-  { "schema_version": 1, "cmd": "reconnecting" },
-  { "schema_version": 1, "cmd": "played", "clip_id": "word_market" },
-  { "schema_version": 1, "cmd": "missing", "clip_id": "word_market" }
+  { "schema_version": 2, "cmd": "step", "step": "INTEREST_CHAT" },
+  { "schema_version": 2, "cmd": "play", "clip_id": "interest_prompt" },
+  { "schema_version": 2, "cmd": "step", "step": "READING" },
+  {
+    "schema_version": 2,
+    "cmd": "show_passage",
+    "passage_id": "bank_p3_market_day",
+    "title": "Market Day",
+    "sentences": [
+      "Ada and Mama went to the market.",
+      "Ada saw a red hat.",
+      "It cost too much.",
+      "Ada smiled and chose a blue hat."
+    ],
+    "arl": 3
+  },
+  { "schema_version": 2, "cmd": "play", "clip_id": "word_market" },
+  { "schema_version": 2, "cmd": "hide_passage" },
+  { "schema_version": 2, "cmd": "reconnecting" },
+  { "schema_version": 2, "cmd": "played", "clip_id": "word_market" },
+  { "schema_version": 2, "cmd": "missing", "clip_id": "word_market" }
 ]
