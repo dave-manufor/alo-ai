@@ -14,6 +14,18 @@ from aloai_azure import build_ssml
 from .prompts import WORD_CLIP_TEXT
 
 
+def line_synthesizer(
+    synthesize: Callable[[str], bytes], *, voice: str, locale: str
+) -> Callable[[str], bytes]:
+    """The speech for a whole line (a fixed prompt, a question, the listening story):
+    `synthesize` takes SSML and returns MP3, as for word_synthesizer."""
+
+    def make(text: str) -> bytes:
+        return synthesize(build_ssml(text, voice=voice, locale=locale))
+
+    return make
+
+
 def word_synthesizer(
     synthesize: Callable[[str], bytes], *, voice: str, locale: str
 ) -> Callable[[str, str | None], bytes]:
