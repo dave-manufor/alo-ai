@@ -58,7 +58,6 @@ class ClipCatalog:
         listening_passage_id: str | None = None,
     ) -> str:
         """The clip store object for a clip id. Raises ValueError for an unknown id."""
-        prefix = f"{self.store.voice_profile_id}/{self.store.tts_version}"
         role, _, number = clip_id.partition(":")
         if clip_id.startswith("word_"):
             return self.store.word_clip_name(clip_id.removeprefix("word_"))
@@ -69,7 +68,7 @@ class ClipCatalog:
         if clip_id == "listening_story" and listening_passage_id:
             return self.store.passage_clip_name(listening_passage_id, "story")
         if clip_id in PROMPTS:
-            return f"{prefix}/{clip_id}.mp3"
+            return self.store.prompt_clip_name(clip_id)
         raise ValueError(f"no clip store object for {clip_id!r}")
 
     def url(self, clip_id: str, **passages: str | None) -> str:
