@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import './styles/app.css';
 import './styles/preview.css';
+import './styles/session.css';
 
 registerSW({ immediate: true });
 

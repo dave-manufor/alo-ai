@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAccount } from './account/store';
 import CheckoutPlaceholderPage from './pages/CheckoutPlaceholderPage';
 import ChildrenPage from './pages/ChildrenPage';
@@ -24,17 +24,23 @@ function RequireGuardian({ children }: { children: ReactNode }) {
 // Routing. Kid-mode and grown-up-mode screens are separate routes and
 // are never mixed on one screen (design system README).
 export default function App() {
+  // The kid session is a full-bleed Night screen (the "Àlọ́ Night
+  // Session" demo): no grown-up chrome inside it.
+  const { pathname } = useLocation();
+  const inSession = pathname.startsWith('/session/');
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <Link to="/">
-          <img
-            className="app-wordmark"
-            src="/design-system/assets/Logos/wordmark-on-light.svg"
-            alt="alo.ai"
-          />
-        </Link>
-      </header>
+      {inSession ? null : (
+        <header className="app-header">
+          <Link to="/">
+            <img
+              className="app-wordmark"
+              src="/design-system/assets/Logos/wordmark-on-light.svg"
+              alt="alo.ai"
+            />
+          </Link>
+        </header>
+      )}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signin" element={<SignInPage />} />

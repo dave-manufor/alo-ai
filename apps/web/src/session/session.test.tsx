@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { accountStore } from '../account/store';
@@ -6,6 +6,8 @@ import ChildrenPage from '../pages/ChildrenPage';
 import SessionPage from '../pages/SessionPage';
 import { browserPlayer, createClipCache, unlockAudio } from './clipCache';
 import { fixtureClips } from './fixtureDriver';
+import HoldToConfirm from './HoldToConfirm';
+import VoiceOrb from './VoiceOrb';
 import { missingAck, parseAgentMessage, playedAck } from './protocol';
 import {
   applyAgentMessage,
@@ -178,6 +180,77 @@ describe('clip cache (PRD 4.4, protocol v2)', () => {
   });
 });
 
+describe('voice orb (the Night session presence)', () => {
+  it('shows five count dots in the mic check and hides itself from AT', () => {
+    const { container } = render(<VoiceOrb state="speaking" countDots />);
+    expect(container.querySelector('.voice-orb--speaking')).not.toBeNull();
+    expect(container.querySelectorAll('.voice-orb__dot')).toHaveLength(5);
+    expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
+  });
+});
+
+describe('grown-up hold gate', () => {
+  it('completes on a full keyboard hold, and an early key release cancels', () => {
+    vi.useFakeTimers();
+    try {
+      const onComplete = vi.fn();
+      render(<HoldToConfirm label="Grown-ups: press and hold" onComplete={onComplete} />);
+      const button = screen.getByRole('button', { name: /press and hold/ });
+      // The hint is wired up for keyboard and screen-reader users.
+      expect(button.getAttribute('aria-describedby')).toBeTruthy();
+      expect(screen.getByText(/hold the Enter or Space key/)).toBeInTheDocument();
+
+      fireEvent.keyDown(button, { key: 'Enter' });
+      act(() => vi.advanceTimersByTime(400));
+      fireEvent.keyUp(button, { key: 'Enter' });
+      act(() => vi.advanceTimersByTime(1500));
+      expect(onComplete).not.toHaveBeenCalled();
+
+      fireEvent.keyDown(button, { key: 'Enter' });
+      act(() => vi.advanceTimersByTime(1100));
+      expect(onComplete).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cancels when the pointer leaves mid-hold', () => {
+    vi.useFakeTimers();
+    try {
+      const onComplete = vi.fn();
+      render(<HoldToConfirm label="Grown-ups: press and hold" onComplete={onComplete} />);
+      const button = screen.getByRole('button', { name: /press and hold/ });
+      fireEvent.pointerDown(button);
+      act(() => vi.advanceTimersByTime(400));
+      fireEvent.pointerLeave(button);
+      act(() => vi.advanceTimersByTime(1500));
+      expect(onComplete).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('completes at once under reduced motion, with no intermediate fill', () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: true,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    try {
+      const onComplete = vi.fn();
+      render(<HoldToConfirm label="Grown-ups: press and hold" onComplete={onComplete} />);
+      fireEvent.pointerDown(screen.getByRole('button', { name: /press and hold/ }));
+      expect(onComplete).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe('kid session screen (PRD 4.1, agent-driven)', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -206,7 +279,7 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Ààlọ̀/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
     // The bubble shows the interest clip's exact text.
     expect(
       await screen.findByText('Before we read, tell me: what kind of stories do you like?'),
@@ -237,7 +310,20 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
 
     // Collect stars stays in kid mode: no route away, no numbers anywhere.
     fireEvent.click(screen.getByRole('button', { name: /Collect stars/ }));
-    expect(screen.getByText('You did a great job today!')).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\d+\s?%|score|timer|words a minute/i);
+
+    // Then the handover: a grown-up must press and hold, and only then
+    // does the grown-up report-ready card appear (video's last frames).
+    expect(screen.getByText('Please give the phone to a grown-up')).toBeInTheDocument();
+    const hold = screen.getByRole('button', { name: /Grown-ups: press and hold/ });
+    // A quick tap must not complete it.
+    fireEvent.pointerDown(hold);
+    fireEvent.pointerUp(hold);
+    expect(screen.queryByText(/report is ready/)).not.toBeInTheDocument();
+    fireEvent.pointerDown(hold);
+    expect(
+      await screen.findByText("Adaeze's report is ready", undefined, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'See the report' })).toBeInTheDocument();
   });
 });
