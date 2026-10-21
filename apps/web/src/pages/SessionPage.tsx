@@ -237,7 +237,10 @@ export default function SessionPage() {
         </section>
       ) : null}
 
-      {started && !state.reconnecting && step === 'CLOSE' && !starsCollected ? (
+      {started &&
+      !state.reconnecting &&
+      (step === 'CLOSE' || step === 'ENDED') &&
+      !starsCollected ? (
         <section className="night-centre">
           <span className="night-moon" aria-hidden="true" />
           <svg
@@ -262,7 +265,10 @@ export default function SessionPage() {
         </section>
       ) : null}
 
-      {started && step === 'CLOSE' && starsCollected && !handedOver ? (
+      {/* Keyed on starsCollected, not the step: if the agent moves to
+          ENDED while the grown-up is holding, the handover must not
+          vanish mid-hold. */}
+      {started && starsCollected && !handedOver ? (
         <section className="night-centre">
           <Japa pose="happy" />
           <p className="kid-title">Please give the phone to a grown-up</p>

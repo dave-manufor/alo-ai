@@ -1,11 +1,14 @@
 /* Kid session, Night theme (the "Àlọ́ Night Session" demo): a full-
    bleed night sky under the àlọ́, a glowing voice orb while Kemi
    speaks or listens, the story on a raised card, and a moonlit reward
-   that ends in the grown-up handover. Every colour, space, radius and
-   size comes from the design-system tokens; the [data-theme="dark"]
-   wrapper on the screen swaps them to Night. No hard-coded values
-   except gradient stops built from token colours and the star field,
-   which is decoration the token set has no primitive for. */
+   that ends in the grown-up handover. Colours, spaces, radii and
+   sizes come from the design-system tokens; the [data-theme="dark"]
+   wrapper on the screen swaps them to Night. The few literals are
+   declared here honestly: gradient stops are built from token
+   colours, and the star field, 1px hairline rings, the 0.08em
+   eyebrow tracking and the 120ms press timing are decoration or
+   motion values the token set has no primitive for (the design
+   system's own motion guidance is 120ms for a press). */
 
 .night-session {
   position: relative;
@@ -19,6 +22,13 @@
   padding: var(--space-5) var(--space-4) var(--space-8);
   background: var(--surface);
   color: var(--ink);
+}
+
+/* Everything except the star field sits above it: the stars are an
+   absolutely-positioned layer that would otherwise paint over the
+   (unpositioned) MoonProgress and the rest of the screen. */
+.night-session > *:not(.night-stars) {
+  position: relative;
 }
 
 /* Two layers of still stars, drawn with radial gradients. */
@@ -324,6 +334,11 @@
   cursor: pointer;
   touch-action: none;
   user-select: none;
+}
+
+.hold-to-confirm__hint {
+  color: var(--ink-muted);
+  max-width: calc(var(--space-8) * 5);
 }
 
 .hold-to-confirm__ring {
