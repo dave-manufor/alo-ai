@@ -18,3 +18,14 @@ spacy==3.8.7
 click<9
 wordfreq==3.1.1
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# Azure (CLOUD=azure): Cosmos DB, Service Bus, Blob Storage, Azure OpenAI through LiteLLM for the
+# Coach, Azure AI Speech. soundfile decodes the response audio for Speech (needs libsndfile1).
+azure-cosmos==4.17.1
+azure-servicebus==7.15.0
+azure-storage-blob==12.31.0
+azure-identity==1.26.0
+pyjwt[crypto]==2.15.1
+openai==2.54.0
+litellm==1.106.2
+azure-cognitiveservices-speech==1.52.0
+soundfile==0.14.0

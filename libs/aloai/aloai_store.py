@@ -240,6 +240,20 @@ def open_store(config: Config) -> Store:  # pragma: no cover - builds a real cli
         from google.cloud import firestore
 
         return FirestoreStore(firestore.Client(project=config.project))
+    database = _cosmos_database(config)
+    return CosmosStore(
+        database.get_container_client("docs"),
+        {"books": database.get_container_client("books")},
+    )
+
+
+def open_container(config: Config, name: str):  # pragma: no cover - builds a real client
+    """A Cosmos DB container by name (azure only), for what the Store has no call for, such
+    as the vector search on `books`."""
+    return _cosmos_database(config).get_container_client(name)
+
+
+def _cosmos_database(config: Config):  # pragma: no cover - builds a real client
     from azure.cosmos import CosmosClient
 
     endpoint = require_setting(config.cosmos_endpoint, "AZURE_COSMOS_ENDPOINT")
@@ -249,8 +263,4 @@ def open_store(config: Config) -> Store:  # pragma: no cover - builds a real cli
         from azure.identity import DefaultAzureCredential
 
         client = CosmosClient(endpoint, DefaultAzureCredential())
-    database = client.get_database_client(config.cosmos_database)
-    return CosmosStore(
-        database.get_container_client("docs"),
-        {"books": database.get_container_client("books")},
-    )
+    return client.get_database_client(config.cosmos_database)

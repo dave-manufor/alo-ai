@@ -11,7 +11,7 @@ holding it back.
 """
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -36,6 +36,7 @@ class ReportAssembler:
     publisher: Publisher
     books: BookRecommender
     clock: Callable[[], datetime] = _now
+    versions: Mapping[str, str] | None = None  # the models used; None: the Google ones
 
     def assemble(self, session_id: str) -> bool:
         """True if the report exists after this call."""
@@ -74,6 +75,7 @@ class ReportAssembler:
                 quick=self.store.get(paths.quick_result(session_id)),
                 previous_reported_arl=self._previous_reported_arl(session_id, session["child_id"]),
                 now=self.clock(),
+                versions=self.versions,
             )
         )
         report["recommendations"]["book_ids"] = self._book_ids(session_id, report, child, passage)

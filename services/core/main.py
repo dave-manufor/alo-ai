@@ -3,13 +3,15 @@
 CLOUD picks the clients (aloai_env). On gcp it wires the Passage Generator, the Grader and
 the Reading Coach to Firestore (and its vector search for books) and Pub/Sub, or their
 emulators when the *_EMULATOR_HOST variables are set, and takes events from the Pub/Sub push
-route. On azure it wires Cosmos DB and Service Bus and takes events from its own queue
-(EVENT_QUEUE); the push route is not mounted, because nothing on Azure signs a push. Book
-search and the live AI clients are not built for azure yet, so a start there says so. By
-AI_MODE the AI is Vertex AI, Speech-to-Text and Text-to-Speech, or the recorded responses in
-fixtures/ai/. The Coach's email goes to the Account and Payments service at ACCOUNT_URL, or
-to the Firestore outbox with ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan
-is the template plan.
+route. On azure it wires Cosmos DB (and its vector search for books) and Service Bus and takes
+events from its own queue (EVENT_QUEUE); the push route is not mounted, because nothing on
+Azure signs a push. By AI_MODE the AI is the recorded responses in fixtures/ai/, or live:
+Vertex AI, Speech-to-Text and Text-to-Speech on gcp, Azure OpenAI and Azure AI Speech on azure
+(the report then records the Azure deployments as the models used). The Passage Generator's
+live Azure model is not built yet, so a live start on azure says so.
+The Coach's email goes to the Account and Payments service at ACCOUNT_URL, or to the
+Firestore outbox with ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the
+template plan.
 GENERATOR_ON (default false, a server setting from terraform.tfvars) lets plan.ready
 pre-generate the child's next story; off, plan.ready is ignored and the Session Agent
 (which has the same setting) uses the bank passage. Generated passages point their word clips
@@ -24,9 +26,11 @@ from pathlib import Path
 import aloai_env
 import requests
 import spacy
+from aloai_azure import deployment, open_openai, recognize_words, synthesize
+from aloai_blobs import open_blobs
 from aloai_events import PushCheck, anyone, open_publisher, pump_lifespan, pushed_by
 from aloai_service_auth import service_token
-from aloai_store import Store, open_store
+from aloai_store import Store, open_container, open_store
 from fastapi import FastAPI
 from google import genai
 from google.adk.models import BaseLlm, Gemini
@@ -35,6 +39,7 @@ from google.cloud import firestore, speech_v2, storage, texttospeech
 
 from .api import event_handler, events_router
 from .coach.agent import COACH_MODEL, RecordedModel
+from .coach.azure import AzureSpeaker, azure_coach_model
 from .coach.clients import (
     AccountNotifier,
     ChirpSpeaker,
@@ -52,6 +57,13 @@ from .generator_requests import NextStories
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
+from .grader.azure import (
+    AzureEmbedder,
+    AzureSpeechTranscriber,
+    CosmosBookSearch,
+    azure_model,
+)
+from .grader.azure import versions as azure_versions
 from .grader.books import (
     BookRecommender,
     BookSearch,
@@ -75,7 +87,12 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     store = open_store(settings)
     publisher = open_publisher(settings)
     model, transcriber, embedder = _ai(settings)
-    assembler = ReportAssembler(store, publisher, BookRecommender(_book_search(settings), embedder))
+    assembler = ReportAssembler(
+        store,
+        publisher,
+        BookRecommender(_book_search(settings), embedder),
+        versions=_versions(settings),
+    )
     coach = ReadingCoach(
         store=store,
         publisher=publisher,
@@ -133,13 +150,17 @@ def _push_check(settings: aloai_env.Config) -> PushCheck:
 
 
 def _book_search(settings: aloai_env.Config) -> BookSearch:
-    _gcp_only(settings, "book search")
+    if settings.cloud == "azure":
+        return CosmosBookSearch(open_container(settings, "books"))
     return FirestoreBookSearch(firestore.Client(project=settings.project))
 
 
-def _gcp_only(settings: aloai_env.Config, what: str) -> None:
-    if settings.cloud != "gcp":
-        raise aloai_env.ConfigError(f"{what} is not built for CLOUD={settings.cloud} yet")
+def _versions(settings: aloai_env.Config) -> Mapping[str, str] | None:
+    """The models the report records as used: the Azure ones when they are the ones called.
+    None keeps the Google ones, which is also what recorded responses are named after."""
+    if settings.cloud == "azure" and settings.ai_mode == "live":
+        return azure_versions(settings)
+    return None
 
 
 def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder]:
@@ -149,7 +170,16 @@ def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder
             FixtureTranscriber(RECORDED / "asr"),
             FixtureEmbedder(RECORDED / "embeddings.json"),
         )
-    _gcp_only(settings, "AI_MODE=live")
+    if settings.cloud == "azure":
+        client = open_openai(settings)
+        return (
+            azure_model(client, settings),
+            AzureSpeechTranscriber(
+                open_blobs(settings),
+                lambda pcm, phrases: recognize_words(settings, pcm, phrases),
+            ),
+            AzureEmbedder(client, deployment(settings, "embedding")),
+        )
     speech = speech_v2.SpeechClient(
         client_options=ClientOptions(api_endpoint=f"{CHIRP_LOCATION}-speech.googleapis.com")
     )
@@ -166,7 +196,10 @@ def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
     if settings.ai_mode == "fixtures":
         model = FixtureModel(RECORDED / "generator")
     else:
-        _gcp_only(settings, "AI_MODE=live")
+        if settings.cloud != "gcp":  # the Azure model comes with the generator's adapters
+            raise aloai_env.ConfigError(
+                f"the Passage Generator's AI_MODE=live is not built for CLOUD={settings.cloud} yet"
+            )
         model = VertexModel(
             genai.Client(vertexai=True, project=settings.project, location=settings.location)
         )
@@ -181,7 +214,8 @@ def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
 def _coach_model(settings: aloai_env.Config) -> Callable[[str], BaseLlm | str]:
     if settings.ai_mode == "fixtures":
         return lambda session_id: RecordedModel.from_file(RECORDED / "coach" / f"{session_id}.json")
-    _gcp_only(settings, "AI_MODE=live")
+    if settings.cloud == "azure":
+        return azure_coach_model(settings)
     gemini = Gemini(
         model=COACH_MODEL,
         client_kwargs={
@@ -206,7 +240,13 @@ def _notifier(settings: aloai_env.Config, env: Mapping[str, str], store: Store) 
 def _speaker(settings: aloai_env.Config, env: Mapping[str, str]) -> Speaker:
     if settings.ai_mode == "fixtures":
         return SilentSpeaker()
-    _gcp_only(settings, "AI_MODE=live")
+    if settings.cloud == "azure":
+        return AzureSpeaker(
+            open_blobs(settings),
+            lambda ssml: synthesize(settings, ssml),
+            _required(env, "AUDIO_BUCKET"),
+            _required(env, "TTS_VOICE"),
+        )
     tts = texttospeech.TextToSpeechClient(client_options=ClientOptions(api_endpoint=TTS_ENDPOINT))
     bucket = storage.Client(project=settings.project).bucket(_required(env, "AUDIO_BUCKET"))
     return ChirpSpeaker(tts, bucket, _required(env, "TTS_VOICE"))

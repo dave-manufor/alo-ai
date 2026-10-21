@@ -64,7 +64,14 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
    - Both `main.py` files build their store and publisher with `open_store` and `open_publisher`, and the Scorer reads audio through `BlobAudio` over any `Blobs`. A recording that is not in storage is now a `BlobNotFound` (a `LookupError`), so the Scorer parks it, as it parks a missing document; before, a missing Cloud Storage object was retried and then dead-lettered.
    - Not built yet, so Core and the Scorer name it and refuse to start on azure: book search (Core) and the live AI clients, speech and voice (both). They come with step 4.
    - Core calls the Account service with `aloai_service_auth.service_token`, so it works on either cloud.
-4. AI adapters, split by owner, each with its evaluation result.
+4. AI adapters, split by owner, each with its evaluation result. **W3 part built, evaluations not run:**
+   - `libs/aloai/aloai_azure.py`: the deployment for a role, the OpenAI v1 client (`{endpoint}/openai/v1/`, so the deployment name is the `model` and no api-version is set), the audio Speech takes, what a recognition returns, the SSML for a voice (with an IPA `phoneme` for a name), and the two Speech SDK calls.
+   - Core: `AzureGradingModel` (JSON-schema response format, not strict, checked by `grade()` afterwards; the quick and grader deployments by role), `AzureSpeechTranscriber`, `AzureEmbedder` (`text-embedding-3-small` asked for 768 dimensions), `CosmosBookSearch` (`VectorDistance`, nearest first, held books and other levels left out), and the Coach's `azure_coach_model` (ADK through LiteLLM, a fresh token for each run) and `AzureSpeaker`.
+   - Reading Scorer: `AzureSpeechReading` (the passage's names as phrase hints) and `OpenAIReading` (a transcription deployment, verbatim prompt, temperature 0).
+   - The report's `versions` now name the models actually called, so an Azure report says `azure-openai/<deployment>` and `azure-speech/<locale>`, not the Gemini and Chirp names.
+   - `UpstreamErrors` also counts OpenAI and azure-core errors, so the quick endpoint still answers 503 with `retryable: true`.
+   - **Not run, so not claimed:** the evaluation sets (hard rule 6), the day-1 Azure Speech check, and every call to a real Azure service. Unit tests use fake clients. The Speech SDK calls (`recognize_words`, `synthesize`) and the parse of Speech's detailed JSON follow the SDK's documented shapes and are the least certain parts: check that Speech returns a confidence for each word (without one, every word is left unmarked), that the transcription model keeps a child's mistakes instead of correcting them to the passage, and the 2.5 s quick-grade timeout on the quick deployment.
+   - **Waiting on the generator reaching `main`:** the generator's `Model` (writer, critic, scoring call) and the Session Agent's `Tagger` are on the stacked branches of #28 to #31, which were merged into each other, not into `main`. Their Azure adapters (W2) follow once that chain is on `main`.
 5. `infra/azure/` Terraform.
 6. Web sign-in and hosting.
 7. Seed clips, the book catalogue and bank passages.

@@ -169,11 +169,6 @@ def test_the_gcp_app_starts_no_pump(monkeypatch):
         pass
 
 
-def test_live_transcribers_are_not_built_for_azure_yet():
-    with pytest.raises(aloai_env.ConfigError, match="AI_MODE=live"):
-        main.create_app({"ALO_ENV": "local", "CLOUD": "azure", "AI_MODE": "live"})
-
-
 # ---- the audio, from either cloud's storage
 
 

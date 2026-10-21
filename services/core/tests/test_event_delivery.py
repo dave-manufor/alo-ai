@@ -7,11 +7,14 @@ from types import SimpleNamespace
 import aloai_env
 import aloai_events
 import pytest
+from aloai_blobs import MemoryBlobs
 from aloai_events import MemoryPublisher, pump_once
 from aloai_store import MemoryStore
 from fastapi.testclient import TestClient
 from services.core import main
 from services.core.api import event_handler
+from services.core.coach.azure import AzureSpeaker
+from services.core.grader.azure import AzureEmbedder, AzureGradingModel, AzureSpeechTranscriber
 from services.core.grader import paths
 from services.core.grader.models import FixtureGradingModel
 from services.core.grader.quick import QuickGrader
@@ -204,34 +207,78 @@ def test_the_gcp_app_starts_no_pump(monkeypatch):
         pass
 
 
-# ---- what is not built for azure yet says so
+# ---- Core on azure builds its own clients
+
+
+class BooksContainer:
+    def query_items(self, **kwargs):
+        return iter([])
+
+
+AZURE_ENV = {
+    "ALO_ENV": "local",
+    "CLOUD": "azure",
+    "EVENT_QUEUE": "core-events",
+    "AZURE_OPENAI_ENDPOINT": "https://aloai.openai.azure.com",
+    "AZURE_OPENAI_DEPLOYMENTS": json.dumps(
+        {"grader": "gpt-4.1", "quick": "gpt-4.1-mini", "coach": "gpt-4.1", "embedding": "embed"}
+    ),
+}
 
 
 @pytest.fixture
 def in_memory(monkeypatch):
+    """Core's azure clients replaced by in-memory ones, as AI_MODE=fixtures needs no Azure."""
     monkeypatch.setattr(main, "open_store", lambda config: MemoryStore())
     monkeypatch.setattr(main, "open_publisher", lambda config: MemoryPublisher())
+    monkeypatch.setattr(main, "open_container", lambda config, name: BooksContainer())
+    monkeypatch.setattr(main, "open_blobs", lambda config: MemoryBlobs())
+    monkeypatch.setattr(main, "open_openai", lambda config: SimpleNamespace(client="openai"))
+    # The Passage Generator's live Azure model is not built at this commit, and spaCy is slow.
+    monkeypatch.setattr(main, "_generator", lambda config, env: SimpleNamespace())
 
 
-@pytest.mark.parametrize(
-    "env, what",
-    [
-        ({"AI_MODE": "fixtures"}, "book search"),
-        ({"AI_MODE": "live"}, "AI_MODE=live"),
-    ],
-    ids=["book search", "live AI"],
-)
-def test_core_on_azure_names_what_is_not_built_yet(in_memory, env, what):
-    with pytest.raises(aloai_env.ConfigError, match=what):
-        main.create_app({"ALO_ENV": "local", "CLOUD": "azure", "EVENT_QUEUE": "core-events"} | env)
+def test_core_starts_on_azure_with_recorded_responses_and_cosmos_book_search(in_memory):
+    app = main.create_app(AZURE_ENV | {"AI_MODE": "fixtures"})
+    response = TestClient(app).post("/v1/grade:quick", json=quick_request("READING", 0, ""))
+    assert response.status_code == 400
 
 
-def test_the_live_coach_model_and_voice_are_not_built_for_azure_either():
-    live = settings("azure", AI_MODE="live")
-    with pytest.raises(aloai_env.ConfigError, match="AI_MODE=live"):
-        main._coach_model(live)
-    with pytest.raises(aloai_env.ConfigError, match="AI_MODE=live"):
-        main._speaker(live, {})
+def test_live_core_on_azure_calls_azure_openai_and_azure_speech(in_memory):
+    model, transcriber, embedder = main._ai(settings("azure", **AZURE_ENV, AI_MODE="live"))
+    assert isinstance(model, AzureGradingModel)
+    assert isinstance(transcriber, AzureSpeechTranscriber)
+    assert (type(embedder), embedder.deployment) == (AzureEmbedder, "embed")
+    assert main._book_search(settings("azure")).container is not None
+
+
+def test_live_core_on_azure_starts_with_the_coach_and_voice_it_needs(in_memory):
+    env = AZURE_ENV | {
+        "AI_MODE": "live",
+        "AUDIO_BUCKET": "audio",
+        "TTS_VOICE": "en-NG-EzinneNeural",
+    }
+    app = main.create_app(env | {"ALO_ENV": "local"})
+    assert TestClient(app).post("/v1/grade:quick", json={}).status_code == 400
+
+
+def test_the_azure_voice_needs_a_container_and_a_voice(in_memory):
+    live = settings("azure", **AZURE_ENV, AI_MODE="live")
+    assert isinstance(
+        main._speaker(live, {"AUDIO_BUCKET": "audio", "TTS_VOICE": "en-NG-EzinneNeural"}),
+        AzureSpeaker,
+    )
+    with pytest.raises(aloai_env.ConfigError, match="AUDIO_BUCKET"):
+        main._speaker(live, {"TTS_VOICE": "en-NG-EzinneNeural"})
+    with pytest.raises(aloai_env.ConfigError, match="TTS_VOICE"):
+        main._speaker(live, {"AUDIO_BUCKET": "audio"})
+
+
+def test_live_core_on_azure_refuses_to_start_without_its_deployments(in_memory):
+    with pytest.raises(aloai_env.ConfigError, match="'quick'"):
+        main.create_app(
+            AZURE_ENV | {"AI_MODE": "live", "AZURE_OPENAI_DEPLOYMENTS": "{}"} | {"ALO_ENV": "local"}
+        )
 
 
 def test_the_coach_email_is_called_with_a_token_for_the_chosen_cloud(monkeypatch):

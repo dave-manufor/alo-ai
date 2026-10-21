@@ -6,6 +6,7 @@ this module only arranges them. Book ids stay empty until book ranking (PRD 9.3)
 is built, and parent_reporting stays null until the Reading Coach writes it.
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -70,6 +71,7 @@ class ReportInputs:
     quick: dict | None
     previous_reported_arl: int | None
     now: datetime
+    versions: Mapping[str, str] | None = None  # the models used; None: the Google ones
 
 
 def build_report(inputs: ReportInputs) -> dict:
@@ -118,7 +120,7 @@ def build_report(inputs: ReportInputs) -> dict:
         "recommendations": _recommendations(profile.code, level["reported_arl"]),
         "flags": flags,
         "parent_reporting": None,
-        "versions": VERSIONS,
+        "versions": dict(inputs.versions or VERSIONS),
     }
 
 

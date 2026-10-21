@@ -156,12 +156,12 @@ def pushed(message: dict) -> dict:
     }
 
 
-def assembler(store: MemoryStore, publisher: MemoryPublisher) -> ReportAssembler:
+def assembler(store: MemoryStore, publisher: MemoryPublisher, **changes) -> ReportAssembler:
     return ReportAssembler(
         store,
         publisher,
         recommender(store),
-        clock=lambda: NOW,
+        **({"clock": lambda: NOW} | changes),
     )
 
 
