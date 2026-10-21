@@ -1,11 +1,16 @@
 """Core service entry point: uvicorn services.core.main:create_app --factory.
 
-Wires the Grader and the Reading Coach to Firestore (and its vector search for books) and
+Wires the Passage Generator, the Grader and the Reading Coach to Firestore (and its vector search for books) and
 Pub/Sub, or their emulators when the *_EMULATOR_HOST variables are set, and, by AI_MODE,
 to Vertex AI, Speech-to-Text and Text-to-Speech or to the recorded responses in
 fixtures/ai/. The Coach's email goes to
 the Account and Payments service at ACCOUNT_URL, or to the Firestore outbox with
 ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the template plan.
+GENERATOR_ON (default false, a server setting from terraform.tfvars) lets plan.ready
+pre-generate the child's next story; off, plan.ready is ignored and the Session Agent
+(which has the same setting) uses the bank passage.
+Generated passages point their word clips at CLIPS_BUCKET and TTS_VERSION (the Session
+Agent's settings and defaults).
 Refuses to start with ALO_ENV=local on Cloud Run.
 """
 
@@ -15,6 +20,7 @@ from pathlib import Path
 
 import aloai_env
 import requests
+import spacy
 from aloai_events import PubSubPublisher, PushCheck, anyone, pushed_by
 from aloai_store import FirestoreStore, Store
 from fastapi import FastAPI
@@ -37,6 +43,10 @@ from .coach.clients import (
     StoryRequests,
 )
 from .coach.run import ReadingCoach
+from .generator.models import FixtureModel, Model, VertexModel
+from .generator.pipeline import Generator
+from .generator_api import router as generator_router
+from .generator_requests import NextStories
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
@@ -75,7 +85,9 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
         model_for=_coach_model(settings),
         enabled=_flag(env, "COACH_ON"),
     )
+    generator = _generator(settings, env)
     app = FastAPI(title="Alo.ai Core")
+    app.include_router(generator_router(generator, store))
     app.include_router(router(QuickGrader(store, model)))
     app.include_router(
         events_router(
@@ -84,6 +96,8 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
             coach,
             store,
             _push_check(settings),
+            # Off until the Writer + Critic evaluation set passes (and a switch on demo day).
+            NextStories(generator, store) if _flag(env, "GENERATOR_ON", "false") else None,
         )
     )
     return app
@@ -109,6 +123,22 @@ def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder
         VertexGradingModel(vertex),
         ChirpTranscriber(speech, settings.project),
         VertexEmbedder(vertex),
+    )
+
+
+def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
+    model: Model
+    if settings.ai_mode == "fixtures":
+        model = FixtureModel(RECORDED / "generator")
+    else:
+        model = VertexModel(
+            genai.Client(vertexai=True, project=settings.project, location=settings.location)
+        )
+    return Generator(
+        model=model,
+        nlp=spacy.load("en_core_web_sm"),  # once per instance, not per request
+        clips_bucket=env.get("CLIPS_BUCKET", "aloai-dev-clips"),
+        tts_version=env.get("TTS_VERSION", "v1"),
     )
 
 
@@ -144,8 +174,8 @@ def _speaker(settings: aloai_env.Config, env: Mapping[str, str]) -> Speaker:
     return ChirpSpeaker(tts, bucket, _required(env, "TTS_VOICE"))
 
 
-def _flag(env: Mapping[str, str], name: str) -> bool:
-    value = env.get(name, "true")
+def _flag(env: Mapping[str, str], name: str, default: str = "true") -> bool:
+    value = env.get(name, default)
     if value not in FLAGS:
         raise aloai_env.ConfigError(f"{name}={value!r} is not one of {sorted(FLAGS)}")
     return FLAGS[value]

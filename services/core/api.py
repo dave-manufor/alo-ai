@@ -1,7 +1,8 @@
 """Core's push subscription on aloai.session-events (SDD 11).
 
 session.done starts final grading, phase1.scored retries report assembly, report.ready
-starts the Reading Coach, and other types are ignored. Pub/Sub redelivers anything that
+starts the Reading Coach, plan.ready pre-generates the child's next story, and other
+types are ignored. Pub/Sub redelivers anything that
 is not acknowledged, so a push that is not a valid event (a type the envelope doesn't
 know included) is logged and acknowledged, and an event that can never be handled (an
 answer turn with no item, a missing document, a value aloai_scoring refuses, a report
@@ -22,6 +23,7 @@ from fastapi.responses import Response
 from jsonschema import ValidationError
 
 from .coach.run import ReadingCoach
+from .generator_requests import NextStories
 from .grader.assembly import ReportAssembler
 from .grader.final import FinalGrader
 
@@ -35,6 +37,7 @@ def events_router(
     coach: ReadingCoach,
     store: Store,
     from_pubsub: PushCheck,
+    next_stories: NextStories | None = None,
 ) -> APIRouter:
     routes = APIRouter()
 
@@ -57,6 +60,8 @@ def events_router(
                     assembler.assemble(event["session_id"])
                 case "report.ready":
                     coach.handle(event["data"])
+                case "plan.ready" if next_stories is not None:
+                    next_stories.handle(event["session_id"])
         except PERMANENT as error:
             path = park(store, event, error, datetime.now(UTC))
             log.error("parked %s at %s: %s", event["type"], path, type(error).__name__)

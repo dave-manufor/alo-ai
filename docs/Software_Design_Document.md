@@ -462,7 +462,7 @@ Public endpoints take a Firebase ID token; service-to-service calls use Cloud Ru
 |Account and Payments|`POST /internal/notify`|Reading Coach (Core)|IAM|Send a templated email (no scores)|
 |Account and Payments|`POST /v1/checkout`|Web app|ID token|Initialize a Paystack transaction, return the access code|
 |Account and Payments|`POST /webhooks/paystack`|Paystack|HMAC-SHA512 signature|Receive payment and subscription events|
-|Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent, Reading Coach|IAM|Generate and gate a passage, or return a bank fallback|
+|Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent|IAM|Generate and gate a passage and store it; a failed gate or a passed deadline is an error, and the Session Agent uses its bank passage (it never returns one)|
 |Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; the listening decision when complete|
 |Reading Scorer, Core|`POST` `/pubsub/<subscription>`|Pub/Sub push|IAM (push service account)|Event handlers (below)|
 
@@ -479,7 +479,7 @@ Deleting a child's data is by request in the sprint (`ops/delete_child.py`); `DE
 |`phase1.scored`|Reading Scorer|Core (report assembly)|`session_id`, `telemetry_ref`|
 |`session.done`|Session Agent|Core (Grader)|`session_id`, `passage_id`, `turn_audio_uris` (each with `phase`, item `index` and `part`), `capture_mode`, `session_settings`, `flags`, `reading_stopped_early`, `listening_module_run`, `listening_passage_id` (when the listening module ran). Envelope `schema_version` 2|
 |`report.ready`|Core (Grader)|Core (Reading Coach)|`session_id`, `report_ref`, `profile`, `provisional`|
-|`plan.ready`|Core (Reading Coach)|None in the hackathon (analytics later)|`session_id`, `plan_ref`, `template_used`|
+|`plan.ready`|Core (Reading Coach)|Core (Passage Generator): pre-generates the next story from `story_requests/story_{session_id}`|`session_id`, `plan_ref`, `template_used`|
 
 Every event uses one envelope: `{event_id (a UUID), type, schema_version, occurred_at, session_id, data}`. The Reading Scorer, Grader and Reading Coach derive `event_id` from the session and the type, so every publication of one session's `phase1.scored`, `report.ready` or `plan.ready` carries the same id. Paystack webhooks are handled directly by the Account and Payments service and never touch this topic.
 
