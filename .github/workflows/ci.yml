@@ -35,7 +35,8 @@ jobs:
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
             command: pytest -c services/core/pyproject.toml services/core --cov=services/core
           - suite: generator
-            install: pip install -r services/core/generator/requirements.txt pytest pytest-cov
+            # openai: the Azure adapter test imports it (Core's requirements pin the same version).
+            install: pip install -r services/core/generator/requirements.txt openai==2.54.0 pytest pytest-cov
             command: pytest -c services/core/generator/pyproject.toml services/core/generator --cov=services/core/generator
           - suite: reading_scorer
             # CPU wheels first, as the image does; silero-vad would otherwise pull the CUDA ones.
@@ -48,7 +49,8 @@ jobs:
             command: pytest -c services/session_agent/pyproject.toml services/session_agent --cov=services/session_agent
           # The account suite and image are added when services/account is on main.
           - suite: eval
-            install: pip install ./libs/aloai[dev]
+            # The evaluation sets run Core's grader and Coach, so they need Core's packages.
+            install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
             command: pytest -c eval/pyproject.toml eval
     steps:
       - uses: actions/checkout@v4
@@ -87,6 +89,8 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
+      # typecheck and lint read the generated design-system files; test and build make them too.
+      - run: npm run sync:ds
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
