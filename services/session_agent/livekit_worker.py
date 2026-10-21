@@ -29,8 +29,8 @@ from .background import Background
 from .clips.catalog import ClipCatalog
 from .clips.store import ClipStore
 from .driver import Driver, Ports
-from .machine.types import Timer
-from .passages import PassageBank, folder_bank
+from .machine.types import Profile, Timer
+from .passages import DEFAULT_BANK, PassageBank, folder_bank
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
@@ -130,19 +130,19 @@ class _Passages:
     """No Passage Generator yet (day 3): a story request falls back to the bank,
     so the session is honestly flagged FALLBACK_PASSAGE."""
 
-    def __init__(self, bank: PassageBank, passage_id: str) -> None:
-        self._bank, self._passage_id = bank, passage_id
+    def __init__(self, bank: PassageBank, passage_id: str, profile: Profile) -> None:
+        self._bank, self._passage_id, self._profile = bank, passage_id, profile
         self.driver: Driver | None = None
 
     def pair(self, passage_id: str):
-        return self._bank.pair(passage_id)
+        return self._bank.pair(passage_id, self._profile)
 
     def generate(self, with_tags: bool) -> None:
         log.info("Passage Generator not wired yet; using the bank passage")
         self.bank()
 
     def bank(self) -> None:
-        pair = self._bank.pair(self._passage_id)
+        pair = self._bank.pair(self._passage_id, self._profile)
         asyncio.get_running_loop().call_soon(
             functools.partial(self.driver.passage_arrived, pair, fallback=True)
         )
@@ -160,19 +160,24 @@ async def entrypoint(ctx: JobContext) -> None:
     start = metadata.parse(ctx.job.metadata or ctx.job.room.metadata, settings.voice_profile_id)
     log.info("session %s starting", start.ctx.session_id)
 
+    gcs = cloud.storage_client(settings.project)
+    audio_bucket = cloud.GcsBucket(gcs, settings.audio_bucket)
+    db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
+    profile = config.PROFILES[cfg.session_profile]
+    bank_passage_id = settings.bank_passage_id or DEFAULT_BANK[profile.name]
+    passages = _Passages(_bank(settings, db), bank_passage_id, profile)
+    # Fail before the child joins, not mid-session, if the fallback passage doesn't fit
+    # SESSION_PROFILE.
+    passages.pair(bank_passage_id)
+
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
     child = await ctx.wait_for_participant()
     loop = asyncio.get_running_loop()
 
-    gcs = cloud.storage_client(settings.project)
-    audio_bucket = cloud.GcsBucket(gcs, settings.audio_bucket)
-    db = cloud.FirestoreDocuments(firestore.Client(project=settings.project))
     background = Background()
     timers = _Timers(loop)
     channel = _Channel(ctx.room)
-    profile = config.PROFILES[cfg.session_profile]
     grader = _Grader(settings, cfg, profile.n_questions)
-    passages = _Passages(_bank(settings, db), settings.bank_passage_id)
 
     def upload(audio_uri: str, flac: bytes) -> None:
         bucket, name = object_name(audio_uri)

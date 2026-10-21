@@ -73,6 +73,7 @@ def test_session_protocol_fixture_messages_validate():
     assert {m["cmd"] for m in messages} == {
         "clip_list",
         "play",
+        "step",
         "show_passage",
         "hide_passage",
         "reconnecting",
@@ -172,6 +173,41 @@ def test_a_listening_passage_may_have_one_item_and_a_reading_passage_needs_two(n
     passage = _fixture(name)
     passage["items"] = passage["items"][:items]
     assert _validator("passage.schema.json").is_valid(passage) is valid
+
+
+@pytest.mark.parametrize(
+    ("name", "length_profile", "items", "valid"),
+    [
+        ("passage.bank_p3_market_day.json", "DEMO", 2, True),
+        ("passage.bank_p3_market_day.json", "DEMO", 3, False),
+        ("passage.bank_p3_market_day.json", "STANDARD", 2, False),
+        ("passage.bank_p3_market_day.json", "STANDARD", 3, True),
+        ("passage.bank_l3_rain.json", "DEMO", 1, True),
+        ("passage.bank_l3_rain.json", "DEMO", 2, False),
+        ("passage.bank_l3_rain.json", "STANDARD", 1, False),
+        ("passage.bank_l3_rain.json", "STANDARD", 2, True),
+    ],
+)
+def test_a_passage_has_exactly_the_items_its_length_profile_asks(
+    name, length_profile, items, valid
+):
+    passage = _fixture(name)
+    passage["length_profile"] = length_profile
+    passage["items"] = [passage["items"][0]] * items
+    assert _validator("passage.schema.json").is_valid(passage) is valid
+
+
+@pytest.mark.parametrize(
+    "name", ["passage.bank_p3_school_garden.json", "passage.bank_l5_before_rain.json"]
+)
+def test_standard_bank_passages_validate(name):
+    _validator("passage.schema.json").validate(_fixture(name))
+
+
+def test_a_passage_must_say_its_length_profile():
+    passage = _fixture("passage.bank_l3_rain.json")
+    del passage["length_profile"]
+    assert not _validator("passage.schema.json").is_valid(passage)
 
 
 def test_a_reading_passage_names_its_listening_passage():
@@ -287,7 +323,31 @@ def test_audio_uri_must_be_gcs():
 
 
 def test_protocol_message_with_extra_field_is_rejected():
-    message = {"schema_version": 1, "cmd": "play", "clip_id": "x", "score": 90}
+    message = {"schema_version": 2, "cmd": "play", "clip_id": "x", "score": 90}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+def test_protocol_version_1_is_rejected():
+    message = {"schema_version": 1, "cmd": "play", "clip_id": "x"}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+@pytest.mark.parametrize("leak", ["items", "propositions", "rubric", "score"])
+def test_show_passage_cannot_carry_answer_keys_or_scores(leak):
+    message = next(m for m in _fixture("session_protocol.json") if m["cmd"] == "show_passage")
+    assert not _validator("session_protocol.schema.json").is_valid({**message, leak: []})
+
+
+def test_every_clip_says_what_it_says_or_null():
+    clip_list = _fixture("session_protocol.json")[0]
+    without_text = {**clip_list, "clips": [{"clip_id": "x", "url": "u"}]}
+    assert not _validator("session_protocol.schema.json").is_valid(without_text)
+    empty_text = {**clip_list, "clips": [{"clip_id": "x", "url": "u", "text": ""}]}
+    assert not _validator("session_protocol.schema.json").is_valid(empty_text)
+
+
+def test_a_step_must_be_a_known_task():
+    message = {"schema_version": 2, "cmd": "step", "step": "SHOW_SCORE"}
     assert not _validator("session_protocol.schema.json").is_valid(message)
 
 

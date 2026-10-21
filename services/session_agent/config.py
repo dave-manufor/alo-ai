@@ -43,7 +43,7 @@ class WorkerSettings:
     voice_profile_id: str
     tts_version: str
     core_url: str  # the Grader's grade:quick lives in Core
-    bank_passage_id: str  # the bank passage used until the Passage Generator is live
+    bank_passage_id: str  # "" = the profile's default (passages.DEFAULT_BANK)
     bank_dir: str  # local only: a folder of passage.*.json files, instead of Firestore
     stt_language: str
     stt_location: str
@@ -59,7 +59,7 @@ def worker_settings(env: Mapping[str, str]) -> WorkerSettings:
         voice_profile_id=env.get("VOICE_PROFILE_ID", "vp_google_v1"),
         tts_version=env.get("TTS_VERSION", "v1"),
         core_url=env.get("CORE_URL", "http://localhost:8080"),
-        bank_passage_id=env.get("BANK_PASSAGE_ID", "bank_p3_market_day"),
+        bank_passage_id=env.get("BANK_PASSAGE_ID", ""),
         bank_dir=env.get("BANK_DIR", ""),
         # Chirp 3 has no en-NG locale (PRD 1, decision 9); the day-3 benchmark picks one.
         stt_language=env.get("STT_LANGUAGE", "en-GB"),

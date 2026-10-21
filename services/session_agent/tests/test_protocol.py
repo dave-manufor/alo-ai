@@ -1,10 +1,12 @@
 import json
+from pathlib import Path
 
 import pytest
 from services.session_agent import protocol
 from services.session_agent.machine.types import (
     ClipAck,
     HidePassage,
+    Phase,
     PlayClip,
     PlayWordClip,
     ShowPassage,
@@ -12,6 +14,8 @@ from services.session_agent.machine.types import (
     SpeakLive,
     StopRecording,
 )
+
+CONTRACTS = Path(__file__).resolve().parents[3] / "fixtures" / "contracts"
 
 
 def word_clip(index: int) -> str:
@@ -23,27 +27,65 @@ def word_clip(index: int) -> str:
     [
         (PlayClip("retell_prompt"), {"cmd": "play", "clip_id": "retell_prompt"}),
         (PlayWordClip(4), {"cmd": "play", "clip_id": "word_4"}),
-        (ShowPassage("p1"), {"cmd": "show_passage", "passage_id": "p1"}),
         (HidePassage(), {"cmd": "hide_passage"}),
         (ShowReconnecting(), {"cmd": "reconnecting"}),
     ],
 )
 def test_actions_become_schema_valid_messages(action, expected, validate):
     message = protocol.message_for(action, word_clip)
-    assert message == {"schema_version": 1, **expected}
+    assert message == {"schema_version": 2, **expected}
     validate("session_protocol.schema.json", message)
 
 
-@pytest.mark.parametrize("action", [StopRecording(), SpeakLive("retell_prompt")])
+@pytest.mark.parametrize("action", [StopRecording(), SpeakLive("retell_prompt"), ShowPassage("p1")])
 def test_other_actions_are_not_data_channel_messages(action):
     assert protocol.message_for(action, word_clip) is None
 
 
 def test_clip_list_is_schema_valid(validate):
-    message = protocol.clip_list([("greeting_1", "https://x/greeting_1.mp3")])
-    assert message["clips"] == [{"clip_id": "greeting_1", "url": "https://x/greeting_1.mp3"}]
+    message = protocol.clip_list(
+        [
+            ("retell_prompt", "https://x/retell_prompt.mp3", "Tell me the story."),
+            ("listening_story", "https://x/story.mp3", None),
+        ]
+    )
+    assert message["clips"] == [
+        {
+            "clip_id": "retell_prompt",
+            "url": "https://x/retell_prompt.mp3",
+            "text": "Tell me the story.",
+        },
+        {"clip_id": "listening_story", "url": "https://x/story.mp3", "text": None},
+    ]
     validate("session_protocol.schema.json", message)
     validate("session_protocol.schema.json", protocol.clip_list([]))
+
+
+@pytest.mark.parametrize("phase", sorted(protocol.STEPS, key=lambda p: p.value))
+def test_each_task_has_a_schema_valid_step(validate, phase):
+    message = protocol.step(phase)
+    assert message == {"schema_version": 2, "cmd": "step", "step": phase.value}
+    validate("session_protocol.schema.json", message)
+
+
+@pytest.mark.parametrize("phase", [Phase.INIT, Phase.TRANSITION])
+def test_phases_without_a_screen_send_no_step(phase):
+    assert protocol.step(phase) is None
+
+
+def test_show_passage_carries_the_story_and_no_answer_keys(validate):
+    passage = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
+    message = protocol.show_passage(passage)
+    validate("session_protocol.schema.json", message)
+    assert message["title"] == "Market Day" and message["arl"] == 3
+    assert message["sentences"] == [
+        "Ada and Mama went to the market.",
+        "Ada saw a red hat.",
+        "It cost too much.",
+        "Ada smiled and chose a blue hat.",
+    ]
+    assert " ".join(message["sentences"]) == passage["text_content"]
+    assert set(message) == {"schema_version", "cmd", "passage_id", "title", "sentences", "arl"}
 
 
 def test_encode_is_compact_json():
