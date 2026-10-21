@@ -18,6 +18,8 @@ from google import genai
 from google.api_core.exceptions import GoogleAPIError
 from google.genai import errors as genai_errors
 from google.genai import types
+from azure.core.exceptions import AzureError
+from openai import APIError as OpenAIError
 
 from .prompts import build_prompt
 
@@ -44,8 +46,10 @@ class GradingError(Exception):
 
 
 # Vertex AI or Firestore did not answer, or not in time: worth a retry, unlike a refused
-# request. The Gemini client raises httpx's own errors for a timeout.
-UpstreamErrors = (genai_errors.APIError, GoogleAPIError, httpx.HTTPError)
+# request. The Gemini client raises httpx's own errors for a timeout; the OpenAI client
+# (Azure) raises its own APIError family, a timeout and a refused connection included, and
+# Cosmos DB raises azure-core errors.
+UpstreamErrors = (genai_errors.APIError, GoogleAPIError, httpx.HTTPError, OpenAIError, AzureError)
 
 
 class GradingModel(Protocol):

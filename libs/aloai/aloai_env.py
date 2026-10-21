@@ -11,8 +11,8 @@ and CLOUD_RUN_JOB in a job; Container Apps sets CONTAINER_APP_NAME and
 CONTAINER_APP_JOB_NAME. There, ALO_ENV=local (emulators) is refused, and so are the
 recorded AI responses (AI_MODE=fixtures, the default), so a deployment that forgets
 AI_MODE=live stops at start instead of replaying recordings. On Azure the connection
-strings and keys that reach emulators (AZURE_*_CONNECTION_STRING, AZURE_COSMOS_KEY) are
-refused too: hosted services use their managed identity. A Cloud Run service also needs
+strings and keys (AZURE_*_CONNECTION_STRING, AZURE_COSMOS_KEY, AZURE_OPENAI_API_KEY,
+AZURE_SPEECH_KEY) are refused too: hosted services use their managed identity. A Cloud Run service also needs
 PUSH_SERVICE_ACCOUNT, the identity Pub/Sub pushes with, so its push route can turn away any
 other caller (aloai_events.pushed_by). PUSH_AUDIENCE, the subscription's token audience, is
 optional: set, it also refuses a token minted for another endpoint. Azure services take
@@ -31,6 +31,8 @@ AZURE_LOCAL_ONLY = (
     "AZURE_STORAGE_CONNECTION_STRING",
     "AZURE_COSMOS_KEY",
     "AZURE_SERVICEBUS_CONNECTION_STRING",
+    "AZURE_OPENAI_API_KEY",
+    "AZURE_SPEECH_KEY",
 )
 DEFAULT_LOCATION = {"gcp": "europe-west1", "azure": "swedencentral"}
 
@@ -63,6 +65,16 @@ class Config:
     event_routes: Mapping[str, tuple[str, ...]] | None = None
     # The queue this service takes its events from (Azure): core-events, scorer-events.
     event_queue: str | None = None
+    # Azure AI. Deployments name the Azure OpenAI deployment for each role (grader, quick,
+    # coach, embedding, transcribe, ...); the services reach OpenAI and Speech with their
+    # managed identity. The keys are for local runs and are refused when hosted.
+    openai_endpoint: str | None = None
+    openai_key: str | None = None
+    openai_deployments: Mapping[str, str] | None = None
+    speech_region: str | None = None
+    speech_resource_id: str | None = None
+    speech_key: str | None = None
+    speech_locale: str = "en-GB"  # PRD 5.2: the day-1 transcript check confirms or changes it
 
 
 def load(env: Mapping[str, str]) -> Config:
@@ -108,6 +120,13 @@ def load(env: Mapping[str, str]) -> Config:
         servicebus_connection_string=env.get("AZURE_SERVICEBUS_CONNECTION_STRING") or None,
         event_routes=_routes(env.get("EVENT_ROUTES")),
         event_queue=env.get("EVENT_QUEUE") or None,
+        openai_endpoint=env.get("AZURE_OPENAI_ENDPOINT") or None,
+        openai_key=env.get("AZURE_OPENAI_API_KEY") or None,
+        openai_deployments=_deployments(env.get("AZURE_OPENAI_DEPLOYMENTS")),
+        speech_region=env.get("AZURE_SPEECH_REGION") or None,
+        speech_resource_id=env.get("AZURE_SPEECH_RESOURCE_ID") or None,
+        speech_key=env.get("AZURE_SPEECH_KEY") or None,
+        speech_locale=env.get("AZURE_SPEECH_LOCALE") or "en-GB",
     )
 
 
@@ -116,6 +135,23 @@ def require_setting(value: str | None, name: str) -> str:
     if not value:
         raise ConfigError(f"{name} must be set")
     return value
+
+
+def _deployments(raw: str | None) -> Mapping[str, str] | None:
+    """AZURE_OPENAI_DEPLOYMENTS is JSON: {"grader": "gpt-4.1", "quick": "gpt-4.1-mini", ...}."""
+    if not raw:
+        return None
+    try:
+        found = json.loads(raw)
+        if not isinstance(found, dict) or not all(
+            isinstance(role, str) and isinstance(name, str) and name for role, name in found.items()
+        ):
+            raise ValueError(raw)
+    except ValueError as error:
+        raise ConfigError(
+            "AZURE_OPENAI_DEPLOYMENTS must be JSON: {role: deployment name}"
+        ) from error
+    return found
 
 
 def _routes(raw: str | None) -> Mapping[str, tuple[str, ...]] | None:

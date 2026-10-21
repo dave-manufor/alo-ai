@@ -36,7 +36,9 @@ One Docker Compose stack, three profiles: one per owner. Each person runs their 
 | `SESSION_PROFILE` | `standard`, `demo` | `standard` | `demo`: a 75-word story, 2 questions, a ~50-word listening story when triggered. In the cloud it comes from Terraform (`session_profile`). |
 | `demo_warm` | Terraform variable | n/a | The infrastructure toggle: min 1 instance on all four services from the evening before the demo. Never set locally. |
 
-`ALO_ENV=local` turns on the local-only shortcuts (no OIDC check on Pub/Sub pushes, emulator URLs for clips, fixture AI). **Every service refuses to start with `ALO_ENV=local` if `K_SERVICE` or `CLOUD_RUN_JOB` (Cloud Run) or `CONTAINER_APP_NAME` or `CONTAINER_APP_JOB_NAME` (Azure Container Apps) is set**, which those platforms always set, so these shortcuts can never reach the cloud. On Azure the emulator connections (`AZURE_STORAGE_CONNECTION_STRING`, `AZURE_COSMOS_KEY`, `AZURE_SERVICEBUS_CONNECTION_STRING`) are refused there too: a hosted service uses its managed identity.
+`ALO_ENV=local` turns on the local-only shortcuts (no OIDC check on Pub/Sub pushes, emulator URLs for clips, fixture AI). **Every service refuses to start with `ALO_ENV=local` if `K_SERVICE` or `CLOUD_RUN_JOB` (Cloud Run) or `CONTAINER_APP_NAME` or `CONTAINER_APP_JOB_NAME` (Azure Container Apps) is set**, which those platforms always set, so these shortcuts can never reach the cloud. On Azure the emulator connections and keys (`AZURE_STORAGE_CONNECTION_STRING`, `AZURE_COSMOS_KEY`, `AZURE_SERVICEBUS_CONNECTION_STRING`, `AZURE_OPENAI_API_KEY`, `AZURE_SPEECH_KEY`) are refused there too: a hosted service uses its managed identity.
+
+With `CLOUD=azure` and `AI_MODE=live` a service also reads `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENTS` (JSON, role to deployment name: `grader`, `quick`, `coach`, `embedding`, `transcribe`), `AZURE_SPEECH_REGION`, `AZURE_SPEECH_RESOURCE_ID` and `AZURE_SPEECH_LOCALE` (default `en-GB`), and Core also `AUDIO_BUCKET` (the container) and `TTS_VOICE` (an Azure voice such as `en-NG-EzinneNeural`). `AI_MODE=fixtures` needs none of them.
 
 ## Repository layout this assumes
 

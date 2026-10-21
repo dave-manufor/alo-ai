@@ -5,9 +5,9 @@ Cloud Storage (their emulators when the *_EMULATOR_HOST variables are set) and t
 events from the push route. On azure it wires Cosmos DB, Service Bus and Blob Storage and
 takes events from its own queue (EVENT_QUEUE); the push route is not mounted, because
 nothing on Azure signs a push. Both use the CPU aligner and pause finder, and by AI_MODE
-Chirp 3 and Gemini or the recorded transcripts in fixtures/ai/reading/. The live Azure
-transcribers are not built yet, so AI_MODE=live needs gcp. Refuses to start with
-ALO_ENV=local on Cloud Run or Container Apps.
+the recorded transcripts in fixtures/ai/reading/, or live: Chirp 3 and Gemini on gcp,
+Azure AI Speech and an Azure OpenAI transcription deployment on azure. Refuses to start
+with ALO_ENV=local on Cloud Run or Container Apps.
 """
 
 import os
@@ -15,7 +15,8 @@ from collections.abc import Mapping
 from pathlib import Path
 
 import aloai_env
-from aloai_blobs import open_blobs
+from aloai_azure import deployment, open_openai, recognize_words
+from aloai_blobs import Blobs, open_blobs
 from aloai_events import anyone, open_publisher, pump_lifespan, pushed_by
 from aloai_store import open_store
 from fastapi import FastAPI
@@ -25,6 +26,7 @@ from google.cloud import speech_v2
 
 from .api import event_handler, router
 from .audio import BlobAudio
+from .azure import AzureSpeechReading, OpenAIReading
 from .scorer import Phase1Scorer
 from .transcribers import (
     CHIRP_LOCATION,
@@ -39,13 +41,14 @@ RECORDED = Path(__file__).resolve().parents[2] / "fixtures" / "ai" / "reading"
 
 def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     settings = aloai_env.load(os.environ if env is None else env)
-    chirp, gemini = _transcribers(settings)
+    blobs = open_blobs(settings)
+    chirp, gemini = _transcribers(settings, blobs)
     from .timing import MmsAligner, SileroPauses  # PyTorch is installed only in the image
 
     scorer = Phase1Scorer(
         store=open_store(settings),
         publisher=open_publisher(settings),
-        audio=BlobAudio(open_blobs(settings)),
+        audio=BlobAudio(blobs),
         chirp=chirp,
         gemini=gemini,
         aligner=MmsAligner(),
@@ -67,11 +70,16 @@ def build_app(settings: aloai_env.Config, scorer: Phase1Scorer) -> FastAPI:
     return app
 
 
-def _transcribers(settings: aloai_env.Config) -> tuple[Transcriber, Transcriber]:
+def _transcribers(settings: aloai_env.Config, blobs: Blobs) -> tuple[Transcriber, Transcriber]:
+    """The two transcripts: Chirp 3 and Gemini on gcp, Azure AI Speech and an Azure OpenAI
+    transcription deployment on azure, or the recorded ones."""
     if settings.ai_mode == "fixtures":
         return FixtureReading(RECORDED, "chirp"), FixtureReading(RECORDED, "gemini")
-    if settings.cloud != "gcp":
-        raise aloai_env.ConfigError(f"AI_MODE=live is not built for CLOUD={settings.cloud} yet")
+    if settings.cloud == "azure":
+        return (
+            AzureSpeechReading(blobs, lambda pcm, phrases: recognize_words(settings, pcm, phrases)),
+            OpenAIReading(open_openai(settings), deployment(settings, "transcribe"), blobs),
+        )
     speech = speech_v2.SpeechClient(
         client_options=ClientOptions(api_endpoint=f"{CHIRP_LOCATION}-speech.googleapis.com")
     )
