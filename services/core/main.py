@@ -7,8 +7,8 @@ route. On azure it wires Cosmos DB (and its vector search for books) and Service
 events from its own queue (EVENT_QUEUE); the push route is not mounted, because nothing on
 Azure signs a push. By AI_MODE the AI is the recorded responses in fixtures/ai/, or live:
 Vertex AI, Speech-to-Text and Text-to-Speech on gcp, Azure OpenAI and Azure AI Speech on azure
-(the report then records the Azure deployments as the models used). The Passage Generator's
-live Azure model is not built yet, so a live start on azure says so.
+(the report then records the Azure deployments as the models used). The Passage Generator
+uses the "generator" deployment on azure.
 The Coach's email goes to the Account and Payments service at ACCOUNT_URL, or to the
 Firestore outbox with ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the
 template plan.
@@ -27,7 +27,7 @@ import aloai_env
 import requests
 import spacy
 from aloai_azure import deployment, open_openai, recognize_words, synthesize
-from aloai_blobs import open_blobs
+from aloai_blobs import SCHEME_OF, open_blobs
 from aloai_events import PushCheck, anyone, open_publisher, pump_lifespan, pushed_by
 from aloai_service_auth import service_token
 from aloai_store import Store, open_container, open_store
@@ -50,6 +50,7 @@ from .coach.clients import (
     StoryRequests,
 )
 from .coach.run import ReadingCoach
+from .generator.azure import AzureModel
 from .generator.models import FixtureModel, Model, VertexModel
 from .generator.pipeline import Generator
 from .generator_api import router as generator_router
@@ -195,11 +196,9 @@ def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
     model: Model
     if settings.ai_mode == "fixtures":
         model = FixtureModel(RECORDED / "generator")
+    elif settings.cloud == "azure":
+        model = AzureModel(open_openai(settings), deployment(settings, "generator"))
     else:
-        if settings.cloud != "gcp":  # the Azure model comes with the generator's adapters
-            raise aloai_env.ConfigError(
-                f"the Passage Generator's AI_MODE=live is not built for CLOUD={settings.cloud} yet"
-            )
         model = VertexModel(
             genai.Client(vertexai=True, project=settings.project, location=settings.location)
         )
@@ -208,6 +207,7 @@ def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
         nlp=spacy.load("en_core_web_sm"),  # once per instance, not per request
         clips_bucket=env.get("CLIPS_BUCKET", "aloai-dev-clips"),
         tts_version=env.get("TTS_VERSION", "v1"),
+        scheme=SCHEME_OF[settings.cloud],
     )
 
 

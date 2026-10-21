@@ -129,6 +129,34 @@ class VertexTagger:
             return NO_INTEREST
 
 
+class AzureTagger:
+    """The same tagger on Azure OpenAI (CLOUD=azure): the deployment for the role "tagger",
+    the same instructions, schema and answer check as VertexTagger."""
+
+    def __init__(self, client, deployment: str) -> None:
+        """client is an openai.AsyncOpenAI on the Azure OpenAI v1 API."""
+        self._client = client
+        self._deployment = deployment
+
+    async def tag(self, answer: str) -> Interest:
+        prompt = f"{TAGGER_INSTRUCTIONS}\n\n<child>{answer}</child>"
+        response = await self._client.chat.completions.create(
+            model=self._deployment,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": "interest", "schema": TAGGER_SCHEMA, "strict": False},
+            },
+            timeout=TAGGER_TIMEOUT_S,
+        )
+        choices = response.choices
+        try:
+            return parse_interest(json.loads(choices[0].message.content if choices else None))
+        except (TypeError, json.JSONDecodeError):
+            return NO_INTEREST
+
+
 def start_arl(child: dict | None, today: date) -> int | None:
     """PRD 6.7: a returning child starts at the last report's next_passage_arl; a first
     session at 2 x class - 1 in term 1 (September to December) and 2 x class in terms 2
