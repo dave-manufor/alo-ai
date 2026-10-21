@@ -36,9 +36,21 @@ class ModelError(Exception):
     """The model gave no usable answer for the call."""
 
 
-# Vertex AI did not answer, or not in time: worth a retry later, unlike a bad answer.
-# The Gemini client raises httpx's own errors for a timeout.
-UpstreamErrors = (genai_errors.APIError, httpx.HTTPError)
+# Vertex AI or Azure OpenAI did not answer, or not in time: worth a retry later, unlike a
+# bad answer. The Gemini client raises httpx's own errors for a timeout; the OpenAI client
+# its own APIError family (a timeout and a refused connection included).
+def _upstream_errors() -> tuple[type[Exception], ...]:
+    """Each cloud's SDK errors, for the SDKs that are installed (an image carries only its own)."""
+    errors: tuple[type[Exception], ...] = (genai_errors.APIError, httpx.HTTPError)
+    try:
+        from azure.core.exceptions import AzureError
+        from openai import APIError as OpenAIError
+    except ImportError:
+        return errors
+    return (*errors, OpenAIError, AzureError)
+
+
+UpstreamErrors = _upstream_errors()
 
 
 class Model(Protocol):
