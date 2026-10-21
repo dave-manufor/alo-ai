@@ -1,47 +1,70 @@
 import { useSyncExternalStore } from 'react';
 
-// Fixture-backed account store for the MVP UI phase. It mirrors the shape
-// the Account and Payments service will own (PRD 4.4, 12): a verified
-// guardian, a consent record, and the guardian's children. The microphone
-// and a session can never start for a child without a consent record, so
-// `addChild` refuses until consent exists. Nothing here calls a network;
-// Firebase Auth and the Account service replace this store later.
+// Fixture-backed account store for the MVP UI phase. Shapes mirror what
+// the Account and Payments service will own (PRD 4.4, 12; SDD 12):
+//   guardians/{guardian_id}, children/{child_id}, consents/{consent_id}
+// Consent is PER CHILD: the guardian attests "I am the parent or guardian
+// of [child], aged [n]" when adding that child, and the record carries
+// guardian_id and child_id so the Session Agent (mic gate) and the
+// Reading Coach can both look it up by child. A session can only start
+// for a child with a consent record from this guardian.
+//
+// TODO(live): child first names and birth years must NOT stay in
+// localStorage on a shared family phone. Live: profiles live in Firestore
+// behind security rules (guardians see only their own children); only the
+// Firebase Auth session persists in the browser.
 
 export const CONSENT_VERSION = 'consent_v1_2026-10';
 export const CONSENT_TEXT =
-  'I am the parent or guardian of the child I am adding. I agree that Alo.ai can record my child reading aloud, use the recording to make their reading report, and keep the audio for up to 90 days. Alo.ai is a screening tool that helps us practise reading.';
+  'I agree that Alo.ai can record my child reading aloud, use the recording to make their reading report, and keep the audio for up to 90 days. Alo.ai is a screening tool that helps us practise reading.';
 
 export interface Guardian {
-  id: string;
+  guardian_id: string;
   email: string;
-  signInMethod: 'google' | 'email_link';
+  sign_in_method: 'google' | 'email_link';
 }
 
 export interface ConsentRecord {
-  childScope: 'added_children';
-  textVersion: string;
-  attestedAtIso: string;
-  signInMethod: Guardian['signInMethod'];
-  verifiedEmail: string;
-  trainingOptIn: boolean;
+  consent_id: string;
+  guardian_id: string;
+  child_id: string;
+  text_version: string;
+  /** The exact attestation the guardian agreed to, naming the child. */
+  attestation: string;
+  sign_in_method: Guardian['sign_in_method'];
+  verified_email: string;
+  timestamp: string;
+  training_opt_in: boolean;
 }
 
 export interface ChildProfile {
-  id: string;
-  firstName: string;
-  primaryClass: number; // 1..6
-  birthYear: number;
-  classConfirmedYear: number;
+  child_id: string;
+  first_name: string;
+  primary_class: number; // 1..6
+  birth_year: number;
+  class_confirmed_year: number;
+}
+
+export interface Subscription {
+  guardian_id: string;
+  active: boolean;
 }
 
 export interface AccountState {
   guardian: Guardian | null;
-  consent: ConsentRecord | null;
   children: ChildProfile[];
+  /** consents/{consent_id} by child_id — one record per child. */
+  consentsByChildId: Record<string, ConsentRecord>;
+  subscription: Subscription | null;
 }
 
-const STORAGE_KEY = 'alo.fixture.account.v1';
-const emptyState: AccountState = { guardian: null, consent: null, children: [] };
+const STORAGE_KEY = 'alo.fixture.account.v2';
+const emptyState: AccountState = {
+  guardian: null,
+  children: [],
+  consentsByChildId: {},
+  subscription: null,
+};
 
 function load(): AccountState {
   try {
@@ -60,9 +83,23 @@ function setState(next: AccountState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // Storage can be unavailable (private mode); the in-memory state works.
+    // Storage can be unavailable (private mode); in-memory state still works.
   }
   listeners.forEach((listener) => listener());
+}
+
+export function attestationFor(firstName: string, age: number): string {
+  return `I am the parent or guardian of ${firstName}, aged ${age}. ${CONSENT_TEXT}`;
+}
+
+export function ageFromBirthYear(birthYear: number, now = new Date()): number {
+  return now.getFullYear() - birthYear;
+}
+
+let idCounter = 0;
+function nextId(prefix: string): string {
+  idCounter += 1;
+  return `${prefix}_sample_${Date.now()}_${idCounter}`;
 }
 
 export const accountStore = {
@@ -71,50 +108,72 @@ export const accountStore = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  /** Sample sign-in standing in for Firebase Auth (Google / email link). */
-  signIn(method: Guardian['signInMethod'], email = 'guardian@example.com') {
+  /** Completes sign-in (Google, or returning via the email link). */
+  signIn(method: Guardian['sign_in_method'], email = 'guardian@example.com') {
     setState({
       ...state,
-      guardian: { id: 'guardian_sample_001', email, signInMethod: method },
+      guardian: { guardian_id: 'guardian_sample_001', email, sign_in_method: method },
     });
   },
   signOut() {
     setState(emptyState);
   },
-  recordConsent(trainingOptIn: boolean) {
-    if (!state.guardian) throw new Error('Sign in before giving consent.');
-    const consent: ConsentRecord = {
-      childScope: 'added_children',
-      textVersion: CONSENT_VERSION,
-      attestedAtIso: new Date().toISOString(),
-      signInMethod: state.guardian.signInMethod,
-      verifiedEmail: state.guardian.email,
-      trainingOptIn,
-    };
-    setState({ ...state, consent });
-    return consent;
-  },
-  addChild(input: { firstName: string; primaryClass: number; birthYear: number }) {
-    if (!state.consent) {
-      throw new Error('Consent is needed before adding a child.');
-    }
+  /**
+   * Adds a child AND records that child's consent in one step, the way the
+   * live Add-a-child screen will. Without the attestation, nothing is saved.
+   */
+  addChildWithConsent(input: {
+    firstName: string;
+    primaryClass: number;
+    birthYear: number;
+    attested: boolean;
+    trainingOptIn: boolean;
+  }): { child: ChildProfile; consent: ConsentRecord } {
+    if (!state.guardian) throw new Error('Sign in before adding a child.');
+    if (!input.attested) throw new Error('Consent is needed before adding a child.');
     const child: ChildProfile = {
-      id: `child_sample_${Date.now()}`,
-      firstName: input.firstName.trim(),
-      primaryClass: input.primaryClass,
-      birthYear: input.birthYear,
-      classConfirmedYear: new Date().getFullYear(),
+      child_id: nextId('child'),
+      first_name: input.firstName.trim(),
+      primary_class: input.primaryClass,
+      birth_year: input.birthYear,
+      class_confirmed_year: new Date().getFullYear(),
     };
-    setState({ ...state, children: [...state.children, child] });
-    return child;
+    const consent: ConsentRecord = {
+      consent_id: nextId('consent'),
+      guardian_id: state.guardian.guardian_id,
+      child_id: child.child_id,
+      text_version: CONSENT_VERSION,
+      attestation: attestationFor(child.first_name, ageFromBirthYear(child.birth_year)),
+      sign_in_method: state.guardian.sign_in_method,
+      verified_email: state.guardian.email,
+      timestamp: new Date().toISOString(),
+      training_opt_in: input.trainingOptIn,
+    };
+    setState({
+      ...state,
+      children: [...state.children, child],
+      consentsByChildId: { ...state.consentsByChildId, [child.child_id]: consent },
+    });
+    return { child, consent };
   },
-  /** Whether a session may start: signed in, consent on file, child exists. */
-  canStartSession(childId: string) {
+  consentFor(childId: string): ConsentRecord | null {
+    const consent = state.consentsByChildId[childId];
+    if (!consent || !state.guardian) return null;
+    return consent.guardian_id === state.guardian.guardian_id ? consent : null;
+  },
+  /** The mic gate (PRD 12): signed in + this child's consent on file. */
+  canStartSession(childId: string): boolean {
+    return this.consentFor(childId) !== null;
+  },
+  hasActiveSubscription(): boolean {
     return Boolean(
-      state.guardian && state.consent && state.children.some((c) => c.id === childId),
+      state.guardian &&
+        state.subscription?.active &&
+        state.subscription.guardian_id === state.guardian.guardian_id,
     );
   },
   resetForTests() {
+    idCounter = 0;
     setState(emptyState);
   },
 };

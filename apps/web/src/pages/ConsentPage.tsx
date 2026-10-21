@@ -1,16 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CONSENT_TEXT, accountStore, useAccount } from '../account/store';
-import { Button } from '../design-system/alo';
+import { accountStore, useAccount } from '../account/store';
+import NavButton from '../design-system/NavButton';
 
-// Grown-up mode: verified guardian consent (PRD 12). The consent record
-// (text, version, timestamp, sign-in method, verified email) must exist
-// before a child can be added or the microphone can open.
+// Grown-up mode: what consent means, and the per-child records on file
+// (PRD 12). Consent itself is given per child when the child is added —
+// the attestation names that child and their age — so this page explains
+// it and shows the records; it never collects a blanket consent.
 export default function ConsentPage() {
-  const navigate = useNavigate();
-  const { guardian, consent } = useAccount();
-  const [agreed, setAgreed] = useState(false);
-  const [trainingOptIn, setTrainingOptIn] = useState(false);
+  const { guardian, children, consentsByChildId } = useAccount();
 
   if (!guardian) {
     return (
@@ -18,57 +14,61 @@ export default function ConsentPage() {
         <section className="card">
           <h1 className="title">Sign in first</h1>
           <p className="body">We need to know who is giving consent.</p>
-          <Link to="/signin">
-            <Button variant="primary" size="grown">
-              Go to sign in
-            </Button>
-          </Link>
+          <NavButton variant="primary" size="grown" to="/signin">
+            Go to sign in
+          </NavButton>
         </section>
       </main>
     );
   }
 
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!agreed) return;
-    accountStore.recordConsent(trainingOptIn);
-    navigate('/children');
-  }
-
   return (
     <main className="app-main">
-      <form className="card" onSubmit={submit}>
-        <h1 className="title">Before we start</h1>
-        <p className="body">{CONSENT_TEXT}</p>
-        <p className="body muted">
-          Using recordings to help Alo.ai learn is separate, and only if
-          you say yes here. It is off unless you turn it on.
+      <section className="card">
+        <h1 className="title">Consent, in plain words</h1>
+        <p className="body">
+          For each child you add, we ask you to agree that Alo.ai can record
+          them reading aloud, use the recording to make their reading
+          report, and keep the audio for up to 90 days. Alo.ai is a
+          screening tool that helps you practise reading.
         </p>
-        <label className="row">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(event) => setAgreed(event.target.checked)}
-          />
-          <span className="body">I am the parent or guardian, and I agree.</span>
-        </label>
-        <label className="row">
-          <input
-            type="checkbox"
-            checked={trainingOptIn}
-            onChange={(event) => setTrainingOptIn(event.target.checked)}
-          />
-          <span className="body">You may use recordings to help Alo.ai learn (optional).</span>
-        </label>
-        {consent ? (
-          <p className="body" role="status">
-            Consent saved for {consent.verifiedEmail}.
-          </p>
-        ) : null}
-        <Button variant="primary" size="grown" type="submit" disabled={!agreed}>
-          Save and continue
-        </Button>
-      </form>
+        <p className="body">
+          Letting recordings help Alo.ai learn is a separate choice for each
+          child, and it is off unless you turn it on.
+        </p>
+        <p className="body muted">
+          No reading check can start for a child until their consent is
+          saved here.
+        </p>
+      </section>
+
+      <section className="stack" aria-label="Consent records">
+        <h2 className="title">Your consent records</h2>
+        {children.length === 0 ? (
+          <p className="body">No children added yet, so no consent records yet.</p>
+        ) : (
+          children.map((child) => {
+            const consent = consentsByChildId[child.child_id];
+            return (
+              <article key={child.child_id} className="card">
+                <h3 className="title">{child.first_name}</h3>
+                {consent && accountStore.consentFor(child.child_id) ? (
+                  <p className="body muted">
+                    Consent saved {new Date(consent.timestamp).toLocaleDateString('en-GB')} ·
+                    agreed as {consent.verified_email} · recordings to help
+                    Alo.ai learn: {consent.training_opt_in ? 'yes' : 'no'}
+                  </p>
+                ) : (
+                  <p className="body">No consent on file for this child yet.</p>
+                )}
+              </article>
+            );
+          })
+        )}
+        <NavButton variant="secondary" size="grown" to="/children">
+          Back to your children
+        </NavButton>
+      </section>
     </main>
   );
 }

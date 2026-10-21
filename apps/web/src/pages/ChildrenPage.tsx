@@ -1,17 +1,25 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { accountStore, useAccount } from '../account/store';
+import {
+  accountStore,
+  ageFromBirthYear,
+  attestationFor,
+  useAccount,
+} from '../account/store';
 import { Button } from '../design-system/alo';
+import NavButton from '../design-system/NavButton';
 
-// Grown-up mode: child profiles (PRD 4.4). A child has a first name,
-// primary class and birth year. Each September the app will ask the
-// guardian to confirm the new class; the note shows when class was last
-// confirmed. Starting a check needs consent on file (PRD 12).
+// Grown-up mode: child profiles (PRD 4.4, 12). Adding a child includes
+// that child's consent: the attestation names the child and their age,
+// and the record is stored per child. Without it, nothing is saved and
+// no reading check can start for that child. Each September the app will
+// ask the guardian to confirm the new class.
 export default function ChildrenPage() {
-  const { guardian, consent, children } = useAccount();
+  const { guardian, children, consentsByChildId } = useAccount();
   const [firstName, setFirstName] = useState('');
   const [primaryClass, setPrimaryClass] = useState(3);
   const [birthYear, setBirthYear] = useState(2017);
+  const [attested, setAttested] = useState(false);
+  const [trainingOptIn, setTrainingOptIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!guardian) {
@@ -20,30 +28,9 @@ export default function ChildrenPage() {
         <section className="card">
           <h1 className="title">Sign in first</h1>
           <p className="body">Your children&apos;s profiles are tied to your sign-in.</p>
-          <Link to="/signin">
-            <Button variant="primary" size="grown">
-              Go to sign in
-            </Button>
-          </Link>
-        </section>
-      </main>
-    );
-  }
-
-  if (!consent) {
-    return (
-      <main className="app-main">
-        <section className="card">
-          <h1 className="title">One step before profiles</h1>
-          <p className="body">
-            We need your consent before you add a child or start a reading
-            check.
-          </p>
-          <Link to="/consent">
-            <Button variant="primary" size="grown">
-              Give consent
-            </Button>
-          </Link>
+          <NavButton variant="primary" size="grown" to="/signin">
+            Go to sign in
+          </NavButton>
         </section>
       </main>
     );
@@ -56,13 +43,23 @@ export default function ChildrenPage() {
       return;
     }
     try {
-      accountStore.addChild({ firstName, primaryClass, birthYear });
+      accountStore.addChildWithConsent({
+        firstName,
+        primaryClass,
+        birthYear,
+        attested,
+        trainingOptIn,
+      });
       setFirstName('');
+      setAttested(false);
+      setTrainingOptIn(false);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'We could not add that child.');
     }
   }
+
+  const trimmedName = firstName.trim();
 
   return (
     <main className="app-main">
@@ -72,23 +69,20 @@ export default function ChildrenPage() {
       </section>
 
       {children.map((child) => (
-        <article key={child.id} className="card">
-          <h2 className="title">{child.firstName}</h2>
+        <article key={child.child_id} className="card">
+          <h2 className="title">{child.first_name}</h2>
           <p className="body muted">
-            Primary {child.primaryClass} · Born {child.birthYear} · Class
-            confirmed {child.classConfirmedYear}
+            Primary {child.primary_class} · Born {child.birth_year} · Class
+            confirmed {child.class_confirmed_year}
+            {consentsByChildId[child.child_id] ? ' · Consent on file' : ''}
           </p>
           <div className="row">
-            <Link to="/session">
-              <Button variant="primary" size="grown">
-                Start a reading check
-              </Button>
-            </Link>
-            <Link to="/reports">
-              <Button variant="secondary" size="grown">
-                See reports
-              </Button>
-            </Link>
+            <NavButton variant="primary" size="grown" to={`/session/${child.child_id}`}>
+              Start a reading check
+            </NavButton>
+            <NavButton variant="secondary" size="grown" to="/reports">
+              See reports
+            </NavButton>
           </div>
         </article>
       ))}
@@ -129,12 +123,36 @@ export default function ChildrenPage() {
             onChange={(event) => setBirthYear(Number(event.target.value))}
           />
         </label>
+
+        <label className="row">
+          <input
+            type="checkbox"
+            checked={attested}
+            onChange={(event) => setAttested(event.target.checked)}
+          />
+          <span className="body">
+            {trimmedName
+              ? attestationFor(trimmedName, ageFromBirthYear(birthYear))
+              : 'I am the parent or guardian of this child. I agree that Alo.ai can record them reading aloud, use the recording to make their reading report, and keep the audio for up to 90 days.'}
+          </span>
+        </label>
+        <label className="row">
+          <input
+            type="checkbox"
+            checked={trainingOptIn}
+            onChange={(event) => setTrainingOptIn(event.target.checked)}
+          />
+          <span className="body">
+            You may use recordings to help Alo.ai learn (optional, off unless you say yes).
+          </span>
+        </label>
+
         {error ? (
           <p className="body" role="alert">
             {error}
           </p>
         ) : null}
-        <Button variant="primary" size="grown" type="submit">
+        <Button variant="primary" size="grown" type="submit" disabled={!attested || !trimmedName}>
           Add child
         </Button>
       </form>
