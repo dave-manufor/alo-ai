@@ -16,8 +16,11 @@ def word_key(clean_text: str, ipa: str | None) -> str:
     return quote(clean_text if ipa is None else f"{clean_text}~{ipa}", safe="")
 
 
-def word_clip_uri(bucket: str, voice_profile_id: str, tts_version: str) -> ClipUri:
-    prefix = f"gs://{bucket}/{voice_profile_id}/{tts_version}/words"
+def word_clip_uri(
+    bucket: str, voice_profile_id: str, tts_version: str, scheme: str = "gs"
+) -> ClipUri:
+    """scheme is gs on Google Cloud and az on Azure (the contracts accept both)."""
+    prefix = f"{scheme}://{bucket}/{voice_profile_id}/{tts_version}/words"
 
     def uri(clean_text: str, ipa: str | None) -> str:
         return f"{prefix}/{word_key(clean_text, ipa)}.mp3"

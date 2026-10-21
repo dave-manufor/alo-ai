@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import aloai_env
-from aloai_azure import speech_credentials
+from aloai_azure import deployment, open_openai_async, speech_credentials
 from aloai_blobs import SCHEME_OF, open_blobs
 from aloai_events import open_publisher
 from aloai_service_auth import service_token
@@ -217,6 +217,16 @@ def _consume_prepared(background: Background, db: Store, child_id: str) -> None:
     background.run(db.merge, f"children/{child_id}", {"next_passage_id": None})
 
 
+def _tagger(settings: config.WorkerSettings, shared: aloai_env.Config) -> generation.Tagger:
+    """The tagger for this cloud: Azure OpenAI's "tagger" deployment, or Gemini on Vertex AI."""
+    if shared.cloud == "azure":
+        return generation.AzureTagger(open_openai_async(shared), deployment(shared, "tagger"))
+    vertex = genai.Client(
+        vertexai=True, project=settings.project, location=settings.vertex_location
+    )
+    return generation.VertexTagger(vertex)
+
+
 def _story_requester(
     settings: config.WorkerSettings,
     cfg: config.Config,
@@ -228,19 +238,12 @@ def _story_requester(
 ) -> generation.StoryRequester | None:
     if cfg.ai_mode != "live" or not cfg.generator_on:
         return None
-    if shared.cloud != "gcp":  # the Azure tagger comes with the generator's adapters
-        raise aloai_env.ConfigError(
-            f"GENERATOR_ON with AI_MODE=live is not built for CLOUD={shared.cloud} yet"
-        )
-    vertex = genai.Client(
-        vertexai=True, project=settings.project, location=settings.vertex_location
-    )
     return generation.StoryRequester(
         session_id=start.ctx.session_id,
         child_ref=start.child_id,
         voice_profile_id=settings.voice_profile_id,
         length_profile=profile.name.upper(),
-        tagger=generation.VertexTagger(vertex),
+        tagger=_tagger(settings, shared),
         child=lambda: db.get(f"children/{start.child_id}"),
         client=CoreClient(
             settings.core_url, generation.PATH, PASSAGE_WAIT_MS / 1000, _id_token(settings, shared)

@@ -416,20 +416,6 @@ def test_there_is_no_story_requester_with_recorded_ai_or_the_generator_off(ai_mo
     assert _story_requester(settings, cfg, None, DEMO, BANK, None, shared) is None
 
 
-def test_a_live_generator_on_azure_is_refused_until_its_tagger_is_built():
-    import aloai_env
-    from services.session_agent import config
-    from services.session_agent.livekit_worker import _story_requester
-
-    cfg = config.Config("", "live", "cache_first", "demo", True)
-    settings = config.worker_settings({"CLOUD": "azure", "CLIPS_BASE_URL": "x"})
-    shared = aloai_env.load(
-        {"ALO_ENV": "local", "CLOUD": "azure", "AI_MODE": "live"}, receives_pushes=False
-    )
-    with pytest.raises(aloai_env.ConfigError, match="GENERATOR_ON"):
-        _story_requester(settings, cfg, None, DEMO, BANK, None, shared)
-
-
 class _Db:
     def __init__(self):
         self.merged = []

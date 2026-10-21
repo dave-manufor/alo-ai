@@ -221,7 +221,13 @@ AZURE_ENV = {
     "EVENT_QUEUE": "core-events",
     "AZURE_OPENAI_ENDPOINT": "https://aloai.openai.azure.com",
     "AZURE_OPENAI_DEPLOYMENTS": json.dumps(
-        {"grader": "gpt-4.1", "quick": "gpt-4.1-mini", "coach": "gpt-4.1", "embedding": "embed"}
+        {
+            "grader": "gpt-4.1",
+            "quick": "gpt-4.1-mini",
+            "coach": "gpt-4.1",
+            "embedding": "embed",
+            "generator": "gen",
+        }
     ),
 }
 
@@ -400,6 +406,21 @@ def test_the_generator_switch_decides_whether_plan_ready_is_acted_on(monkeypatch
     assert (next_stories is not None) is on
 
 
-def test_the_live_generator_on_azure_is_refused_until_it_is_built():
-    with pytest.raises(aloai_env.ConfigError, match="AI_MODE=live"):
-        main._generator(settings("azure", AI_MODE="live"), {})
+def test_the_generator_on_azure_uses_the_generator_deployment_and_names_az_clips(monkeypatch):
+    monkeypatch.setattr(main, "open_openai", lambda config: SimpleNamespace(client="openai"))
+    monkeypatch.setattr(main.spacy, "load", lambda name: "nlp")
+    live = settings("azure", **AZURE_ENV, AI_MODE="live")
+    generator = main._generator(live, {"CLIPS_BUCKET": "clips"})
+    assert type(generator.model).__name__ == "AzureModel"
+    assert (generator.scheme, generator.clips_bucket) == ("az", "clips")
+
+
+def test_the_generator_on_gcp_still_names_gs_clips():
+    generator = main._generator(aloai_env.load({"ALO_ENV": "local"}), {})
+    assert generator.scheme == "gs"
+
+
+def test_the_live_generator_on_azure_needs_a_generator_deployment(monkeypatch):
+    monkeypatch.setattr(main, "open_openai", lambda config: SimpleNamespace(client="openai"))
+    with pytest.raises(aloai_env.ConfigError, match="'generator'"):
+        main._generator(settings("azure", AI_MODE="live", AZURE_OPENAI_DEPLOYMENTS="{}"), {})
