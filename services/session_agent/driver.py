@@ -41,6 +41,7 @@ from .machine.types import (
     RequestPassage,
     SetFlag,
     SetLiveMode,
+    ShowPassage,
     SpeakLive,
     Start,
     StartRecording,
@@ -144,7 +145,8 @@ class Driver:
     def start(self, returning: PassagePair | None = None, live_available: bool = False) -> None:
         self.state = initial_state(self.profile, self.voice_mode)
         self.created_at = self.wall()
-        self.ports.channel.send(protocol.clip_list([(c, self.catalog.url(c)) for c in PROMPTS]))
+        prompts = [(c, self.catalog.url(c), self.catalog.text(c)) for c in PROMPTS]
+        self.ports.channel.send(protocol.clip_list(prompts))
         if returning is not None:
             self._use(returning)
         read = returning.read["passage_id"] if returning else None
@@ -160,7 +162,14 @@ class Driver:
     # ---- inputs
 
     def handle(self, event: Event) -> None:
+        before = self.state.phase
         self.state, actions = step(self.state, event)
+        if self.state.phase is not before or isinstance(event, Reconnected):
+            # The web app follows the agent's step, and clears its waiting screen on a
+            # reconnect; it never moves the session on by itself.
+            message = protocol.step(self.state.phase)
+            if message is not None:
+                self.ports.channel.send(message)
         for action in actions:
             self._run(action)
 
@@ -255,8 +264,11 @@ class Driver:
                 self.ports.timers.start(name, ms)
             case StreamClipFromStore(clip_id=clip_id):
                 url = self.catalog.url(clip_id, **self._passage_ids())
-                self.ports.channel.send(protocol.clip_list([(clip_id, url)]))
+                text = self.catalog.text(clip_id, *self._passages())
+                self.ports.channel.send(protocol.clip_list([(clip_id, url, text)]))
                 self._send({"cmd": "play", "clip_id": clip_id})
+            case ShowPassage():
+                self.ports.channel.send(protocol.show_passage(self.pair.read))
             case EndSession(status=status):
                 self._write_session(status)
                 self.on_end(status)
@@ -347,6 +359,11 @@ class Driver:
         if pair is None or pair.listening is None:
             return None
         return pair.listening["passage_id"]
+
+    def _passages(self) -> tuple[dict | None, dict | None]:
+        if self.pair is None:
+            return None, None
+        return self.pair.read, self.pair.listening
 
     def _passage_ids(self) -> dict:
         if self.pair is None:

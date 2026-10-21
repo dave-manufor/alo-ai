@@ -2,11 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "event_envelope.schema.json",
   "title": "EventEnvelope",
-  "description": "Envelope for every event on the aloai.session-events topic (SDD 11). schema_version is the version of the event's data and is pinned per type below. Producer of the session.* and phase1.recorded events: Session Agent (W2).",
+  "description": "Envelope for every event on the aloai.session-events topic (SDD 11). schema_version is the version of the event's data and is pinned per type below. Producer of the session.* and phase1.recorded events: Session Agent (W2). Producer of phase1.scored, report.ready and plan.ready: Reading Scorer, Grader and Reading Coach (W3).",
   "type": "object",
   "properties": {
     "event_id": { "type": "string", "format": "uuid" },
-    "type": { "type": "string", "enum": ["session.started", "phase1.recorded", "session.done"] },
+    "type": {
+      "type": "string",
+      "enum": ["session.started", "phase1.recorded", "session.done", "phase1.scored", "report.ready", "plan.ready"]
+    },
     "schema_version": { "type": "integer", "minimum": 1 },
     "occurred_at": { "type": "string", "format": "date-time" },
     "session_id": { "type": "string", "minLength": 1 },
@@ -26,6 +29,18 @@
     {
       "if": { "properties": { "type": { "const": "session.done" } } },
       "then": { "properties": { "schema_version": { "const": 2 }, "data": { "$ref": "session_done.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "phase1.scored" } } },
+      "then": { "properties": { "schema_version": { "const": 1 }, "data": { "$ref": "phase1_scored.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "report.ready" } } },
+      "then": { "properties": { "schema_version": { "const": 1 }, "data": { "$ref": "report_ready.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "plan.ready" } } },
+      "then": { "properties": { "schema_version": { "const": 1 }, "data": { "$ref": "plan_ready.schema.json" } } }
     }
   ]
 }

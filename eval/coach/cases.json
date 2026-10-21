@@ -1,0 +1,157 @@
+{
+  "set": "coach",
+  "about": "PRD 13.4: 10 fictional reports covering the main profiles plus provisional, LC_MISSED and missing-field cases. Each changes the demo report sess_demo_001; the profile's texts and book band follow from its code.",
+  "cases": [
+    {
+      "case_id": "c01_on_track",
+      "about": "Reads accurately at pace and understands; not provisional, so the next check is in 14 days.",
+      "profile": "ON_TRACK",
+      "provisional": false,
+      "report": {
+        "level.passage_arl": 3,
+        "level.band": "INDEPENDENT",
+        "level.reported_arl": 3,
+        "level.next_passage_arl": 4,
+        "fluency.accuracy_pct": 97.2,
+        "fluency.wcpm": 93.8,
+        "fluency.word_reading_ok": true,
+        "comprehension.reading_comprehension": 86.7,
+        "comprehension.listening_module_run": false,
+        "comprehension.listening_comprehension": null,
+        "comprehension.listening_used": false
+      }
+    },
+    {
+      "case_id": "c02_building_word_reading_provisional",
+      "about": "The demo session as reported: understands, word reading still developing, provisional."
+    },
+    {
+      "case_id": "c03_decoding_limited",
+      "about": "Understands when listening; word reading blocks reading comprehension.",
+      "profile": "DECODING_LIMITED",
+      "provisional": false,
+      "report": {
+        "level.band": "FRUSTRATION",
+        "level.reported_arl": 3,
+        "level.next_passage_arl": 2,
+        "fluency.accuracy_pct": 88.0,
+        "fluency.wcpm": 41.0,
+        "comprehension.reading_comprehension": 50.0,
+        "comprehension.listening_comprehension": 86.7
+      }
+    },
+    {
+      "case_id": "c04_fluent_needs_language_support",
+      "about": "Reads fluently; understanding is weak when reading and when listening.",
+      "profile": "FLUENT_NEEDS_LANGUAGE_SUPPORT",
+      "provisional": false,
+      "report": {
+        "level.band": "INSTRUCTIONAL",
+        "level.reported_arl": 3,
+        "level.next_passage_arl": 3,
+        "fluency.accuracy_pct": 96.5,
+        "fluency.wcpm": 92.0,
+        "fluency.word_reading_ok": true,
+        "comprehension.reading_comprehension": 45.0,
+        "comprehension.listening_comprehension": 40.0
+      }
+    },
+    {
+      "case_id": "c05_needs_support_in_both_provisional",
+      "about": "Word reading and comprehension both need support; LC is near the cut, so provisional.",
+      "profile": "NEEDS_SUPPORT_IN_BOTH",
+      "provisional": true,
+      "report": {
+        "level.band": "FRUSTRATION",
+        "level.reported_arl": 2,
+        "level.next_passage_arl": 1,
+        "fluency.accuracy_pct": 80.0,
+        "fluency.wcpm": 30.0,
+        "comprehension.reading_comprehension": 40.0,
+        "comprehension.listening_comprehension": 66.7
+      }
+    },
+    {
+      "case_id": "c06_comprehension_strategy_gap",
+      "about": "Reads fluently and understands when listening, but not when reading alone.",
+      "profile": "COMPREHENSION_STRATEGY_GAP",
+      "provisional": false,
+      "report": {
+        "level.band": "INSTRUCTIONAL",
+        "level.reported_arl": 3,
+        "level.next_passage_arl": 3,
+        "fluency.accuracy_pct": 96.0,
+        "fluency.wcpm": 88.0,
+        "fluency.word_reading_ok": true,
+        "comprehension.reading_comprehension": 50.0,
+        "comprehension.listening_comprehension": 93.3
+      }
+    },
+    {
+      "case_id": "c07_insufficient_low_audio",
+      "about": "The microphone was too quiet: no level, no WCPM, no books, and a retry in 7 days.",
+      "profile": "INSUFFICIENT_EVIDENCE",
+      "provisional": true,
+      "flags": ["LOW_AUDIO", "DEMO_PROFILE"],
+      "report": {
+        "level.band": null,
+        "level.reported_arl": null,
+        "level.approx_primary_class": null,
+        "fluency.accuracy_pct": null,
+        "fluency.wcpm": null,
+        "fluency.word_reading_ok": null,
+        "fluency.self_correction_ratio": null,
+        "prosody.reported": false,
+        "prosody.phrasing": null,
+        "prosody.overall": null
+      }
+    },
+    {
+      "case_id": "c08_lc_missed",
+      "about": "Reading comprehension was low but the listening module did not run (LC_MISSED).",
+      "profile": "INSUFFICIENT_EVIDENCE",
+      "provisional": true,
+      "flags": ["LC_MISSED", "DEMO_PROFILE"],
+      "report": {
+        "comprehension.reading_comprehension": 55.0,
+        "comprehension.listening_module_run": false,
+        "comprehension.listening_comprehension": null,
+        "comprehension.listening_used": false
+      }
+    },
+    {
+      "case_id": "c09_missing_fields",
+      "about": "No WCPM, accuracy, prosody or listening result: the Coach must not fill the gaps.",
+      "report": {
+        "fluency.accuracy_pct": null,
+        "fluency.wcpm": null,
+        "fluency.self_correction_ratio": null,
+        "prosody.reported": false,
+        "prosody.phrasing": null,
+        "prosody.overall": null,
+        "comprehension.quick_reading_comprehension": null,
+        "comprehension.quick_vs_final_item_agreement": null,
+        "comprehension.listening_comprehension": null,
+        "comprehension.listening_used": false
+      }
+    },
+    {
+      "case_id": "c10_returning_child",
+      "about": "A second check that agrees with the first, with an earlier report and plan in the history.",
+      "profile": "ON_TRACK",
+      "provisional": false,
+      "returning": true,
+      "saved_tags": ["animals", "football"],
+      "report": {
+        "level.band": "INDEPENDENT",
+        "level.reported_arl": 3,
+        "level.confirmed": true,
+        "level.next_passage_arl": 4,
+        "fluency.accuracy_pct": 98.1,
+        "fluency.wcpm": 96.4,
+        "fluency.word_reading_ok": true,
+        "comprehension.reading_comprehension": 90.0
+      }
+    }
+  ]
+}

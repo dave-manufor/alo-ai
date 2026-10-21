@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reading_report.schema.json",
+  "title": "ReadingReport",
+  "description": "Firestore reports/{session_id} (PRD 10.4, SDD 7 and 12). Producer: Grader (W3), with every number from aloai_scoring; the Reading Coach later fills parent_reporting and, when it uses the template summary, adds COACH_TEMPLATE_USED to flags. Consumer: the report screen (W1). child_id and guardian_id are what the Firestore rules check. Numbers are null where the session gave no evidence for them: no RC after a reading stopped by the kindness rule (PRD 4.3), no accuracy when no word could be scored, no level without a band, no book band for INSUFFICIENT_EVIDENCE (PRD 8). parent_reporting is null until the Reading Coach writes it.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "session_id": { "type": "string", "minLength": 1 },
+    "child_id": { "type": "string", "minLength": 1 },
+    "guardian_id": { "type": "string", "minLength": 1 },
+    "timestamp_iso": { "type": "string", "format": "date-time" },
+    "context": { "type": "string", "enum": ["HOME", "SCHOOL"] },
+    "capture_mode": { "type": "string", "enum": ["LIVE", "LOCAL_CAPTURE"] },
+    "session_settings": {
+      "type": "object",
+      "properties": {
+        "voice_mode": { "type": "string", "enum": ["cache_first", "live_first"] },
+        "session_profile": { "type": "string", "enum": ["standard", "demo"] }
+      },
+      "required": ["voice_mode", "session_profile"],
+      "additionalProperties": false
+    },
+    "primary_class": { "type": "integer", "minimum": 1, "maximum": 6 },
+    "passage": {
+      "type": "object",
+      "properties": {
+        "passage_id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "enum": ["BANK", "GENERATED"] },
+        "title": { "type": "string" },
+        "topic_tags": { "type": "array", "items": { "type": "string" }, "maxItems": 2 }
+      },
+      "required": ["passage_id", "source", "title", "topic_tags"],
+      "additionalProperties": false
+    },
+    "fluency": {
+      "type": "object",
+      "properties": {
+        "accuracy_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "wcpm": { "type": ["number", "null"], "minimum": 0 },
+        "words_attempted": { "type": "integer", "minimum": 0 },
+        "reading_seconds": { "type": "number", "minimum": 0, "maximum": 90 },
+        "self_correction_ratio": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "word_reading_ok": { "type": ["boolean", "null"] }
+      },
+      "required": ["accuracy_pct", "wcpm", "words_attempted", "reading_seconds", "self_correction_ratio", "word_reading_ok"],
+      "additionalProperties": false
+    },
+    "prosody": {
+      "type": "object",
+      "properties": {
+        "reported": { "type": "boolean" },
+        "phrasing": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "expression": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "overall": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+      },
+      "required": ["reported"],
+      "additionalProperties": false
+    },
+    "comprehension": {
+      "type": "object",
+      "properties": {
+        "reading_comprehension": { "$ref": "#/$defs/score" },
+        "retell_coverage": { "$ref": "#/$defs/share" },
+        "item_score": { "$ref": "#/$defs/share" },
+        "quick_reading_comprehension": { "$ref": "#/$defs/score" },
+        "listening_module_run": { "type": "boolean" },
+        "listening_comprehension": { "$ref": "#/$defs/score" },
+        "listening_used": { "type": "boolean" },
+        "quick_vs_final_item_agreement": { "$ref": "#/$defs/share" }
+      },
+      "required": ["reading_comprehension", "retell_coverage", "item_score", "quick_reading_comprehension", "listening_module_run", "listening_comprehension", "listening_used"],
+      "additionalProperties": false
+    },
+    "level": {
+      "type": "object",
+      "properties": {
+        "passage_arl": { "$ref": "#/$defs/arl" },
+        "band": { "type": ["string", "null"], "enum": ["INDEPENDENT", "INSTRUCTIONAL", "SUPPORTED", "FRUSTRATION", null] },
+        "reported_arl": { "oneOf": [{ "$ref": "#/$defs/arl" }, { "type": "null" }] },
+        "at_least": { "type": "boolean" },
+        "confirmed": { "type": "boolean" },
+        "next_passage_arl": { "$ref": "#/$defs/arl" },
+        "approx_primary_class": { "type": ["string", "null"] }
+      },
+      "required": ["passage_arl", "band", "reported_arl", "at_least", "confirmed", "next_passage_arl", "approx_primary_class"],
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": ["ON_TRACK", "UNDERSTANDS_BUILDING_WORD_READING", "DECODING_LIMITED", "FLUENT_NEEDS_LANGUAGE_SUPPORT", "NEEDS_SUPPORT_IN_BOTH", "COMPREHENSION_STRATEGY_GAP", "INSUFFICIENT_EVIDENCE"]
+        },
+        "provisional": { "type": "boolean" },
+        "primary_need": { "type": "string" },
+        "instructional_focus": { "type": "string" }
+      },
+      "required": ["code", "provisional", "primary_need", "instructional_focus"],
+      "additionalProperties": false
+    },
+    "recommendations": {
+      "type": "object",
+      "properties": {
+        "arl_min": { "oneOf": [{ "$ref": "#/$defs/arl" }, { "type": "null" }] },
+        "arl_max": { "oneOf": [{ "$ref": "#/$defs/arl" }, { "type": "null" }] },
+        "book_ids": { "type": "array", "items": { "type": "string" }, "maxItems": 3 }
+      },
+      "required": ["arl_min", "arl_max", "book_ids"],
+      "additionalProperties": false
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["LOW_AUDIO", "OFF_TASK", "ASSISTED", "SHORT_READING", "HIGH_UNCERTAINTY", "GRADER_DISAGREEMENT", "ASR_DISAGREEMENT", "LIVE_FALLBACK", "RECONNECTED", "DEMO_PROFILE", "LIVE_FIRST", "LC_NOT_USED", "LC_MISSED", "COACH_TEMPLATE_USED", "FALLBACK_PASSAGE"]
+      },
+      "uniqueItems": true
+    },
+    "parent_reporting": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "summary_script": { "type": "string", "minLength": 1 },
+            "home_practice": { "type": "string", "minLength": 1 }
+          },
+          "required": ["summary_script", "home_practice"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "properties": { "scoring_module": { "type": "string", "minLength": 1 } },
+      "required": ["scoring_module"],
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "required": ["schema_version", "session_id", "child_id", "guardian_id", "timestamp_iso", "context", "capture_mode", "session_settings", "primary_class", "passage", "fluency", "prosody", "comprehension", "level", "profile", "recommendations", "flags", "parent_reporting", "versions"],
+  "additionalProperties": false,
+  "$defs": {
+    "arl": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "score": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+    "share": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+  }
+}

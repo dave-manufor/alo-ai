@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from services.session_agent.clips.catalog import PROMPTS, ClipCatalog
+from services.session_agent.clips.prompts import PROMPT_TEXTS
 from services.session_agent.clips.store import ClipStore, MemoryBucket
 from services.session_agent.intents import intent
 from services.session_agent.machine.profiles import DEMO, STANDARD
@@ -168,13 +169,54 @@ def test_session_clips_are_unique_and_include_names_with_their_ipa(catalog):
     read = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
     listening = json.loads((CONTRACTS / "passage.bank_l3_rain.json").read_text())
     clips = catalog.session_clips(read, listening, 2, 1)
-    ids = [clip_id for clip_id, _ in clips]
+    ids = [clip_id for clip_id, _, _ in clips]
     assert len(ids) == len(set(ids))
     assert set(PROMPTS) <= set(ids)
     assert {"question:0", "question:1", "listening_story", "listening_item:0"} <= set(ids)
     assert "word_ada~%CB%88%C9%91%CB%90d%C9%91" in ids  # a name, with its pronunciation
-    alone = {clip_id for clip_id, _ in catalog.session_clips(read, None, 2, 1)}
+    alone = {clip_id for clip_id, _, _ in catalog.session_clips(read, None, 2, 1)}
     assert "listening_story" not in alone and "listening_item:0" not in alone
+
+
+def test_every_session_clip_says_what_kemi_says(catalog):
+    read = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
+    listening = json.loads((CONTRACTS / "passage.bank_l3_rain.json").read_text())
+    texts = {clip_id: text for clip_id, _, text in catalog.session_clips(read, listening, 2, 1)}
+    assert texts["retell_prompt"] == PROMPT_TEXTS["retell_prompt"]
+    assert texts["question:1"] == read["items"][1]["prompt_text"]
+    assert texts["listening_item:0"] == listening["items"][0]["prompt_text"]
+    assert texts["listening_story"] is None  # heard, never read
+    assert texts["word_market"] == "That word is market."
+    # A name keeps its capital.
+    assert texts["word_ada~%CB%88%C9%91%CB%90d%C9%91"] == "That word is Ada."
+    assert texts["word_it"] == "That word is it."
+    assert all(text for clip_id, text in texts.items() if clip_id != "listening_story")
+
+
+def test_question_texts_follow_the_asking_order_not_the_list_order(catalog):
+    read = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
+    shuffled = {**read, "items": list(reversed(read["items"]))}
+    assert catalog.text("question:0", shuffled) == read["items"][0]["prompt_text"]
+
+
+def test_every_prompt_has_its_text():
+    assert set(PROMPT_TEXTS) == set(PROMPTS)
+
+
+@pytest.mark.parametrize("clip_id", sorted(PROMPT_TEXTS))
+def test_prompts_keep_the_voice_rules_for_children(clip_id):
+    # Design-system README "To children": never "wrong", "no", "incorrect" or "fail",
+    # at most one exclamation mark, and nothing about scores or time.
+    text = PROMPT_TEXTS[clip_id]
+    words = {w.strip(".,!?:'").lower() for w in text.split()}
+    assert not words & {"wrong", "no", "incorrect", "fail", "score", "seconds", "timer"}
+    assert text.count("!") <= 1
+
+
+@pytest.mark.parametrize("clip_id", ["question:1", "listening_story", "word_zebra", "nonsense"])
+def test_a_clip_with_no_known_text_is_refused(catalog, clip_id):
+    with pytest.raises(ValueError, match="no text"):
+        catalog.text(clip_id)
 
 
 # ---- grade:quick client

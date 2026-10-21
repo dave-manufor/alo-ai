@@ -1,0 +1,100 @@
+"""Placing what a transcript heard against the passage (PRD 5.3).
+
+Each transcript is aligned to the passage words by edit distance, so every passage word
+gets the word heard in its place, or nothing when it was skipped, together with any
+extra words heard just before it.
+
+A child may stop anywhere (the kindness rule, the reading cap, "I'm done"), so the
+passage words after the last one reached may cost nothing: they were not attempted. That
+reading is kept only when the child said fewer words after the last one reached than the
+passage had left. Saying as many or more means the child read on to the end, and those
+words are misreadings of the passage words they stand for. A heard word only takes a
+passage word's place cheaply when it looks like an attempt at it; one that is nothing
+like it costs as much as a skip plus an extra word.
+"""
+
+import unicodedata
+from collections.abc import Sequence
+from dataclasses import dataclass
+from difflib import SequenceMatcher
+
+ATTEMPT_LIKENESS = 0.5  # [CAL] PRD 5.3: how alike a heard word must be to be a misreading
+
+
+@dataclass(frozen=True)
+class Heard:
+    text: str
+    confidence: float | None = None
+
+
+@dataclass(frozen=True)
+class Placed:
+    """What a transcript heard where one passage word belongs."""
+
+    heard: Heard | None
+    before: tuple[str, ...] = ()
+
+
+def normalize(word: str) -> str:
+    """Lowercase, without accents or punctuation, so "Jàpá," and "japa" match. A curly
+    apostrophe counts as a straight one, so "we’ll" stays "we'll"."""
+    decomposed = unicodedata.normalize("NFKD", word.lower().replace("’", "'").replace("‘", "'"))
+    return "".join(ch for ch in decomposed if ch.isalnum() or ch == "'").strip("'")
+
+
+def substitution(target: str, word: str) -> int:
+    if target == word:
+        return 0
+    return 1 if SequenceMatcher(None, target, word).ratio() >= ATTEMPT_LIKENESS else 2
+
+
+def align(passage: Sequence[str], heard: Sequence[Heard]) -> list[Placed]:
+    """passage holds normalized words. Ties keep a word matched, and reach as far into
+    the passage as the cheapest alignment allows."""
+    words = [normalize(h.text) for h in heard]
+    rows, cols = len(passage), len(words)
+    cost = [[i + j if i == 0 or j == 0 else 0 for j in range(cols + 1)] for i in range(rows + 1)]
+    for i in range(1, rows + 1):
+        for j in range(1, cols + 1):
+            cost[i][j] = min(
+                cost[i - 1][j - 1] + substitution(passage[i - 1], words[j - 1]),
+                cost[i - 1][j] + 1,
+                cost[i][j - 1] + 1,
+            )
+    reached = min(range(rows + 1), key=lambda end: (cost[end][cols], -end))
+    placed, before, said_after = _walk(passage, heard, words, cost, reached)
+    if said_after >= rows - reached > 0:
+        placed, before, _ = _walk(passage, heard, words, cost, rows)
+    return [Placed(heard=placed[k], before=tuple(before[k])) for k in range(rows)]
+
+
+def _walk(
+    passage: Sequence[str],
+    heard: Sequence[Heard],
+    words: Sequence[str],
+    cost: list[list[int]],
+    end: int,
+) -> tuple[list[Heard | None], list[list[str]], int]:
+    """The alignment that ends at passage word `end`, and how many heard words came
+    after the last passage word it reached."""
+    rows = len(passage)
+    placed: list[Heard | None] = [None] * rows
+    before: list[list[str]] = [[] for _ in range(rows)]
+    said_after = 0
+    i, j = end, len(words)
+    while i > 0 or j > 0:
+        diagonal = i > 0 and j > 0
+        if diagonal and cost[i][j] == cost[i - 1][j - 1] + substitution(
+            passage[i - 1], words[j - 1]
+        ):
+            placed[i - 1] = heard[j - 1]
+            i, j = i - 1, j - 1
+        elif i > 0 and cost[i][j] == cost[i - 1][j] + 1:
+            i -= 1
+        else:
+            if i < rows:
+                before[i].insert(0, words[j - 1])
+            if i == end:
+                said_after += 1
+            j -= 1
+    return placed, before, said_after

@@ -1,0 +1,14 @@
+# fastapi stays at 0.141.1: newer releases need opentelemetry-api 1.44 or later, and
+# google-adk 2.12 caps it at 1.42.1. The Reading Scorer has no ADK and uses 0.148.0.
+fastapi==0.141.1
+uvicorn==0.54.0
+jsonschema[format]==4.26.0
+google-genai==2.31.0
+google-cloud-firestore==2.34.1
+google-cloud-pubsub==2.43.0
+google-cloud-speech==2.41.0
+google-adk==2.12.0
+google-auth==2.62.0
+google-cloud-storage==3.17.1
+google-cloud-texttospeech==2.38.0
+requests==2.34.2
