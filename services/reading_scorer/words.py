@@ -14,8 +14,10 @@ like it costs as much as a skip plus an extra word.
 
 A child who stops near the end often says so ("I'm done", "stop"). Within the last few
 passage words that would count as reading on, so a stop phrase at the end of what was
-heard is dropped before aligning, unless its words match the passage words they are
-placed on (a passage that itself ends "...had to stop").
+heard is dropped before aligning, unless its own words match the passage words they are
+placed on (a passage that itself ends "...had to stop"). A polite word just before the
+phrase ("Auntie, I'm done") goes with it, unless it is the passage word it is placed on
+("ada met auntie", then "I'm done").
 """
 
 import unicodedata
@@ -24,9 +26,9 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 
 ATTEMPT_LIKENESS = 0.5  # [CAL] PRD 5.3: how alike a heard word must be to be a misreading
-# What the Session Agent hears as a stop (services/session_agent/intents.py; the scorer
-# image doesn't carry the agent, so tests/test_words.py keeps the two lists in step), and
-# the words a child may say with it ("I'm done, Auntie").
+# What the Session Agent hears as a stop, and the words a child may say with it
+# (services/session_agent/intents.py; the scorer image doesn't carry the agent, so
+# tests/test_words.py keeps the lists in step).
 STOP_PHRASES = ("stop", "i want to stop", "i don't want to", "i'm done", "i am done", "no more")
 POLITE = ("please", "auntie", "aunty")
 
@@ -63,15 +65,23 @@ def align(passage: Sequence[str], heard: Sequence[Heard]) -> list[Placed]:
     the passage as the cheapest alignment allows."""
     words = [normalize(h.text) for h in heard]
     placed = _align(passage, heard, words)
-    start = _stop_at_end(words)
-    if start < len(words) and not _read(passage, placed, heard[start:]):
-        return align(passage, heard[:start])
-    return placed
+    stop = _stop_at_end(words)
+    if stop is None:
+        return placed
+    start, end = stop
+    if _read(passage, placed, heard[start:end]):
+        return placed  # the phrase is the passage's own ending
+    while start and words[start - 1].replace("'", "") in POLITE:
+        if _read(passage, placed, heard[start - 1 : start]):
+            break  # "auntie" read as the passage, then "I'm done"
+        start -= 1
+    return align(passage, heard[:start])
 
 
-def _stop_at_end(words: Sequence[str]) -> int:
-    """Where a stop phrase at the end of what was heard begins, or len(words) when there
-    is none. Apostrophes are ignored, so "im done" is "i'm done"."""
+def _stop_at_end(words: Sequence[str]) -> tuple[int, int] | None:
+    """Where the stop phrase at the end of what was heard begins and ends, after any
+    polite words that follow it ("I'm done, Auntie"), or None. Apostrophes are ignored,
+    so "im done" is "i'm done"."""
     bare = [w.replace("'", "") for w in words]
     end = len(bare)
     while end and bare[end - 1] in POLITE:
@@ -80,10 +90,8 @@ def _stop_at_end(words: Sequence[str]) -> int:
     for phrase in sorted(phrases, key=len, reverse=True):  # "i want to stop" before "stop"
         start = end - len(phrase)
         if start >= 0 and bare[start:end] == phrase:
-            while start and bare[start - 1] in POLITE:
-                start -= 1
-            return start
-    return len(words)
+            return start, end
+    return None
 
 
 def _read(passage: Sequence[str], placed: Sequence[Placed], tail: Sequence[Heard]) -> bool:

@@ -91,6 +91,7 @@ def test_a_word_nothing_like_the_passage_word_still_takes_its_place_mid_passage(
         ("Ada saw a, I'm done, Auntie.", 3),
         ("ada saw a red please stop", 4),
         ("ada saw a red i want to stop", 4),
+        ("ada saw a red auntie im done", 4),
         ("ada saw a red hat i am done", 5),
     ],
 )
@@ -113,6 +114,12 @@ def test_a_passage_that_ends_in_a_stop_word_is_read_as_written():
 def test_a_stop_phrase_partly_read_as_the_passage_stays_a_reading():
     placed = align(["she", "had", "no", "money"], heard("she had no more"))
     assert [p.heard.text for p in placed] == ["she", "had", "no", "more"]
+
+
+def test_a_polite_word_read_as_the_passage_stays_when_the_stop_after_it_is_dropped():
+    placed = align(["ada", "met", "auntie", "bola"], heard("ada met auntie im done"))
+    assert [p.heard.text for p in placed[:3]] == ["ada", "met", "auntie"]
+    assert placed[3] == Placed(None)
 
 
 def test_the_stop_phrases_are_the_session_agents():
