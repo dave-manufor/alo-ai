@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "PASSAGE_NOT_FOUND",
+    "message": "No passage bank_p3_market_day for session sess_demo_001.",
+    "retryable": false
+  }
+}

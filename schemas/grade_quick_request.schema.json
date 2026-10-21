@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grade_quick_request.schema.json",
+  "title": "GradeQuickRequest",
+  "description": "Body of POST /v1/grade:quick (PRD 7.4, SDD 7). Producer of the endpoint: Grader (W3). Caller: Session Agent (W2), once for the retell and once for every scripted item, including an item the child did not answer (transcript \"\"). index is the 0-based position in the passage's items sorted by order, and 0 for the retell. A repeated call for the same session_id, turn_phase and index returns the stored result.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "session_id": { "type": "string", "minLength": 1 },
+    "passage_id": { "type": "string", "minLength": 1 },
+    "turn_phase": { "type": "string", "enum": ["RETELL", "QUESTION"] },
+    "index": { "type": "integer", "minimum": 0, "maximum": 2 },
+    "transcript": { "type": "string" }
+  },
+  "required": ["schema_version", "session_id", "passage_id", "turn_phase", "index", "transcript"],
+  "additionalProperties": false,
+  "if": { "properties": { "turn_phase": { "const": "RETELL" } } },
+  "then": { "properties": { "index": { "const": 0 } } }
+}

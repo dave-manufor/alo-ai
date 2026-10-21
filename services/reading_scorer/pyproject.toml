@@ -1,0 +1,22 @@
+[project]
+name = "aloai-reading-scorer"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Alo.ai Reading Scorer (W3)"
+
+[project.optional-dependencies]
+# httpx2, not httpx: Starlette 1.x's TestClient imports httpx2 and calls httpx deprecated.
+dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "httpx2>=2.14,<3", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+# Run from the repo root with: pytest -c services/reading_scorer/pyproject.toml services/reading_scorer
+pythonpath = ["../..", "../../libs/aloai"]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

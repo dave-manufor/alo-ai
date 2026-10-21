@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grader_output.schema.json",
+  "title": "GraderOutput",
+  "description": "What one Gemini grading pass returns for one passage (PRD 10.3, 7.2). Producer: the grading model, through the Grader (W3). Consumer: Grader reconciliation and aloai_scoring (W3). The model scores propositions and items only; every other number is computed in code. No schema_version: the model does not echo one, and the Grader records the prompt and model versions on the report.",
+  "type": "object",
+  "properties": {
+    "passage_id": { "type": "string", "minLength": 1 },
+    "propositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "credit": { "type": "number", "enum": [0, 0.5, 1] },
+          "evidence": { "type": ["string", "null"] }
+        },
+        "required": ["id", "credit", "evidence"],
+        "additionalProperties": false
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": { "type": "string", "minLength": 1 },
+          "points": { "type": "integer", "enum": [0, 1, 2] },
+          "evidence": { "type": ["string", "null"] },
+          "rationale": { "type": "string" },
+          "needs_review": { "type": "boolean" }
+        },
+        "required": ["item_id", "points", "evidence", "rationale", "needs_review"],
+        "additionalProperties": false
+      }
+    },
+    "inaccuracies": { "type": "array", "items": { "type": "string" } },
+    "miscue_tags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "token_index": { "type": "integer", "minimum": 0 },
+          "tag": { "type": "string", "enum": ["MEANING_PRESERVING", "MEANING_DISRUPTING"] }
+        },
+        "required": ["token_index", "tag"],
+        "additionalProperties": false
+      }
+    },
+    "needs_review": { "type": "boolean" }
+  },
+  "required": ["passage_id", "propositions", "items", "inaccuracies", "needs_review"],
+  "additionalProperties": false
+}
