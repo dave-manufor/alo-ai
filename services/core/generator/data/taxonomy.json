@@ -1,0 +1,17 @@
+{
+  "about": "The topic taxonomy (PRD 4.5 G1). The tags are the topic_tag.schema.json enum. The tagger maps the interest-chat answer to at most 2 of them; the Writer reads the description and the genre. A request's genre is EXPOSITORY only when every tag is factual and no genre_hint is given; otherwise NARRATIVE.",
+  "tags": [
+    { "tag": "animals", "description": "animals at home, on the farm or in the wild", "factual": true },
+    { "tag": "football", "description": "playing and watching football", "factual": false },
+    { "tag": "space", "description": "the sun, the moon, the stars and rockets", "factual": true },
+    { "tag": "food", "description": "food and cooking", "factual": false },
+    { "tag": "market", "description": "buying and selling at the market", "factual": false },
+    { "tag": "family", "description": "life at home with family", "factual": false },
+    { "tag": "school", "description": "school, classmates and learning", "factual": false },
+    { "tag": "music", "description": "songs, drums and dancing", "factual": false },
+    { "tag": "transport", "description": "cars, buses, bikes, trains and boats", "factual": false },
+    { "tag": "farming", "description": "planting, growing and harvesting crops", "factual": false },
+    { "tag": "weather", "description": "sun, rain, wind and the seasons", "factual": true },
+    { "tag": "adventure", "description": "exploring, journeys and finding things out", "factual": false }
+  ]
+}
