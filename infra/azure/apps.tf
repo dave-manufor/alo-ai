@@ -387,6 +387,10 @@ resource "azurerm_container_app_job" "book_ingest" {
       image  = var.images["book_ingest"]
       cpu    = 1
       memory = "2Gi"
+      # Without a command the Core image would start its web server and run until the timeout.
+      # Until the ingestion job exists, this embeds the catalogue with the Azure model
+      # (services/core/books/reembed.py).
+      command = ["python", "-m", "services.core.books.reembed"]
 
       dynamic "env" {
         for_each = local.env_book_ingest
@@ -411,4 +415,54 @@ resource "azurerm_static_web_app" "web" {
   sku_tier            = "Free"
   sku_size            = "Free"
   tags                = var.tags
+}
+
+# ---- Seed: the clips and the bank passages (services/session_agent/seed.py), run by hand
+# after an apply and whenever VOICE_PROFILE_ID or the passages change. It runs as the Session
+# Agent's own identity, which already may write the clips container and the documents and call
+# Speech, so it needs no roles of its own. Clips already there are never replaced.
+
+resource "azurerm_container_app_job" "seed" {
+  name                         = "${var.prefix}-seed"
+  resource_group_name          = azurerm_resource_group.main.name
+  location                     = azurerm_resource_group.main.location
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  replica_timeout_in_seconds   = 1800
+  replica_retry_limit          = 0
+  tags                         = var.tags
+
+  manual_trigger_config {
+    parallelism              = 1
+    replica_completion_count = 1
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.svc["session-agent"].id]
+  }
+
+  registry {
+    server   = azurerm_container_registry.main.login_server
+    identity = azurerm_user_assigned_identity.svc["session-agent"].id
+  }
+
+  template {
+    container {
+      name    = "seed"
+      image   = var.images["session_agent"]
+      cpu     = 1
+      memory  = "2Gi"
+      command = ["python", "-m", "services.session_agent.seed"]
+
+      dynamic "env" {
+        for_each = merge(local.env_session_agent, { TTS_VOICE = var.tts_voice })
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+    }
+  }
+
+  depends_on = [azurerm_role_assignment.rbac, azurerm_cosmosdb_sql_role_assignment.data]
 }
