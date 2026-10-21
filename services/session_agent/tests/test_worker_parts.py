@@ -11,9 +11,10 @@ from services.session_agent.clips.catalog import PROMPTS, ClipCatalog
 from services.session_agent.clips.prompts import PROMPT_TEXTS
 from services.session_agent.clips.store import ClipStore, MemoryBucket
 from services.session_agent.intents import intent
+from services.session_agent.machine.profiles import DEMO, STANDARD
 from services.session_agent.machine.types import ChildStop, MicResult, RepeatRequest
 from services.session_agent.mic_check import MicMeter, block_dbfs
-from services.session_agent.passages import PassageBank, PassageError, folder_bank
+from services.session_agent.passages import DEFAULT_BANK, PassageBank, PassageError, folder_bank
 from services.session_agent.quick_grade import FixtureQuickGrader, decision, request_body
 from services.session_agent.turns import TurnTaker
 
@@ -259,15 +260,69 @@ def test_the_fixture_grader_completes_after_the_retell_and_every_item(tmp_path):
 
 
 def test_the_bank_loads_a_reading_passage_with_its_listening_passage():
-    pair = folder_bank(CONTRACTS).pair("bank_p3_market_day")
+    pair = folder_bank(CONTRACTS).pair("bank_p3_market_day", DEMO)
     assert pair.read["mode"] == "READ" and pair.listening["passage_id"] == "bank_l3_rain"
 
 
 def test_the_bank_refuses_unknown_and_listening_passages():
     bank = folder_bank(CONTRACTS)
     with pytest.raises(PassageError, match="no passage"):
-        bank.pair("nope")
+        bank.pair("nope", DEMO)
     with pytest.raises(PassageError, match="not READ"):
-        bank.pair("bank_l3_rain")
-    lonely = PassageBank({"p": {"passage_id": "p", "mode": "READ"}}.get)
-    assert lonely.pair("p").listening is None
+        bank.pair("bank_l3_rain", DEMO)
+    lonely = {"passage_id": "p", "mode": "READ", "length_profile": "DEMO", "items": [{}, {}]}
+    assert PassageBank({"p": lonely}.get).pair("p", DEMO).listening is None
+
+
+@pytest.mark.parametrize("profile", [STANDARD, DEMO])
+def test_each_profile_has_a_default_bank_pair_that_fits_it(profile):
+    pair = folder_bank(CONTRACTS).pair(DEFAULT_BANK[profile.name], profile)
+    assert len(pair.read["items"]) == profile.n_questions
+    assert len(pair.listening["items"]) == profile.n_listening_items
+
+
+def test_the_standard_bank_pair_is_a_whole_story_at_its_level():
+    pair = folder_bank(CONTRACTS).pair("bank_p3_school_garden", STANDARD)
+    read, listening = pair.read, pair.listening
+    # PRD 4.5 blueprint for ARL 5-6: 120-150 words; a standard listening story is
+    # about 80-120 words (PRD 4.1). Checked with the generator's code gate when written.
+    assert read["arl_level"] == listening["arl_level"] == 5
+    assert 120 <= read["word_count"] <= 150 and 80 <= listening["word_count"] <= 120
+    assert [i["type"] for i in read["items"]] == ["LITERAL", "LITERAL", "INFERENTIAL"]
+    assert [i["type"] for i in listening["items"]] == ["LITERAL", "INFERENTIAL"]
+    for passage in (read, listening):
+        assert " ".join(t["text"] for t in passage["tokens"]) == passage["text_content"]
+
+
+def test_the_bank_refuses_passages_that_do_not_fit_the_session_profile():
+    # The demo bank pair asks 2 questions and 1 listening item; a standard session asks
+    # 3 and 2, so the Grader would never see the items it expects (PRD 4.5).
+    with pytest.raises(PassageError, match="is a DEMO passage; this session is standard"):
+        folder_bank(CONTRACTS).pair("bank_p3_market_day", STANDARD)
+
+
+@pytest.mark.parametrize(
+    ("read_items", "listen_items", "message"),
+    [
+        (1, 1, "p has 1 items; a demo session asks 2"),
+        (2, 2, "l has 2 items; a demo session asks 1"),
+    ],
+)
+def test_the_bank_refuses_a_pair_with_the_wrong_item_counts(read_items, listen_items, message):
+    docs = {
+        "p": {
+            "passage_id": "p",
+            "mode": "READ",
+            "length_profile": "DEMO",
+            "items": [{}] * read_items,
+            "paired_listening_passage_id": "l",
+        },
+        "l": {
+            "passage_id": "l",
+            "mode": "LISTEN",
+            "length_profile": "DEMO",
+            "items": [{}] * listen_items,
+        },
+    }
+    with pytest.raises(PassageError, match=message):
+        PassageBank(docs.get).pair("p", DEMO)
