@@ -41,7 +41,8 @@ def generator(model, nlp, clock=None):
     return Generator(
         model=model,
         nlp=nlp,
-        clip_uri=CLIP_URI,
+        clips_bucket="aloai-dev-clips",
+        tts_version="v1",
         monotonic=clock or Clock(),
         now=lambda: NOW,
     )
@@ -231,7 +232,7 @@ def test_the_contract_request_is_read_whole():
 
 
 def test_the_default_lists_and_clock_are_the_real_ones(nlp):
-    built = Generator(model=ScriptedModel({}), nlp=nlp, clip_uri=CLIP_URI)
+    built = Generator(ScriptedModel({}), nlp, "aloai-dev-clips", "v1")
     assert "femi" in built.names and built.blocklist.hits("gun") == ["gun"]
     assert built.now().tzinfo is UTC
     assert critic.CHECK_NAMES == ("items_answerable", "items_not_guessable")

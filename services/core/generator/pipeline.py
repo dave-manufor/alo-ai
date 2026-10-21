@@ -20,8 +20,7 @@ from datetime import UTC, datetime
 
 from spacy.language import Language
 
-from . import artifact, critic, data, gate, textlevel, writer
-from .artifact import ClipUri
+from . import artifact, clips, critic, data, gate, textlevel, writer
 from .data import Taxonomy
 from .detail import safe_detail
 from .gate import Check
@@ -112,7 +111,8 @@ class _Clock:
 class Generator:
     model: Model
     nlp: Language
-    clip_uri: ClipUri
+    clips_bucket: str  # the shared clip store (PRD 4.5 G5)
+    tts_version: str
     names: NameList = field(default_factory=data.names)
     blocklist: Blocklist = field(default_factory=data.blocklist)
     taxonomy: Taxonomy = field(default_factory=data.taxonomy)
@@ -187,7 +187,10 @@ class Generator:
     ) -> Generated:
         sentences = story["sentences"]
         estimated = round(textlevel.estimate_arl(textlevel.features(sentences, self.names)), 2)
-        tokens = artifact.build_tokens(sentences, self.nlp, self.names, self.clip_uri)
+        clip_uri = clips.word_clip_uri(
+            self.clips_bucket, request.voice_profile_id, self.tts_version
+        )
+        tokens = artifact.build_tokens(sentences, self.nlp, self.names, clip_uri)
         passage = {
             "schema_version": PASSAGE_SCHEMA_VERSION,
             "passage_id": passage_id,
