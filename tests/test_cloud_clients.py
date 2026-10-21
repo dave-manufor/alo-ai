@@ -202,7 +202,17 @@ class FirestoreFake:
                 stream=lambda: [SimpleNamespace(to_dict=lambda d=d: d) for d in found]
             )
 
-        return SimpleNamespace(where=where)
+        def list_documents():
+            return [
+                self.document(p)
+                for p in self.documents
+                if p.startswith(f"{name}/") and "/" not in p[len(name) + 1 :]
+            ]
+
+        return SimpleNamespace(where=where, list_documents=list_documents)
+
+    def write_option(self, exists):
+        return SimpleNamespace(exists=exists)
 
 
 def _deep_merge(base, changes):
@@ -234,6 +244,11 @@ class FirestoreDocument:
             raise AlreadyExists("exists")
         self._documents[self.path] = copy.deepcopy(data)
 
+    def delete(self, option=None):
+        if option is not None and option.exists and self.path not in self._documents:
+            raise NotFound("no such document")
+        self._documents.pop(self.path, None)
+
 
 class CosmosFake:
     """One Cosmos DB container: items by (id, partition key), etags, and the one query
@@ -258,6 +273,11 @@ class CosmosFake:
 
     def read_items(self, items):
         return [copy.deepcopy(self.items[key]) for key in items if key in self.items]
+
+    def delete_item(self, item, partition_key):
+        if (item, partition_key) not in self.items:
+            raise CosmosResourceNotFoundError(message="not found")
+        del self.items[(item, partition_key)]
 
     def create_item(self, body):
         if self.before_create:
@@ -287,6 +307,8 @@ class CosmosFake:
         assert enable_cross_partition_query is True
         self.queries.append(query)
         wanted = {p["name"]: p["value"] for p in parameters}
+        if query.startswith("SELECT VALUE c.id"):
+            return iter([i["id"] for i in self.items.values() if i["col"] == wanted["@col"]])
         path = re.findall(r'\["([^"]+)"\]', query)
         found = []
         for item in self.items.values():
@@ -371,6 +393,49 @@ def test_where_finds_the_documents_of_one_collection_with_a_matching_field(store
 
 
 # ---- Cosmos specifics
+
+
+def test_delete_removes_one_document_and_says_whether_it_was_there(store):
+    store.set("children/c", {"primary_class": 2})
+    store.set("children/d", {"primary_class": 3})
+    assert store.delete("children/c") is True
+    assert store.get("children/c") is None
+    assert store.get("children/d") == {"primary_class": 3}
+    assert store.delete("children/c") is False
+    assert store.delete("children/never") is False
+
+
+def test_delete_leaves_the_collections_under_a_document(store):
+    store.set("sessions/s1", {"status": "COMPLETE"})
+    store.set("sessions/s1/turns/t1", {"phase": "READING"})
+    assert store.delete("sessions/s1") is True
+    assert store.get("sessions/s1/turns/t1") == {"phase": "READING"}
+
+
+def test_list_paths_names_the_documents_directly_in_one_collection(store):
+    store.set("sessions/s1", {"status": "COMPLETE"})
+    store.set("sessions/s1/turns/t1", {"phase": "READING"})
+    store.set("sessions/s1/turns/t2", {"phase": "RETELL"})
+    store.set("sessions/s2/turns/t9", {"phase": "READING"})
+    store.set("sessions/s2", {"status": "STARTED"})
+    assert sorted(store.list_paths("sessions/s1/turns")) == [
+        "sessions/s1/turns/t1",
+        "sessions/s1/turns/t2",
+    ]
+    assert sorted(store.list_paths("sessions")) == ["sessions/s1", "sessions/s2"]
+    assert store.list_paths("sessions/s3/turns") == []
+
+
+def test_cosmos_lists_a_dedicated_collection_from_its_own_container():
+    docs, books = CosmosFake(), CosmosFake()
+    store = CosmosStore(docs, dedicated={"books": books})
+    store.set("books/b1", {"title": "A"})
+    store.set("children/c", {"primary_class": 2})
+    assert store.list_paths("books") == ["books/b1"]
+    assert store.list_paths("children") == ["children/c"]
+    assert store.delete("books/b1") is True
+    assert books.items == {}
+    assert len(docs.items) == 1
 
 
 def test_cosmos_keeps_a_session_and_its_turns_in_one_partition_and_a_document_in_a_wrapper():
@@ -522,6 +587,11 @@ class GcsObjectFake:
     def exists(self):
         return self._key in self._objects
 
+    def delete(self):
+        if self._key not in self._objects:
+            raise NotFound("no such object")
+        del self._objects[self._key]
+
 
 class BlobServiceFake:
     """Blob Storage as AzureBlobs uses it."""
@@ -550,6 +620,11 @@ class AzureObjectFake:
 
     def exists(self):
         return self._key in self._objects
+
+    def delete_blob(self):
+        if self._key not in self._objects:
+            raise ResourceNotFoundError("no such blob")
+        del self._objects[self._key]
 
 
 @pytest.fixture(params=["memory", "gcs", "azure"])
@@ -589,6 +664,33 @@ def test_write_if_absent_never_replaces_a_blob(blobs):
     assert store.write_if_absent(uri, b"first", "audio/mpeg") is True
     assert store.write_if_absent(uri, b"second", "audio/mpeg") is False
     assert store.read(uri) == b"first"
+
+
+def test_a_blob_is_deleted_once_and_a_blob_already_gone_is_not_an_error(blobs):
+    store, scheme = blobs
+    uri, other = _uri(scheme), _uri(scheme, "3f2b/RETELL/c3d4.flac")
+    store.write(uri, b"one", "audio/flac")
+    store.write(other, b"two", "audio/flac")
+    assert store.delete(uri) is True
+    assert store.exists(uri) is False
+    assert store.exists(other) is True
+    assert store.delete(uri) is False
+    with pytest.raises(BlobNotFound):
+        store.read(uri)
+
+
+def test_a_blob_delete_takes_only_a_blob_uri(blobs):
+    store, _ = blobs
+    with pytest.raises(ValueError):
+        store.delete("not-a-uri")
+
+
+def test_a_deleted_in_memory_blob_forgets_its_content_type():
+    store = MemoryBlobs()
+    uri = _uri("gs")
+    store.write(uri, b"one", "audio/flac")
+    store.delete(uri)
+    assert uri not in store.content_types
 
 
 def test_a_clip_name_is_used_exactly_as_given(blobs):

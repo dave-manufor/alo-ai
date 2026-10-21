@@ -31,6 +31,10 @@ class Blobs(Protocol):
 
     def exists(self, uri: str) -> bool: ...
 
+    def delete(self, uri: str) -> bool:
+        """Remove a blob. True if it was there; a blob already gone is False, not an error."""
+        ...
+
 
 def split_uri(uri: str) -> tuple[str, str, str]:
     """(scheme, bucket or container, name) of a blob URI; ValueError if it is not one."""
@@ -76,6 +80,11 @@ class MemoryBlobs:
         split_uri(uri)
         return uri in self.blobs
 
+    def delete(self, uri: str) -> bool:
+        split_uri(uri)
+        self.content_types.pop(uri, None)
+        return self.blobs.pop(uri, None) is not None
+
 
 def _only(uri: str, scheme: str) -> tuple[str, str]:
     found, container, name = split_uri(uri)
@@ -119,6 +128,15 @@ class GcsBlobs:
     def exists(self, uri: str) -> bool:
         return self._blob(uri).exists()
 
+    def delete(self, uri: str) -> bool:
+        from google.api_core.exceptions import NotFound
+
+        try:
+            self._blob(uri).delete()
+        except NotFound:
+            return False
+        return True
+
 
 class AzureBlobs:
     """Blob Storage, or Azurite when a connection string is given."""
@@ -154,6 +172,15 @@ class AzureBlobs:
 
     def exists(self, uri: str) -> bool:
         return self._blob(uri).exists()
+
+    def delete(self, uri: str) -> bool:
+        from azure.core.exceptions import ResourceNotFoundError
+
+        try:
+            self._blob(uri).delete_blob()
+        except ResourceNotFoundError:
+            return False
+        return True
 
 
 def _settings(content_type: str | None):
