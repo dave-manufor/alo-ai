@@ -1,7 +1,7 @@
 {
   "event_id": "6f1c2f0e-3a55-4a7e-9d1a-2b8c5e0a1002",
   "type": "phase1.recorded",
-  "schema_version": 1,
+  "schema_version": 2,
   "occurred_at": "2026-01-15T09:03:10Z",
   "session_id": "sess_demo_001",
   "data": {

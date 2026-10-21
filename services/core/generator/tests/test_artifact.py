@@ -85,7 +85,7 @@ def test_items_lose_the_exemplar_variety_and_gain_max_points():
 
 def test_a_whole_generated_passage_validates_against_the_schema(tokens):
     passage = {
-        "schema_version": 3,
+        "schema_version": 4,
         "passage_id": "gen_sess_demo_001",
         "title": STORY["title"],
         "mode": "READ",

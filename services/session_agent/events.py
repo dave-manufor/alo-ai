@@ -15,7 +15,7 @@ from .recording import AudioLog
 
 # The version of each event's data (schemas/event_envelope.schema.json). Must match
 # aloai_events.SCHEMA_VERSIONS (tests/test_shared_contracts.py).
-SCHEMA_VERSIONS = {"session.started": 1, "phase1.recorded": 1, "session.done": 2}
+SCHEMA_VERSIONS = {"session.started": 1, "phase1.recorded": 2, "session.done": 3}
 
 
 @dataclass(frozen=True)

@@ -15,7 +15,7 @@ from .events import SessionContext
 from .recording import Turn
 
 SCHEMA_VERSION = 1
-TURN_SCHEMA_VERSION = 2  # turns carry index and part
+TURN_SCHEMA_VERSION = 3  # turns carry index and part
 
 
 class Documents(Protocol):

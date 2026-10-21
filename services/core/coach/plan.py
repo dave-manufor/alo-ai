@@ -13,7 +13,7 @@ from aloai_store import Store
 from . import library
 from .template import default_activities, next_check_days, template_home_practice, template_summary
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 TEMPLATE_FLAG = "COACH_TEMPLATE_USED"
 
 

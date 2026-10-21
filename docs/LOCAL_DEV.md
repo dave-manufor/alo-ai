@@ -30,7 +30,8 @@ One Docker Compose stack, three profiles: one per owner. Each person runs their 
 
 | Variable | Values | Default locally | What it does |
 |---|---|---|---|
-| `AI_MODE` | `fixtures`, `live` | `fixtures` | `fixtures` answers every AI call from `fixtures/ai/` (the same files CI uses); Gemini Live is off, so the session runs in scripted-clip mode, which is also the production fallback path. `live` calls Vertex AI on the cloud project and spends from the $400. |
+| `CLOUD` | `gcp`, `azure` | `gcp` | Which cloud's clients the services build when they are not using fixtures or emulators: Google (Firestore, Pub/Sub, Cloud Storage, Vertex AI, Chirp) or Azure (Cosmos DB, Service Bus, Blob Storage, Azure OpenAI, Azure AI Speech). In the cloud it comes from Terraform; the browser never sets it. Blob references are `gs://` or `az://` to match. On Azure `VOICE_MODE` is `cache_first` only. See `docs/adr/0001-azure-as-a-second-cloud.md`. |
+| `AI_MODE` | `fixtures`, `live` | `fixtures` | `fixtures` answers every AI call from `fixtures/ai/` (the same files CI uses); Gemini Live is off, so the session runs in scripted-clip mode, which is also the production fallback path. `live` calls the AI services of the chosen `CLOUD` (Vertex AI, or Azure OpenAI and Azure AI Speech) and spends from that cloud's budget ($400 on GCP, $150 on Azure). |
 | `VOICE_MODE` | `cache_first`, `live_first` | `cache_first` | Who speaks scripted lines: pre-made clips, or Gemini Live with the clip as fallback. "That word is X." always plays from the clip. In the cloud it comes from Terraform (`voice_mode`); the browser never sets it. |
 | `SESSION_PROFILE` | `standard`, `demo` | `standard` | `demo`: a 75-word story, 2 questions, a ~50-word listening story when triggered. In the cloud it comes from Terraform (`session_profile`). |
 | `demo_warm` | Terraform variable | n/a | The infrastructure toggle: min 1 instance on all four services from the evening before the demo. Never set locally. |

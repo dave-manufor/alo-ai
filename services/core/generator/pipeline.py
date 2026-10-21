@@ -27,7 +27,8 @@ from .gate import Check
 from .models import Model, ModelError, UpstreamErrors
 from .names import Blocklist, NameList
 
-PASSAGE_SCHEMA_VERSION = 3  # passage.schema.json: exact item counts per length profile (#25)
+# passage.schema.json: exact item counts per length profile (#25); 4 accepts az:// clip URIs.
+PASSAGE_SCHEMA_VERSION = 4
 WRITER_TIMEOUT_S = 12.0  # [CAL] one Writer call, at most
 CRITIC_TIMEOUT_S = 5.0  # [CAL] each Critic call, at most
 RETRY_MIN_S = 10.0  # [CAL] the time a second attempt needs: a Writer and three Critic calls

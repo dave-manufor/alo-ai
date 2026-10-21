@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "session_id": { "type": "string", "minLength": 1 },
-    "audio_uri": { "type": "string", "pattern": "^gs://" },
+    "audio_uri": { "type": "string", "pattern": "^(gs|az)://" },
     "passage_id": { "type": "string", "minLength": 1 },
     "told_token_indices": {
       "type": "array",

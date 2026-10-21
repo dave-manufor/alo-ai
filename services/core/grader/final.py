@@ -5,7 +5,7 @@ independent Gemini 2.5 Pro passes, with a third when they disagree, and the
 reconciled credits and points are stored for report assembly. Grading already
 stored is not redone, so a redelivered event changes nothing.
 
-session.done (schema_version 2) names the passages, says whether the kindness rule
+session.done (schema_version 3) names the passages, says whether the kindness rule
 ended the reading, and gives each turn the item it answers (index) and its place among
 that item's recordings (part); the parts of a retell or an answer are heard together.
 """

@@ -141,7 +141,7 @@ def test_an_event_carries_its_types_version_and_one_id_per_session():
     assert event["event_id"] == stable_event_id("sess_demo_001", "phase1.scored")
     assert event["event_id"] != stable_event_id("sess_demo_002", "phase1.scored")
     assert event["event_id"] != stable_event_id("sess_demo_001", "report.ready")
-    assert SCHEMA_VERSIONS["session.done"] == 2
+    assert (SCHEMA_VERSIONS["phase1.recorded"], SCHEMA_VERSIONS["session.done"]) == (2, 3)
 
 
 def test_an_event_its_schema_refuses_is_never_built():
