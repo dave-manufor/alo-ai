@@ -47,7 +47,9 @@ jobs:
           - suite: session_agent
             install: pip install -r services/session_agent/requirements-dev.txt httpx2
             command: pytest -c services/session_agent/pyproject.toml services/session_agent --cov=services/session_agent --cov-fail-under=97
-          # The account suite and image are added when services/account is on main.
+          - suite: account
+            install: pip install -r services/account/requirements.txt pytest pytest-cov httpx2
+            command: pytest -c services/account/pyproject.toml services/account --cov=services/account --cov-fail-under=100
           - suite: eval
             # The evaluation sets run Core's grader and Coach, so they need Core's packages.
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
@@ -123,6 +125,9 @@ jobs:
           - image: core
             dockerfile: services/core/Dockerfile
             check: python -c "import services.core.main"
+          - image: account
+            dockerfile: services/account/Dockerfile
+            check: python -c "import services.account.main"
           - image: reading_scorer
             dockerfile: services/reading_scorer/Dockerfile
             check: python -c "import services.reading_scorer.main"
