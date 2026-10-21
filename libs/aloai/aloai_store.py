@@ -44,6 +44,15 @@ class Store(Protocol):
 
     def where(self, collection: str, field: str, value: Any) -> list[dict]: ...
 
+    def delete(self, path: str) -> bool:
+        """Remove one document, not the collections under it. True if it existed."""
+        ...
+
+    def list_paths(self, collection: str) -> list[str]:
+        """The paths of the documents directly in a collection, such as
+        "sessions/s1/turns", whatever they hold."""
+        ...
+
 
 def require(store: Store, path: str) -> dict:
     document = store.get(path)
@@ -82,6 +91,17 @@ class MemoryStore:
             if path.startswith(prefix)
             and "/" not in path[len(prefix) :]
             and doc.get(field) == value
+        ]
+
+    def delete(self, path: str) -> bool:
+        return self.docs.pop(path, None) is not None
+
+    def list_paths(self, collection: str) -> list[str]:
+        prefix = f"{collection}/"
+        return [
+            path
+            for path in self.docs
+            if path.startswith(prefix) and "/" not in path[len(prefix) :]
         ]
 
 
@@ -128,6 +148,18 @@ class FirestoreStore:
 
         query = self._client.collection(collection).where(filter=FieldFilter(field, "==", value))
         return [snapshot.to_dict() for snapshot in query.stream()]
+
+    def delete(self, path: str) -> bool:
+        from google.api_core.exceptions import NotFound
+
+        try:
+            self._client.document(path).delete(option=self._client.write_option(exists=True))
+        except NotFound:
+            return False
+        return True
+
+    def list_paths(self, collection: str) -> list[str]:
+        return [reference.path for reference in self._client.collection(collection).list_documents()]
 
 
 class CosmosStore:
@@ -231,6 +263,26 @@ class CosmosStore:
                 enable_cross_partition_query=True,
             )
         )
+
+    def delete(self, path: str) -> bool:
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError
+
+        item_id, partition = self._key(path)
+        try:
+            self._container(path).delete_item(item=item_id, partition_key=partition)
+        except CosmosResourceNotFoundError:
+            return False
+        return True
+
+    def list_paths(self, collection: str) -> list[str]:
+        container = self._dedicated.get(collection.partition("/")[0], self._docs)
+        ids = container.query_items(
+            query="SELECT VALUE c.id FROM c WHERE c.col = @col",
+            parameters=[{"name": "@col", "value": collection}],
+            enable_cross_partition_query=True,
+        )
+        # An item id is its path with "/" written as "|" (_key refuses a path that has one).
+        return [item_id.replace("|", "/") for item_id in ids]
 
 
 def open_store(config: Config) -> Store:  # pragma: no cover - builds a real client
