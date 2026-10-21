@@ -47,3 +47,17 @@ output "openai_deployments" {
 output "servicebus_queues" {
   value = sort(tolist(local.queues))
 }
+
+output "web_url" {
+  description = "The web app's address. Register web_redirect_uri as the single-page-app redirect URI of the Entra app registration (README.md)."
+  value       = "https://${azurerm_static_web_app.web.default_host_name}"
+}
+
+output "web_redirect_uri" {
+  value = "https://${azurerm_static_web_app.web.default_host_name}/signin"
+}
+
+output "web_app_name" {
+  description = "The Static Web Apps resource CI deploys to."
+  value       = azurerm_static_web_app.web.name
+}

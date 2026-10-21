@@ -166,3 +166,13 @@ variable "budget_start" {
   type        = string
   default     = "2026-10-01T00:00:00Z"
 }
+
+variable "web_location" {
+  description = "Region for the Static Web Apps resource. It is offered in few regions; West Europe is the EU one. The site itself is served from Azure's edge."
+  type        = string
+  default     = "westeurope"
+  validation {
+    condition     = var.web_location == "westeurope"
+    error_message = "web_location must be westeurope, the EU region Static Web Apps is offered in."
+  }
+}
