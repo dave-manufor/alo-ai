@@ -49,7 +49,15 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
 ## Order of work
 
 1. Contracts and docs (this PR).
-2. Shared library seams: `CLOUD` in `aloai_env`, `Blobs`, `CosmosStore`, `ServiceBusPublisher`, service-to-service tokens, with the existing Store and Publisher contract tests run over every backend.
+2. Shared library seams (`libs/aloai`, W3's area). Built:
+   - `aloai_env`: `CLOUD`, a `hosted` check that sees Container Apps as well as Cloud Run (so the hard rule 8 guards hold on Azure), the Azure resource settings, and `EVENT_ROUTES`.
+   - `aloai_blobs`: `Blobs` with `MemoryBlobs`, `GcsBlobs` and `AzureBlobs`, and one `BlobNotFound` on every backend.
+   - `aloai_store`: `CosmosStore` beside `FirestoreStore`. Items are `{id, pk, col, d}`; `merge` retries under the etag, so it keeps Firestore's merge behaviour.
+   - `aloai_events`: `ServiceBusPublisher`, `QueuePump` and `pump_once`. A handler that returns completes the message and one that raises abandons it, so Service Bus redelivers it and then dead-letters it, as Pub/Sub does. `infra/events.json` is the queue-to-event-type table that Terraform turns into queues and into `EVENT_ROUTES`.
+   - `aloai_service_auth` (not `aloai_authz`, which is agent authorization): `google_caller` (what `pushed_by` now wraps), `entra_caller`, and `service_token`.
+   - One store contract and one blob contract run against every backend.
+   - Each cloud's SDK is imported only inside its own classes, and `libs/aloai/pyproject.toml` has the extras `[gcp]` and `[azure]`.
+   - Cosmos DB limits to plan for: one container `docs` (partition key `/pk`) and one `books` with a vector path.
 3. Event handling split into one `handle(event)` used by the Pub/Sub push route and the Service Bus pump.
 4. AI adapters, split by owner, each with its evaluation result.
 5. `infra/azure/` Terraform.

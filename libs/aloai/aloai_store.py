@@ -1,18 +1,30 @@
-"""Firestore documents for the Alo.ai services (SDD 12).
+"""Documents for the Alo.ai services (SDD 12): Firestore on GCP, Cosmos DB on Azure.
 
 Paths are full document paths such as "sessions/{session_id}". FirestoreStore talks
-to Firestore, or to its emulator when FIRESTORE_EMULATOR_HOST is set; MemoryStore
-stands in for it in tests. merge works as Firestore's set(merge=True): nested maps are
+to Firestore, or to its emulator when FIRESTORE_EMULATOR_HOST is set; CosmosStore talks to
+Cosmos DB for NoSQL; MemoryStore stands in for both in tests. Each cloud's SDK is imported
+only when its store is used. merge works as Firestore's set(merge=True): nested maps are
 merged field by field, and any other value, a list included, is replaced.
+
+CosmosStore keeps each document in an item {"id", "pk", "col", "d"}: id is the path with "/"
+as "|" (Cosmos ids cannot hold "/"), pk is the top-level document ("sessions/{id}", so a
+session and its turns share a partition), col is the collection the document is in (so
+where() can find it), and d is the document itself, apart from the keys Cosmos adds. A
+collection in `dedicated` (books, which has a vector index) lives in its own container.
 """
 
 import copy
-from collections.abc import Sequence
-from typing import Any, Protocol
+import re
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Protocol
 
-from google.api_core.exceptions import AlreadyExists
-from google.cloud import firestore
-from google.cloud.firestore_v1.base_query import FieldFilter
+from aloai_env import Config, require_setting
+
+if TYPE_CHECKING:
+    from google.cloud import firestore
+
+MERGE_ATTEMPTS = 8
+FIELD_PATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 
 
 class Store(Protocol):
@@ -84,7 +96,7 @@ def _merged(base: dict, changes: dict) -> dict:
 
 
 class FirestoreStore:
-    def __init__(self, client: firestore.Client) -> None:
+    def __init__(self, client: "firestore.Client") -> None:
         self._client = client
 
     def get(self, path: str) -> dict | None:
@@ -103,6 +115,8 @@ class FirestoreStore:
         self._client.document(path).set(data, merge=True)
 
     def create(self, path: str, data: dict) -> bool:
+        from google.api_core.exceptions import AlreadyExists
+
         try:
             self._client.document(path).create(data)
         except AlreadyExists:
@@ -110,5 +124,133 @@ class FirestoreStore:
         return True
 
     def where(self, collection: str, field: str, value: Any) -> list[dict]:
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
         query = self._client.collection(collection).where(filter=FieldFilter(field, "==", value))
         return [snapshot.to_dict() for snapshot in query.stream()]
+
+
+class CosmosStore:
+    def __init__(self, docs, dedicated: Mapping[str, Any] | None = None) -> None:
+        """docs and each dedicated container are azure.cosmos ContainerProxy objects, with
+        partition key /pk."""
+        self._docs = docs
+        self._dedicated = dict(dedicated or {})
+
+    def _container(self, path: str):
+        return self._dedicated.get(path.partition("/")[0], self._docs)
+
+    @staticmethod
+    def _key(path: str) -> tuple[str, str]:
+        """(item id, partition key) of a document path."""
+        parts = path.split("/")
+        if len(parts) % 2 or not all(parts) or "|" in path:
+            raise ValueError(f"not a document path: {path!r}")
+        return "|".join(parts), "/".join(parts[:2])
+
+    def _item(self, path: str, data: dict) -> dict:
+        item_id, partition = self._key(path)
+        return {"id": item_id, "pk": partition, "col": path.rpartition("/")[0], "d": data}
+
+    def get(self, path: str) -> dict | None:
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError
+
+        item_id, partition = self._key(path)
+        try:
+            return self._container(path).read_item(item=item_id, partition_key=partition)["d"]
+        except CosmosResourceNotFoundError:
+            return None
+
+    def get_many(self, paths: Sequence[str]) -> list[dict | None]:
+        by_container: dict[int, tuple[Any, list[tuple[str, str]]]] = {}
+        for path in paths:
+            container = self._container(path)
+            by_container.setdefault(id(container), (container, []))[1].append(self._key(path))
+        found: dict[str, dict] = {}
+        for container, keys in by_container.values():
+            for item in container.read_items(items=keys):
+                found[item["id"]] = item["d"]
+        return [found.get(self._key(path)[0]) for path in paths]
+
+    def set(self, path: str, data: dict) -> None:
+        self._container(path).upsert_item(self._item(path, copy.deepcopy(data)))
+
+    def merge(self, path: str, data: dict) -> None:
+        """Read, merge and write back under the item's etag, again if another writer got
+        in between, so two merges to one document never drop each other's fields."""
+        from azure.core import MatchConditions
+        from azure.cosmos.exceptions import (
+            CosmosAccessConditionFailedError,
+            CosmosResourceExistsError,
+            CosmosResourceNotFoundError,
+        )
+
+        item_id, partition = self._key(path)
+        container = self._container(path)
+        for _ in range(MERGE_ATTEMPTS):
+            try:
+                current = container.read_item(item=item_id, partition_key=partition)
+            except CosmosResourceNotFoundError:
+                try:
+                    container.create_item(self._item(path, copy.deepcopy(data)))
+                    return
+                except CosmosResourceExistsError:
+                    continue
+            item = self._item(path, _merged(current["d"], copy.deepcopy(data)))
+            try:
+                container.replace_item(
+                    item=item_id,
+                    body=item,
+                    etag=current["_etag"],
+                    match_condition=MatchConditions.IfNotModified,
+                )
+                return
+            except CosmosAccessConditionFailedError:
+                continue
+        raise RuntimeError(f"could not merge into {path}: too many concurrent writers")
+
+    def create(self, path: str, data: dict) -> bool:
+        from azure.cosmos.exceptions import CosmosResourceExistsError
+
+        try:
+            self._container(path).create_item(self._item(path, copy.deepcopy(data)))
+        except CosmosResourceExistsError:
+            return False
+        return True
+
+    def where(self, collection: str, field: str, value: Any) -> list[dict]:
+        if not FIELD_PATH.match(field):
+            raise ValueError(f"not a field path: {field!r}")
+        column = "c.d" + "".join(f'["{part}"]' for part in field.split("."))
+        container = self._dedicated.get(collection.partition("/")[0], self._docs)
+        parameters = [{"name": "@col", "value": collection}, {"name": "@value", "value": value}]
+        return list(
+            container.query_items(
+                query=f"SELECT VALUE c.d FROM c WHERE c.col = @col AND {column} = @value",
+                parameters=parameters,
+                enable_cross_partition_query=True,
+            )
+        )
+
+
+def open_store(config: Config) -> Store:  # pragma: no cover - builds a real client
+    """The document store for this cloud. Google picks up Application Default Credentials
+    (or FIRESTORE_EMULATOR_HOST); Azure uses the managed identity, or the emulator's key."""
+    if config.cloud == "gcp":
+        from google.cloud import firestore
+
+        return FirestoreStore(firestore.Client(project=config.project))
+    from azure.cosmos import CosmosClient
+
+    endpoint = require_setting(config.cosmos_endpoint, "AZURE_COSMOS_ENDPOINT")
+    if config.cosmos_key:
+        client = CosmosClient(endpoint, config.cosmos_key, connection_verify=False)
+    else:
+        from azure.identity import DefaultAzureCredential
+
+        client = CosmosClient(endpoint, DefaultAzureCredential())
+    database = client.get_database_client(config.cosmos_database)
+    return CosmosStore(
+        database.get_container_client("docs"),
+        {"books": database.get_container_client("books")},
+    )
