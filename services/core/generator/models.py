@@ -12,11 +12,9 @@ from pathlib import Path
 from typing import Protocol
 
 import httpx
-from azure.core.exceptions import AzureError
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
-from openai import APIError as OpenAIError
 
 FLASH = "gemini-2.5-flash"
 
@@ -41,7 +39,18 @@ class ModelError(Exception):
 # Vertex AI or Azure OpenAI did not answer, or not in time: worth a retry later, unlike a
 # bad answer. The Gemini client raises httpx's own errors for a timeout; the OpenAI client
 # its own APIError family (a timeout and a refused connection included).
-UpstreamErrors = (genai_errors.APIError, httpx.HTTPError, OpenAIError, AzureError)
+def _upstream_errors() -> tuple[type[Exception], ...]:
+    """Each cloud's SDK errors, for the SDKs that are installed (an image carries only its own)."""
+    errors: tuple[type[Exception], ...] = (genai_errors.APIError, httpx.HTTPError)
+    try:
+        from azure.core.exceptions import AzureError
+        from openai import APIError as OpenAIError
+    except ImportError:
+        return errors
+    return (*errors, OpenAIError, AzureError)
+
+
+UpstreamErrors = _upstream_errors()
 
 
 class Model(Protocol):
