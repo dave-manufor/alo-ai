@@ -4,3 +4,5 @@ wordfreq==3.1.1
 jsonschema==4.26.0
 # The small English model spaCy uses for the phrase boundaries (PRD 4.5 G3).
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# The Writer and the Critic call Gemini on Vertex AI (same pin as Core).
+google-genai==2.31.0

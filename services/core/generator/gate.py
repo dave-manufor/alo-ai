@@ -1,7 +1,7 @@
 """Step G4: the code checks of the generation gate (PRD 4.5), with no LLM.
 
-The two Critic calls (items answerable, items not guessable) come later and run only
-when these pass. Every check runs, so the failed ones can all go back to the Writer as
+The Critic (critic.py: items answerable, items not guessable) runs only when these
+pass. Every check runs, so the failed ones can all go back to the Writer as
 feedback in one retry. Each result is a name, a pass or fail, and a reason; the names are
 the keys of the passage's generation.gate_results.
 

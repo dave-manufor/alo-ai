@@ -2,7 +2,7 @@
 name = "aloai-passage-generator"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "Alo.ai Passage Generator (W2): the code gate, the artifact builder and, later, the Writer and Critic"
+description = "Alo.ai Passage Generator (W2): the Story Writer + Critic loop, the code gate and the artifact builder"
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<9", "pytest-cov>=5,<8", "ruff>=0.6"]

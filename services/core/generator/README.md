@@ -1,6 +1,6 @@
 # Passage Generator (W2)
 
-PRD 4.5, SDD 5. This folder holds the generator's code. So far it has the parts that need no model:
+PRD 4.5, SDD 5. This folder holds the generator's code. It has the code steps and, behind recorded responses in CI, the model steps:
 
 | Module | Does | PRD |
 |---|---|---|
@@ -11,9 +11,14 @@ PRD 4.5, SDD 5. This folder holds the generator's code. So far it has the parts 
 | `gate.py` | The nine code checks of the generation gate; each returns a name, pass or fail, and a reason | 4.5 G4 |
 | `detail.py` | Re-checks the safe detail from the interest chat before the Writer sees it | 4.5 G1 |
 | `names.py`, `text.py` | The name list and blocklist types; the clip store's word rule | 4.5, 4.6 |
+| `writer.py` | The Story Writer: the prompt, its output schema and one Gemini Flash call | 4.5 G2 |
+| `critic.py` | The Critic: A answers from the story, B from the title and questions only (in parallel), C scores both against the rubrics | 4.5 G4 |
+| `pipeline.py` | The loop: detail check, Writer, code gate, Critic, one retry inside the deadline, the passage document; `choose_listening` | 4.5, SDD 5 |
+| `models.py` | Gemini on Vertex AI, or the recorded responses in `fixtures/ai/generator/` (`AI_MODE=fixtures`) | 4.5 |
+| `clips.py` | Word clip URIs in the shared clip store, with the Session Agent's key rule | 4.5 G5 |
 | `data.py`, `data/` | The curated names with IPA, the blocklist and the topic taxonomy, and their loaders | 4.5, 4.6 |
 
-The Writer, the Critic calls, the clip synthesis and the HTTP endpoint come in later PRs.
+Making the missing clips (G5), storing the passage and the HTTP endpoint in Core come in later PRs.
 
 **The name IPA is a draft.** PRD 4.6 says each name is checked by ear in the voice before it is used. Once text-to-speech is available, listen to every entry in `data/names.json` and remove any name that still sounds wrong.
 
@@ -25,4 +30,4 @@ uv pip install --python services/core/generator/.venv/bin/python -r services/cor
 services/core/generator/.venv/bin/python -m pytest -c services/core/generator/pyproject.toml services/core/generator
 ```
 
-No cloud access is needed. Nothing here calls a model.
+No cloud access is needed: the tests use scripted and recorded model answers.
