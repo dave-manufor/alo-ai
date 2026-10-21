@@ -2,6 +2,7 @@
 livekit-agents==1.8.8
 livekit-plugins-silero==1.8.8
 livekit-plugins-google==1.8.8
+google-genai==2.31.0
 google-cloud-storage==3.17.1
 google-cloud-firestore==2.34.1
 google-cloud-pubsub==2.43.0
