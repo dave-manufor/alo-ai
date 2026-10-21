@@ -114,6 +114,7 @@ class Generator:
     nlp: Language
     clips_bucket: str  # the shared clip store (PRD 4.5 G5)
     tts_version: str
+    scheme: str = "gs"  # gs on Google Cloud, az on Azure: how the word clips are named
     names: NameList = field(default_factory=data.names)
     blocklist: Blocklist = field(default_factory=data.blocklist)
     taxonomy: Taxonomy = field(default_factory=data.taxonomy)
@@ -189,7 +190,7 @@ class Generator:
         sentences = story["sentences"]
         estimated = round(textlevel.estimate_arl(textlevel.features(sentences, self.names)), 2)
         clip_uri = clips.word_clip_uri(
-            self.clips_bucket, request.voice_profile_id, self.tts_version
+            self.clips_bucket, request.voice_profile_id, self.tts_version, self.scheme
         )
         tokens = artifact.build_tokens(sentences, self.nlp, self.names, clip_uri)
         passage = {

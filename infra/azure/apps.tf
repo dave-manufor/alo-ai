@@ -56,6 +56,7 @@ locals {
   env_core = merge(local.base_env, local.ai_env, {
     EVENT_QUEUE     = "core-events"
     COACH_ON        = tostring(var.coach_on)
+    GENERATOR_ON    = tostring(var.generator_on)
     TTS_VOICE       = var.tts_voice
     ACCOUNT_URL     = "https://${azurerm_container_app.account.ingress[0].fqdn}"
     AZURE_CLIENT_ID = azurerm_user_assigned_identity.svc["core"].client_id
@@ -65,6 +66,9 @@ locals {
     AZURE_SPEECH_REGION      = local.ai_env.AZURE_SPEECH_REGION
     AZURE_SPEECH_RESOURCE_ID = local.ai_env.AZURE_SPEECH_RESOURCE_ID
     AZURE_SPEECH_LOCALE      = var.speech_locale
+    GENERATOR_ON             = tostring(var.generator_on)
+    AZURE_OPENAI_ENDPOINT    = local.ai_env.AZURE_OPENAI_ENDPOINT # the tagger
+    AZURE_OPENAI_DEPLOYMENTS = local.ai_env.AZURE_OPENAI_DEPLOYMENTS
     VOICE_MODE               = var.voice_mode
     SESSION_PROFILE          = var.session_profile
     VOICE_PROFILE_ID         = var.voice_profile_id

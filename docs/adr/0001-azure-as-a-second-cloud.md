@@ -79,7 +79,12 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
      - The Session Agent now refuses `ALO_ENV=local` on Container Apps too, and `aloai_env.load(..., receives_pushes=False)` lets it start on Cloud Run without a push identity.
      - Clips: `clips/azure.py` makes the `synthesize(text, ipa)` that `seed_words` takes from an Azure voice, with an IPA `phoneme` for names. Use a new `VOICE_PROFILE_ID` for an Azure voice. There is still no seed command (it was not started), so nothing makes clips yet.
      - The image now ships `libs/aloai` and `schemas/` (as the Scorer's does) and the Azure pins. Not built: no Docker build was run.
-   - **Waiting on the generator reaching `main`:** the generator's `Model` (writer, critic, scoring call) and the Session Agent's `Tagger` are on the stacked branches of #28 to #31, which were merged into each other, not into `main`. Their Azure adapters (W2) follow once that chain is on `main`.
+   - **Generator and tagger (W2), built after #28 to #31 reached `main`, not evaluated:**
+     - `services/core/generator/azure.py`: `AzureModel` for the Writer and the Critic (the "generator" deployment; JSON-schema response format, not strict, checked by the pipeline afterwards). `UpstreamErrors` also counts OpenAI and azure-core errors, so the endpoint still answers retryable.
+     - `services/session_agent/generation.py`: `AzureTagger` (the "tagger" deployment), async, with the same instructions, schema and answer check as `VertexTagger`; `open_openai_async` in `aloai_azure`.
+     - Generated passages name `az://` word clips on Azure (`Generator.scheme`, `word_clip_uri`).
+     - `infra/azure`: `generator_on` (default false, written into the Session Agent and Core as `GENERATOR_ON`), the `generator` and `tagger` deployments, and the Session Agent's OpenAI role and settings.
+     - **Keep `GENERATOR_ON` false.** The Writer + Critic and tagger evaluation sets have not run on Azure (hard rule 6), and no clip maker (G5) exists on any cloud, so a generated story's words have no clips. The seed command covers the bank only. Core also needs spaCy and `en_core_web_sm` in its image, and there is no Core Dockerfile.
 5. `infra/azure/` Terraform.
 6. Web sign-in and hosting. **Built, not run against Azure:**
    - `apps/web/src/auth`: Entra External ID through MSAL (`@azure/msal-browser`, loaded only in a real build), as a public client with PKCE and its session in `sessionStorage`. "Continue with Google" and "Continue with email" (an emailed code) both go to Entra's hosted page, which verifies the guardian; nobody is signed in by the click itself. The build's mode comes from `VITE_ENTRA_*`, never from the browser, and without them the sample sign-in stays.
