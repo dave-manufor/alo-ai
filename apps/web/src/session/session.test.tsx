@@ -206,7 +206,7 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Ààlọ̀/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
     // The bubble shows the interest clip's exact text.
     expect(
       await screen.findByText('Before we read, tell me: what kind of stories do you like?'),
@@ -237,7 +237,20 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
 
     // Collect stars stays in kid mode: no route away, no numbers anywhere.
     fireEvent.click(screen.getByRole('button', { name: /Collect stars/ }));
-    expect(screen.getByText('You did a great job today!')).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\d+\s?%|score|timer|words a minute/i);
+
+    // Then the handover: a grown-up must press and hold, and only then
+    // does the grown-up report-ready card appear (video's last frames).
+    expect(screen.getByText('Please give the phone to a grown-up')).toBeInTheDocument();
+    const hold = screen.getByRole('button', { name: /Grown-ups: press and hold/ });
+    // A quick tap must not complete it.
+    fireEvent.pointerDown(hold);
+    fireEvent.pointerUp(hold);
+    expect(screen.queryByText(/report is ready/)).not.toBeInTheDocument();
+    fireEvent.pointerDown(hold);
+    expect(
+      await screen.findByText("Adaeze's report is ready", undefined, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'See the report' })).toBeInTheDocument();
   });
 });
