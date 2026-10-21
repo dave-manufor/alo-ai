@@ -1,0 +1,22 @@
+# Keeps secrets, child audio and unrelated trees out of every build context (hard rule 2).
+.git
+.claude
+.env
+.env.*
+!.env.example
+**/.venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.coverage
+apps
+docs
+infra
+eval
+**/*.wav
+**/*.mp3
+**/*.flac
+**/*.webm
+**/*.opus
+**/*.m4a
+**/*.ogg
