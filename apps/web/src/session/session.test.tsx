@@ -5,6 +5,7 @@ import { accountStore } from '../account/store';
 import ChildrenPage from '../pages/ChildrenPage';
 import SessionPage from '../pages/SessionPage';
 import { createClipCache } from './clipCache';
+import { fixtureClips } from './fixtureDriver';
 import { missingAck, parseAgentMessage, playedAck } from './protocol';
 import {
   applyAgentMessage,
@@ -49,6 +50,22 @@ describe('session protocol v2 (PR #24)', () => {
       cmd: 'played',
       clip_id: 'word_market',
     });
+  });
+
+  it('uses the clip ids and texts the agent sends in PR #24', () => {
+    expect(fixtureClips.map((clip) => clip.clip_id)).toEqual([
+      'interest_prompt',
+      'mic_check_prompt',
+      'story_almost_ready',
+      'word_market',
+      'retell_prompt',
+      'question:0',
+      'question:1',
+      'close_praise',
+    ]);
+    expect(fixtureClips.find((clip) => clip.clip_id === 'mic_check_prompt')?.text).toBe(
+      "Let's count together. Say one, two, three, four, five.",
+    );
   });
 
   it('follows step, shows the story with its level size, clears reconnecting on any message', () => {
@@ -160,6 +177,10 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
     expect(screen.queryByRole('button', { name: /help with a word/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Animals/ }));
+    // The mic-check bubble shows PR #24's mic_check_prompt text.
+    expect(
+      await screen.findByText("Let's count together. Say one, two, three, four, five."),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button')); // mic: the child counted
     expect(await screen.findByText(/Ada and Mama went to the market/)).toBeInTheDocument();
     // The agent tells a word during reading; the bubble shows the clip text.
