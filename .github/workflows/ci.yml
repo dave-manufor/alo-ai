@@ -35,8 +35,8 @@ jobs:
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
             command: pytest -c services/core/pyproject.toml services/core --cov=services/core
           - suite: generator
-            # openai: the Azure adapter test imports it (Core's requirements pin the same version).
-            install: pip install -r services/core/generator/requirements.txt openai==2.54.0 pytest pytest-cov
+            # openai and azure-core: the Azure adapter test imports them (Core pins the same versions).
+            install: pip install -r services/core/generator/requirements.txt openai==2.54.0 azure-cosmos==4.17.1 pytest pytest-cov
             command: pytest -c services/core/generator/pyproject.toml services/core/generator --cov=services/core/generator
           - suite: reading_scorer
             # CPU wheels first, as the image does; silero-vad would otherwise pull the CUDA ones.
