@@ -10,19 +10,16 @@ pending or failed call is covered by the machine's 6 s quick_score timer.
     response {schema_version, complete, run_listening_module} | {error: {...}}
 """
 
-import asyncio
 import json
-import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import httpx
+from .core_client import CoreClient
 
 SCHEMA_VERSION = 1
 PATH = "/v1/grade:quick"
 TIMEOUT_S = 3.0  # per attempt; one retry fits inside the machine's 6 s quick_score timer
-TOKEN_TTL_S = 50 * 60  # Cloud Run ID tokens last about an hour; renew early
 
 
 def request_body(
@@ -83,75 +80,10 @@ class FixtureQuickGrader:
         return self.default
 
 
-def _error(code: str, message: str, *, retryable: bool) -> dict:
-    return {"error": {"code": code, "message": message, "retryable": retryable}}
-
-
-def _retryable(response: dict) -> bool:
-    error = response.get("error")
-    return isinstance(error, dict) and error.get("retryable") is True
-
-
-class QuickGradeClient:
-    """AI_MODE=live: POST to Core with a Cloud Run ID token. Errors come back as SDD 11 errors.
-
-    One HTTP client and one ID token serve the whole session, so a call costs no new TLS
-    handshake and no token fetch (the token is valid for about an hour; the fetch is a
-    blocking call, so it runs in a thread). A retryable error is tried once more: each
+class QuickGradeClient(CoreClient):
+    """AI_MODE=live: POST /v1/grade:quick. A retryable error is tried once more: each
     attempt gets TIMEOUT_S and two fit inside the machine's 6 s quick_score timer, which
-    runs the listening module if no complete answer arrives in time.
-    """
+    runs the listening module if no complete answer arrives in time."""
 
-    def __init__(
-        self,
-        base_url: str,
-        token: Callable[[], str] | None = None,
-        *,
-        client: httpx.AsyncClient | None = None,
-        clock: Callable[[], float] = time.monotonic,
-    ) -> None:
-        self._url = f"{base_url.rstrip('/')}{PATH}"
-        self._fetch_token, self._client, self._clock = token, client, clock
-        self._token: str | None = None
-        self._token_expires = 0.0
-        self._token_lock = asyncio.Lock()
-
-    async def post(self, body: dict) -> dict:
-        response = await self._attempt(body)
-        if _retryable(response):
-            response = await self._attempt(body)
-        return response
-
-    async def aclose(self) -> None:
-        if self._client is not None:
-            await self._client.aclose()
-
-    async def _attempt(self, body: dict) -> dict:
-        try:
-            headers = await self._headers()
-        except Exception as error:  # noqa: BLE001 - no ID token is an error reply, not a crash
-            return _error("AUTH", f"could not get an ID token: {error}", retryable=False)
-        if self._client is None:
-            self._client = httpx.AsyncClient(timeout=TIMEOUT_S)
-        try:
-            reply = await self._client.post(self._url, json=body, headers=headers)
-        except httpx.HTTPError as error:
-            return _error("CLIENT", str(error) or type(error).__name__, retryable=True)
-        if reply.status_code in (401, 403):
-            self._token = None  # expired or revoked early: fetch a new one next time
-        try:
-            data = reply.json()
-        except ValueError:
-            return _error("CLIENT", f"not JSON (HTTP {reply.status_code})", retryable=True)
-        if not isinstance(data, dict):
-            return _error("CLIENT", f"unexpected reply (HTTP {reply.status_code})", retryable=True)
-        return data
-
-    async def _headers(self) -> dict[str, str]:
-        if self._fetch_token is None:
-            return {}
-        async with self._token_lock:
-            if self._token is None or self._clock() >= self._token_expires:
-                self._token = await asyncio.to_thread(self._fetch_token)
-                self._token_expires = self._clock() + TOKEN_TTL_S
-            return {"Authorization": f"Bearer {self._token}"}
+    def __init__(self, base_url: str, token: Callable[[], str] | None = None, **options) -> None:
+        super().__init__(base_url, PATH, TIMEOUT_S, token, retry=True, **options)
