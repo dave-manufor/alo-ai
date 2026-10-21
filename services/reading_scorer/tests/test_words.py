@@ -1,7 +1,7 @@
 """Placing what a transcript heard against the passage (PRD 5.3)."""
 
 import pytest
-from services.reading_scorer.words import STOP_PHRASES, Heard, Placed, align, normalize
+from services.reading_scorer.words import POLITE, STOP_PHRASES, Heard, Placed, align, normalize
 from services.session_agent import intents
 
 PASSAGE = ["ada", "saw", "a", "red", "hat"]
@@ -122,6 +122,7 @@ def test_a_polite_word_read_as_the_passage_stays_when_the_stop_after_it_is_dropp
     assert placed[3] == Placed(None)
 
 
-def test_the_stop_phrases_are_the_session_agents():
+def test_the_stop_phrases_and_polite_words_are_the_session_agents():
     # The scorer image doesn't carry the Session Agent, so words.py keeps a copy.
-    assert set(STOP_PHRASES) == set(intents._STOP)
+    assert set(STOP_PHRASES) == set(intents.STOP_PHRASES)
+    assert set(POLITE) == set(intents.POLITE)
