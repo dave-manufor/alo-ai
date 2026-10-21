@@ -61,3 +61,11 @@ output "web_app_name" {
   description = "The Static Web Apps resource CI deploys to."
   value       = azurerm_static_web_app.web.name
 }
+
+output "jobs" {
+  description = "Run with: az containerapp job start --name <job> --resource-group <resource_group>. seed makes the clips and writes the bank passages; book_ingest embeds the catalogue."
+  value = {
+    seed        = azurerm_container_app_job.seed.name
+    book_ingest = azurerm_container_app_job.book_ingest.name
+  }
+}

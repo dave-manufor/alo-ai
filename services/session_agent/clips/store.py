@@ -49,6 +49,10 @@ class ClipStore:
     def passage_clip_name(self, passage_id: str, name: str) -> str:
         return f"{self.voice_profile_id}/{self.tts_version}/passages/{passage_id}/{name}.mp3"
 
+    def prompt_clip_name(self, clip_id: str) -> str:
+        """A fixed prompt such as "retell_prompt" (clips/prompts.py)."""
+        return f"{self.voice_profile_id}/{self.tts_version}/{clip_id}.mp3"
+
     def uri(self, name: str) -> str:
         return f"{self.scheme}://{self.bucket_name}/{name}"
 
