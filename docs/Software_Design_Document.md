@@ -462,7 +462,7 @@ Public endpoints take a Firebase ID token; service-to-service calls use Cloud Ru
 |Account and Payments|`POST /internal/notify`|Reading Coach (Core)|IAM|Send a templated email (no scores)|
 |Account and Payments|`POST /v1/checkout`|Web app|ID token|Initialize a Paystack transaction, return the access code|
 |Account and Payments|`POST /webhooks/paystack`|Paystack|HMAC-SHA512 signature|Receive payment and subscription events|
-|Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent, Reading Coach|IAM|Generate and gate a passage, or return a bank fallback|
+|Core (Passage Generator)|`POST /v1/passages:generate`|Session Agent|IAM|Generate and gate a passage and store it; a failed gate or a passed deadline is an error, and the Session Agent uses its bank passage (it never returns one)|
 |Core (Grader)|`POST /v1/grade:quick`|Session Agent|IAM|Quick score for one turn; the listening decision when complete|
 |Reading Scorer, Core|`POST` `/pubsub/<subscription>`|Pub/Sub push|IAM (push service account)|Event handlers (below)|
 

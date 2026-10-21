@@ -1,11 +1,13 @@
 """Core service entry point: uvicorn services.core.main:create_app --factory.
 
-Wires the Grader and the Reading Coach to Firestore (and its vector search for books) and
+Wires the Passage Generator, the Grader and the Reading Coach to Firestore (and its vector search for books) and
 Pub/Sub, or their emulators when the *_EMULATOR_HOST variables are set, and, by AI_MODE,
 to Vertex AI, Speech-to-Text and Text-to-Speech or to the recorded responses in
 fixtures/ai/. The Coach's email goes to
 the Account and Payments service at ACCOUNT_URL, or to the Firestore outbox with
 ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the template plan.
+Generated passages point their word clips at CLIPS_BUCKET and TTS_VERSION (the Session
+Agent's settings and defaults).
 Refuses to start with ALO_ENV=local on Cloud Run.
 """
 
@@ -15,6 +17,7 @@ from pathlib import Path
 
 import aloai_env
 import requests
+import spacy
 from aloai_events import PubSubPublisher, PushCheck, anyone, pushed_by
 from aloai_store import FirestoreStore, Store
 from fastapi import FastAPI
@@ -37,6 +40,9 @@ from .coach.clients import (
     StoryRequests,
 )
 from .coach.run import ReadingCoach
+from .generator.models import FixtureModel, Model, VertexModel
+from .generator.pipeline import Generator
+from .generator_api import router as generator_router
 from .grader.api import router
 from .grader.asr import CHIRP_LOCATION, ChirpTranscriber, FixtureTranscriber, Transcriber
 from .grader.assembly import ReportAssembler
@@ -76,6 +82,7 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
         enabled=_flag(env, "COACH_ON"),
     )
     app = FastAPI(title="Alo.ai Core")
+    app.include_router(generator_router(_generator(settings, env), store))
     app.include_router(router(QuickGrader(store, model)))
     app.include_router(
         events_router(
@@ -109,6 +116,22 @@ def _ai(settings: aloai_env.Config) -> tuple[GradingModel, Transcriber, Embedder
         VertexGradingModel(vertex),
         ChirpTranscriber(speech, settings.project),
         VertexEmbedder(vertex),
+    )
+
+
+def _generator(settings: aloai_env.Config, env: Mapping[str, str]) -> Generator:
+    model: Model
+    if settings.ai_mode == "fixtures":
+        model = FixtureModel(RECORDED / "generator")
+    else:
+        model = VertexModel(
+            genai.Client(vertexai=True, project=settings.project, location=settings.location)
+        )
+    return Generator(
+        model=model,
+        nlp=spacy.load("en_core_web_sm"),  # once per instance, not per request
+        clips_bucket=env.get("CLIPS_BUCKET", "aloai-dev-clips"),
+        tts_version=env.get("TTS_VERSION", "v1"),
     )
 
 
