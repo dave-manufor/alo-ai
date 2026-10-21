@@ -25,14 +25,17 @@ export default function ClassTable({ children }: { children: PreviewChild[] }) {
   const [ascending, setAscending] = useState(true);
 
   const rows = useMemo(() => {
-    const sorted = [...children].sort((a, b) => {
+    const empty = (value: string | number | null) => value === null || value === '';
+    return [...children].sort((a, b) => {
       const av = a[sortKey];
       const bv = b[sortKey];
-      if (av === null || av === '') return 1;
-      if (bv === null || bv === '') return -1;
-      return av < bv ? -1 : av > bv ? 1 : 0;
+      // Children with no result yet always sort last, in both directions.
+      if (empty(av) || empty(bv)) {
+        return empty(av) === empty(bv) ? 0 : empty(av) ? 1 : -1;
+      }
+      const order = av < bv ? -1 : av > bv ? 1 : 0;
+      return ascending ? order : -order;
     });
-    return ascending ? sorted : sorted.reverse();
   }, [children, sortKey, ascending]);
 
   function sortBy(key: SortKey) {

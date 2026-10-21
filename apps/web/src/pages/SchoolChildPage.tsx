@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button, ParentReportCard, ProfilePill } from '../design-system/alo';
+import NavButton from '../design-system/NavButton';
 import {
   practicePlanByProfile,
   previewBannerText,
@@ -9,9 +10,10 @@ import {
 } from '../preview/teacherFixture';
 
 // Child page of the teacher view PREVIEW (PRD 4.7): a sample report, the
-// sample passage with misreadings marked, and the practice plan. Listening
-// to a word and changing the plan say "Coming soon" instead of working.
-// Misreadings are marked with a word and a shape, never colour alone.
+// sample passage with misreadings marked at their token positions, and
+// the practice plan. Listening to a word and changing the plan say
+// "Coming soon" instead of working. Misreadings are marked with an
+// underline and listed in words, never by colour alone.
 export default function SchoolChildPage() {
   const { childId } = useParams();
   const child = previewClass.find((item) => item.id === childId);
@@ -26,17 +28,16 @@ export default function SchoolChildPage() {
         <section className="stack">
           <h1 className="title">We could not find that child</h1>
           <p className="body">This preview only has the sample class, P3B.</p>
-          <Link to="/schools/preview">
-            <Button variant="secondary" size="grown">
-              Back to the class
-            </Button>
-          </Link>
+          <NavButton variant="secondary" size="grown" to="/schools/preview">
+            Back to the class
+          </NavButton>
         </section>
       </main>
     );
   }
 
-  const misreadWords = new Map(child.misreadings.map((m) => [m.word, m.heard]));
+  const misreadAt = new Map(child.misreadings.map((m) => [m.token_index, m]));
+  let tokenIndex = -1;
 
   return (
     <main className="app-main">
@@ -73,15 +74,15 @@ export default function SchoolChildPage() {
         </p>
         {samplePassage.sentences.map((sentence) => (
           <p key={sentence} className="reading-p3">
-            {sentence.split(' ').map((token, index) => {
-              const word = token.replace(/[^A-Za-zÀ-ÿ'-]/g, '');
-              const heard = misreadWords.get(word);
-              return heard ? (
-                <mark key={`${token}-${index}`} className="misread">
+            {sentence.split(' ').map((token) => {
+              tokenIndex += 1;
+              const atThisToken = tokenIndex;
+              return misreadAt.has(atThisToken) ? (
+                <mark key={atThisToken} className="misread">
                   {token}{' '}
                 </mark>
               ) : (
-                <span key={`${token}-${index}`}>{token} </span>
+                <span key={atThisToken}>{token} </span>
               );
             })}
           </p>
@@ -89,7 +90,7 @@ export default function SchoolChildPage() {
         {child.misreadings.length > 0 ? (
           <ul className="body">
             {child.misreadings.map((item) => (
-              <li key={item.word}>
+              <li key={item.token_index}>
                 “{item.word}” was read as “{item.heard}”.
               </li>
             ))}
@@ -120,11 +121,9 @@ export default function SchoolChildPage() {
         ) : null}
       </section>
 
-      <Link to="/schools/preview">
-        <Button variant="secondary" size="grown">
-          Back to the class
-        </Button>
-      </Link>
+      <NavButton variant="secondary" size="grown" to="/schools/preview">
+        Back to the class
+      </NavButton>
     </main>
   );
 }
