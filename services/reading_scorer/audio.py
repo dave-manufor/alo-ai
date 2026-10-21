@@ -1,7 +1,8 @@
-"""The reading audio, 16 kHz mono FLAC in Cloud Storage (PRD 5.1), and what is measured
+"""The reading audio, 16 kHz mono FLAC in object storage (PRD 5.1), and what is measured
 from it: each passage word's time and the pauses between words.
 
-GcsAudio reads Cloud Storage, or its emulator when STORAGE_EMULATOR_HOST is set. The
+BlobAudio reads whichever cloud's storage the Blobs given reads (gs:// or az://); GcsAudio is
+it over Cloud Storage, or its emulator when STORAGE_EMULATOR_HOST is set. The
 aligner and pause finder run on CPU in the scorer image (timing.py).
 """
 
@@ -12,7 +13,7 @@ from typing import Protocol
 
 import numpy as np
 import soundfile
-from google.cloud import storage
+from aloai_blobs import Blobs, GcsBlobs
 
 SAMPLE_RATE = 16_000
 
@@ -40,14 +41,22 @@ class PauseFinder(Protocol):
         ...
 
 
-class GcsAudio:
-    def __init__(self, client: storage.Client) -> None:
-        self._client = client
+class BlobAudio:
+    """The reading audio from object storage, whichever cloud: any Blobs backend. A
+    recording that is not there is a BlobNotFound (a LookupError), which the event handler
+    parks, as it does a missing document."""
+
+    def __init__(self, blobs: Blobs) -> None:
+        self._blobs = blobs
 
     def load(self, uri: str) -> Audio:
-        bucket, _, name = uri.removeprefix("gs://").partition("/")
-        data = self._client.bucket(bucket).blob(name).download_as_bytes()
+        data = self._blobs.read(uri)
         samples, rate = soundfile.read(io.BytesIO(data), dtype="float32", always_2d=True)
         if rate != SAMPLE_RATE:
             raise ValueError(f"{uri} is {rate} Hz; the reading track is {SAMPLE_RATE} Hz")
         return Audio(samples.mean(axis=1))
+
+
+class GcsAudio(BlobAudio):
+    def __init__(self, client) -> None:  # a google.cloud.storage.Client
+        super().__init__(GcsBlobs(client))

@@ -58,7 +58,12 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
    - One store contract and one blob contract run against every backend.
    - Each cloud's SDK is imported only inside its own classes, and `libs/aloai/pyproject.toml` has the extras `[gcp]` and `[azure]`.
    - Cosmos DB limits to plan for: one container `docs` (partition key `/pk`) and one `books` with a vector path.
-3. Event handling split into one `handle(event)` used by the Pub/Sub push route and the Service Bus pump.
+3. Event handling split into one `handle(event)` used by the Pub/Sub push route and the Service Bus pump. Built:
+   - `event_handler` in Core (`services/core/api.py`) and in the Reading Scorer (`services/reading_scorer/api.py`). It returns once an event is done with (handled, ignored, or parked because it can never succeed) and raises for anything else. The routes keep their signatures and call it.
+   - `build_app` in each `main.py`: on `gcp` it mounts the push route; on `azure` it does not (nothing on Azure signs a push, so an unsigned route would let any app in the environment post a `session.done`) and instead pumps the service's own queue (`EVENT_QUEUE`) through `aloai_events.pump_lifespan`.
+   - Both `main.py` files build their store and publisher with `open_store` and `open_publisher`, and the Scorer reads audio through `BlobAudio` over any `Blobs`. A recording that is not in storage is now a `BlobNotFound` (a `LookupError`), so the Scorer parks it, as it parks a missing document; before, a missing Cloud Storage object was retried and then dead-lettered.
+   - Not built yet, so Core and the Scorer name it and refuse to start on azure: book search (Core) and the live AI clients, speech and voice (both). They come with step 4.
+   - Core calls the Account service with `aloai_service_auth.service_token`, so it works on either cloud.
 4. AI adapters, split by owner, each with its evaluation result.
 5. `infra/azure/` Terraform.
 6. Web sign-in and hosting.

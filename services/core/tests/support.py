@@ -14,7 +14,7 @@ import aloai_scoring as scoring
 from aloai_events import MemoryPublisher, anyone, envelope
 from aloai_store import MemoryStore
 from fastapi import APIRouter
-from services.core.api import events_router
+from services.core.api import event_handler, events_router
 from services.core.coach.agent import RecordedModel as RecordedCoach
 from services.core.coach.clients import Outbox, SilentSpeaker, StoryRequests
 from services.core.coach.run import ReadingCoach
@@ -165,8 +165,9 @@ def assembler(store: MemoryStore, publisher: MemoryPublisher) -> ReportAssembler
     )
 
 
-def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
-    """Core's push route on the recorded responses, wired as AI_MODE=fixtures wires it."""
+def parts(store: MemoryStore, publisher: MemoryPublisher):
+    """The final grader, report assembler and Reading Coach on the recorded responses,
+    wired as AI_MODE=fixtures wires them."""
     model, reports = FixtureGradingModel(RECORDED / "grader"), assembler(store, publisher)
     coach = ReadingCoach(
         store=store,
@@ -180,7 +181,19 @@ def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
         clock=lambda: NOW,
     )
     grader = FinalGrader(store, model, FixtureTranscriber(RECORDED / "asr"), reports)
+    return grader, reports, coach
+
+
+def events(store: MemoryStore, publisher: MemoryPublisher) -> APIRouter:
+    """Core's push route on the recorded responses."""
+    grader, reports, coach = parts(store, publisher)
     return events_router(grader, reports, coach, store, anyone)
+
+
+def handler(store: MemoryStore, publisher: MemoryPublisher):
+    """Core's event handler on the recorded responses: what the queue pump calls."""
+    grader, reports, coach = parts(store, publisher)
+    return event_handler(grader, reports, coach, store)
 
 
 def grader_output(

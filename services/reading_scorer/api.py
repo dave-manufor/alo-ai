@@ -1,4 +1,6 @@
-"""The Reading Scorer's push subscription on aloai.session-events (SDD 11).
+"""The Reading Scorer's events from aloai.session-events (SDD 11): event_handler does the work
+on either cloud; router is the Pub/Sub push route in front of it (GCP). On Azure the Service
+Bus pump (aloai_events.QueuePump) calls the same handler, and the route is not mounted.
 
 phase1.recorded (checked against its schema with the envelope) is scored; other event
 types are acknowledged and ignored. Pub/Sub redelivers anything that is not
@@ -12,6 +14,7 @@ ID token is refused with 403 (aloai_events.pushed_by).
 """
 
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
@@ -26,8 +29,27 @@ log = logging.getLogger(__name__)
 PERMANENT = (LookupError, ValueError, ValidationError)
 
 
+def event_handler(scorer: Phase1Scorer) -> Callable[[dict], None]:
+    """What the Scorer does with one valid event, on either cloud. It returns when the event
+    is done with (scored, ignored, or parked because it can never succeed) and raises for
+    any other failure, which the Pub/Sub push route answers with 500 and the Service Bus
+    pump answers by abandoning the message, so the event is delivered again."""
+
+    def handle(event: dict) -> None:
+        if event["type"] != "phase1.recorded":
+            return
+        try:
+            scorer.handle(event["data"])
+        except PERMANENT as error:
+            path = park(scorer.store, event, error, datetime.now(UTC))
+            log.error("parked %s at %s: %s", event["type"], path, type(error).__name__)
+
+    return handle
+
+
 def router(scorer: Phase1Scorer, from_pubsub: PushCheck) -> APIRouter:
     routes = APIRouter()
+    handle = event_handler(scorer)
 
     @routes.post("/pubsub/session-events")
     def session_events(
@@ -40,12 +62,7 @@ def router(scorer: Phase1Scorer, from_pubsub: PushCheck) -> APIRouter:
         if event is None:
             log.warning("acknowledged a push that is not a valid event")
             return Response(status_code=204)
-        if event["type"] == "phase1.recorded":
-            try:
-                scorer.handle(event["data"])
-            except PERMANENT as error:
-                path = park(scorer.store, event, error, datetime.now(UTC))
-                log.error("parked %s at %s: %s", event["type"], path, type(error).__name__)
+        handle(event)
         return Response(status_code=204)
 
     return routes
