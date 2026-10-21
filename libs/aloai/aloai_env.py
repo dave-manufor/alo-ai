@@ -77,7 +77,9 @@ class Config:
     speech_locale: str = "en-GB"  # PRD 5.2: the day-1 transcript check confirms or changes it
 
 
-def load(env: Mapping[str, str]) -> Config:
+def load(env: Mapping[str, str], *, receives_pushes: bool = True) -> Config:
+    """The settings. A Cloud Run service that receives Pub/Sub pushes (Core, the Scorer) must name
+    the push identity; one that does not (receives_pushes=False, the Session Agent) need not."""
     cloud = env.get("CLOUD", "gcp")
     if cloud not in CLOUDS:
         raise ConfigError(f"CLOUD={cloud!r} is not one of {sorted(CLOUDS)}")
@@ -94,7 +96,7 @@ def load(env: Mapping[str, str]) -> Config:
     if ai_mode == "fixtures" and hosted:
         raise ConfigError(f"recorded AI responses (AI_MODE=fixtures) are not allowed on {where}")
     push_service_account = env.get("PUSH_SERVICE_ACCOUNT") or None
-    if env.get("K_SERVICE") and push_service_account is None:
+    if receives_pushes and env.get("K_SERVICE") and push_service_account is None:
         raise ConfigError("PUSH_SERVICE_ACCOUNT must be set on a Cloud Run service")
     if hosted:
         local_only = [name for name in AZURE_LOCAL_ONLY if env.get(name)]

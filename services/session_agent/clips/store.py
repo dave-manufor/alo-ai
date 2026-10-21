@@ -41,6 +41,7 @@ class ClipStore:
     bucket_name: str
     voice_profile_id: str
     tts_version: str
+    scheme: str = "gs"  # gs on Google Cloud, az on Azure (the URIs in the passage artifact)
 
     def word_clip_name(self, key: str) -> str:
         return f"{self.voice_profile_id}/{self.tts_version}/words/{key}.mp3"
@@ -49,7 +50,7 @@ class ClipStore:
         return f"{self.voice_profile_id}/{self.tts_version}/passages/{passage_id}/{name}.mp3"
 
     def uri(self, name: str) -> str:
-        return f"gs://{self.bucket_name}/{name}"
+        return f"{self.scheme}://{self.bucket_name}/{name}"
 
     def has_word(self, key: str) -> bool:
         return self.bucket.exists(self.word_clip_name(key))

@@ -18,7 +18,7 @@ are the only parts here marked `pragma: no cover`: check them against the real s
 
 import io
 import json
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from xml.sax.saxutils import escape, quoteattr
 
 from aloai_env import Config, require_setting
@@ -54,15 +54,29 @@ def openai_base_url(config: Config) -> str:
     )
 
 
-def bearer_token(config: Config) -> str:  # pragma: no cover - asks Entra
-    """A fresh credential for an OpenAI-compatible client that takes a string: the key for a
-    local run, else the managed identity's access token (about an hour; build the client
-    for each use rather than keeping it)."""
-    if config.openai_key:
-        return config.openai_key
+def entra_token() -> str:  # pragma: no cover - asks Entra
+    """The managed identity's access token for Azure AI services (about an hour)."""
     from azure.identity import DefaultAzureCredential
 
     return DefaultAzureCredential().get_token(COGNITIVE_SCOPE).token
+
+
+def bearer_token(config: Config) -> str:
+    """A fresh credential for an OpenAI-compatible client that takes a string: the key for a
+    local run, else the managed identity's access token (about an hour; build the client
+    for each use rather than keeping it)."""
+    return config.openai_key or entra_token()
+
+
+def speech_credentials(config: Config, token: Callable[[], str] | None = None) -> dict[str, str]:
+    """How to reach Azure AI Speech: {"region", "key"} for a local run, else {"region",
+    "auth_token"} with the managed identity's token in the form Speech takes for Entra,
+    aad#{resource id}#{token} (a custom-subdomain resource). Fetch it for each use."""
+    region = require_setting(config.speech_region, "AZURE_SPEECH_REGION")
+    if config.speech_key:
+        return {"region": region, "key": config.speech_key}
+    resource = require_setting(config.speech_resource_id, "AZURE_SPEECH_RESOURCE_ID")
+    return {"region": region, "auth_token": f"aad#{resource}#{(token or entra_token)()}"}
 
 
 def pcm16(audio: bytes) -> bytes:
@@ -125,14 +139,12 @@ def build_ssml(
 def _speech_config(config: Config):  # pragma: no cover - builds a real client
     import azure.cognitiveservices.speech as speechsdk
 
-    region = require_setting(config.speech_region, "AZURE_SPEECH_REGION")
-    if config.speech_key:
-        return speechsdk.SpeechConfig(subscription=config.speech_key, region=region)
-    from azure.identity import DefaultAzureCredential
-
-    resource = require_setting(config.speech_resource_id, "AZURE_SPEECH_RESOURCE_ID")
-    token = DefaultAzureCredential().get_token(COGNITIVE_SCOPE).token
-    return speechsdk.SpeechConfig(auth_token=f"aad#{resource}#{token}", region=region)
+    credentials = speech_credentials(config)
+    if "key" in credentials:
+        return speechsdk.SpeechConfig(subscription=credentials["key"], region=credentials["region"])
+    return speechsdk.SpeechConfig(
+        auth_token=credentials["auth_token"], region=credentials["region"]
+    )
 
 
 def recognize_words(
