@@ -6,6 +6,9 @@ to Vertex AI, Speech-to-Text and Text-to-Speech or to the recorded responses in
 fixtures/ai/. The Coach's email goes to
 the Account and Payments service at ACCOUNT_URL, or to the Firestore outbox with
 ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the template plan.
+GENERATOR_ON (default false, a server setting from terraform.tfvars) lets plan.ready
+pre-generate the child's next story; off, plan.ready is ignored and the Session Agent
+(which has the same setting) uses the bank passage.
 Generated passages point their word clips at CLIPS_BUCKET and TTS_VERSION (the Session
 Agent's settings and defaults).
 Refuses to start with ALO_ENV=local on Cloud Run.
@@ -93,7 +96,8 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
             coach,
             store,
             _push_check(settings),
-            NextStories(generator, store),
+            # Off until the Writer + Critic evaluation set passes (and a switch on demo day).
+            NextStories(generator, store) if _flag(env, "GENERATOR_ON", "false") else None,
         )
     )
     return app
@@ -170,8 +174,8 @@ def _speaker(settings: aloai_env.Config, env: Mapping[str, str]) -> Speaker:
     return ChirpSpeaker(tts, bucket, _required(env, "TTS_VOICE"))
 
 
-def _flag(env: Mapping[str, str], name: str) -> bool:
-    value = env.get(name, "true")
+def _flag(env: Mapping[str, str], name: str, default: str = "true") -> bool:
+    value = env.get(name, default)
     if value not in FLAGS:
         raise aloai_env.ConfigError(f"{name}={value!r} is not one of {sorted(FLAGS)}")
     return FLAGS[value]
