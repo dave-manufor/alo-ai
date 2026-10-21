@@ -1,0 +1,168 @@
+variable "location" {
+  description = "Azure region for everything. EU only (hard rule 9)."
+  type        = string
+  default     = "swedencentral"
+  validation {
+    condition     = contains(["swedencentral", "northeurope", "westeurope", "francecentral", "germanywestcentral", "norwayeast", "polandcentral", "italynorth", "spaincentral"], var.location)
+    error_message = "location must be an EU or EEA region."
+  }
+}
+
+variable "prefix" {
+  description = "Name prefix for every resource."
+  type        = string
+  default     = "aloai"
+}
+
+variable "tags" {
+  type = map(string)
+  default = {
+    project = "aloai"
+    env     = "dev"
+  }
+}
+
+variable "github_repository" {
+  description = "owner/name of the repository whose main branch CI deploys from (OIDC, no keys)."
+  type        = string
+  default     = "dave-manufor/alo-ai"
+}
+
+# ---- server settings (PRD 4.1, 4.2, 14.5): changed only by a one-line chore/infra-... PR
+
+variable "voice_mode" {
+  type    = string
+  default = "cache_first"
+  validation {
+    condition     = contains(["cache_first", "live_first"], var.voice_mode)
+    error_message = "voice_mode must be cache_first or live_first."
+  }
+}
+
+variable "session_profile" {
+  type    = string
+  default = "standard"
+  validation {
+    condition     = contains(["standard", "demo"], var.session_profile)
+    error_message = "session_profile must be standard or demo."
+  }
+}
+
+variable "demo_warm" {
+  description = "Minimum 1 replica on all four services, from the evening before the demo."
+  type        = bool
+  default     = false
+}
+
+variable "agent_on" {
+  description = "Session Agent minimum 1 replica (from day 3): the LiveKit worker must be running to take a session."
+  type        = bool
+  default     = false
+}
+
+variable "coach_on" {
+  description = "false turns the Reading Coach off: every plan is the template plan."
+  type        = bool
+  default     = true
+}
+
+# ---- images: CI builds and pushes them; Terraform receives only each image's digest
+
+variable "images" {
+  description = "Container image for each app, by digest, e.g. aloaiacr.azurecr.io/aloai-core@sha256:... Until CI has pushed one, the quickstart placeholder keeps the first apply working."
+  type        = map(string)
+  default = {
+    session_agent  = "mcr.microsoft.com/k8se/quickstart:latest"
+    account        = "mcr.microsoft.com/k8se/quickstart:latest"
+    reading_scorer = "mcr.microsoft.com/k8se/quickstart:latest"
+    core           = "mcr.microsoft.com/k8se/quickstart:latest"
+    book_ingest    = "mcr.microsoft.com/k8se/quickstart:latest"
+  }
+  validation {
+    condition     = alltrue([for k in ["session_agent", "account", "reading_scorer", "core", "book_ingest"] : contains(keys(var.images), k)])
+    error_message = "images needs session_agent, account, reading_scorer, core and book_ingest."
+  }
+}
+
+# ---- voice and speech
+
+variable "voice_profile_id" {
+  description = "Names the Azure voice's clips in the clip store, apart from the Google ones."
+  type        = string
+  default     = "vp_azure_v1"
+}
+
+variable "tts_voice" {
+  description = "Azure neural voice for Auntie Kemi and the parent summary."
+  type        = string
+  default     = "en-NG-EzinneNeural"
+}
+
+variable "speech_locale" {
+  description = "Recognition locale (PRD 5.2): en-GB until the day-1 check says otherwise."
+  type        = string
+  default     = "en-GB"
+}
+
+variable "livekit_url" {
+  description = "wss:// URL of the LiveKit server (configured outside Terraform; its key and secret are Key Vault secrets)."
+  type        = string
+  default     = "wss://livekit.invalid"
+}
+
+variable "web_origins" {
+  description = "Origins of the web app, allowed to fetch clips (CORS)."
+  type        = list(string)
+  default     = ["http://localhost:5173"]
+}
+
+# ---- Azure OpenAI: one deployment per role the services name in AZURE_OPENAI_DEPLOYMENTS
+
+variable "openai_deployments" {
+  description = "Deployments by role. sku must keep processing in the EU: DataZoneStandard (EU data zone) or Standard (regional). GlobalStandard may process outside the EU, which hard rule 9 and the NDPA transfer basis do not allow. Check model availability in the region first."
+  type = map(object({
+    model    = string
+    version  = string
+    sku      = string
+    capacity = number
+  }))
+  default = {
+    grader     = { model = "gpt-4.1", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
+    quick      = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
+    coach      = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 30 }
+    embedding  = { model = "text-embedding-3-small", version = "1", sku = "DataZoneStandard", capacity = 50 }
+    transcribe = { model = "gpt-4o-transcribe", version = "2025-03-20", sku = "DataZoneStandard", capacity = 30 }
+  }
+  validation {
+    condition     = alltrue([for d in values(var.openai_deployments) : contains(["Standard", "DataZoneStandard"], d.sku)])
+    error_message = "sku must be Standard or DataZoneStandard so processing stays in the EU."
+  }
+}
+
+# ---- budget: US$150 of Azure credit
+
+variable "budget_amount" {
+  type    = number
+  default = 150
+}
+
+variable "budget_alerts" {
+  description = "Spend in US$ at which the budget emails the contacts."
+  type        = list(number)
+  default     = [50, 100, 130]
+}
+
+variable "budget_contact_emails" {
+  description = "Who the budget alerts email. Required, and not in terraform.tfvars: it is a person's address, so it comes from outside the repository (TF_VAR_budget_contact_emails in CI)."
+  type        = list(string)
+  validation {
+    condition     = length(var.budget_contact_emails) > 0
+    error_message = "budget_contact_emails must name at least one person, or the alerts reach nobody."
+  }
+}
+
+variable "budget_start" {
+  description = "First day of a month, RFC 3339."
+  type        = string
+  default     = "2026-10-01T00:00:00Z"
+}

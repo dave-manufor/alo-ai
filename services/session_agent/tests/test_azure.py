@@ -178,6 +178,19 @@ def test_the_token_for_core_is_for_its_audience_and_fresh_each_time(monkeypatch)
     assert asked == [("azure", "api://aloai-core")] * 2
 
 
+def test_on_azure_without_an_audience_core_is_called_without_a_token(monkeypatch, caplog):
+    monkeypatch.setattr(
+        livekit_worker, "service_token", lambda *args: pytest.fail("a token was asked for")
+    )
+    hosted = aloai_env.load(
+        {"CLOUD": "azure", "AI_MODE": "live", "CONTAINER_APP_NAME": "aloai-session-agent"},
+        receives_pushes=False,
+    )
+    settings = config.worker_settings({"CLOUD": "azure", "CLIPS_BASE_URL": "x"})
+    assert livekit_worker._id_token(settings, hosted) is None
+    assert "CORE_AUDIENCE is not set" in caplog.text
+
+
 def test_the_token_for_core_defaults_to_its_url_as_the_audience(monkeypatch):
     asked = []
     monkeypatch.setattr(
