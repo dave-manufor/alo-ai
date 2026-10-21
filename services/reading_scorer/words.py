@@ -11,6 +11,11 @@ passage had left. Saying as many or more means the child read on to the end, and
 words are misreadings of the passage words they stand for. A heard word only takes a
 passage word's place cheaply when it looks like an attempt at it; one that is nothing
 like it costs as much as a skip plus an extra word.
+
+A child who stops near the end often says so ("I'm done", "stop"). Within the last few
+passage words that would count as reading on, so a stop phrase at the end of what was
+heard is dropped before aligning, unless its words match the passage words they are
+placed on (a passage that itself ends "...had to stop").
 """
 
 import unicodedata
@@ -19,6 +24,11 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 
 ATTEMPT_LIKENESS = 0.5  # [CAL] PRD 5.3: how alike a heard word must be to be a misreading
+# What the Session Agent hears as a stop (services/session_agent/intents.py; the scorer
+# image doesn't carry the agent, so tests/test_words.py keeps the two lists in step), and
+# the words a child may say with it ("I'm done, Auntie").
+STOP_PHRASES = ("stop", "i want to stop", "i don't want to", "i'm done", "i am done", "no more")
+POLITE = ("please", "auntie", "aunty")
 
 
 @dataclass(frozen=True)
@@ -52,6 +62,40 @@ def align(passage: Sequence[str], heard: Sequence[Heard]) -> list[Placed]:
     """passage holds normalized words. Ties keep a word matched, and reach as far into
     the passage as the cheapest alignment allows."""
     words = [normalize(h.text) for h in heard]
+    placed = _align(passage, heard, words)
+    start = _stop_at_end(words)
+    if start < len(words) and not _read(passage, placed, heard[start:]):
+        return align(passage, heard[:start])
+    return placed
+
+
+def _stop_at_end(words: Sequence[str]) -> int:
+    """Where a stop phrase at the end of what was heard begins, or len(words) when there
+    is none. Apostrophes are ignored, so "im done" is "i'm done"."""
+    bare = [w.replace("'", "") for w in words]
+    end = len(bare)
+    while end and bare[end - 1] in POLITE:
+        end -= 1
+    phrases = (p.replace("'", "").split() for p in STOP_PHRASES)
+    for phrase in sorted(phrases, key=len, reverse=True):  # "i want to stop" before "stop"
+        start = end - len(phrase)
+        if start >= 0 and bare[start:end] == phrase:
+            while start and bare[start - 1] in POLITE:
+                start -= 1
+            return start
+    return len(words)
+
+
+def _read(passage: Sequence[str], placed: Sequence[Placed], tail: Sequence[Heard]) -> bool:
+    """Whether any of these heard words is the passage word it was placed on."""
+    return any(
+        p.heard is h and normalize(h.text) == word
+        for p, word in zip(placed, passage, strict=True)
+        for h in tail
+    )
+
+
+def _align(passage: Sequence[str], heard: Sequence[Heard], words: Sequence[str]) -> list[Placed]:
     rows, cols = len(passage), len(words)
     cost = [[i + j if i == 0 or j == 0 else 0 for j in range(cols + 1)] for i in range(rows + 1)]
     for i in range(1, rows + 1):
