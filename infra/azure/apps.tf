@@ -108,13 +108,13 @@ resource "azurerm_container_app" "session_agent" {
   secret {
     name                = "livekit-api-key"
     identity            = azurerm_user_assigned_identity.svc["session-agent"].id
-    key_vault_secret_id = azurerm_key_vault_secret.entry["livekit-api-key"].versionless_id
+    key_vault_secret_id = local.secret_uri["livekit-api-key"]
   }
 
   secret {
     name                = "livekit-api-secret"
     identity            = azurerm_user_assigned_identity.svc["session-agent"].id
-    key_vault_secret_id = azurerm_key_vault_secret.entry["livekit-api-secret"].versionless_id
+    key_vault_secret_id = local.secret_uri["livekit-api-secret"]
   }
 
   template {
@@ -297,7 +297,7 @@ resource "azurerm_container_app" "account" {
     content {
       name                = secret.value
       identity            = azurerm_user_assigned_identity.svc["account"].id
-      key_vault_secret_id = azurerm_key_vault_secret.entry[secret.value].versionless_id
+      key_vault_secret_id = local.secret_uri[secret.value]
     }
   }
 

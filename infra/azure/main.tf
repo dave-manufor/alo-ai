@@ -233,8 +233,8 @@ resource "azurerm_servicebus_queue" "events" {
   default_message_ttl = "P1D"
 }
 
-# ---- Key Vault: the entries and who may read them. The VALUES are set outside Terraform
-# (README.md); the placeholder below is not a secret, and a later value is never overwritten.
+# ---- Key Vault: who may read which entry. The entries and their VALUES are created outside
+# Terraform (README.md), so no secret value is ever in state.
 
 resource "azurerm_key_vault" "main" {
   name                       = "${var.prefix}-kv-${local.suffix}"
@@ -250,20 +250,12 @@ resource "azurerm_key_vault" "main" {
 
 locals {
   secrets = toset(["paystack-secret-key", "resend-api-key", "livekit-api-key", "livekit-api-secret"])
-}
 
-resource "azurerm_key_vault_secret" "entry" {
-  for_each     = local.secrets
-  name         = each.key
-  key_vault_id = azurerm_key_vault.main.id
-  value        = "set-outside-terraform"
-  content_type = "placeholder until `az keyvault secret set`"
-
-  lifecycle {
-    ignore_changes = [value, content_type]
-  }
-
-  depends_on = [azurerm_role_assignment.ci]
+  # The entries are created by `az keyvault secret set` (README.md), not by Terraform: a managed
+  # azurerm_key_vault_secret reads its value into state on every refresh. Terraform only
+  # names them: the versionless URI for the Container Apps, the scope for the role assignments.
+  secret_uri   = { for name in local.secrets : name => "${azurerm_key_vault.main.vault_uri}secrets/${name}" }
+  secret_scope = { for name in local.secrets : name => "${azurerm_key_vault.main.id}/secrets/${name}" }
 }
 
 # ---- Azure AI: OpenAI and Speech. Entra only (no keys); a custom subdomain is needed for that.
@@ -359,12 +351,12 @@ locals {
 
       # Key Vault: only the Account service reads the Paystack secret and the email key; the
       # Account service (which mints LiveKit tokens) and the Session Agent (the worker) read LiveKit's.
-      "account-paystack"             = { principal = local.id["account"], scope = azurerm_key_vault_secret.entry["paystack-secret-key"].resource_versionless_id, role = "Key Vault Secrets User" }
-      "account-resend"               = { principal = local.id["account"], scope = azurerm_key_vault_secret.entry["resend-api-key"].resource_versionless_id, role = "Key Vault Secrets User" }
-      "account-livekit-key"          = { principal = local.id["account"], scope = azurerm_key_vault_secret.entry["livekit-api-key"].resource_versionless_id, role = "Key Vault Secrets User" }
-      "account-livekit-secret"       = { principal = local.id["account"], scope = azurerm_key_vault_secret.entry["livekit-api-secret"].resource_versionless_id, role = "Key Vault Secrets User" }
-      "session-agent-livekit-key"    = { principal = local.id["session-agent"], scope = azurerm_key_vault_secret.entry["livekit-api-key"].resource_versionless_id, role = "Key Vault Secrets User" }
-      "session-agent-livekit-secret" = { principal = local.id["session-agent"], scope = azurerm_key_vault_secret.entry["livekit-api-secret"].resource_versionless_id, role = "Key Vault Secrets User" }
+      "account-paystack"             = { principal = local.id["account"], scope = local.secret_scope["paystack-secret-key"], role = "Key Vault Secrets User" }
+      "account-resend"               = { principal = local.id["account"], scope = local.secret_scope["resend-api-key"], role = "Key Vault Secrets User" }
+      "account-livekit-key"          = { principal = local.id["account"], scope = local.secret_scope["livekit-api-key"], role = "Key Vault Secrets User" }
+      "account-livekit-secret"       = { principal = local.id["account"], scope = local.secret_scope["livekit-api-secret"], role = "Key Vault Secrets User" }
+      "session-agent-livekit-key"    = { principal = local.id["session-agent"], scope = local.secret_scope["livekit-api-key"], role = "Key Vault Secrets User" }
+      "session-agent-livekit-secret" = { principal = local.id["session-agent"], scope = local.secret_scope["livekit-api-secret"], role = "Key Vault Secrets User" }
     },
   )
 }

@@ -18,13 +18,15 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 ## Bootstrap, once, by a person with Owner on the subscription
 
 1. Create the state storage (`aloai-tfstate-rg`, storage account `aloaitfstateeu`, container `tfstate`, versioning on, EU). Rename it in `backend.tf` if the account name is taken: storage account names are global.
-2. `az login`, then from `infra/azure`: `terraform init`, then `terraform apply -var 'budget_contact_emails=["<an address>"]'`. This first apply is done by a person, because it creates the CI identity and its roles. After that CI applies on merge to `main`.
-3. In GitHub, set the repository variables `AZURE_CLIENT_ID` (output `ci_client_id`), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, and `TF_VAR_budget_contact_emails`. The address is a person's, so it is not in `terraform.tfvars`.
-4. Register `Microsoft.App`, `Microsoft.DocumentDB`, `Microsoft.ServiceBus`, `Microsoft.CognitiveServices` and `Microsoft.ContainerRegistry` on the subscription if they are not.
+2. `az login`, then from `infra/azure`: `terraform init`, then the vault first: `terraform apply -target=azurerm_key_vault.main -var 'budget_contact_emails=["<an address>"]'`.
+3. Set the secret values (see "Secret values" below). The vault must hold all four before the apps are created, because the Container Apps read them.
+4. Then the full `terraform apply -var 'budget_contact_emails=["<an address>"]'`. The first apply is done by a person, because it creates the CI identity and its roles. After that CI applies on merge to `main`.
+5. In GitHub, set the repository variables `AZURE_CLIENT_ID` (output `ci_client_id`), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, and `TF_VAR_budget_contact_emails`. The address is a person's, so it is not in `terraform.tfvars`.
+6. Register `Microsoft.App`, `Microsoft.DocumentDB`, `Microsoft.ServiceBus`, `Microsoft.CognitiveServices` and `Microsoft.ContainerRegistry` on the subscription if they are not.
 
 ## Outside Terraform
 
-- **Secret values.** Terraform creates the Key Vault entries with a placeholder and never overwrites a later value (`ignore_changes`). Set the real values once, so they never reach state:
+- **Secret values.** Terraform does not create or read the Key Vault entries (a managed secret resource reads the value into state on every refresh, even with `ignore_changes`). It only grants access to, and points the Container Apps at, `<vault uri>secrets/<name>`. You need `Key Vault Secrets Officer` on the vault to set them. Create each entry once, so no value reaches state:
   `az keyvault secret set --vault-name <key_vault output> --name paystack-secret-key --value ...`, and the same for `resend-api-key`, `livekit-api-key`, `livekit-api-secret`. Paystack stays in test mode. Container Apps read the latest version.
 - **LiveKit.** The server and its account are set up in LiveKit's dashboard; put its `wss://` address in `livekit_url`.
 - **Entra sign-in for the web app** (Entra External ID: email code, Google) and the **Static Web Apps** deployment: PR 6, W1.
