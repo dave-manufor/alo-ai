@@ -5,6 +5,7 @@ session_profile = "standard"
 demo_warm       = false
 agent_on        = false
 coach_on        = true
+generator_on    = false
 
 # Images by digest, once CI has pushed them (until then the placeholder keeps the first apply working):
 # images = {

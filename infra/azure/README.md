@@ -65,3 +65,7 @@ Two manual jobs, run when needed (`az containerapp job start --name <name> --res
 2. **`book_ingest`**: embeds the catalogue with `text-embedding-3-small` once there is one in Cosmos DB (`services/core/books/reembed.py`). **There is no catalogue yet:** the ingestion job and the 30 real open-licence books it would load do not exist, so this job finds nothing to do. It needs a Core image, and there is no Core Dockerfile yet.
 
 Both jobs are untested against Azure.
+
+## The generator switch
+
+`generator_on` (default `false`, in `terraform.tfvars`, changed only by a one-line `chore/infra-...` PR) lets `plan.ready` pre-generate a child's next story and the Session Agent ask the Passage Generator for the story. Leave it `false` until the generator and tagger evaluation sets have been run on the Azure deployments (`generator`, `tagger`) and word clips are made for generated stories: the seed job covers only the bank passages, so a generated story's words would have no clips.

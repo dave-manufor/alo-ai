@@ -12,9 +12,11 @@ from pathlib import Path
 from typing import Protocol
 
 import httpx
+from azure.core.exceptions import AzureError
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
+from openai import APIError as OpenAIError
 
 FLASH = "gemini-2.5-flash"
 
@@ -36,9 +38,10 @@ class ModelError(Exception):
     """The model gave no usable answer for the call."""
 
 
-# Vertex AI did not answer, or not in time: worth a retry later, unlike a bad answer.
-# The Gemini client raises httpx's own errors for a timeout.
-UpstreamErrors = (genai_errors.APIError, httpx.HTTPError)
+# Vertex AI or Azure OpenAI did not answer, or not in time: worth a retry later, unlike a
+# bad answer. The Gemini client raises httpx's own errors for a timeout; the OpenAI client
+# its own APIError family (a timeout and a refused connection included).
+UpstreamErrors = (genai_errors.APIError, httpx.HTTPError, OpenAIError, AzureError)
 
 
 class Model(Protocol):

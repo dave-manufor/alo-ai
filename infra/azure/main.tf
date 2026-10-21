@@ -345,6 +345,7 @@ locals {
       "core-openai"           = { principal = local.id["core"], scope = azurerm_cognitive_account.openai.id, role = "Cognitive Services OpenAI User" }
       "reading-scorer-openai" = { principal = local.id["reading-scorer"], scope = azurerm_cognitive_account.openai.id, role = "Cognitive Services OpenAI User" }
       "ingest-openai"         = { principal = local.id["ingest"], scope = azurerm_cognitive_account.openai.id, role = "Cognitive Services OpenAI User" }
+      "session-agent-openai"  = { principal = local.id["session-agent"], scope = azurerm_cognitive_account.openai.id, role = "Cognitive Services OpenAI User" } # the interest tagger
       "session-agent-speech"  = { principal = local.id["session-agent"], scope = azurerm_cognitive_account.speech.id, role = "Cognitive Services Speech User" }
       "core-speech"           = { principal = local.id["core"], scope = azurerm_cognitive_account.speech.id, role = "Cognitive Services Speech User" }
       "reading-scorer-speech" = { principal = local.id["reading-scorer"], scope = azurerm_cognitive_account.speech.id, role = "Cognitive Services Speech User" }
