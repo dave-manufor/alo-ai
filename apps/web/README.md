@@ -60,7 +60,7 @@ Settings (all public values: the app is a public client with PKCE and holds no s
 
 **Until the Account service exists, the real build keeps a guardian's children and consents in memory for the life of the tab and then they are gone.** That is deliberate: a child's first name and birth year must not stay in `localStorage` on a shared family phone (PRD 12). It also means the real build cannot yet be used for real families. The sign-in session itself is in `sessionStorage` (closed with the tab). A sample build's leftovers on the same origin are removed when the real build first loads.
 
-The consent record's `sign_in_method` is `google`, `email_code` (the real build's emailed code) or `email_link` (the sample build only). There is no consent schema in `schemas/` yet, only the SDD table; when W1 defines it with the Account service, `email_code` needs to be in it.
+The consent record's `sign_in_method` is `google`, `email_code` (the real build's emailed code) or `email_link` (the sample build only). The record's shape is `schemas/consent.schema.json`.
 
 ### Setting up Entra (by hand: an external tenant cannot be made by Terraform)
 

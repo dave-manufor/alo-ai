@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "child.schema.json",
+  "title": "Child",
+  "description": "children/{child_id} (SDD 12). Created by the Account service (W1) with the required fields. Later merged into by Core: the Grader writes next_passage_arl, the Reading Coach writes saved_tags and next_session_at, the Passage Generator path writes next_passage_id, and the Session Agent (W2) clears next_passage_id when a session uses it. A child is read by the Grader, the Coach and the Session Agent. A child must have a consents/ record before a session starts.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "guardian_id": { "type": "string", "minLength": 1 },
+    "first_name": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "primary_class": { "type": "integer", "minimum": 1, "maximum": 6 },
+    "birth_year": { "type": "integer", "minimum": 2000, "maximum": 2100 },
+    "class_confirmed_year": { "type": "integer", "minimum": 2000, "maximum": 2100 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "saved_tags": { "type": "array", "items": { "$ref": "topic_tag.schema.json" }, "uniqueItems": true },
+    "next_passage_arl": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "next_passage_id": { "type": ["string", "null"], "minLength": 1 },
+    "next_session_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["schema_version", "guardian_id", "first_name", "primary_class", "birth_year", "class_confirmed_year", "created_at"],
+  "additionalProperties": false
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "guardian.schema.json",
+  "title": "Guardian",
+  "description": "guardians/{guardian_id} (SDD 12). guardian_id is the Entra External ID object id (oid) of the signed-in guardian, never the email address. Written by the Account service (W1) the first time the guardian calls it; read by the Account service only.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "guardian_id": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "format": "email" },
+    "sign_in_method": { "type": "string", "enum": ["google", "email_code", "email_link"] },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["schema_version", "guardian_id", "email", "sign_in_method", "created_at"],
+  "additionalProperties": false
+}

@@ -106,6 +106,9 @@ def test_every_schema_has_a_fixture():
         "passage_generate_response.schema.json",
         "story_request.schema.json",
         "book.schema.json",
+        "consent.schema.json",
+        "guardian.schema.json",
+        "child.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 
@@ -431,3 +434,13 @@ def test_a_pre_generated_passage_never_reuses_an_id_in_the_same_session():
     in_session = _fixture("passage_generate.response.json")["passage_id"]
     assert request["passage_id"] == f"gen_next_{request['session_id']}"
     assert request["passage_id"] not in (f"story_{request['session_id']}", in_session)
+
+
+def test_cloud_smoke_child_fits_the_child_schema():
+    from services.session_agent.tools.cloud_smoke import CHILD
+
+    # The smoke child is partial: it sets only what the Grader and the Coach read.
+    child_schema = _validator("child.schema.json")
+    assert set(CHILD) <= set(child_schema.schema["properties"])
+    complete = _fixture("child.child_demo_001.json")
+    child_schema.validate({**complete, **CHILD})
