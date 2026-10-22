@@ -233,3 +233,21 @@ variable "web_location" {
     error_message = "web_location must be westeurope, westus2 or eastus2 (the regions Static Web Apps is offered in that this project accepts)."
   }
 }
+
+variable "entra_tenant_id" {
+  description = "The Entra External ID (external) tenant id. Not a secret; the Account service checks the token tid and issuer with it."
+  type        = string
+  default     = ""
+}
+
+variable "entra_authority" {
+  description = "The external tenant sign-in address, such as https://aloaiauth.ciamlogin.com (no path)."
+  type        = string
+  default     = ""
+}
+
+variable "entra_api_audience" {
+  description = "The Account API app registration application (client) id: the token aud."
+  type        = string
+  default     = ""
+}

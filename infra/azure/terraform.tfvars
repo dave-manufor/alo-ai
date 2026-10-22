@@ -46,3 +46,8 @@ interest_chat = false
 # One transcript (Azure AI Speech): the Gemini endpoint has no /audio/transcriptions and a chat
 # transcript dropped a word in a test. Needs W3's confirmation before real children (PRD 5.3).
 second_transcript = "off"
+
+# Entra External ID (the aloai external tenant; set up by hand, steps in ops/README.md). Identifiers only, no secrets.
+entra_tenant_id    = "d611df49-f494-4953-9681-5a99d88b0d06"
+entra_authority    = "https://aloaiauth.ciamlogin.com"
+entra_api_audience = "15b55da5-38e0-4a9c-8b47-38f39e717bfe"
