@@ -21,7 +21,7 @@ export interface ReportChild {
 }
 
 export interface ReadingReport {
-  schema_version: 1;
+  schema_version: 2;
   session_id: string;
   child_id: string;
   timestamp_iso: string;
@@ -84,7 +84,7 @@ export const sampleChildren: Record<string, ReportChild> = {
 
 export const sampleReports: ReadingReport[] = [
   {
-    schema_version: 1,
+    schema_version: 2,
     session_id: 'sess_demo_001',
     child_id: 'child_demo_001',
     timestamp_iso: '2026-01-15T09:09:05Z',
@@ -120,7 +120,7 @@ export const sampleReports: ReadingReport[] = [
     flags: ['DEMO_PROFILE', 'SHORT_READING'],
   },
   {
-    schema_version: 1,
+    schema_version: 2,
     session_id: 'sess_demo_002',
     child_id: 'child_demo_002',
     timestamp_iso: '2026-01-16T09:09:05Z',

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "guardian_plan.schema.json",
+  "title": "GuardianPlan",
+  "description": "GET /v1/plans/{session_id} on the Account service (W1): a guardian's two-week plan (plans/plan_{session_id}, plan.schema.json, written by the Coach) with the books it names, trimmed to what the plan screen shows (a book carries its licence and required attribution, PRD 9.1). It leaves out the guardian id, the summary audio path and the Coach's internal flags. A book that is missing or held for review is left out. The producer reads and returns; it makes no number. schema_version 1.",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "plan_id": { "type": "string", "minLength": 1 },
+    "session_id": { "type": "string", "minLength": 1 },
+    "child_id": { "type": "string", "minLength": 1 },
+    "activities": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "activity_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 }
+        },
+        "required": ["activity_id", "title", "text"],
+        "additionalProperties": false
+      }
+    },
+    "books": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "book_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "author": { "type": "string", "minLength": 1 },
+          "licence": { "type": "string", "minLength": 1 },
+          "attribution": { "type": "string", "minLength": 1 },
+          "arl": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["book_id", "title", "author", "licence", "attribution", "arl"],
+        "additionalProperties": false
+      }
+    },
+    "next_session_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["schema_version", "plan_id", "session_id", "child_id", "activities", "books", "next_session_at"],
+  "additionalProperties": false
+}
