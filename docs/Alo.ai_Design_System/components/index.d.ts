@@ -61,10 +61,31 @@ export interface ProfilePillProps {
 }
 export declare function ProfilePill(props: ProfilePillProps): React.ReactElement;
 
+export interface RoundButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> { kind?: 'next' | 'play'; /** read by screen readers; required */ label: string }
+export declare function RoundButton(props: RoundButtonProps): React.ReactElement;
+
+export interface PaperProps extends React.HTMLAttributes<HTMLElement> { as?: keyof JSX.IntrinsicElements }
+export declare function Paper(props: PaperProps): React.ReactElement;
+
+export interface EyebrowProps extends React.HTMLAttributes<HTMLElement> { as?: keyof JSX.IntrinsicElements }
+export declare function Eyebrow(props: EyebrowProps): React.ReactElement;
+
+export interface FieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'id'> {
+  id: string; label: string; hint?: string; /** renders a select when given */ options?: { value: string; label: string }[];
+}
+export declare function Field(props: FieldProps): React.ReactElement;
+
+export interface ToggleGroupProps { id: string; label: string; options: { value: string; label: string }[]; value?: string; onChange?: (value: string) => void; className?: string }
+export declare function ToggleGroup(props: ToggleGroupProps): React.ReactElement;
+
+export interface BannerProps { tone?: 'good' | 'info' | 'notice'; className?: string; children?: React.ReactNode }
+export declare function Banner(props: BannerProps): React.ReactElement;
+
 declare global {
   interface Window {
     Alo: { Button: typeof Button; MicButton: typeof MicButton; SpeechBubble: typeof SpeechBubble; ReadingPanel: typeof ReadingPanel;
       MoonProgress: typeof MoonProgress; RewardBadge: typeof RewardBadge; LanternStreak: typeof LanternStreak; Japa: typeof Japa;
-      ParentReportCard: typeof ParentReportCard; ProfilePill: typeof ProfilePill };
+      ParentReportCard: typeof ParentReportCard; ProfilePill: typeof ProfilePill;
+      RoundButton: typeof RoundButton; Paper: typeof Paper; Eyebrow: typeof Eyebrow; Field: typeof Field; ToggleGroup: typeof ToggleGroup; Banner: typeof Banner };
   }
 }

@@ -73,6 +73,13 @@ ${[...color.light, ...shadow.light, ...flat(tokens.spacing.tokens),
 ${[...color.dark, ...shadow.dark].join('\n')}
   color-scheme: dark;
 }
+/* Scoped light theme: same token names as :root, so a light card can sit inside
+   a dark screen (the README says where this is allowed). Declared last so it
+   wins over an outer [data-theme="dark"] when nested. */
+[data-theme="light"] {
+${[...color.light, ...shadow.light].join('\n')}
+  color-scheme: light;
+}
 ${typeClasses.join('\n')}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
