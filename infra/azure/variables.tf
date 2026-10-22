@@ -22,6 +22,18 @@ variable "tags" {
   }
 }
 
+variable "github_owner_id" {
+  description = "The numeric id of the GitHub account that owns the repository (gh api users/<owner> --jq .id). It is part of the OIDC subject GitHub presents."
+  type        = string
+  default     = "107783499"
+}
+
+variable "github_repository_id" {
+  description = "The numeric id of the repository (gh api repos/<owner>/<name> --jq .id). It is part of the OIDC subject GitHub presents."
+  type        = string
+  default     = "1421059333"
+}
+
 variable "github_repository" {
   description = "owner/name of the repository whose main branch CI deploys from (OIDC, no keys)."
   type        = string

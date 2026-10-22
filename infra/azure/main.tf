@@ -54,6 +54,22 @@ resource "azurerm_federated_identity_credential" "ci_main" {
   subject             = "repo:${var.github_repository}:ref:refs/heads/main"
 }
 
+# GitHub now puts the numeric owner and repository ids in the token's subject
+# (repo:owner@<id>/name@<id>:...), so the record above no longer matches what Actions presents:
+# the first deploy-images run failed with AADSTS700213 for exactly this subject. Both are kept.
+resource "azurerm_federated_identity_credential" "ci_main_ids" {
+  name                = "github-main-ids"
+  resource_group_name = azurerm_resource_group.main.name
+  parent_id           = azurerm_user_assigned_identity.ci.id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = "https://token.actions.githubusercontent.com"
+  subject = format(
+    "repo:%s@%s/%s@%s:ref:refs/heads/main",
+    split("/", var.github_repository)[0], var.github_owner_id,
+    split("/", var.github_repository)[1], var.github_repository_id,
+  )
+}
+
 # ---- registry
 
 resource "azurerm_container_registry" "main" {
