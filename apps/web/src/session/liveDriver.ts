@@ -13,11 +13,11 @@ import {
 // only thing the web app sends is the clip ack (`played` / `missing`) in
 // reply to a `play`.
 //
-// CONTRACT ASSUMPTION (C4, `POST /v1/sessions`, #70, is not built yet):
+// CONTRACT (C4, `POST /v1/sessions`, schemas/session_start.schema.json):
 // the request is {"child_id": "..."} and the reply is
 // {"session_id": "...", "livekit_url": "wss://...", "token": "..."}.
 // The caller passes `startSession`, so only that one function changes if
-// C4 lands differently. Nothing here holds a secret: the token is a
+// the contract does. Nothing here holds a secret: the token is a
 // short-lived room token for this child's session.
 
 export interface SessionJoin {

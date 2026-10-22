@@ -1,0 +1,5 @@
+{
+  "session_id": "sess_demo_001",
+  "livekit_url": "wss://livekit.example.test",
+  "token": "sample-room-token"
+}

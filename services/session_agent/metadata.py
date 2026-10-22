@@ -12,7 +12,8 @@ service, and VOICE_MODE / SESSION_PROFILE never do (server settings):
       "passage_id": "..."                a returning child's prepared passage
     }
 
-TODO(W1): agree this shape with Anthony and add a schema in schemas/.
+The shape is schemas/session_start.schema.json (room_metadata), with a fixture in
+fixtures/contracts/ that tests/test_contracts.py parses with this module.
 """
 
 import json

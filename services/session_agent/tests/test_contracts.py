@@ -109,8 +109,27 @@ def test_every_schema_has_a_fixture():
         "consent.schema.json",
         "guardian.schema.json",
         "child.schema.json",
+        "session_start.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
+
+
+def test_the_account_services_room_metadata_is_what_the_agent_is_dispatched_with():
+    # POST /v1/sessions (Account, W1) writes this into the room; metadata.parse reads it.
+    from services.session_agent import metadata
+
+    raw = (FIXTURES / "session_start.room_metadata.json").read_text()
+    start = metadata.parse(raw, voice_profile_id="voice_test")
+    meta = json.loads(raw)
+    assert (start.ctx.session_id, start.child_id) == (meta["session_id"], meta["child_id"])
+    assert (start.ctx.context, start.ctx.capture_mode) == (meta["context"], meta["capture_mode"])
+    assert start.passage_id is None
+    schema = _load(SCHEMAS / "session_start.schema.json")
+    room_metadata = Draft202012Validator(
+        {"$ref": "session_start.schema.json#/$defs/room_metadata"}, registry=REGISTRY
+    )
+    room_metadata.validate(meta)
+    assert set(meta) <= set(schema["$defs"]["room_metadata"]["properties"])
 
 
 PASSAGE_FIXTURES = [

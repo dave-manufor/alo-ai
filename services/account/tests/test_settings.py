@@ -43,3 +43,12 @@ def test_a_missing_entra_setting_is_named(name):
 def test_a_hosted_service_must_name_the_one_web_origin():
     with pytest.raises(ConfigError, match="WEB_ORIGIN"):
         AccountSettings.from_env(ENV, hosted=True)
+
+
+def test_livekit_settings_are_read_and_empty_means_unset():
+    settings = AccountSettings.from_env(
+        ENV | {"LIVEKIT_URL": "wss://x.test", "LIVEKIT_API_KEY": "k", "LIVEKIT_API_SECRET": ""},
+        hosted=False,
+    )
+    assert (settings.livekit_url, settings.livekit_api_key) == ("wss://x.test", "k")
+    assert settings.livekit_api_secret is None

@@ -7,3 +7,4 @@ azure-identity==1.26.0
 google-cloud-firestore==2.34.1
 # Entra External ID access-token checks (RS256 against the tenant's keys).
 pyjwt[crypto]==2.15.1
+livekit-api==1.2.2

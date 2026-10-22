@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session_start.schema.json",
+  "title": "SessionStart",
+  "description": "POST /v1/sessions on the Account service (W1) and what it hands the Session Agent (W2). The browser sends only the child and, optionally, the context; VOICE_MODE and SESSION_PROFILE are server settings and are never part of this. The Account service creates the LiveKit room with room_metadata, and the agent (no agent name, so auto-dispatched) reads it from the room. schema_version 1.",
+  "$defs": {
+    "context": { "type": "string", "enum": ["HOME", "SCHOOL"] },
+    "request": {
+      "type": "object",
+      "properties": {
+        "child_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "context": { "$ref": "#/$defs/context" }
+      },
+      "required": ["child_id"],
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "session_id": { "type": "string", "pattern": "^sess_[A-Za-z0-9_-]{1,60}$" },
+        "livekit_url": { "type": "string", "format": "uri" },
+        "token": { "type": "string", "minLength": 1 }
+      },
+      "required": ["session_id", "livekit_url", "token"],
+      "additionalProperties": false
+    },
+    "room_metadata": {
+      "type": "object",
+      "properties": {
+        "session_id": { "type": "string", "pattern": "^sess_[A-Za-z0-9_-]{1,60}$" },
+        "child_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "context": { "$ref": "#/$defs/context" },
+        "capture_mode": { "type": "string", "enum": ["LIVE", "LOCAL_CAPTURE"] },
+        "passage_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["session_id", "child_id", "context", "capture_mode"],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/response" },
+    { "$ref": "#/$defs/room_metadata" }
+  ]
+}
