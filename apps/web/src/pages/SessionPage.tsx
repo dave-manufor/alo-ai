@@ -11,11 +11,8 @@ import {
   SpeechBubble,
 } from '../design-system/alo';
 import { createClipCache, unlockAudio } from '../session/clipCache';
-import {
-  closingMessages,
-  messagesFor,
-  type DriverEvent,
-} from '../session/fixtureDriver';
+import type { ChildEvent, SessionDriver } from '../session/driver';
+import { createFixtureDriver } from '../session/fixtureDriver';
 import HoldToConfirm from '../session/HoldToConfirm';
 import type { AgentMessage } from '../session/protocol';
 import {
@@ -56,15 +53,19 @@ const STEP_INDEX: Record<string, number> = {
 // protocol replaces it. The told word is the agent's decision during
 // reading, never a child's button. Children never see a score, timer,
 // percentage or red mark.
-export default function SessionPage() {
+export default function SessionPage({
+  createDriver = createFixtureDriver,
+}: {
+  /** Which SessionDriver carries the session (fixture now, LiveKit when live). */
+  createDriver?: () => SessionDriver;
+} = {}) {
   const { childId } = useParams();
   const navigate = useNavigate();
   const [started, setStarted] = useState(false);
   const [state, setState] = useState(initialSessionState);
   const [starsCollected, setStarsCollected] = useState(false);
   const [handedOver, setHandedOver] = useState(false);
-  const answersRef = useRef(0);
-  const toldWordTimer = useRef<number | null>(null);
+  const driverRef = useRef<SessionDriver | null>(null);
 
   const clipCache = useMemo(
     () =>
@@ -90,30 +91,18 @@ export default function SessionPage() {
     }
   }
 
-  async function dispatchAll(messages: AgentMessage[]) {
-    for (const message of messages) await dispatch(message);
+  function startSession() {
+    driverRef.current = createDriver();
+    driverRef.current.start(dispatch);
   }
 
-  function driverEvent(event: DriverEvent) {
-    if (event === 'child_spoke' && state.step === 'QUESTIONS') {
-      answersRef.current += 1;
-      if (answersRef.current >= 2) {
-        void dispatchAll(closingMessages());
-        return;
-      }
-    }
-    void dispatchAll(messagesFor(event, state.step));
-    if (event === 'child_spoke' && state.step === 'MIC_CHECK') {
-      // During reading, the agent tells a word after a pause (PRD 4.1).
-      toldWordTimer.current = window.setTimeout(() => {
-        void dispatchAll(messagesFor('reading_pause', 'READING'));
-      }, 900);
-    }
+  function driverEvent(event: ChildEvent) {
+    driverRef.current?.send(event);
   }
 
   useEffect(
     () => () => {
-      if (toldWordTimer.current !== null) window.clearTimeout(toldWordTimer.current);
+      driverRef.current?.stop();
     },
     [],
   );
@@ -145,6 +134,12 @@ export default function SessionPage() {
       data-theme="dark"
     >
       <div className="night-stars" aria-hidden="true" />
+      {/* What Auntie Kemi says, for screen readers and tests only (the
+          design shows no words on the child's screen; README deviation
+          B2). The text is the playing clip's exact words from clip_list. */}
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {started && !state.reconnecting ? state.bubbleText : null}
+      </p>
       {handedOver ? null : (
         <MoonProgress
           steps={['Say hello', 'Read', 'Tell', 'Answer']}
@@ -162,7 +157,7 @@ export default function SessionPage() {
             onClick={() => {
               unlockAudio();
               setStarted(true);
-              driverEvent('session_started');
+              startSession();
             }}
           >
             <span className="night-start__circle" aria-hidden="true">
@@ -186,7 +181,6 @@ export default function SessionPage() {
       {started && !state.reconnecting && step === 'INTEREST_CHAT' ? (
         <section className="night-centre">
           <VoiceOrb state={orbState} />
-          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <div className="night-topics">
             {TOPICS.map((topic) => (
               <Button
@@ -206,7 +200,6 @@ export default function SessionPage() {
       {started && !state.reconnecting && step === 'MIC_CHECK' ? (
         <section className="night-centre">
           <VoiceOrb state={orbState} countDots />
-          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
@@ -222,7 +215,6 @@ export default function SessionPage() {
             level={readingLevelForArl(state.passage.arl)}
             text={state.passage.sentences}
           />
-          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
@@ -232,7 +224,6 @@ export default function SessionPage() {
       (step === 'RETELL' || step === 'QUESTIONS' || step === 'LISTENING') ? (
         <section className="night-centre">
           <VoiceOrb state={orbState} />
-          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
@@ -251,7 +242,6 @@ export default function SessionPage() {
             <polyline points="10,55 45,20 90,8 140,22 168,40 188,58" pathLength={100} />
             <circle className="night-constellation__star" cx="188" cy="58" r="4" />
           </svg>
-          {state.bubbleText ? <SpeechBubble>{state.bubbleText}</SpeechBubble> : null}
           <Japa pose="cheer" />
           <RewardBadge kind="teller" earned />
           <Button

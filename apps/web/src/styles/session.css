@@ -19,7 +19,12 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
-  padding: var(--space-5) var(--space-4) var(--space-8);
+  /* Safe areas (notches, gesture bars) are added to the token padding. */
+  padding-top: calc(var(--space-5) + env(safe-area-inset-top, 0px));
+  padding-right: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(var(--space-4) + env(safe-area-inset-left, 0px));
+  min-width: 0;
   background: var(--surface);
   color: var(--ink);
 }
@@ -147,8 +152,11 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: calc(var(--space-8) * 3);
-  height: calc(var(--space-8) * 3);
+  /* The orb follows the screen: the smaller of width and height, kept
+     between 2 and 3.5 times the largest space token. */
+  --orb-size: clamp(calc(var(--space-8) * 2), 34vmin, calc(var(--space-8) * 3.5));
+  width: var(--orb-size);
+  height: var(--orb-size);
 }
 
 .voice-orb--small {
@@ -399,5 +407,78 @@
 
   .night-start__circle {
     transition: none;
+  }
+}
+
+/* --- Screen-reader text (B3) ------------------------------------------
+   Visually hidden, still read aloud by assistive tech: what Auntie Kemi
+   says. Nothing here is visible on the child's screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Device presets (B4) ------------------------------------------------
+   The layout follows the viewport's width and height, not a fixed
+   device. Checked at: small Android phone (360 x 640), tall phone
+   (412 x 915), tablet (768 x 1024) and landscape phone (915 x 412).
+   Media queries cannot read custom properties, so the breakpoints are
+   rem literals (the token set has no breakpoint primitive; proposed
+   addition in DESIGN-V.md). No horizontal scroll at any size. */
+
+.night-session,
+.night-centre,
+.night-reading {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Short screens (small phone, or any phone held sideways): tighter
+   gaps so the orb, the topics and the mic fit without scrolling. */
+@media (max-height: 40rem) {
+  .night-session {
+    gap: var(--space-3);
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .night-centre {
+    gap: var(--space-3);
+  }
+}
+
+/* Landscape phone: put the orb beside what it goes with. */
+@media (orientation: landscape) and (max-height: 30rem) {
+  .night-centre {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: none;
+  }
+
+  .night-reading {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .night-reading__head {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Tablet and wider: more room around the same single column. */
+@media (min-width: 48rem) {
+  .night-session {
+    gap: var(--space-7);
+    padding-left: calc(var(--space-7) + env(safe-area-inset-left, 0px));
+    padding-right: calc(var(--space-7) + env(safe-area-inset-right, 0px));
   }
 }
