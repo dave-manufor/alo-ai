@@ -251,3 +251,9 @@ variable "entra_api_audience" {
   type        = string
   default     = ""
 }
+
+variable "operator_object_ids" {
+  description = "Entra object ids of the people running the study (usually one). Each gets Cosmos DB data access to the one database and Service Bus Data Owner on the queues, for the cloud smoke test and the study-day checks (I5). A person's id is not committed: pass it with -var on the command line, like budget_contact_emails."
+  type        = list(string)
+  default     = []
+}
