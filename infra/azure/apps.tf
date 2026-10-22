@@ -57,6 +57,10 @@ locals {
     WEB_ORIGIN      = "https://${azurerm_static_web_app.web.default_host_name}" # the only origin allowed to call it (CORS)
     LIVEKIT_URL     = var.livekit_url
     AZURE_CLIENT_ID = azurerm_user_assigned_identity.svc["account"].client_id
+    # Entra External ID identifiers (not secrets): the Account service checks the guardian's token with these.
+    ENTRA_TENANT_ID    = var.entra_tenant_id
+    ENTRA_AUTHORITY    = var.entra_authority
+    ENTRA_API_AUDIENCE = var.entra_api_audience
   })
 
   env_core = merge(local.base_env, local.ai_env, {
