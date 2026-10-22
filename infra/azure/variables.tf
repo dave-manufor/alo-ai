@@ -60,6 +60,16 @@ variable "agent_on" {
   default     = false
 }
 
+variable "second_transcript" {
+  description = "\"on\": a word counts only where two transcripts agree (PRD 5.3). \"off\": the Reading Scorer scores from the Azure AI Speech transcript alone, which needs no OpenAI transcription deployment but relaxes that rule: leave it on unless W3 has confirmed the single-transcript rule and rerun the golden recordings."
+  type        = string
+  default     = "on"
+  validation {
+    condition     = contains(["on", "off"], var.second_transcript)
+    error_message = "second_transcript must be \"on\" or \"off\"."
+  }
+}
+
 variable "coach_on" {
   description = "false turns the Reading Coach off: every plan is the template plan."
   type        = bool
