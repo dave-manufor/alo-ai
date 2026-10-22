@@ -23,6 +23,7 @@ import {
 } from '../session/sessionState';
 import { requestMic, type MicResult } from '../session/micPermission';
 import StoryPages from '../session/StoryPages';
+import Atmosphere from '../session/Atmosphere';
 import VoiceOrb from '../session/VoiceOrb';
 
 const TOPICS: { label: string; icon: 'book' | 'star' | 'lantern' | 'ear' }[] = [
@@ -159,7 +160,7 @@ export default function SessionPage({
       className={`night-session${step === 'LISTENING' ? ' night-session--rain' : ''}`}
       data-theme="dark"
     >
-      <div className="night-stars" aria-hidden="true" />
+      <Atmosphere rain={step === 'LISTENING'} />
       {/* What Auntie Kemi says, for screen readers and tests only (the
           design shows no words on the child's screen; README deviation
           B2). The text is the playing clip's exact words from clip_list. */}
@@ -309,7 +310,7 @@ export default function SessionPage({
       !state.reconnecting &&
       (step === 'RETELL' || step === 'QUESTIONS' || step === 'LISTENING') ? (
         <section className="night-centre">
-          <VoiceOrb state={orbState} />
+          <VoiceOrb state={orbState} tone={step === 'LISTENING' ? 'blue' : undefined} />
           <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
       ) : null}
