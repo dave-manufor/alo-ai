@@ -201,6 +201,13 @@ export function createSessionClipCache(): ClipCache {
   }
   return createClipCache({
     load: async (url) => `fixture:${url}`,
-    player: { play: async () => undefined },
+    // Sample build: no audio, but a clip "plays" for about as long as a short sentence,
+    // so the screen can show Auntie Kemi speaking.
+    player: {
+      play: (clip_id) =>
+        new Promise<void>((resolve) =>
+          setTimeout(resolve, import.meta.env.MODE === 'test' ? 0 : clip_id.startsWith('word_') ? 1800 : 2800),
+        ),
+    },
   });
 }

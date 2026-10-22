@@ -1,0 +1,832 @@
+/* The kid session screen: a port of the "Alo Night Session V" artifact's
+   `.stage` (the source of truth). Values are the artifact's, measured and
+   copied; colours use design-system tokens where one equals the artifact's
+   value and artifact-tokens.css otherwise. The screen sets data-theme="dark";
+   the story page and the report card set data-theme="light" (the scoped
+   light theme the design system allows for a card on a dark screen).
+   Under prefers-reduced-motion every loop stops (orb spin, aurora drift,
+   twinkle, rain, rings); positions still change, without easing. */
+
+.night-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: var(--art-screen);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  line-height: 1.55;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.night-stage *,
+.night-stage *::before,
+.night-stage *::after {
+  box-sizing: border-box;
+}
+.night-stage .l {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+.night-stage .sky {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.night-stage .sky.dusk {
+  background: linear-gradient(180deg, var(--art-sky-dusk-a) 0%, var(--art-sky-dusk-b) 100%);
+}
+.night-stage .sky.night {
+  background: linear-gradient(180deg, var(--art-sky-night-a) 0%, var(--art-sky-night-b) 100%);
+}
+.night-stage .sky.deep {
+  background: linear-gradient(180deg, var(--art-sky-deep-a) 0%, var(--art-sky-deep-b) 100%);
+}
+.night-stage .aurset {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.night-stage .aur {
+  border-radius: 50%;
+  will-change: transform;
+}
+.night-stage .aur.a1 {
+  animation: ns-drift1 26s ease-in-out infinite alternate;
+}
+.night-stage .aur.a2 {
+  animation: ns-drift2 31s ease-in-out infinite alternate;
+}
+@keyframes ns-drift1 {
+  to {
+    transform: translate(18%, 14%) scale(1.15);
+  }
+}
+@keyframes ns-drift2 {
+  to {
+    transform: translate(-18%, -12%) scale(0.9);
+  }
+}
+.night-stage .aur.coral {
+  background: radial-gradient(circle, rgb(var(--art-coral-rgb) / 0.16) 0%, rgb(var(--art-coral-rgb) / 0.1) 25%, rgb(var(--art-coral-rgb) / 0.04) 45%, rgb(var(--art-coral-rgb) / 0.01) 60%, rgb(var(--art-coral-rgb) / 0) 70%);
+}
+.night-stage .aur.indigo {
+  background: radial-gradient(circle, rgb(var(--art-indigo-rgb) / 0.18) 0%, rgb(var(--art-indigo-rgb) / 0.11) 25%, rgb(var(--art-indigo-rgb) / 0.045) 45%, rgb(var(--art-indigo-rgb) / 0.012) 60%, rgb(var(--art-indigo-rgb) / 0) 70%);
+}
+.night-stage .aur.blue {
+  background: radial-gradient(circle, rgb(var(--art-sky-rgb) / 0.15) 0%, rgb(var(--art-sky-rgb) / 0.09) 25%, rgb(var(--art-sky-rgb) / 0.04) 45%, rgb(var(--art-sky-rgb) / 0.01) 60%, rgb(var(--art-sky-rgb) / 0) 70%);
+}
+.night-stage .aur.gold {
+  background: radial-gradient(circle, rgb(var(--art-aur-gold-rgb) / 0.08) 0%, rgb(var(--art-aur-gold-rgb) / 0.05) 25%, rgb(var(--art-aur-gold-rgb) / 0.02) 45%, rgb(var(--art-aur-gold-rgb) / 0) 70%);
+}
+.night-stage .stars {
+  width: 100%;
+  height: 65%;
+  background: url('./assets/stars.webp') 0 0 / 364px 480px repeat;
+}
+.night-stage .stars2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('./assets/stars2.webp') 0 0 / 364px 480px repeat;
+  animation: ns-twinkle 3.2s ease-in-out infinite alternate;
+}
+@keyframes ns-twinkle {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.night-stage .rainbox {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.night-stage .rain {
+  left: -60px;
+  top: -480px;
+  width: calc(100% + 120px);
+  height: calc(100% + 960px);
+  background: url('./assets/rain.webp') 0 0 / 120px 240px repeat;
+  will-change: transform;
+  animation: ns-fall 0.9s linear infinite;
+}
+.night-stage .rain.r2 {
+  background-size: 180px 360px;
+  opacity: 0.55;
+  animation: ns-fall2 1.5s linear infinite;
+}
+@keyframes ns-fall {
+  to {
+    transform: translate(-29px, 240px);
+  }
+}
+@keyframes ns-fall2 {
+  to {
+    transform: translate(-43px, 360px);
+  }
+}
+.night-stage .const {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.night-stage .const line {
+  stroke: rgb(var(--art-lilac-rgb) / 0.6);
+  stroke-width: 1.2;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.6s ease;
+}
+.night-stage .const line.head {
+  stroke: rgb(var(--art-gold-b-rgb) / 0.8);
+}
+.night-stage .const line.on {
+  stroke-dashoffset: 0;
+}
+.night-stage .const circle {
+  fill: var(--ink);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.night-stage .const circle.on {
+  opacity: 1;
+}
+
+/* Auntie Kemi's light */
+.night-stage .orb {
+  width: 0;
+  height: 0;
+  will-change: transform, opacity;
+}
+.night-stage .orb .lvl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.night-stage .orb .set {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.night-stage .orb .halo {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  left: -180px;
+  top: -180px;
+  border-radius: 50%;
+}
+.night-stage .orb .spin {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  left: -70px;
+  top: -70px;
+  animation: ns-spin 9s linear infinite;
+}
+.night-stage .orb .spin.b {
+  animation-duration: 13s;
+  animation-direction: reverse;
+}
+.night-stage .orb .spin.c {
+  animation-duration: 17s;
+}
+.night-stage .orb .lobe {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: ns-breathe 3.4s ease-in-out infinite alternate;
+}
+.night-stage .orb .spin.a .lobe {
+  transform: translate(9px, 0);
+}
+.night-stage .orb .spin.b .lobe {
+  transform: translate(0, -9px);
+  animation-delay: -1.2s;
+}
+.night-stage .orb .spin.c .lobe {
+  transform: translate(-8px, 6px);
+  animation-delay: -2.3s;
+}
+@keyframes ns-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ns-breathe {
+  from {
+    scale: 0.94;
+  }
+  to {
+    scale: 1.05;
+  }
+}
+.night-stage .orb .core {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  left: -56px;
+  top: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 70%);
+}
+.night-stage .orb .rings,
+.night-stage .orb .shim,
+.night-stage .orb .outline {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.night-stage .orb .rings i {
+  position: absolute;
+  width: 136px;
+  height: 136px;
+  left: -68px;
+  top: -68px;
+  border-radius: 50%;
+  border: 1.4px solid rgb(var(--art-lilac-rgb) / 0.55);
+  opacity: 0;
+  animation: ns-ring 1.8s ease-out infinite;
+}
+.night-stage .orb .rings i:nth-child(2) {
+  animation-delay: 0.6s;
+}
+.night-stage .orb .rings i:nth-child(3) {
+  animation-delay: 1.2s;
+}
+@keyframes ns-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+.night-stage .orb .shim i {
+  position: absolute;
+  width: 176px;
+  height: 176px;
+  left: -88px;
+  top: -88px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgb(var(--art-lilac-rgb) / 0) 0deg, rgb(var(--art-lilac-rgb) / 0.55) 40deg, rgb(var(--art-lilac-rgb) / 0) 90deg, rgb(var(--art-lilac-rgb) / 0) 180deg, rgb(var(--art-lilac-rgb) / 0.4) 220deg, rgb(var(--art-lilac-rgb) / 0) 270deg);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 62%, #000 66%, transparent 68%);
+  mask: radial-gradient(circle, transparent 60%, #000 62%, #000 66%, transparent 68%);
+  animation: ns-spin 1.6s linear infinite;
+}
+.night-stage .orb .outline i {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  left: -66px;
+  top: -66px;
+  border-radius: 50%;
+  border: 2px dashed rgb(var(--art-lilac-rgb) / 0.55);
+  animation: ns-spin 6s linear infinite;
+}
+.night-stage .set.coral .halo {
+  background: radial-gradient(circle, rgb(var(--art-coral-rgb) / 0.45) 0%, rgb(var(--art-coral-rgb) / 0) 62%);
+}
+.night-stage .set.coral .a .lobe {
+  background: radial-gradient(circle, rgb(var(--art-coral-rgb) / 0.75) 0%, rgb(var(--art-coral-rgb) / 0.35) 60%, rgb(var(--art-coral-rgb) / 0) 72%);
+}
+.night-stage .set.coral .b .lobe {
+  background: radial-gradient(circle, rgb(var(--art-peach-rgb) / 0.75) 0%, rgb(var(--art-peach-rgb) / 0.3) 60%, rgb(var(--art-peach-rgb) / 0) 72%);
+}
+.night-stage .set.coral .c .lobe {
+  background: radial-gradient(circle, rgb(var(--art-cream-rgb) / 0.7) 0%, rgb(var(--art-cream-rgb) / 0.25) 55%, rgb(var(--art-cream-rgb) / 0) 70%);
+}
+.night-stage .set.indigo .halo {
+  background: radial-gradient(circle, rgb(var(--art-indigo-rgb) / 0.45) 0%, rgb(var(--art-indigo-rgb) / 0) 62%);
+}
+.night-stage .set.indigo .a .lobe {
+  background: radial-gradient(circle, rgb(var(--art-indigo-rgb) / 0.8) 0%, rgb(var(--art-indigo-rgb) / 0.38) 60%, rgb(var(--art-indigo-rgb) / 0) 72%);
+}
+.night-stage .set.indigo .b .lobe {
+  background: radial-gradient(circle, rgb(var(--art-sky-rgb) / 0.7) 0%, rgb(var(--art-sky-rgb) / 0.3) 60%, rgb(var(--art-sky-rgb) / 0) 72%);
+}
+.night-stage .set.indigo .c .lobe {
+  background: radial-gradient(circle, rgb(var(--art-lilac-rgb) / 0.7) 0%, rgb(var(--art-lilac-rgb) / 0.25) 55%, rgb(var(--art-lilac-rgb) / 0) 70%);
+}
+.night-stage .set.blue .halo {
+  background: radial-gradient(circle, rgb(var(--art-blue-rgb) / 0.45) 0%, rgb(var(--art-blue-rgb) / 0) 62%);
+}
+.night-stage .set.blue .a .lobe {
+  background: radial-gradient(circle, rgb(var(--art-blue-rgb) / 0.8) 0%, rgb(var(--art-blue-rgb) / 0.38) 60%, rgb(var(--art-blue-rgb) / 0) 72%);
+}
+.night-stage .set.blue .b .lobe {
+  background: radial-gradient(circle, rgb(var(--art-sky-lt-rgb) / 0.7) 0%, rgb(var(--art-sky-lt-rgb) / 0.3) 60%, rgb(var(--art-sky-lt-rgb) / 0) 72%);
+}
+.night-stage .set.blue .c .lobe {
+  background: radial-gradient(circle, rgb(var(--art-sky-pale-rgb) / 0.7) 0%, rgb(var(--art-sky-pale-rgb) / 0.25) 55%, rgb(var(--art-sky-pale-rgb) / 0) 70%);
+}
+.night-stage .set.gold .halo {
+  background: radial-gradient(circle, rgb(var(--art-gold-halo-rgb) / 0.5) 0%, rgb(var(--art-gold-halo-rgb) / 0) 62%);
+}
+.night-stage .set.gold .a .lobe {
+  background: radial-gradient(circle, rgb(var(--art-gold-a-rgb) / 0.9) 0%, rgb(var(--art-gold-a-rgb) / 0.5) 62%, rgb(var(--art-gold-a-rgb) / 0) 72%);
+}
+.night-stage .set.gold .b .lobe {
+  background: radial-gradient(circle, rgb(var(--art-gold-b-rgb) / 0.85) 0%, rgb(var(--art-gold-b-rgb) / 0.45) 62%, rgb(var(--art-gold-b-rgb) / 0) 72%);
+}
+.night-stage .set.gold .c .lobe {
+  background: radial-gradient(circle, rgb(var(--art-gold-pale-rgb) / 0.8) 0%, rgb(var(--art-gold-pale-rgb) / 0.35) 55%, rgb(var(--art-gold-pale-rgb) / 0) 70%);
+}
+
+/* the child's voice, flowing up into the light */
+.night-stage .voice {
+  width: 0;
+  height: 0;
+  will-change: transform, opacity;
+}
+.night-stage .voice i {
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, var(--art-mint-core) 0%, rgb(var(--art-mint-rgb) / 0.6) 40%, rgb(var(--art-mint-rgb) / 0) 70%);
+  animation: ns-flow 1.6s cubic-bezier(0.45, 0, 0.75, 1) infinite;
+  animation-delay: var(--d);
+}
+@keyframes ns-flow {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  55% {
+    transform: translate(calc(var(--x) * -0.45 + var(--w)), calc(var(--rise) * -0.58)) scale(0.8);
+  }
+  100% {
+    transform: translate(calc(var(--x) * -1), calc(var(--rise) * -1)) scale(0.35);
+    opacity: 0;
+  }
+}
+.night-stage .call {
+  text-align: center;
+  font-family: var(--font-reading);
+  font-weight: 700;
+  opacity: 0;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  background: linear-gradient(180deg, var(--art-call-top) 0%, var(--coral) 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.night-stage .glyph {
+  opacity: 0;
+  overflow: visible;
+  will-change: transform, opacity;
+}
+.night-stage .glyph * {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.3s ease;
+}
+.night-stage .glyph.drawn * {
+  stroke-dashoffset: 0;
+}
+.night-stage .pt8 {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0;
+  background: rgb(var(--art-ink-rgb) / 0.14);
+  box-shadow: 0 0 0 1.5px rgb(var(--art-ink-rgb) / 0.3) inset;
+  transition: background 0.3s, box-shadow 0.3s;
+  will-change: transform, opacity;
+}
+.night-stage .pt8.lit {
+  background: var(--art-mint-lit);
+  box-shadow: 0 0 14px 4px rgb(var(--art-mint-rgb) / 0.7);
+}
+
+/* the reading page (scoped light theme) */
+.night-stage .page {
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  opacity: 0;
+  will-change: transform, opacity;
+  background: linear-gradient(180deg, var(--art-page-top) 0%, var(--art-page-bottom) 100%);
+  color: var(--ink);
+  box-shadow: 0 24px 50px rgb(0 0 0 / 0.45);
+}
+.night-stage .page.measure {
+  visibility: hidden;
+  opacity: 1;
+  box-shadow: none;
+}
+.night-stage .page .ph {
+  flex: none;
+}
+.night-stage .page .ph small {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--line-strong);
+  margin-bottom: 6px;
+}
+.night-stage.tight .page .ph small {
+  display: none;
+}
+.night-stage.tight .page .ph h3 {
+  margin-bottom: 0.35em;
+}
+.night-stage .page .ph h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0 0 0.6em;
+  color: var(--ink);
+}
+.night-stage .page .pt {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  font-family: var(--font-reading);
+  line-height: 1.6;
+  color: var(--art-page-text);
+}
+.night-stage .page .pt p {
+  margin: 0;
+  will-change: transform, opacity;
+}
+.night-stage .page .pf {
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.night-stage .pdots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.night-stage .pdots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--art-page-dot);
+  transition: width 0.3s, background 0.3s;
+}
+.night-stage .pdots i.on {
+  width: 22px;
+  background: var(--night);
+}
+.night-stage .next {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--night);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--night) 35%, transparent);
+  pointer-events: auto;
+  cursor: pointer;
+}
+.night-stage .next svg {
+  width: 24px;
+  height: 24px;
+}
+.night-stage .next .rip {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--night) 35%, transparent);
+  opacity: 0;
+}
+.night-stage .page.live {
+  pointer-events: auto;
+}
+
+.night-stage .japa {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.night-stage .japa::before {
+  content: '';
+  position: absolute;
+  inset: -28%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--art-accent-rgb) / 0.35) 0%, rgb(var(--art-accent-rgb) / 0) 65%);
+}
+.night-stage .japa img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.night-stage .gstar {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.night-stage .gstar::before {
+  content: '';
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  left: -32px;
+  top: -32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--art-gold-b-rgb) / 0.7) 0%, rgb(var(--art-gold-b-rgb) / 0) 65%);
+}
+.night-stage .gstar svg {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: -12px;
+  top: -12px;
+}
+
+/* overlays */
+.night-stage .ov {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.night-stage .ov.live {
+  pointer-events: auto;
+}
+.night-stage .startov {
+  background: radial-gradient(80% 60% at 50% 45%, var(--art-start-a) 0%, var(--art-start-b) 100%);
+}
+.night-stage .startbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.night-stage .startbox .jp {
+  width: 150px;
+  height: 110px;
+}
+.night-stage .jp img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.night-stage .startbtn {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 10px rgb(var(--art-ink-rgb) / 0.08), 0 0 60px rgb(var(--art-accent-rgb) / 0.4);
+}
+.night-stage .startbtn svg {
+  width: 44px;
+  height: 44px;
+  margin-left: 6px;
+}
+.night-stage .startbox b {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 26px;
+  color: var(--ink);
+}
+.night-stage .handov {
+  background: rgb(var(--art-night-ink-rgb) / 0.72);
+}
+.night-stage .handbox {
+  grid-area: 1 / 1;
+  width: min(86%, 440px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  will-change: transform, opacity;
+  transition: opacity 0.6s ease;
+}
+.night-stage .handbox.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+.night-stage .handbox .jp {
+  width: 130px;
+  height: 95px;
+}
+.night-stage .handbox h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(22px, 4.5vmin, 30px);
+  line-height: 1.2;
+  color: var(--ink);
+}
+.night-stage .handbox p {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--art-page-dot);
+}
+.night-stage .hold,
+.night-stage .pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  border: 1px solid rgb(var(--art-ink-rgb) / 0.25);
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 18px 8px 8px;
+  color: var(--art-page-dot);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+  touch-action: none;
+}
+.night-stage .pill {
+  padding: 8px 22px;
+  min-height: 48px;
+  touch-action: auto;
+}
+.night-stage .hold svg {
+  width: 40px;
+  height: 40px;
+  transform: rotate(-90deg);
+}
+.night-stage .hold circle {
+  fill: none;
+  stroke-width: 4;
+}
+.night-stage .hold .track {
+  stroke: rgb(var(--art-ink-rgb) / 0.2);
+}
+.night-stage .hold .fill {
+  stroke: var(--ink);
+}
+.night-stage .report {
+  grid-area: 1 / 1;
+  width: min(90%, 420px);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 22px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.5);
+}
+.night-stage .report.shown {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.night-stage .report small {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.night-stage .report h5 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+}
+.night-stage .report p {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--ink-muted);
+}
+.night-stage .report .cta,
+.night-stage .report .cta2 {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border: 0;
+  background: var(--night);
+  color: var(--on-night);
+  border-radius: 12px;
+  padding: 9px 16px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+.night-stage .report .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.night-stage .report .cta2 {
+  background: transparent;
+  color: var(--night);
+  box-shadow: 0 0 0 2px var(--night) inset;
+}
+.night-stage .grownup {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: rgb(var(--art-night-ink-rgb) / 0.72);
+  pointer-events: auto;
+  overflow: auto;
+  padding: 16px;
+}
+.night-stage .grownup .report {
+  position: relative;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.night-stage .grownup .report ol {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 14.5px;
+  color: var(--ink-muted);
+}
+.night-stage .vignette {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(120% 80% at 50% 45%, rgb(0 0 0 / 0) 55%, rgb(0 0 0 / 0.5) 100%);
+}
+.night-stage .grain {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.06;
+  background: url('./assets/grain.png') 0 0 / 64px 64px;
+  mix-blend-mode: overlay;
+}
+.night-stage :focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.night-stage .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.night-stage.paused *,
+.night-stage.paused *::before,
+.night-stage.paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* Reduced motion: every loop stops. The grain is dropped as in the artifact. */
+@media (prefers-reduced-motion: reduce) {
+  .night-stage .grain {
+    display: none;
+  }
+  .night-stage *,
+  .night-stage *::before,
+  .night-stage *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

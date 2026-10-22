@@ -1,0 +1,57 @@
+/* Colours of the "Alo Night Session V" design artifact that have NO design-system token.
+ *
+ * The owner asked for the session screen to match the artifact exactly, so
+ * these values are copied from it verbatim instead of being rounded to the
+ * nearest token. This is an approved deviation (listed in the PR under
+ * "Design system deviations"); proposed addition to the design system:
+ * a "night sky" and "aurora" colour group plus a "mint" (gentle success)
+ * colour. Nothing outside src/session/ uses these.
+ *
+ * Where the artifact value equals a token (ink, night, moon, the light
+ * card colours, the coral at the end of the call gradient), the stylesheet
+ * uses the token and it is NOT repeated here.
+ *
+ * rgb triplets are used with `rgb(var(--art-x) / alpha)` so each hue is
+ * written once. */
+.night-stage {
+  /* sky gradients (dusk, night, deep) */
+  --art-sky-dusk-a: #1b1236;
+  --art-sky-dusk-b: #3a1b33;
+  --art-sky-night-a: #0e0b2c;
+  --art-sky-night-b: #141038;
+  --art-sky-deep-a: #05040f;
+  --art-sky-deep-b: #0e0b2e;
+  --art-screen: #05040f;
+  --art-start-a: #1e1850;
+  --art-start-b: #0b0926;
+  /* hues as rgb triplets */
+  --art-ink-rgb: 243 240 255;
+  --art-lilac-rgb: 214 208 255;
+  --art-accent-rgb: 157 144 255;
+  --art-coral-rgb: 255 107 74;
+  --art-peach-rgb: 255 179 138;
+  --art-cream-rgb: 255 230 214;
+  --art-indigo-rgb: 109 92 255;
+  --art-sky-rgb: 56 166 238;
+  --art-sky-lt-rgb: 108 193 255;
+  --art-sky-pale-rgb: 221 240 253;
+  --art-blue-rgb: 46 124 240;
+  --art-aur-gold-rgb: 255 190 90;
+  --art-gold-halo-rgb: 255 176 32;
+  --art-gold-a-rgb: 255 200 61;
+  --art-gold-b-rgb: 255 212 94;
+  --art-gold-pale-rgb: 255 246 214;
+  --art-mint-rgb: 155 240 184;
+  --art-night-ink-rgb: 5 4 15;
+  /* mint and the reward star */
+  --art-mint-lit: #c9fad9;
+  --art-mint-core: #dcffe8;
+  --art-star: #ffe9a8;
+  /* the call, "Alo o!": top of its gradient (the bottom is --coral in dark) */
+  --art-call-top: #ffd9c9;
+  /* the story page */
+  --art-page-top: #fcfbff;
+  --art-page-bottom: #f4f1ff;
+  --art-page-text: #2a2160;
+  --art-page-dot: #d6d0ff;
+}

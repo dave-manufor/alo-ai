@@ -1,55 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { accountStore } from '../account/store';
-import {
-  Button,
-  Japa,
-  MicButton,
-  MoonProgress,
-  Paper,
-  RewardBadge,
-  SpeechBubble,
-} from '../design-system/alo';
 import { dataMode } from '../api';
 import { createSessionClipCache, unlockAudio } from '../session/clipCache';
-import type { ChildEvent, SessionDriver } from '../session/driver';
+import type { SessionDriver } from '../session/driver';
 import { createSessionDriver } from '../session/driverFactory';
 import HoldToConfirm from '../session/HoldToConfirm';
-import type { AgentMessage } from '../session/protocol';
-import {
-  applyAgentMessage,
-  initialSessionState,
-  readingLevelForArl,
-  recordAck,
-} from '../session/sessionState';
 import { requestMic, type MicResult } from '../session/micPermission';
-import StoryPages from '../session/StoryPages';
-import Atmosphere from '../session/Atmosphere';
-import VoiceOrb from '../session/VoiceOrb';
+import japaBase from '../session/assets/japa-base.svg';
+import NightStage from '../session/NightStage';
+import type { AgentMessage } from '../session/protocol';
+import { applyAgentMessage, initialSessionState, recordAck } from '../session/sessionState';
+import type { Mode, StageInput } from '../session/stageEngine';
 
-const STEP_INDEX: Record<string, number> = {
-  INTEREST_CHAT: 0,
-  MIC_CHECK: 0,
-  READING: 1,
-  RETELL: 2,
-  QUESTIONS: 3,
-  LISTENING: 3,
-  CLOSE: 3,
-  ENDED: 3,
-};
+// How long the moon, the constellation and the child's star stay before the
+// hand-back (the artifact: 8 s after the light becomes the moon).
+const END_MS = 8000;
+const QUESTION_CLIP = /^question:(\d+)$/;
 
-// Kid mode session screen (PRD 4.1, 4.4), rebuilt on the "Àlọ́ Night
-// Session" demo: a Night-theme screen where Kemi is a glowing voice
-// orb, the story arrives on a raised card, and the reward is a moon
-// and a constellation before the grown-up handover. The gate comes
-// first: no signed-in guardian + no per-child consent record, no
-// session (PRD 12). The screen follows the agent's protocol v2
-// messages only — step, clip texts for the bubble, the story from
-// show_passage — and never moves the session on itself. In this phase
-// a fixture driver emits those messages; the LiveKit driver in #24's
-// protocol replaces it. The told word is the agent's decision during
-// reading, never a child's button. Children never see a score, timer,
-// percentage or red mark.
+// Kid mode session screen (PRD 4.1, 4.4): the "Alo Night Session V" design.
+// One night sky; Auntie Kemi is a light that moves (centre, the corner while
+// the child reads, the moon at the end); the story is a page the child turns
+// with the arrow; the only other control is Start and the grown-ups' press and
+// hold. The gate comes first: no signed-in guardian + no per-child consent
+// record, no session (PRD 12). The screen follows the agent's protocol v2
+// messages only (step, clips, show_passage) and never moves the session on
+// itself. Children never see a score, timer, percentage or red mark.
 export default function SessionPage({
   createDriver,
 }: {
@@ -61,11 +37,12 @@ export default function SessionPage({
   const navigate = useNavigate();
   const [started, setStarted] = useState(false);
   // Before the session: 'greeting' (Start) -> 'explain' (why the mic, before the browser
-  // asks) -> started, or 'blocked' / 'unavailable' (a grown-up screen to recover).
+  // asks) -> started, or 'blocked' / 'unavailable' (a grown-up card to recover).
   const [micPhase, setMicPhase] = useState<'greeting' | 'explain' | MicResult>('greeting');
   const [state, setState] = useState(initialSessionState);
-  const [starsCollected, setStarsCollected] = useState(false);
-  const [handedOver, setHandedOver] = useState(false);
+  const [questionsLit, setQuestionsLit] = useState(0);
+  const [endDone, setEndDone] = useState(false);
+  const [reported, setReported] = useState(false);
   const driverRef = useRef<SessionDriver | null>(null);
 
   // Fixture build: clips are simulated locally. Live build: every clip is
@@ -76,6 +53,10 @@ export default function SessionPage({
   async function dispatch(message: AgentMessage) {
     if (message.cmd === 'clip_list') {
       await clipCache.downloadAll(message.clips);
+    }
+    if (message.cmd === 'play') {
+      const q = QUESTION_CLIP.exec(message.clip_id);
+      if (q) setQuestionsLit((n) => Math.max(n, Number(q[1])));
     }
     setState((current) =>
       applyAgentMessage(current, message, (clipId) => clipCache.textFor(clipId)),
@@ -103,6 +84,7 @@ export default function SessionPage({
   function retrySession() {
     driverRef.current?.stop();
     setState(initialSessionState);
+    setQuestionsLit(0);
     startSession();
   }
 
@@ -117,15 +99,60 @@ export default function SessionPage({
     }
   }
 
-  function driverEvent(event: ChildEvent) {
-    driverRef.current?.send(event);
-  }
-
   useEffect(
     () => () => {
       driverRef.current?.stop();
     },
     [],
+  );
+
+  const step = state.step;
+  const ending = step === 'CLOSE' || step === 'ENDED';
+  // After the closing praise: the moon and the star, then the hand-back.
+  useEffect(() => {
+    if (!ending) return undefined;
+    const id = window.setTimeout(() => setEndDone(true), END_MS);
+    return () => window.clearTimeout(id);
+  }, [ending]);
+
+  const speaking = state.playingClipId !== null;
+  const savedEarly = started && failure !== null && step !== null;
+  const reading = step === 'READING' && state.passageVisible && state.passage !== null;
+
+  let mode: Mode = 'start';
+  if (started) {
+    if (savedEarly) mode = 'hand';
+    else if (state.reconnecting) mode = 'reconnect';
+    else if (step === null) mode = 'call';
+    else if (step === 'INTEREST_CHAT') mode = 'seeds';
+    else if (step === 'MIC_CHECK')
+      mode = state.playingClipId === 'story_almost_ready' ? 'think' : 'count';
+    else if (step === 'READING') mode = reading ? 'reading' : 'think';
+    else if (step === 'RETELL') mode = 'retell';
+    else if (step === 'QUESTIONS') mode = 'questions';
+    else if (step === 'LISTENING') mode = 'listen';
+    else mode = endDone ? 'hand' : 'end';
+  }
+
+  const input = useMemo<StageInput>(
+    () => ({
+      mode,
+      speaking,
+      childSpeaking: false,
+      counting: mode === 'count' && !speaking,
+      questionsLit: ending ? 3 : questionsLit,
+      seeds: 0,
+      peek: mode === 'reading' && (state.playingClipId?.startsWith('word_') ?? false),
+      nod: false,
+      pageVisible: state.passageVisible && state.passage !== null,
+      showStart: micPhase === 'greeting' || micPhase === 'explain',
+    }),
+    [mode, speaking, ending, questionsLit, state.playingClipId, state.passageVisible, state.passage, micPhase],
+  );
+
+  const story = useMemo(
+    () => (state.passage ? { title: state.passage.title, sentences: state.passage.sentences } : null),
+    [state.passage],
   );
 
   // The mic gate (PRD 12): this child's consent record must exist.
@@ -137,221 +164,127 @@ export default function SessionPage({
     accountStore.getState().children.find((child) => child.child_id === childId)?.first_name ??
     'Your child';
 
-  const step = state.step;
-  const speaking = state.playingClipId !== null;
-  const listening =
-    !speaking &&
-    (step === 'INTEREST_CHAT' ||
-      step === 'MIC_CHECK' ||
-      step === 'READING' ||
-      step === 'RETELL' ||
-      step === 'QUESTIONS' ||
-      step === 'LISTENING');
-  const orbState = speaking ? 'speaking' : listening ? 'listening' : 'idle';
+  const start =
+    micPhase === 'explain' ? (
+      <div className="handbox">
+        <div className="jp">
+          <img src={japaBase} alt="" />
+        </div>
+        <h4>Auntie Kemi needs to hear you</h4>
+        <p>Ask a grown-up to tap Allow when the phone asks about the microphone.</p>
+        <button type="button" className="pill" onClick={() => void askForMic()}>
+          I’m ready
+        </button>
+      </div>
+    ) : (
+      <>
+        <div className="jp">
+          <img src={japaBase} alt="" />
+        </div>
+        <button
+          type="button"
+          className="startbtn"
+          aria-label="Start"
+          onClick={() => {
+            unlockAudio();
+            setMicPhase('explain');
+          }}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 4.5v15l13-7.5z" style={{ fill: 'var(--night-edge)' }} />
+          </svg>
+        </button>
+        <b aria-hidden="true">Start</b>
+      </>
+    );
+
+  const hand = (
+    <>
+      <div className={`handbox${reported ? ' gone' : ''}`}>
+        <div className="jp">
+          <img src={japaBase} alt="" />
+        </div>
+        <h4>Please give the phone to a grown-up</h4>
+        <HoldToConfirm label="Grown-ups: press and hold" onComplete={() => setReported(true)} />
+      </div>
+      <div className={`report${reported ? ' shown' : ''}`} data-theme="light">
+        <small>{savedEarly ? 'Reading check · saved' : 'Reading check · today'}</small>
+        <h5>
+          {savedEarly ? `We saved ${childName}’s reading` : `${childName}’s report is ready`}
+        </h5>
+        <p>
+          {savedEarly
+            ? 'The internet dropped, so the check stopped early. You’ll be offered a new session later, with a different story.'
+            : `See how ${childName} read and what to try this week.`}
+        </p>
+        <button
+          type="button"
+          className="cta"
+          tabIndex={reported ? 0 : -1}
+          onClick={() => navigate(savedEarly ? '/children' : '/reports')}
+        >
+          {savedEarly ? 'Back to your children' : 'See the report'}
+        </button>
+      </div>
+    </>
+  );
+
+  const blocked = micPhase === 'denied' || micPhase === 'unavailable';
+  const failedToStart = failure !== null && !savedEarly;
+  const grownUp =
+    blocked || failedToStart ? (
+      <div className="l grownup" data-theme="dark">
+        <div className="report" data-theme="light" role={failedToStart ? 'alert' : undefined}>
+          <h5>
+            {failedToStart
+              ? 'We could not start'
+              : micPhase === 'denied'
+                ? 'The microphone is turned off'
+                : 'No microphone found'}
+          </h5>
+          {failedToStart ? (
+            <p>{failure}</p>
+          ) : (
+            <>
+              <p>
+                Alo.ai listens to your child read aloud, so it needs the microphone.
+                {micPhase === 'denied'
+                  ? ' To turn it on:'
+                  : ' Please check that a microphone is working on this phone, and that you are using Chrome.'}
+              </p>
+              {micPhase === 'denied' ? (
+                <ol>
+                  <li>Tap the icon next to the web address at the top of the screen.</li>
+                  <li>Open Permissions, then set Microphone to Allow.</li>
+                  <li>Come back here and tap Try again.</li>
+                </ol>
+              ) : null}
+            </>
+          )}
+          <div className="row">
+            <button
+              type="button"
+              className="cta"
+              onClick={() => (failedToStart ? retrySession() : void askForMic())}
+            >
+              Try again
+            </button>
+            <button type="button" className="cta2" onClick={() => navigate('/children')}>
+              Back to your children
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null;
 
   return (
-    <main
-      className={`night-session${step === 'LISTENING' ? ' night-session--rain' : ''}`}
-      data-theme="dark"
-    >
-      <Atmosphere rain={step === 'LISTENING'} />
-      {/* What Auntie Kemi says, for screen readers and tests only (the
-          design shows no words on the child's screen; README deviation
-          B2). The text is the playing clip's exact words from clip_list. */}
-      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {started && !state.reconnecting ? state.bubbleText : null}
-      </p>
-      {handedOver || micPhase === 'denied' || micPhase === 'unavailable' ? null : (
-        <MoonProgress
-          steps={['Say hello', 'Read', 'Tell', 'Answer']}
-          current={step ? STEP_INDEX[step] : 0}
-        />
-      )}
-
-      {micPhase === 'explain' ? (
-        <section className="night-centre">
-          <Japa pose="happy" />
-          <p className="kid-title">Auntie Kemi needs to hear you</p>
-          <p className="kid-body">
-            Ask a grown-up to tap Allow when the phone asks about the microphone.
-          </p>
-          <Button variant="primary" size="kid" onClick={() => void askForMic()}>
-            I’m ready
-          </Button>
-        </section>
-      ) : null}
-
-      {micPhase === 'denied' || micPhase === 'unavailable' ? (
-        <section className="night-centre night-grownup">
-          <div className="night-report-card">
-            <h1 className="title">
-              {micPhase === 'denied' ? 'The microphone is turned off' : 'No microphone found'}
-            </h1>
-            <p className="body">
-              Alo.ai listens to your child read aloud, so it needs the microphone.
-              {micPhase === 'denied'
-                ? ' To turn it on:'
-                : ' Please check that a microphone is working on this phone, and that you are using Chrome.'}
-            </p>
-            {micPhase === 'denied' ? (
-              <ol className="body">
-                <li>Tap the icon next to the web address at the top of the screen.</li>
-                <li>Open Permissions, then set Microphone to Allow.</li>
-                <li>Come back here and tap Try again.</li>
-              </ol>
-            ) : null}
-            <div className="row">
-              <Button variant="primary" size="grown" onClick={() => void askForMic()}>
-                Try again
-              </Button>
-              <Button variant="secondary" size="grown" onClick={() => navigate('/children')}>
-                Back to your children
-              </Button>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {micPhase === 'greeting' ? (
-        <section className="night-centre">
-          <SpeechBubble tone="call">Àlọ́ o!</SpeechBubble>
-          <Japa pose="happy" />
-          <button
-            type="button"
-            className="night-start"
-            onClick={() => {
-              unlockAudio();
-              setMicPhase('explain');
-            }}
-          >
-            <span className="night-start__circle" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="40" height="40">
-                <path d="M8 5v14l11-7z" fill="currentColor" />
-              </svg>
-            </span>
-            <span className="night-start__label">Start</span>
-          </button>
-        </section>
-      ) : null}
-
-      {failure ? (
-        <section className="night-centre">
-          <div className="night-report-card" role="alert">
-            <h1 className="title">We could not start</h1>
-            <p className="body">{failure}</p>
-            <div className="row">
-              <Button variant="primary" size="grown" onClick={retrySession}>
-                Try again
-              </Button>
-              <Button variant="secondary" size="grown" onClick={() => navigate('/children')}>
-                Back to your children
-              </Button>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {started && !failure && state.reconnecting ? (
-        <section className="night-centre">
-          <VoiceOrb state="idle" />
-          <SpeechBubble>Let’s wait for the internet.</SpeechBubble>
-          <Japa pose="thinking" />
-        </section>
-      ) : null}
-
-      {started && !state.reconnecting && step === 'INTEREST_CHAT' ? (
-        <section className="night-centre">
-          {/* The interests are spoken (the artifact's "seeds"): no buttons. */}
-          <VoiceOrb state={orbState} />
-        </section>
-      ) : null}
-
-      {started && !state.reconnecting && step === 'MIC_CHECK' ? (
-        <section className="night-centre">
-          <VoiceOrb state={orbState} countDots />
-          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
-        </section>
-      ) : null}
-
-      {started && !state.reconnecting && step === 'READING' && state.passageVisible && state.passage ? (
-        <section className="night-reading">
-          <span className="night-reading__head">
-            <VoiceOrb state={orbState} small />
-            <p className="label night-eyebrow">Your story</p>
-          </span>
-          <StoryPages
-            title={state.passage.title}
-            level={readingLevelForArl(state.passage.arl)}
-            sentences={state.passage.sentences}
-          />
-          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
-        </section>
-      ) : null}
-
-      {started &&
-      !state.reconnecting &&
-      (step === 'RETELL' || step === 'QUESTIONS' || step === 'LISTENING') ? (
-        <section className="night-centre">
-          <VoiceOrb state={orbState} tone={step === 'LISTENING' ? 'blue' : undefined} />
-          <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
-        </section>
-      ) : null}
-
-      {started &&
-      !state.reconnecting &&
-      (step === 'CLOSE' || step === 'ENDED') &&
-      !starsCollected ? (
-        <section className="night-centre">
-          <span className="night-moon" aria-hidden="true" />
-          <svg
-            className="night-constellation"
-            viewBox="0 0 200 70"
-            aria-hidden="true"
-          >
-            <polyline points="10,55 45,20 90,8 140,22 168,40 188,58" pathLength={100} />
-            <circle className="night-constellation__star" cx="188" cy="58" r="4" />
-          </svg>
-          <Japa pose="cheer" />
-          <RewardBadge kind="teller" earned />
-          <Button
-            variant="reward"
-            size="kid"
-            icon="star"
-            onClick={() => setStarsCollected(true)}
-          >
-            Collect stars
-          </Button>
-        </section>
-      ) : null}
-
-      {/* Keyed on starsCollected, not the step: if the agent moves to
-          ENDED while the grown-up is holding, the handover must not
-          vanish mid-hold. */}
-      {started && starsCollected && !handedOver ? (
-        <section className="night-centre">
-          <Japa pose="happy" />
-          <p className="kid-title">Please give the phone to a grown-up</p>
-          <HoldToConfirm
-            label="Grown-ups: press and hold"
-            onComplete={() => setHandedOver(true)}
-          />
-        </section>
-      ) : null}
-
-      {started && handedOver ? (
-        <section className="night-centre">
-          {/* Grown-up mode, after the hold gate: one of the two places the
-              design system allows the light scope (Paper). */}
-          <Paper className="night-report-card night-report-card--paper">
-            <p className="caption muted">Reading check · today</p>
-            <h2 className="title">{childName}&apos;s report is ready</h2>
-            <p className="body">See how {childName} read and what to try this week.</p>
-            <Button variant="primary" size="grown" onClick={() => navigate('/reports')}>
-              See the report
-            </Button>
-          </Paper>
-        </section>
-      ) : null}
-    </main>
+    <NightStage
+      input={input}
+      story={story}
+      start={start}
+      hand={hand}
+      grownUp={grownUp}
+      srText={started && !state.reconnecting ? state.bubbleText : null}
+    />
   );
 }
