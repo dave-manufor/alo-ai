@@ -337,6 +337,25 @@ class SlowModel(BaseLlm):
         yield
 
 
+class FailingModel(BaseLlm):
+    """A run that fails with the child's details in the error, as a schema error that quotes
+    the plan it refused would."""
+
+    async def generate_content_async(self, llm_request, stream=False):
+        raise ValueError("summary_script: 'Chidi read 93.8 words a minute' is not valid")
+        yield
+
+
+def test_a_failed_run_logs_the_error_class_and_none_of_the_child_s_details(caplog):
+    with caplog.at_level(logging.ERROR):
+        coach, _, _ = run(models=lambda session_id: FailingModel(model="failing"))
+    assert coach.store.get(plan_path(SESSION_ID))["template_used"] is True
+    assert "the Reading Coach failed for session sess_demo_001: ValueError" in caplog.text
+    assert "Chidi" not in caplog.text
+    assert "93.8" not in caplog.text
+    assert "Traceback" not in caplog.text
+
+
 def test_a_run_past_its_deadline_saves_the_template_plan(monkeypatch):
     monkeypatch.setattr(coach_run, "RUN_DEADLINE_S", 0.05)
     coach, publisher, _ = run(models=lambda session_id: SlowModel(model="slow"))

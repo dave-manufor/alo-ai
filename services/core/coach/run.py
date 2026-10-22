@@ -30,6 +30,11 @@ from .plan import plan_path, save_next_check, write_template_plan
 from .tools import MAX_TAGS, CoachTools, catalogue_books, first_name, topic_tags
 
 logger = logging.getLogger(__name__)
+# ADK logs a failed run with its traceback ("Root node ... failed." in its runners), and the
+# error's message can quote the plan or summary it refused, with the child's name and results
+# (PRD 12: no child data in logs). Only critical ADK logs get through; _run_agent logs each
+# failure itself, by class.
+logging.getLogger("google_adk").setLevel(logging.CRITICAL)
 
 
 def _now() -> datetime:
@@ -124,8 +129,12 @@ class ReadingCoach:
         try:
             agent = coach_agent(self.model_for(ctx.session_id), tools, guard)
             asyncio.run(asyncio.wait_for(run_coach(agent, ctx), RUN_DEADLINE_S))
-        except Exception:
-            logger.exception("the Reading Coach failed for session %s", ctx.session_id)
+        except Exception as error:
+            # The class only: an error's message can hold the plan or summary it refused, with
+            # the child's name and results (a schema error quotes the instance), so no text.
+            logger.error(
+                "the Reading Coach failed for session %s: %s", ctx.session_id, type(error).__name__
+            )
 
     def _speak(self, plan: dict) -> None:
         if plan["summary_audio_uri"] is not None:
