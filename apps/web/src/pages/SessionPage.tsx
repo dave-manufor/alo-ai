@@ -138,7 +138,7 @@ export default function SessionPage({
     () => ({
       mode,
       speaking,
-      childSpeaking: false,
+      childSpeaking: state.childSpeaking,
       counting: mode === 'count' && !speaking,
       questionsLit: ending ? 3 : questionsLit,
       seeds: 0,
@@ -147,7 +147,17 @@ export default function SessionPage({
       pageVisible: state.passageVisible && state.passage !== null,
       showStart: micPhase === 'greeting' || micPhase === 'explain',
     }),
-    [mode, speaking, ending, questionsLit, state.playingClipId, state.passageVisible, state.passage, micPhase],
+    [
+      mode,
+      speaking,
+      ending,
+      questionsLit,
+      state.childSpeaking,
+      state.playingClipId,
+      state.passageVisible,
+      state.passage,
+      micPhase,
+    ],
   );
 
   const story = useMemo(

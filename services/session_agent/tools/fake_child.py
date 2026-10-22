@@ -20,7 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 TOPIC = "aloai.session"
-SCHEMA_VERSION = 2  # services/session_agent/protocol.py
+SCHEMA_VERSION = 3  # services/session_agent/protocol.py
 SAMPLE_RATE = 16_000
 FRAME_SAMPLES = SAMPLE_RATE // 100  # 10 ms
 DEFAULT_VOICE = "en-NG-EzinneNeural"

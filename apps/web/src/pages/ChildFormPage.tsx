@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { addChild } from '../account/actions';
-import { accountStore, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
+import { CONSENT_TEXT, accountStore, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
 import { dataMode } from '../api';
 import { Button } from '../design-system/alo';
 import { consentDraft, useConsentDraft } from '../onboarding/draft';
@@ -158,7 +158,7 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
             <p className="caption muted">
               {trimmed
                 ? attestationFor(trimmed, ageFromBirthYear(year))
-                : 'Saving records that you are this child’s parent or guardian and that you agree to the recording. Add their name to see the exact words.'}
+                : `I am the parent or guardian of this child. ${CONSENT_TEXT}`}
             </p>
           </div>
         ) : null}

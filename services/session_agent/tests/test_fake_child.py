@@ -4,11 +4,11 @@ from services.session_agent.tools.fake_child import Reply, Responder, chunks
 
 
 def step(name: str) -> dict:
-    return {"schema_version": 2, "cmd": "step", "step": name}
+    return {"schema_version": 3, "cmd": "step", "step": name}
 
 
 def play(clip_id: str = "clip_1") -> dict:
-    return {"schema_version": 2, "cmd": "play", "clip_id": clip_id}
+    return {"schema_version": 3, "cmd": "play", "clip_id": clip_id}
 
 
 # ---- what the child does for each message
@@ -16,7 +16,7 @@ def play(clip_id: str = "clip_1") -> dict:
 
 def test_every_play_is_acked_and_the_ack_is_one_the_agent_accepts():
     reply = Responder().on_message(play("greeting"))
-    assert reply.ack == {"schema_version": 2, "cmd": "played", "clip_id": "greeting"}
+    assert reply.ack == {"schema_version": 3, "cmd": "played", "clip_id": "greeting"}
     assert protocol.parse_client(protocol.encode(reply.ack)).clip_id == "greeting"
 
 

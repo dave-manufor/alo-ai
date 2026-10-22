@@ -37,9 +37,10 @@ function Privacy() {
       </p>
       <h2 className="title">Recordings</h2>
       <p className="body">
-        We record your child&apos;s voice while they read and answer, only after you agree for that child. Recordings are
-        deleted after 90 days. We use them to improve Alo.ai only if you say yes, and you can change that in your
-        account.
+        We record your child&apos;s voice while they read and answer, only after you agree for that child, and turn the
+        recording into a written transcript. Recordings are deleted after 90 days. Transcripts and the report stay in
+        your account until you ask for them to be deleted. We use recordings to improve Alo.ai only if you say yes, and
+        you can change that in your account.
       </p>
       <h2 className="title">Where it lives</h2>
       <p className="body">Everything is stored in the European Union. Only you can see your child&apos;s reports.</p>

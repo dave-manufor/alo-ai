@@ -5,7 +5,9 @@ import { BackLink, Card, CheckRow, SectionLabel } from '../ui/primitives';
 
 // Onboarding step 1 (PRD 12): what we record and keep, and the guardian's yes. The yes is
 // written per child, naming the child and their age, when the child is added on the next
-// step (the attestation is spelled out there). Nothing is saved here.
+// step (the attestation is spelled out there, with CONSENT_TEXT in full). Nothing is saved
+// here. The wording follows consent_v2 (what is recorded, transcripts, who sees them, where
+// they are processed, that the child can stop, that deletion can be asked for).
 export default function ConsentPage() {
   const navigate = useNavigate();
   const draft = useConsentDraft();
@@ -18,8 +20,15 @@ export default function ConsentPage() {
           <p className="label ui-steps">Step 1 of 2</p>
           <h1 className="display-m">Before your child reads</h1>
           <p className="body">
-            Alo.ai records your child&apos;s voice while they read and answer, so it can make their
-            reading report. Recordings are deleted after 90 days.
+            For each child you add, we ask you to agree that Alo.ai can record them reading aloud and answering
+            questions, turn the recording into a written transcript, and use both to make a reading report for you.
+            Recordings are kept for up to 90 days and then deleted. Transcripts and the report stay in your account
+            until you ask for them to be deleted. Only your family and the Alo.ai study team can see them, and they
+            are processed on secure servers in Europe. Alo.ai is a screening tool that helps you practise reading.
+          </p>
+          <p className="body">
+            Your child can stop at any time, and you can ask for everything about your child to be deleted. Letting
+            recordings help Alo.ai learn is a separate choice for each child, and it is off unless you turn it on.
           </p>
         </div>
 
@@ -41,8 +50,8 @@ export default function ConsentPage() {
         <div className="step">
           <SectionLabel>What we keep</SectionLabel>
           <p className="body">
-            Your child&apos;s first name, class and birth year. Nothing your child says in the chat
-            goes into their story, and our payment partner never sees anything about your child.
+            Your child&apos;s first name, class and birth year. Nothing your child says in the chat goes into their
+            story, and our payment partner never sees anything about your child.
           </p>
           <Link to="/privacy" className="body">
             Read the full privacy notice

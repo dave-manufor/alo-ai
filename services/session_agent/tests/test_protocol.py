@@ -33,7 +33,14 @@ def word_clip(index: int) -> str:
 )
 def test_actions_become_schema_valid_messages(action, expected, validate):
     message = protocol.message_for(action, word_clip)
-    assert message == {"schema_version": 2, **expected}
+    assert message == {"schema_version": 3, **expected}
+    validate("session_protocol.schema.json", message)
+
+
+@pytest.mark.parametrize("speaking", [True, False])
+def test_child_speaking_is_a_schema_valid_message_with_no_words_in_it(speaking, validate):
+    message = protocol.child_speaking(speaking)
+    assert message == {"schema_version": 3, "cmd": "child_speaking", "speaking": speaking}
     validate("session_protocol.schema.json", message)
 
 
@@ -64,7 +71,7 @@ def test_clip_list_is_schema_valid(validate):
 @pytest.mark.parametrize("phase", sorted(protocol.STEPS, key=lambda p: p.value))
 def test_each_task_has_a_schema_valid_step(validate, phase):
     message = protocol.step(phase)
-    assert message == {"schema_version": 2, "cmd": "step", "step": phase.value}
+    assert message == {"schema_version": 3, "cmd": "step", "step": phase.value}
     validate("session_protocol.schema.json", message)
 
 
@@ -92,7 +99,9 @@ def test_encode_is_compact_json():
     assert protocol.encode({"a": 1, "b": "x"}) == b'{"a":1,"b":"x"}'
 
 
-@pytest.mark.parametrize("raw", [b'{"cmd":"played","clip_id":"c1"}', '{"cmd":"played","clip_id":"c1"}'])
+@pytest.mark.parametrize(
+    "raw", [b'{"cmd":"played","clip_id":"c1"}', '{"cmd":"played","clip_id":"c1"}']
+)
 def test_played_ack_is_parsed(raw):
     assert protocol.parse_client(raw) == ClipAck("c1", "played")
 
