@@ -3,7 +3,7 @@
 voice_mode      = "cache_first"
 session_profile = "standard"
 demo_warm       = false
-agent_on        = false
+agent_on        = true # one warm Session Agent for the mini-study; false again afterwards (it runs all day)
 coach_on        = true
 generator_on    = false
 
@@ -22,11 +22,13 @@ generator_on    = false
 # roles use Google's Gemini API through its OpenAI-compatible endpoint, and there are no Azure
 # OpenAI deployments. The key is the Key Vault secret `llm-api-key`, created by hand first.
 #
-# DO NOT SCREEN REAL CHILDREN WITH THIS. A Google AI Studio key is not pinned to the EU and, on
-# a free tier, may use inputs to improve Google's models. Use it with fictional data only until
-# (1) a paid, agreement-covered route with EU processing is chosen and the parent information
-# sheet names the provider, and (2) W3 has rerun the grading, tagger and Coach evaluation sets
-# on these models (hard rule 6) and confirmed the single-transcript rule below (PRD 5.3).
+# David (W2) gave explicit permission on 2026-10-22 to use this with the real children of the
+# mini-study for now. Known risks that remain: a Google AI Studio key is not pinned to the EU and,
+# on a free tier, may use inputs to improve Google's models. Still to do: (1) the parent
+# information sheet names Google as the provider, (2) W3 reruns the grading, tagger and Coach
+# evaluation sets on these models (hard rule 6) and confirms the single-transcript rule below
+# (PRD 5.3), (3) a paid, agreement-covered route with EU processing is chosen before anything
+# beyond the study.
 # To go back: llm_base_url = "", llm_models = {} and restore openai_deployments.
 llm_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
 llm_models = {
