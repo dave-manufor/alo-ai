@@ -124,8 +124,9 @@
 .night-start__circle {
   display: grid;
   place-items: center;
-  width: calc(var(--tap-kid) * 1.5);
-  height: calc(var(--tap-kid) * 1.5);
+  /* The demo's Start disc is 128px: twice the kid tap size. */
+  width: calc(var(--tap-kid) * 2);
+  height: calc(var(--tap-kid) * 2);
   border-radius: var(--radius-pill);
   /* The demo's pale moon-white disc: in the Night theme the ink token
      is that pale lavender, and the surface token its deep indigo. */
@@ -141,9 +142,11 @@
   transform: translateY(4px);
 }
 
+/* The demo sets "Start" in the display face (Fredoka), not the UI face. */
 .night-start__label {
-  font-size: var(--space-4);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: var(--space-5);
+  font-weight: 500;
 }
 
 /* --- The voice orb ------------------------------------------------ */
@@ -499,7 +502,7 @@
 
 .story-pages__box {
   width: 100%;
-  height: max(calc(var(--space-8) * 3), calc(100dvh - var(--space-8) * 6));
+  height: max(calc(var(--space-8) * 3), calc(100dvh - var(--space-8) * 7.25));
   overflow-y: auto;
   cursor: pointer;
 }
@@ -536,4 +539,32 @@
 .story-pages__dot--now {
   background: var(--ink);
   border-color: var(--ink);
+}
+
+/* Landscape phone: the mic sits beside the story, so the story box
+   reserves less height (at 915 x 412 the mic used to fall below the
+   fold). After the base rule so it wins. */
+@media (orientation: landscape) and (max-height: 30rem) {
+  .story-pages__box {
+    height: max(calc(var(--space-8) * 2), calc(100dvh - var(--space-8) * 4));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 30rem) {
+  .night-session {
+    padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .voice-orb {
+    --orb-size: calc(var(--space-8) * 1.5);
+  }
+}
+
+/* No room for the step moons on a phone held sideways (the demo shows
+   no step bar on the child screen at all). */
+@media (orientation: landscape) and (max-height: 30rem) {
+  .night-session .alo-moons {
+    display: none;
+  }
 }
