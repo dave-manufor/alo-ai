@@ -48,6 +48,26 @@ class NewChild(BaseModel):
         return value
 
 
+class ChildEdit(BaseModel):
+    """What a guardian may change on a child. Anything not listed is refused, and at least one
+    thing must be sent. Consent is not touched: it is append-only."""
+
+    model_config = ConfigDict(extra="forbid")
+    first_name: str | None = Field(default=None, min_length=1, max_length=40)
+    primary_class: int | None = Field(default=None, ge=1, le=6)
+    birth_year: int | None = Field(default=None, ge=2000, le=2100)
+
+    @field_validator("first_name")
+    @classmethod
+    def trimmed(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            raise ValueError("first_name must not be blank")
+        return value
+
+
 class NewConsent(BaseModel):
     model_config = ConfigDict(extra="forbid")
     child_id: str = Field(min_length=1, max_length=64)
@@ -129,6 +149,31 @@ def router(
     @routes.get("/v1/children/{child_id}")
     def get_child(child_id: str, principal: Annotated[Principal, current]) -> dict[str, Any]:
         return {"child_id": child_id, **owned_child(store, principal, child_id)}
+
+    @routes.patch("/v1/children/{child_id}")
+    def edit_child(
+        child_id: str, body: ChildEdit, principal: Annotated[Principal, current]
+    ) -> dict[str, Any]:
+        child = owned_child(store, principal, child_id)
+        changes = body.model_dump(exclude_none=True)
+        if not changes:
+            raise AccountError(
+                400, "INVALID_REQUEST", "Please say what to change.", retryable=False
+            )
+        if "primary_class" in changes:
+            # The guardian has just confirmed the class (each September we ask again).
+            changes["class_confirmed_year"] = now().year
+        CHILD.validate(child | changes)
+        store.merge(f"children/{child_id}", changes)
+        audit(
+            store,
+            principal,
+            "child.update",
+            {"child_id": child_id, "fields": sorted(changes)},
+            now,
+            new_id,
+        )
+        return {"child_id": child_id, **child, **changes}
 
     @routes.get("/v1/children/{child_id}/consent")
     def get_consent(child_id: str, principal: Annotated[Principal, current]) -> dict[str, Any]:

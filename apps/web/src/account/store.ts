@@ -206,6 +206,17 @@ export const accountStore = {
       consentsByChildId: { ...state.consentsByChildId, [child.child_id]: consent },
     });
   },
+  /** Live build: a child's profile as the Account API has just saved it. */
+  replaceChild(child: ChildProfile) {
+    setState({
+      ...state,
+      children: state.children.map((existing) => (existing.child_id === child.child_id ? child : existing)),
+    });
+  },
+  /** Live build: the newest consent the Account API has just saved for a child. */
+  adoptServerConsent(consent: ConsentRecord) {
+    setState({ ...state, consentsByChildId: { ...state.consentsByChildId, [consent.child_id]: consent } });
+  },
   /** Edits a child's profile. Only the guardian who holds the child's consent can. */
   updateChild(
     childId: string,

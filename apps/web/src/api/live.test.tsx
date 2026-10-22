@@ -1,8 +1,10 @@
-import { render, renderHook, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addChild, syncAccount } from '../account/actions';
-import { accountStore } from '../account/store';
+import { addChild, changeTrainingOptIn, editChild, syncAccount } from '../account/actions';
+import { accountStore, type ConsentRecord } from '../account/store';
+import AccountPage from '../pages/AccountPage';
+import ChildFormPage from '../pages/ChildFormPage';
 import ReportDetailPage from '../pages/ReportDetailPage';
 import ReportsPage from '../pages/ReportsPage';
 import { createSessionDriver } from '../session/driverFactory';
@@ -12,7 +14,7 @@ import { sampleReports } from '../report/reportFixture';
 import { ApiError } from './client';
 
 // A live build, with the API faked: nothing here touches the network.
-const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
+const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn() }));
 vi.mock('../api', async () => {
   const actual = await vi.importActual<typeof import('./client')>('./client');
   return { dataMode: 'live', liveApi: () => api, ApiError: actual.ApiError };
@@ -40,6 +42,7 @@ const consent = {
 beforeEach(() => {
   api.get.mockReset();
   api.post.mockReset();
+  api.patch.mockReset();
   accountStore.resetForTests();
   accountStore.signInVerified({ id: 'g1', email: 'e@example.com', method: 'google' });
 });
@@ -105,6 +108,119 @@ describe('live build: reports', () => {
     api.get.mockRejectedValue(new ApiError(404, 'NOT_FOUND', false, 'x'));
     renderAt('/reports/nope');
     expect(await screen.findByText('We could not find that report')).toBeInTheDocument();
+  });
+});
+
+describe('live build: editing a child and the recordings choice', () => {
+  beforeEach(() => {
+    accountStore.adoptServerChild(child, consent as ConsentRecord);
+  });
+
+  it('saves a changed name, class and birth year through the API and keeps the consent', async () => {
+    api.patch.mockResolvedValue({ ...child, first_name: 'Adaeze', primary_class: 4, birth_year: 2016 });
+    await editChild('child_1', { firstName: ' Adaeze ', primaryClass: 4, birthYear: 2016 });
+    expect(api.patch).toHaveBeenCalledWith('/v1/children/child_1', {
+      first_name: 'Adaeze',
+      primary_class: 4,
+      birth_year: 2016,
+    });
+    const saved = accountStore.getState().children[0];
+    expect([saved.first_name, saved.primary_class, saved.birth_year]).toEqual(['Adaeze', 4, 2016]);
+    expect(accountStore.consentFor('child_1')).toEqual(consent);
+  });
+
+  it('saves a changed recordings choice as a new consent record', async () => {
+    api.post.mockResolvedValue({ ...consent, consent_id: 'c2', training_opt_in: true });
+    await changeTrainingOptIn('child_1', true);
+    expect(api.post).toHaveBeenCalledWith('/v1/consents', {
+      child_id: 'child_1',
+      attested: true,
+      training_opt_in: true,
+    });
+    expect(accountStore.consentFor('child_1')?.training_opt_in).toBe(true);
+    expect(accountStore.consentFor('child_1')?.consent_id).toBe('c2');
+  });
+
+  function renderAccount() {
+    return render(
+      <MemoryRouter initialEntries={['/account']}>
+        <Routes>
+          <Route path="/account" element={<AccountPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+  }
+
+  it('the account screen no longer says "coming soon", and says how to ask for deletion', () => {
+    renderAccount();
+    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit Ada' })).toBeInTheDocument();
+    expect(screen.getByText(/ask the study team/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Delete Ada/ })).not.toBeInTheDocument();
+  });
+
+  it('a changed choice is saved only after the guardian ticks that they are the parent or guardian', async () => {
+    api.post.mockResolvedValue({ ...consent, consent_id: 'c2', training_opt_in: true });
+    renderAccount();
+    const choice = screen.getByRole('switch', { name: /Use recordings to improve Alo.ai/ });
+    expect(choice).not.toBeChecked();
+    fireEvent.click(choice);
+    expect(choice).toBeChecked();
+    const save = screen.getByRole('button', { name: 'Save' });
+    expect(save).toBeDisabled();
+    expect(api.post).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /I am the parent or guardian of Ada/ }));
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument());
+    expect(accountStore.consentFor('child_1')?.training_opt_in).toBe(true);
+  });
+
+  it('cancelling puts the choice back, and a failed save says so in plain words', async () => {
+    renderAccount();
+    const choice = screen.getByRole('switch', { name: /Use recordings to improve Alo.ai/ });
+    fireEvent.click(choice);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(choice).not.toBeChecked();
+    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+
+    api.post.mockRejectedValue(new ApiError(503, 'X', true, 'Something went wrong on our side. Please try again in a moment.'));
+    fireEvent.click(choice);
+    fireEvent.click(screen.getByRole('checkbox', { name: /I am the parent or guardian of Ada/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByText(/Something went wrong on our side/)).toBeInTheDocument();
+    expect(accountStore.consentFor('child_1')?.training_opt_in).toBe(false);
+
+    api.post.mockRejectedValue(new Error('boom'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByText('We could not save that. Please try again.')).toBeInTheDocument();
+  });
+
+  it('turning the choice back to what it was needs no save', () => {
+    renderAccount();
+    const choice = screen.getByRole('switch', { name: /Use recordings to improve Alo.ai/ });
+    fireEvent.click(choice);
+    fireEvent.click(choice);
+    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+  });
+
+  it('the edit form saves through the API instead of saying "coming soon"', async () => {
+    api.patch.mockResolvedValue({ ...child, first_name: 'Adaeze' });
+    render(
+      <MemoryRouter initialEntries={['/children/child_1/edit']}>
+        <Routes>
+          <Route path="/children/:childId/edit" element={<ChildFormPage mode="edit" />} />
+          <Route path="/account" element={<p>Back on the account screen</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: /First name/ }), { target: { value: 'Adaeze' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText('Back on the account screen')).toBeInTheDocument();
+    expect(api.patch).toHaveBeenCalledWith('/v1/children/child_1', expect.objectContaining({ first_name: 'Adaeze' }));
   });
 });
 

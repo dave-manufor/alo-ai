@@ -1,22 +1,24 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { changeTrainingOptIn } from '../account/actions';
 import { accountStore, useAccount, type ChildProfile } from '../account/store';
-import { dataMode } from '../api';
+import { ApiError, dataMode } from '../api';
 import { auth, authMode } from '../auth';
 import { Button } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
 import { planUnlocked } from '../plan/access';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
-import { Avatar, Card, Notice, SectionLabel, Switch } from '../ui/primitives';
+import { Avatar, Card, CheckRow, Notice, SectionLabel, Switch } from '../ui/primitives';
 
 // Account and privacy (wireframe 22): the children, the choices about their recordings, the
-// plan, and sign out. Changing or deleting a child needs Account API calls that do not exist
-// yet, so in the live build those controls say so instead of pretending to save.
+// plan, and sign out. Editing a child and changing the recordings choice go through the Account
+// API in a live build. Deleting a child's data is not an in-app button there: the study team
+// does it on request (ops/delete_child.py), and the screen says so. The sample build keeps its
+// demo delete.
 export default function AccountPage() {
   const navigate = useNavigate();
   const { guardian, children } = useAccount();
   const subscribed = planUnlocked(guardian !== null);
-  const canChange = dataMode !== 'live';
   const [signingOut, setSigningOut] = useState(false);
 
   async function signOut() {
@@ -50,11 +52,9 @@ export default function AccountPage() {
                   </span>
                 </span>
               </div>
-              {canChange ? (
-                <Link to={`/children/${child.child_id}/edit`} className="body card-title ui-tap" aria-label={`Edit ${child.first_name}`}>
-                  Edit
-                </Link>
-              ) : null}
+              <Link to={`/children/${child.child_id}/edit`} className="body card-title ui-tap" aria-label={`Edit ${child.first_name}`}>
+                Edit
+              </Link>
             </div>
           </Card>
         ))}
@@ -65,13 +65,8 @@ export default function AccountPage() {
 
       <section className="step" aria-labelledby="privacy-heading">
         <SectionLabel id="privacy-heading">Privacy</SectionLabel>
-        {!canChange ? (
-          <Notice tone="sky" role="note">
-            Changing these choices and deleting a child&apos;s data from here is coming soon.
-          </Notice>
-        ) : null}
         {children.map((child) => (
-          <ChildPrivacy key={child.child_id} child={child} canChange={canChange} showName={children.length > 1} />
+          <ChildPrivacy key={child.child_id} child={child} showName={children.length > 1} />
         ))}
       </section>
 
@@ -110,15 +105,46 @@ export default function AccountPage() {
   );
 }
 
-function ChildPrivacy({ child, canChange, showName }: { child: ChildProfile; canChange: boolean; showName: boolean }) {
+function ChildPrivacy({ child, showName }: { child: ChildProfile; showName: boolean }) {
   const navigate = useNavigate();
+  const live = dataMode === 'live';
   const consent = accountStore.consentFor(child.child_id);
   const [confirming, setConfirming] = useState(false);
+  // Live build: a changed choice waits here until the guardian ticks that they are the parent
+  // or guardian, because each change is saved as a new record of consent.
+  const [pending, setPending] = useState<boolean | null>(null);
+  const [attested, setAttested] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const optIn = consent?.training_opt_in ?? false;
 
   function remove() {
     accountStore.removeChild(child.child_id);
     if (accountStore.getState().children.length === 0) navigate('/onboarding/consent');
+  }
+
+  function choose(next: boolean) {
+    if (!live) {
+      void changeTrainingOptIn(child.child_id, next);
+      return;
+    }
+    setPending(next === optIn ? null : next);
+    setAttested(false);
+    setError(null);
+  }
+
+  async function saveChoice() {
+    if (pending === null || !attested) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await changeTrainingOptIn(child.child_id, pending);
+      setPending(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.plain : 'We could not save that. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -127,11 +153,47 @@ function ChildPrivacy({ child, canChange, showName }: { child: ChildProfile; can
       <Switch
         title="Use recordings to improve Alo.ai"
         hint={`${optIn ? 'On' : 'Off'}. Recordings are deleted after 90 days.`}
-        checked={optIn}
-        onChange={(next) => accountStore.setTrainingOptIn(child.child_id, next)}
-        disabled={!canChange}
+        checked={pending ?? optIn}
+        onChange={choose}
       />
-      {canChange ? (
+      {pending !== null ? (
+        <div className="step">
+          <p className="body">
+            {pending ? 'Turn this on' : 'Turn this off'} for {child.first_name}? Each change is saved as a new record of
+            your consent.
+          </p>
+          <CheckRow
+            checked={attested}
+            onChange={setAttested}
+            title={`I am the parent or guardian of ${child.first_name}.`}
+          />
+          {error ? (
+            <Notice tone="sky" role="alert">
+              {error}
+            </Notice>
+          ) : null}
+          <div className="ui-actions">
+            <Button variant="primary" size="grown" disabled={!attested || saving} onClick={saveChoice}>
+              Save
+            </Button>
+            <Button variant="ghost" size="grown" disabled={saving} onClick={() => setPending(null)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {live ? (
+        <>
+          <div className="ui-divider" />
+          <div className="step">
+            <p className="body card-title">Delete {child.first_name}&apos;s data</p>
+            <span className="caption muted">
+              To have {child.first_name}&apos;s recordings, reports and plans deleted, ask the study team who gave you
+              Alo.ai, and we will delete them.
+            </span>
+          </div>
+        </>
+      ) : (
         <>
           <div className="ui-divider" />
           {confirming ? (
@@ -162,7 +224,7 @@ function ChildPrivacy({ child, canChange, showName }: { child: ChildProfile; can
             </div>
           )}
         </>
-      ) : null}
+      )}
     </Card>
   );
 }

@@ -45,6 +45,34 @@ export async function loadAccount(
   };
 }
 
+/** PATCH /v1/children/{id}: the server checks the guardian owns the child and keeps consent as it is. */
+export async function patchChild(
+  api: ApiClient,
+  childId: string,
+  input: { firstName: string; primaryClass: number; birthYear: number },
+): Promise<ChildProfile> {
+  const saved = await api.patch<ServerChild & { child_id: string }>(`/v1/children/${encodeURIComponent(childId)}`, {
+    first_name: input.firstName.trim(),
+    primary_class: input.primaryClass,
+    birth_year: input.birthYear,
+  });
+  return toProfile(saved);
+}
+
+/** POST /v1/consents: consent is append-only, so a changed choice is a new consent record. The
+ *  guardian ticks that they are the parent or guardian each time (the server writes the text). */
+export async function addConsent(
+  api: ApiClient,
+  childId: string,
+  trainingOptIn: boolean,
+): Promise<ConsentRecord> {
+  return api.post<ConsentRecord>('/v1/consents', {
+    child_id: childId,
+    attested: true,
+    training_opt_in: trainingOptIn,
+  });
+}
+
 export async function createChild(
   api: ApiClient,
   input: {

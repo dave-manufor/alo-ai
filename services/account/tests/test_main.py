@@ -78,6 +78,16 @@ def test_the_web_origin_may_call_and_no_other_origin_is_allowed():
         },
     )
     assert allowed.headers["access-control-allow-origin"] == "https://web.example.test"
+    edit = client().options(
+        "/v1/children/child_1",
+        headers={
+            "Origin": "https://web.example.test",
+            "Access-Control-Request-Method": "PATCH",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+    assert edit.status_code == 200
+    assert "PATCH" in edit.headers["access-control-allow-methods"]
     other = client().options(
         "/v1/me",
         headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
