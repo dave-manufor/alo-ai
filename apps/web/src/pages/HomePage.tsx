@@ -52,7 +52,7 @@ export default function HomePage() {
               Start a reading check
             </NavButton>
             {report ? (
-              <Link to={`/reports/${report.session_id}`} className="body card-title">
+              <Link to={`/reports/${report.session_id}`} className="body card-title ui-tap ui-tap--flush">
                 See the last report
               </Link>
             ) : null}
@@ -62,7 +62,7 @@ export default function HomePage() {
           <Card>
             <SectionLabel>Try this week</SectionLabel>
             <p className="body">{tip}</p>
-            <Link to="/plan" className="body card-title">
+            <Link to="/plan" className="body card-title ui-tap ui-tap--flush">
               Open {child.first_name}&apos;s plan
             </Link>
           </Card>

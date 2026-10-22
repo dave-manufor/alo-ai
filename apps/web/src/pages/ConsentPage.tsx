@@ -53,7 +53,7 @@ export default function ConsentPage() {
             Your child&apos;s first name, class and birth year. Nothing your child says in the chat goes into their
             story, and our payment partner never sees anything about your child.
           </p>
-          <Link to="/privacy" className="body">
+          <Link to="/privacy" className="body ui-tap ui-tap--flush">
             Read the full privacy notice
           </Link>
         </div>

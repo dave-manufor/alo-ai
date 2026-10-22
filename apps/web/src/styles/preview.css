@@ -18,6 +18,13 @@
   vertical-align: top;
 }
 
+/* A child's name in the table is a link to their page: tall enough to tap. */
+.preview-table td a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-grown);
+}
+
 .sort-button {
   background: none;
   border: none;
@@ -26,6 +33,7 @@
   font: inherit;
   font-weight: 800;
   min-height: var(--tap-grown);
+  min-width: var(--tap-grown);
   padding: 0;
   text-decoration: underline;
 }
