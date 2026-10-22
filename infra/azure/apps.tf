@@ -17,6 +17,11 @@ resource "azurerm_container_app_environment" "main" {
   location                   = azurerm_resource_group.main.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   tags                       = var.tags
+
+  # Azure adds the implicit Consumption profile itself; without this a plan tries to remove it.
+  lifecycle {
+    ignore_changes = [workload_profile]
+  }
 }
 
 locals {
