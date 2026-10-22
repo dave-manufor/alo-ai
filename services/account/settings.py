@@ -19,6 +19,11 @@ class AccountSettings:
     issuer: str
     # The one browser origin that may call the API. None only off the cloud.
     web_origin: str | None
+    # The LiveKit server the session rooms are made on. Without all three, POST /v1/sessions
+    # answers 503 (the other routes still work).
+    livekit_url: str | None = None
+    livekit_api_key: str | None = None
+    livekit_api_secret: str | None = None
 
     @property
     def jwks_url(self) -> str:
@@ -38,4 +43,7 @@ class AccountSettings:
             scope=env.get("ENTRA_API_SCOPE") or DEFAULT_SCOPE,
             issuer=env.get("ENTRA_ISSUER") or f"https://{tenant_id}.ciamlogin.com/{tenant_id}/v2.0",
             web_origin=web_origin.rstrip("/") if web_origin else None,
+            livekit_url=env.get("LIVEKIT_URL") or None,
+            livekit_api_key=env.get("LIVEKIT_API_KEY") or None,
+            livekit_api_secret=env.get("LIVEKIT_API_SECRET") or None,
         )

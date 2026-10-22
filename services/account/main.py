@@ -15,9 +15,10 @@ from aloai_store import Store, open_store
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import children, errors
+from . import children, errors, sessions
 from .access import Clock, NewId, ensure_guardian, utc_now
 from .auth import GuardianVerifier, Principal, current_guardian
+from .rooms import LiveKitRooms, Rooms
 from .settings import AccountSettings
 
 
@@ -25,7 +26,17 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     env = os.environ if env is None else env
     config = aloai_env.load(env, receives_pushes=False)
     settings = AccountSettings.from_env(env, hosted=config.hosted)
-    return build_app(settings, open_store(config), GuardianVerifier(settings))
+    return build_app(
+        settings, open_store(config), GuardianVerifier(settings), rooms=livekit_rooms(settings)
+    )
+
+
+def livekit_rooms(settings: AccountSettings) -> Rooms | None:
+    if settings.livekit_url and settings.livekit_api_key and settings.livekit_api_secret:
+        return LiveKitRooms(
+            settings.livekit_url, settings.livekit_api_key, settings.livekit_api_secret
+        )
+    return None
 
 
 def build_app(
@@ -34,6 +45,7 @@ def build_app(
     verifier: GuardianVerifier,
     now: Clock = utc_now,
     new_id: NewId = children.default_id,
+    rooms: Rooms | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Alo.ai Account")
     errors.install(app)
@@ -55,4 +67,5 @@ def build_app(
         return ensure_guardian(store, principal, now)
 
     app.include_router(children.router(store, guardian, now, new_id))
+    app.include_router(sessions.router(store, guardian, rooms, now, new_id))
     return app

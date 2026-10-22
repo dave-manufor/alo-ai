@@ -39,4 +39,16 @@ CHILD = validator("child.schema.json")
 PASSAGE_GENERATE_REQUEST = validator("passage_generate_request.schema.json")
 PASSAGE_GENERATE_RESPONSE = validator("passage_generate_response.schema.json")
 STORY_REQUEST = validator("story_request.schema.json")
+
+
+def definition(schema_file: str, name: str) -> Draft202012Validator:
+    """One named $defs entry of a schema file, for a schema that holds several shapes."""
+    return Draft202012Validator(
+        {"$ref": f"{schema_file}#/$defs/{name}"}, registry=_REGISTRY, format_checker=FormatChecker()
+    )
+
+
+SESSION_START_REQUEST = definition("session_start.schema.json", "request")
+SESSION_START_RESPONSE = definition("session_start.schema.json", "response")
+SESSION_ROOM_METADATA = definition("session_start.schema.json", "room_metadata")
 TOPIC_TAGS: tuple[str, ...] = tuple(load("topic_tag.schema.json")["enum"])
