@@ -1,4 +1,4 @@
-import type { AgentMessage } from './protocol';
+import type { AgentMessage, ClientMessage } from './protocol';
 
 // What the session screen needs from whatever carries the session: the
 // fixture driver today, the LiveKit driver (D3) when the backend is
@@ -20,4 +20,9 @@ export interface SessionDriver {
   send(event: ChildEvent): void;
   /** Stop timers and connections (screen left or unmounted). */
   stop(): void;
+  /** Send the clip ack (`played` / `missing`) the screen produced. Live drivers only. */
+  ack?(message: ClientMessage): void;
+  /** Register a listener for a session that cannot start or cannot continue.
+   *  `plain` is a sentence for a grown-up. Live drivers only. */
+  onFailed?(listener: (plain: string) => void): void;
 }

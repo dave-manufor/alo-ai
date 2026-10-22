@@ -9,9 +9,10 @@ import {
   RewardBadge,
   SpeechBubble,
 } from '../design-system/alo';
-import { createClipCache, unlockAudio } from '../session/clipCache';
+import { dataMode } from '../api';
+import { createSessionClipCache, unlockAudio } from '../session/clipCache';
 import type { ChildEvent, SessionDriver } from '../session/driver';
-import { createFixtureDriver } from '../session/fixtureDriver';
+import { createSessionDriver } from '../session/driverFactory';
 import HoldToConfirm from '../session/HoldToConfirm';
 import type { AgentMessage } from '../session/protocol';
 import {
@@ -55,9 +56,10 @@ const STEP_INDEX: Record<string, number> = {
 // reading, never a child's button. Children never see a score, timer,
 // percentage or red mark.
 export default function SessionPage({
-  createDriver = createFixtureDriver,
+  createDriver,
 }: {
-  /** Which SessionDriver carries the session (fixture now, LiveKit when live). */
+  /** Overrides which SessionDriver carries the session (tests). By default the
+   *  build decides (driverFactory): fixture replay, or LiveKit in a live build. */
   createDriver?: () => SessionDriver;
 } = {}) {
   const { childId } = useParams();
@@ -71,16 +73,10 @@ export default function SessionPage({
   const [handedOver, setHandedOver] = useState(false);
   const driverRef = useRef<SessionDriver | null>(null);
 
-  const clipCache = useMemo(
-    () =>
-      createClipCache({
-        // Fixture clips are simulated locally; the live cache stores the
-        // bytes in Cache Storage (clipCache.loadClipIntoCache).
-        load: async (url) => `fixture:${url}`,
-        player: { play: async () => undefined },
-      }),
-    [],
-  );
+  // Fixture build: clips are simulated locally. Live build: every clip is
+  // downloaded into Cache Storage before it can be played (D4).
+  const clipCache = useMemo(() => createSessionClipCache(), []);
+  const [failure, setFailure] = useState<string | null>(null);
 
   async function dispatch(message: AgentMessage) {
     if (message.cmd === 'clip_list') {
@@ -92,12 +88,27 @@ export default function SessionPage({
     if (message.cmd === 'play') {
       const ack = await clipCache.play(message.clip_id);
       setState((current) => recordAck(current, ack));
+      driverRef.current?.ack?.(ack); // live: tell the agent played / missing
     }
   }
 
   function startSession() {
-    driverRef.current = createDriver();
-    driverRef.current.start(dispatch);
+    // A live session needs the internet to download its clips: refuse cleanly.
+    if (dataMode === 'live' && typeof navigator !== 'undefined' && navigator.onLine === false) {
+      setFailure('The reading check needs the internet to start. Please connect and try again.');
+      return;
+    }
+    setFailure(null);
+    const driver = (createDriver ?? (() => createSessionDriver(childId ?? '')))();
+    driverRef.current = driver;
+    driver.onFailed?.((plain) => setFailure(plain));
+    driver.start(dispatch);
+  }
+
+  function retrySession() {
+    driverRef.current?.stop();
+    setState(initialSessionState);
+    startSession();
   }
 
   async function askForMic() {
@@ -228,7 +239,24 @@ export default function SessionPage({
         </section>
       ) : null}
 
-      {started && state.reconnecting ? (
+      {failure ? (
+        <section className="night-centre">
+          <div className="night-report-card" role="alert">
+            <h1 className="title">We could not start</h1>
+            <p className="body">{failure}</p>
+            <div className="row">
+              <Button variant="primary" size="grown" onClick={retrySession}>
+                Try again
+              </Button>
+              <Button variant="secondary" size="grown" onClick={() => navigate('/children')}>
+                Back to your children
+              </Button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {started && !failure && state.reconnecting ? (
         <section className="night-centre">
           <VoiceOrb state="idle" />
           <SpeechBubble>Let’s wait for the internet.</SpeechBubble>

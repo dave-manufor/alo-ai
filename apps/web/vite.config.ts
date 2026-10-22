@@ -16,6 +16,9 @@ export default defineConfig({
       includeAssets: ['design-system/assets/**/*.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,webmanifest}'],
+        // The LiveKit client (~150 kB gzipped) loads only when a live session
+        // starts, so it is not precached: ordinary visits stay light on mobile data.
+        globIgnores: ['**/livekit-client*.js'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
