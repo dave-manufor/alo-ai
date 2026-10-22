@@ -26,6 +26,24 @@ def test_the_recorded_reading_gives_the_contract_telemetry():
     assert store.get(telemetry_path(SESSION_ID)) == TELEMETRY
 
 
+def test_with_one_transcript_the_telemetry_is_valid_and_says_so():
+    store = seeded_store()
+    scorer(store, MemoryPublisher(), gemini=None).handle(recorded())
+    telemetry = store.get(telemetry_path(SESSION_ID))
+    aloai_contracts.PHASE1_TELEMETRY.validate(telemetry)
+    assert telemetry["model_versions"]["transcripts"] == "single"
+    for second_only in ("gemini_transcription", "transcription_prompt"):
+        assert second_only not in telemetry["model_versions"]
+    assert all(event["gemini_hypothesis"] is None for event in telemetry["word_events"])
+    assert any(event["chirp_hypothesis"] for event in telemetry["word_events"])
+
+
+def test_with_two_transcripts_the_telemetry_does_not_say_single():
+    store = seeded_store()
+    scorer(store, MemoryPublisher()).handle(recorded())
+    assert "transcripts" not in store.get(telemetry_path(SESSION_ID))["model_versions"]
+
+
 def test_scoring_announces_phase1_scored():
     publisher = MemoryPublisher()
     scorer(seeded_store(), publisher).handle(recorded())

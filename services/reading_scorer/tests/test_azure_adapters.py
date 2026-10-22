@@ -159,6 +159,33 @@ def test_live_azure_uses_azure_speech_and_the_transcription_deployment(monkeypat
     assert second._deployment == "gpt-4o-transcribe"
 
 
+def test_with_one_transcript_no_second_transcriber_or_openai_client_is_built(monkeypatch):
+    def refuse(config):
+        raise AssertionError("an OpenAI client was built")
+
+    monkeypatch.setattr(main, "open_openai", refuse)
+    first, second = main._transcribers(azure(AZURE_OPENAI_DEPLOYMENTS="{}"), blobs(), second=False)
+    assert isinstance(first, AzureSpeechReading)
+    assert second is None
+
+
+def test_recorded_transcripts_can_be_single_too():
+    first, second = main._transcribers(azure(AI_MODE="fixtures"), MemoryBlobs(), second=False)
+    assert type(first).__name__ == "FixtureReading"
+    assert second is None
+
+
+@pytest.mark.parametrize(("value", "expected"), [(None, True), ("on", True), ("off", False)])
+def test_the_second_transcript_setting_defaults_to_on(value, expected):
+    env = {} if value is None else {"SECOND_TRANSCRIPT": value}
+    assert main._second_transcript(env) is expected
+
+
+def test_the_second_transcript_setting_must_be_on_or_off():
+    with pytest.raises(aloai_env.ConfigError, match="SECOND_TRANSCRIPT"):
+        main._second_transcript({"SECOND_TRANSCRIPT": "maybe"})
+
+
 def test_live_azure_needs_a_transcription_deployment(monkeypatch):
     monkeypatch.setattr(main, "open_openai", lambda config: SimpleNamespace(client="openai"))
     with pytest.raises(aloai_env.ConfigError, match="'transcribe'"):

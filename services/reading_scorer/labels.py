@@ -33,15 +33,22 @@ class WordLabel:
 def label_words(
     targets: Sequence[str],
     chirp: Sequence[Placed],
-    gemini: Sequence[Placed],
+    gemini: Sequence[Placed] | None,
     told: Collection[int],
 ) -> list[WordLabel]:
     """Every passage word up to the last one the child reached; the words after it were
-    not attempted and are not omissions."""
-    labels = [
-        _label(index, target, chirp[index], gemini[index], index in told)
-        for index, target in enumerate(targets)
-    ]
+    not attempted and are not omissions. gemini is None in single-transcript mode
+    (SECOND_TRANSCRIPT=off): see _label_single."""
+    if gemini is None:
+        labels = [
+            _label_single(index, target, chirp[index], index in told)
+            for index, target in enumerate(targets)
+        ]
+    else:
+        labels = [
+            _label(index, target, chirp[index], gemini[index], index in told)
+            for index, target in enumerate(targets)
+        ]
     reached = [label.token_index for label in labels if label.label != "OMISSION"]
     return labels[: reached[-1] + 1] if reached else []
 
@@ -64,6 +71,31 @@ def _label(index: int, target: str, chirp: Placed, gemini: Placed, told: bool) -
     else:
         label = "UNCERTAIN"
     return WordLabel(index, target, chirp.heard, gemini.heard, label, self_corrected)
+
+
+def _label_single(index: int, target: str, chirp: Placed, told: bool) -> WordLabel:
+    """One transcript, no second opinion (SECOND_TRANSCRIPT=off). A word the transcript has
+    right counts unless it was unsure of it; a different word counts as a substitution unless
+    it was unsure, in which case it is left out as UNCERTAIN. A transcript with no confidence
+    is taken as sure. Proposed rule, for W3 to confirm or change (PRD 5.3, changelog)."""
+    word = normalize(target)
+    heard = normalize(chirp.heard.text) if chirp.heard else None
+    unsure = chirp.heard is not None and (
+        chirp.heard.confidence is not None and chirp.heard.confidence < LOW_CONFIDENCE
+    )
+    self_corrected = False
+    if told:
+        label: Label = "TOLD"
+    elif heard is None:
+        label = "OMISSION"
+    elif unsure:
+        label = "UNCERTAIN"
+    elif heard == word:
+        label = "CORRECT"
+        self_corrected = _corrected(word, chirp)
+    else:
+        label = "SUBSTITUTION"
+    return WordLabel(index, target, chirp.heard, None, label, self_corrected)
 
 
 def _corrected(word: str, placed: Placed) -> bool:

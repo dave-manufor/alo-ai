@@ -36,6 +36,17 @@ MODEL_VERSIONS = {
 }
 
 
+# Single-transcript mode: no second transcription model was used, and the report says so.
+SINGLE_TRANSCRIPT_VERSIONS = {
+    **{
+        k: v
+        for k, v in MODEL_VERSIONS.items()
+        if k not in ("gemini_transcription", "transcription_prompt")
+    },
+    "transcripts": "single",
+}
+
+
 def telemetry_path(session_id: str) -> str:
     return f"sessions/{session_id}/phase1/telemetry"
 
@@ -50,7 +61,8 @@ class Phase1Scorer:
     publisher: Publisher
     audio: AudioSource
     chirp: Transcriber
-    gemini: Transcriber
+    # None scores from the first transcript alone (SECOND_TRANSCRIPT=off; labels._label_single).
+    gemini: Transcriber | None
     aligner: Aligner
     pause_finder: PauseFinder
     clock: Callable[[], datetime] = _now
@@ -71,17 +83,20 @@ class Phase1Scorer:
         tokens = passage["tokens"]
         uri = recorded["audio_uri"]
         audio = self.audio.load(uri)  # first, so audio not yet in the bucket costs no transcripts
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            chirp = pool.submit(self.chirp.heard, uri, passage)
-            gemini = pool.submit(self.gemini.heard, uri, passage)
-            heard_chirp, heard_gemini = chirp.result(), gemini.result()
+        if self.gemini is None:
+            heard_chirp, heard_gemini = self.chirp.heard(uri, passage), None
+        else:
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                chirp = pool.submit(self.chirp.heard, uri, passage)
+                gemini = pool.submit(self.gemini.heard, uri, passage)
+                heard_chirp, heard_gemini = chirp.result(), gemini.result()
 
         targets = [token["clean_text"] for token in tokens]
         words = [normalize(target) for target in targets]
         labels = label_words(
             targets,
             align(words, heard_chirp),
-            align(words, heard_gemini),
+            None if heard_gemini is None else align(words, heard_gemini),
             set(recorded["told_token_indices"]),
         )
         times = self.aligner.word_times(audio, targets[: len(labels)]) if labels else []
@@ -107,5 +122,5 @@ class Phase1Scorer:
             prosody=phrasing(
                 tokens, labels, times, self.pause_finder.pauses(audio), fluency.accuracy_pct
             ),
-            model_versions=MODEL_VERSIONS,
+            model_versions=MODEL_VERSIONS if self.gemini else SINGLE_TRANSCRIPT_VERSIONS,
         )
