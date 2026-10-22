@@ -1,3 +1,4 @@
+import type { AgentMessageSink, SessionDriver } from './driver';
 import type { AgentMessage } from './protocol';
 
 // The fixture driver stands in for the Session Agent in the MVP phase.
@@ -127,4 +128,56 @@ export function closingMessages(): AgentMessage[] {
     { ...v2, cmd: 'step', step: 'CLOSE' },
     { ...v2, cmd: 'play', clip_id: 'close_praise' },
   ];
+}
+
+/** The first SessionDriver: replays the fixture session in the agent's order. */
+export function createFixtureDriver(): SessionDriver {
+  let sink: AgentMessageSink | null = null;
+  let step: string | null = null;
+  let answers = 0;
+  let toldWordTimer: number | null = null;
+  let stopped = false;
+  // Messages are delivered one at a time, in order, even across events.
+  let queue: Promise<void> = Promise.resolve();
+
+  function deliver(messages: AgentMessage[]) {
+    for (const message of messages) {
+      // The driver's own notion of the step moves when it decides, so a
+      // quick second tap is answered for the right step.
+      if (message.cmd === 'step') step = message.step;
+      queue = queue.then(async () => {
+        if (stopped || !sink) return;
+        await sink(message);
+      });
+    }
+  }
+
+  return {
+    start(next) {
+      sink = next;
+      stopped = false;
+      deliver(messagesFor('session_started', null));
+    },
+    send(event) {
+      if (event === 'child_spoke' && step === 'QUESTIONS') {
+        answers += 1;
+        if (answers >= 2) {
+          deliver(closingMessages());
+          return;
+        }
+      }
+      const before = step;
+      deliver(messagesFor(event, step));
+      if (event === 'child_spoke' && before === 'MIC_CHECK') {
+        // During reading, the agent tells a word after a pause (PRD 4.1).
+        toldWordTimer = window.setTimeout(() => {
+          deliver(messagesFor('reading_pause', 'READING'));
+        }, 900);
+      }
+    },
+    stop() {
+      stopped = true;
+      if (toldWordTimer !== null) window.clearTimeout(toldWordTimer);
+    },
+  };
 }
