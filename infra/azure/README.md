@@ -75,6 +75,16 @@ Two manual jobs, run when needed (`az containerapp job start --name <name> --res
 
 Both jobs are untested against Azure.
 
+## Deploying images
+
+`.github/workflows/deploy-images.yml` builds the four service images on a merge to `main` that touches the services (or by hand from the Actions tab, on `main`), pushes them to the registry as `aloai-<service>:<git sha>` over GitHub OIDC, and prints their digests as an `images = { ... }` block (in the run's summary, and as the `images-tfvars` artifact). It changes no Azure resource. To run them:
+
+1. Copy the block into a file such as `images.auto.tfvars` in `infra/azure` (git-ignored: do not commit digests), or pass it with `-var`.
+2. `terraform plan -out=...`, read it (it should only change the apps and jobs), then apply it. The apps get a new revision on the new image; **do not deploy during a rehearsal or a session** (the Session Agent runs in single revision mode, so a deploy ends a running session).
+3. After the first real images: run the seed job once (`az containerapp job start --name aloai-seed --resource-group aloai-rg`). Until it has run there are no clips and no bank passage.
+
+The repository variables it reads (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_ACR_NAME`, plus `AZURE_RESOURCE_GROUP` and `AZURE_WEB_APP_NAME` for the web deploy) are set from the Terraform outputs. The CI identity can only sign in from the `main` branch, so the workflow cannot be tried from a pull request.
+
 ## The generator switch
 
 `generator_on` (default `false`, in `terraform.tfvars`, changed only by a one-line `chore/infra-...` PR) lets `plan.ready` pre-generate a child's next story and the Session Agent ask the Passage Generator for the story. Leave it `false` until the generator and tagger evaluation sets have been run on the Azure deployments (`generator`, `tagger`) and word clips are made for generated stories: the seed job covers only the bank passages, so a generated story's words would have no clips.

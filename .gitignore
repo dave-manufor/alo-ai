@@ -48,6 +48,8 @@ npm-debug.log*
 *.tfstate.*
 crash.log
 *.tfplan
+# image digests printed by the deploy-images workflow: a deployment's state, not source
+*.auto.tfvars
 
 # Emulator data
 firebase-export-*/

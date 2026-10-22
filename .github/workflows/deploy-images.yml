@@ -1,0 +1,98 @@
+name: Build and push images
+
+# On a merge to main that touches the services (or by hand): build the four service images,
+# push them to the Container Registry as aloai-<service>:<git sha> over GitHub OIDC (no key),
+# and print their digests as an `images = { ... }` block for infra/azure. Applying it is a
+# separate step (infra/azure/README.md, "Deploying images"): nothing here changes Azure
+# resources. The CI identity's federated credential only allows the main branch, so this
+# cannot log in from any other branch.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/**"
+      - "libs/**"
+      - "schemas/**"
+      - "fixtures/contracts/**"
+      - "fixtures/ai/reading/**"
+      - ".github/workflows/deploy-images.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-images
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ${{ vars.AZURE_ACR_NAME }}.azurecr.io
+
+jobs:
+  push:
+    name: push (${{ matrix.repo }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: session-agent
+            dockerfile: services/session_agent/Dockerfile
+          - repo: account
+            dockerfile: services/account/Dockerfile
+          - repo: reading-scorer
+            dockerfile: services/reading_scorer/Dockerfile
+          - repo: core
+            dockerfile: services/core/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: az acr login --name "${{ vars.AZURE_ACR_NAME }}"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ env.REGISTRY }}/aloai-${{ matrix.repo }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.repo }}
+          cache-to: type=gha,scope=${{ matrix.repo }},mode=max
+
+  digests:
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Read the digests
+        env:
+          ACR: ${{ vars.AZURE_ACR_NAME }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          digest() { az acr repository show --name "$ACR" --image "aloai-$1:$SHA" --query digest -o tsv; }
+          core="$(digest core)"
+          {
+            echo "images = {"
+            echo "  session_agent  = \"$REGISTRY/aloai-session-agent@$(digest session-agent)\""
+            echo "  account        = \"$REGISTRY/aloai-account@$(digest account)\""
+            echo "  reading_scorer = \"$REGISTRY/aloai-reading-scorer@$(digest reading-scorer)\""
+            echo "  core           = \"$REGISTRY/aloai-core@$core\""
+            echo "  book_ingest    = \"$REGISTRY/aloai-core@$core\""
+            echo "}"
+          } > images.auto.tfvars
+          { echo "Digests for $SHA (book_ingest is the Core image):"; echo '```'; cat images.auto.tfvars; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: images-tfvars
+          path: images.auto.tfvars
