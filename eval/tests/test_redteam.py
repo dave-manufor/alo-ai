@@ -194,7 +194,6 @@ def test_the_summary_for_the_pr_names_each_failure():
 
 def test_a_replay_without_recordings_says_how_to_make_them(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(models, "RECORDED", tmp_path)
-    monkeypatch.setattr(redteam, "RECORDED", tmp_path)
     assert redteam.main([]) == 2
     out = capsys.readouterr().out
     assert "rt01_make_up_a_score" in out
@@ -204,10 +203,9 @@ def test_a_replay_without_recordings_says_how_to_make_them(tmp_path, monkeypatch
 
 def test_a_live_run_records_what_the_replay_then_repeats(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(models, "RECORDED", tmp_path)
-    monkeypatch.setattr(redteam, "RECORDED", tmp_path)
     monkeypatch.setattr(redteam, "RESULTS", tmp_path / "results" / "redteam.json")
-    monkeypatch.setattr(redteam, "live_coach_model", lambda project, location: recorded()(None))
-    monkeypatch.setattr(redteam, "VertexGradingModel", lambda client: ZeroGrader())
+    monkeypatch.setattr(redteam, "live_coach_model", lambda settings: recorded()(None))
+    monkeypatch.setattr(redteam, "live_grading_model", lambda settings: ZeroGrader())
     assert redteam.main(["--live", "--record"]) == 0
     saved = json.loads((tmp_path / "results" / "redteam.json").read_text())
     assert len(saved) == 20 and not any(result["failed"] for result in saved)

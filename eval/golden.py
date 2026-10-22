@@ -18,8 +18,7 @@ from dataclasses import asdict, dataclass
 
 import aloai_env
 import aloai_scoring as scoring
-from aloai_store import FirestoreStore, Store, require
-from google.cloud import firestore
+from aloai_store import Store, open_store, require
 from services.core.grader import paths
 
 from .models import ROOT
@@ -106,7 +105,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("No golden recordings yet: add them to eval/golden/index.json.")
         return 2
     settings = aloai_env.load(os.environ)
-    results = check(recordings, FirestoreStore(firestore.Client(project=settings.project)))
+    results = check(recordings, open_store(settings))
     RESULTS.parent.mkdir(exist_ok=True)
     RESULTS.write_text(
         json.dumps([asdict(r) | {"within": r.within} for r in results], indent=2) + "\n"

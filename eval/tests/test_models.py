@@ -2,9 +2,12 @@
 
 import asyncio
 import json
+
+import aloai_env
 from pathlib import Path
 
 import pytest
+from eval import models
 from eval.harness import run_case
 from eval.models import (
     InjectedModel,
@@ -105,10 +108,39 @@ def test_a_recorded_grading_replays_by_call_key(tmp_path):
 
 
 def test_the_live_coach_model_is_the_coachs_on_vertex():
-    model = live_coach_model("aloai-dev", "europe-west1")
+    model = live_coach_model(aloai_env.load({"GOOGLE_CLOUD_LOCATION": "europe-west1"}))
     assert model.model == "gemini-2.5-flash"
     assert model.client_kwargs == {
         "vertexai": True,
         "project": "aloai-dev",
         "location": "europe-west1",
     }
+
+
+AZURE_GEMINI = {
+    "CLOUD": "azure",
+    "LLM_BASE_URL": "https://generativelanguage.googleapis.com/v1beta/openai",
+    "LLM_API_KEY": "fictional-key",
+    "AZURE_OPENAI_DEPLOYMENTS": json.dumps({"coach": "gemini-2.5-flash", "grader": "g"}),
+}
+
+
+def test_on_azure_the_live_coach_model_is_the_coachs_through_the_provider():
+    """The same model Core's Coach runs on Azure (coach/azure.py): ADK through LiteLLM, on
+    the coach deployment, at LLM_BASE_URL with its key."""
+    model = live_coach_model(aloai_env.load(AZURE_GEMINI))
+    assert model.model == "openai/gemini-2.5-flash"
+    assert model._additional_args["api_base"] == (
+        "https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
+    assert model._additional_args["api_key"] == "fictional-key"
+
+
+@pytest.mark.parametrize("cloud, folder", [(None, "gcp"), ("gcp", "gcp"), ("azure", "azure")])
+def test_recordings_are_kept_per_cloud(monkeypatch, tmp_path, cloud, folder):
+    monkeypatch.setattr(models, "RECORDED", tmp_path)
+    if cloud is None:
+        monkeypatch.delenv("CLOUD", raising=False)
+    else:
+        monkeypatch.setenv("CLOUD", cloud)
+    assert models.recording_path("coach", "c0") == tmp_path / folder / "coach" / "c0.json"

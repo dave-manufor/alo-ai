@@ -9,9 +9,13 @@ the real Coach and is scored on three metrics, each with its threshold:
 
 From the repository root, with libs/aloai on the path:
 
-    python -m eval.coach_set                  replay eval/recorded/coach/ (free; CI)
-    python -m eval.coach_set --live           Gemini on Vertex AI (spends the shared budget)
+    python -m eval.coach_set                  replay eval/recorded/{cloud}/coach/ (free; CI)
+    python -m eval.coach_set --live           the live Coach model of CLOUD (spends budget)
     python -m eval.coach_set --live --record  also save the turns for the replay
+
+The live model is the one Core runs on CLOUD (eval/models.py): Gemini on Vertex AI for gcp,
+or for azure the coach deployment in AZURE_OPENAI_DEPLOYMENTS, through Azure OpenAI or, with
+LLM_BASE_URL and LLM_API_KEY, an OpenAI-compatible provider.
 """
 
 import argparse
@@ -101,11 +105,11 @@ def evaluate(model_for: Callable[[Mapping[str, Any]], BaseLlm]) -> list[CaseResu
     return [score(case["case_id"], run_case(case, model_for(case))) for case in cases()]
 
 
-def markdown(results: Sequence[CaseResult], mode: str) -> str:
+def markdown(results: Sequence[CaseResult], mode: str, model: str = COACH_MODEL) -> str:
     counts = totals(results)
     verdict = "PASS" if passed(results) else "FAIL"
     lines = [
-        f"Reading Coach set, {mode}, {COACH_MODEL}, prompt {PROMPT_VERSION}: {verdict}",
+        f"Reading Coach set, {mode}, {model}, prompt {PROMPT_VERSION}: {verdict}",
         "",
         "| Metric | Result | Threshold |",
         "|---|---|---|",
@@ -129,8 +133,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     settings = aloai_env.load(os.environ)
     recorders: dict[str, RecordingModel] = {}
 
+    used: list[str] = []
+
     def live(case: Mapping[str, Any]) -> BaseLlm:
-        model = live_coach_model(settings.project, settings.location)
+        model = live_coach_model(settings)
+        used.append(model.model)
         if not options.record:
             return model
         recorders[case["case_id"]] = RecordingModel(model=model.model, inner=model)
@@ -141,13 +148,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         recorder.save(recording_path(SET, case_id))
     RESULTS.parent.mkdir(exist_ok=True)
     RESULTS.write_text(json.dumps([asdict(r) for r in results], indent=2) + "\n")
-    print(markdown(results, "live"))
+    print(markdown(results, "live", used[0] if used else COACH_MODEL))
     return 0 if passed(results) else 1
 
 
 def _options(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="python -m eval.coach_set")
-    parser.add_argument("--live", action="store_true", help="call Gemini (spends budget)")
+    parser.add_argument(
+        "--live", action="store_true", help="call the live models of CLOUD (spends budget)"
+    )
     parser.add_argument("--record", action="store_true", help="save the turns for replay")
     return parser.parse_args(argv)
 

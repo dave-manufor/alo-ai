@@ -27,8 +27,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import aloai_env
-from aloai_store import FirestoreStore, Store, require
-from google.cloud import firestore
+from aloai_store import Store, open_store, require
 from services.core.grader import paths
 
 from .models import ROOT
@@ -120,7 +119,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("Keep the hand scores outside the repository: they are real children's results.")
         return 2
     settings = aloai_env.load(os.environ)
-    store = FirestoreStore(firestore.Client(project=settings.project))
+    store = open_store(settings)
     reading = compare(json.loads(options.hand_scores.read_text()), store)
     RESULTS.parent.mkdir(exist_ok=True)
     RESULTS.write_text(json.dumps(asdict(reading), indent=2) + "\n")

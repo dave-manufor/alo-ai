@@ -62,8 +62,7 @@ def test_the_check_runs_the_index_against_the_telemetry(tmp_path, monkeypatch, c
     index.write_text(json.dumps({"recordings": [recording]}))
     monkeypatch.setattr(golden, "INDEX", index)
     monkeypatch.setattr(golden, "RESULTS", tmp_path / "results" / "golden.json")
-    monkeypatch.setattr(golden, "FirestoreStore", lambda client: store)
-    monkeypatch.setattr(golden.firestore, "Client", lambda project: None)
+    monkeypatch.setattr(golden, "open_store", lambda settings: store)
     assert golden.main([]) == 0
     assert json.loads((tmp_path / "results" / "golden.json").read_text())[0]["within"] is True
     assert "1 of 1 within" in capsys.readouterr().out
