@@ -100,7 +100,7 @@ export default function HoldToConfirm({
         </svg>
         <span>{label}</span>
       </button>
-      <span id={hintId} className="caption hold-to-confirm__hint">
+      <span id={hintId} className="caption hold-to-confirm__hint sr-only">
         Keep holding until the ring fills — press and hold, or hold the Enter or Space key.
       </span>
     </>
