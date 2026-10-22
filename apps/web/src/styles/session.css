@@ -482,3 +482,58 @@
     padding-right: calc(var(--space-7) + env(safe-area-inset-right, 0px));
   }
 }
+
+/* --- Story pages (B5) ----------------------------------------------------
+   The box has a definite height taken from the viewport, so the pages can
+   be measured against it; StoryPages splits the sentences to fit. The
+   reserved space (header, progress, orb, nav, mic) is a multiple of the
+   largest space token. Dots only: no number, timer or score. */
+.story-pages {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.story-pages__box {
+  width: 100%;
+  height: max(calc(var(--space-8) * 3), calc(100dvh - var(--space-8) * 6));
+  overflow-y: auto;
+  cursor: pointer;
+}
+
+.story-pages__measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.story-pages__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.story-pages__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.story-pages__dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+}
+
+.story-pages__dot--now {
+  background: var(--ink);
+  border-color: var(--ink);
+}

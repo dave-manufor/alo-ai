@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { startSessionScreen, stubMic } from '../test/mic';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { accountStore } from '../account/store';
@@ -46,6 +47,7 @@ function renderSession(childId: string) {
 
 describe('night session states the fixture driver never reaches', () => {
   beforeEach(() => {
+    stubMic();
     localStorage.clear();
     accountStore.resetForTests();
   });
@@ -53,7 +55,7 @@ describe('night session states the fixture driver never reaches', () => {
   it('shows the waiting bubble and orb while reconnecting', async () => {
     startMessages = [{ schema_version: 2, cmd: 'reconnecting' }];
     renderSession(signedInChild());
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+    startSessionScreen();
     expect(await screen.findByText('Let’s wait for the internet.')).toBeInTheDocument();
     expect(document.querySelector('.voice-orb')).not.toBeNull();
     expect(screen.queryByRole('button', { name: /Listening/ })).not.toBeInTheDocument();
@@ -62,7 +64,7 @@ describe('night session states the fixture driver never reaches', () => {
   it('puts rain over the listening step', async () => {
     startMessages = [{ schema_version: 2, cmd: 'step', step: 'LISTENING' }];
     const { container } = renderSession(signedInChild());
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+    startSessionScreen();
     await screen.findByRole('button', { name: /Listening/ });
     expect(container.querySelector('.night-session--rain')).not.toBeNull();
     expect(container.querySelector('.voice-orb')).not.toBeNull();
@@ -71,6 +73,7 @@ describe('night session states the fixture driver never reaches', () => {
 
 describe('what Auntie Kemi says (B3)', () => {
   beforeEach(() => {
+    stubMic();
     localStorage.clear();
     accountStore.resetForTests();
   });
@@ -86,7 +89,7 @@ describe('what Auntie Kemi says (B3)', () => {
       { schema_version: 2, cmd: 'play', clip_id: 'interest_prompt' },
     ];
     const { container } = renderSession(signedInChild());
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+    startSessionScreen();
     const region = await screen.findByRole('status');
     await screen.findByText('What stories do you like?');
     expect(region).toHaveAttribute('aria-live', 'polite');

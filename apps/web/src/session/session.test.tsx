@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { startSessionScreen, stubMic } from '../test/mic';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { accountStore } from '../account/store';
@@ -253,6 +254,7 @@ describe('grown-up hold gate', () => {
 
 describe('kid session screen (PRD 4.1, agent-driven)', () => {
   beforeEach(() => {
+    stubMic();
     localStorage.clear();
     accountStore.resetForTests();
   });
@@ -279,7 +281,7 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+    startSessionScreen();
     // The bubble shows the interest clip's exact text.
     expect(
       await screen.findByText('Before we read, tell me: what kind of stories do you like?'),
