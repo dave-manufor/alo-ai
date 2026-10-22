@@ -40,9 +40,10 @@ RECORDED = Path(__file__).resolve().parents[2] / "fixtures" / "ai" / "reading"
 
 
 def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
-    settings = aloai_env.load(os.environ if env is None else env)
+    env = os.environ if env is None else env
+    settings = aloai_env.load(env)
     blobs = open_blobs(settings)
-    chirp, gemini = _transcribers(settings, blobs)
+    chirp, gemini = _transcribers(settings, blobs, second=_second_transcript(env))
     from .timing import MmsAligner, SileroPauses  # PyTorch is installed only in the image
 
     scorer = Phase1Scorer(
@@ -70,18 +71,35 @@ def build_app(settings: aloai_env.Config, scorer: Phase1Scorer) -> FastAPI:
     return app
 
 
-def _transcribers(settings: aloai_env.Config, blobs: Blobs) -> tuple[Transcriber, Transcriber]:
+def _second_transcript(env: Mapping[str, str]) -> bool:
+    """SECOND_TRANSCRIPT: "on" (default) scores a word only where two transcripts agree
+    (PRD 5.3); "off" scores from the first transcript alone (labels._label_single). A server
+    setting, changed only through Terraform."""
+    value = env.get("SECOND_TRANSCRIPT", "on")
+    if value not in ("on", "off"):
+        raise aloai_env.ConfigError(f"SECOND_TRANSCRIPT={value!r} is not 'on' or 'off'")
+    return value == "on"
+
+
+def _transcribers(
+    settings: aloai_env.Config, blobs: Blobs, *, second: bool = True
+) -> tuple[Transcriber, Transcriber | None]:
     """The two transcripts: Chirp 3 and Gemini on gcp, Azure AI Speech and an Azure OpenAI
-    transcription deployment on azure, or the recorded ones."""
+    transcription deployment on azure, or the recorded ones. With second=False only the first
+    (no second transcriber is built, so no transcription deployment is needed)."""
     if settings.ai_mode == "fixtures":
-        return FixtureReading(RECORDED, "chirp"), FixtureReading(RECORDED, "gemini")
+        return FixtureReading(RECORDED, "chirp"), (
+            FixtureReading(RECORDED, "gemini") if second else None
+        )
     if settings.cloud == "azure":
         return (
             AzureSpeechReading(blobs, lambda pcm, phrases: recognize_words(settings, pcm, phrases)),
-            OpenAIReading(open_openai(settings), deployment(settings, "transcribe"), blobs),
+            OpenAIReading(open_openai(settings), deployment(settings, "transcribe"), blobs)
+            if second
+            else None,
         )
     speech = speech_v2.SpeechClient(
         client_options=ClientOptions(api_endpoint=f"{CHIRP_LOCATION}-speech.googleapis.com")
     )
     vertex = genai.Client(vertexai=True, project=settings.project, location=settings.location)
-    return ChirpReading(speech, settings.project), GeminiReading(vertex)
+    return ChirpReading(speech, settings.project), GeminiReading(vertex) if second else None

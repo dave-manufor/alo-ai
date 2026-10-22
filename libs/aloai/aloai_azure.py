@@ -39,6 +39,8 @@ def deployment(config: Config, role: str) -> str:
 def open_openai(config: Config):  # pragma: no cover - builds a real client
     from openai import OpenAI
 
+    if config.llm_base_url:  # another provider: its own key, never the managed identity's token
+        return OpenAI(base_url=openai_base_url(config), api_key=config.llm_api_key)
     if config.openai_key:
         credential = config.openai_key
     else:
@@ -52,6 +54,8 @@ def open_openai_async(config: Config):  # pragma: no cover - builds a real clien
     """The same client for async callers (the Session Agent's tagger runs in its event loop)."""
     from openai import AsyncOpenAI
 
+    if config.llm_base_url:
+        return AsyncOpenAI(base_url=openai_base_url(config), api_key=config.llm_api_key)
     if config.openai_key:
         credential = config.openai_key
     else:
@@ -62,6 +66,8 @@ def open_openai_async(config: Config):  # pragma: no cover - builds a real clien
 
 
 def openai_base_url(config: Config) -> str:
+    if config.llm_base_url:
+        return config.llm_base_url.rstrip("/") + "/"
     return (
         require_setting(config.openai_endpoint, "AZURE_OPENAI_ENDPOINT").rstrip("/") + "/openai/v1/"
     )
@@ -77,7 +83,9 @@ def entra_token() -> str:  # pragma: no cover - asks Entra
 def bearer_token(config: Config) -> str:
     """A fresh credential for an OpenAI-compatible client that takes a string: the key for a
     local run, else the managed identity's access token (about an hour; build the client
-    for each use rather than keeping it)."""
+    for each use rather than keeping it). With LLM_BASE_URL it is that provider's key."""
+    if config.llm_base_url:
+        return config.llm_api_key  # required with the URL (aloai_env.load)
     return config.openai_key or entra_token()
 
 

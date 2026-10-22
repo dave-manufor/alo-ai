@@ -78,6 +78,52 @@ def test_both_transcripts_must_hear_the_correction():
     assert not label_words(TARGETS, corrected, ALL_RIGHT, set())[1].is_self_corrected
 
 
+# ---- one transcript (SECOND_TRANSCRIPT=off): the proposed rule, for W3 to confirm
+
+
+def single(chirp, told=()):
+    return label_words(TARGETS, chirp, None, set(told))
+
+
+def single_labels(chirp, told=()):
+    return [label.label for label in single(chirp, told)]
+
+
+def test_one_transcript_labels_a_right_word_correct_and_a_different_one_a_substitution():
+    assert single_labels(ALL_RIGHT) == ["CORRECT"] * 5
+    assert single_labels(placed("ada", "sew", "a", "red", "hat"))[1] == "SUBSTITUTION"
+
+
+@pytest.mark.parametrize("heard", ["saw", "sew"])
+def test_one_transcript_leaves_out_a_word_it_was_unsure_of_right_or_wrong(heard):
+    unsure = placed("ada", (heard, 0.3), "a", "red", "hat")
+    assert single_labels(unsure)[1] == "UNCERTAIN"
+
+
+def test_one_transcript_without_a_confidence_is_taken_as_sure():
+    no_confidence = placed("ada", ("sew", None), ("a", None), "red", "hat")
+    assert single_labels(no_confidence)[1:3] == ["SUBSTITUTION", "CORRECT"]
+
+
+def test_one_transcript_nothing_heard_is_an_omission_and_a_told_word_is_told():
+    assert single_labels(placed("ada", None, "a", "red", "hat"))[1] == "OMISSION"
+    assert single_labels(ALL_RIGHT, told=[1])[1] == "TOLD"
+
+
+def test_one_transcript_keeps_no_second_hearing_and_can_see_a_self_correction():
+    corrected = placed("ada", "saw", "a", "red", "hat", before=("sow",))
+    [_, saw, *_] = single(corrected)
+    assert (saw.label, saw.is_self_corrected, saw.gemini) == ("CORRECT", True, None)
+    assert not single(placed("ada", ("saw", 0.2), "a", "red", "hat", before=("sow",)))[
+        1
+    ].is_self_corrected
+
+
+def test_one_transcript_still_stops_at_the_last_word_reached():
+    stopped = placed("ada", "saw", None, None, None)
+    assert single_labels(stopped) == ["CORRECT", "CORRECT"]
+
+
 def test_words_after_the_last_one_reached_were_not_attempted():
     stopped = placed("ada", "saw", None, None, None)
     assert labels_of(stopped, stopped) == ["CORRECT", "CORRECT"]

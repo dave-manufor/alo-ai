@@ -71,6 +71,12 @@ class Config:
     openai_endpoint: str | None = None
     openai_key: str | None = None
     openai_deployments: Mapping[str, str] | None = None
+    # An OpenAI-compatible provider outside Azure OpenAI (LLM_BASE_URL, for example Mistral),
+    # used for the chat and transcription roles in place of the Azure OpenAI endpoint. Its API
+    # key is a secret (Key Vault) and is required with the URL, so the managed identity's
+    # token is never sent to it. Deployments still name the model for each role.
+    llm_base_url: str | None = None
+    llm_api_key: str | None = None
     speech_region: str | None = None
     speech_resource_id: str | None = None
     speech_key: str | None = None
@@ -98,6 +104,12 @@ def load(env: Mapping[str, str], *, receives_pushes: bool = True) -> Config:
     push_service_account = env.get("PUSH_SERVICE_ACCOUNT") or None
     if receives_pushes and env.get("K_SERVICE") and push_service_account is None:
         raise ConfigError("PUSH_SERVICE_ACCOUNT must be set on a Cloud Run service")
+    llm_base_url = env.get("LLM_BASE_URL") or None
+    llm_api_key = env.get("LLM_API_KEY") or None
+    if llm_base_url and not llm_api_key:
+        raise ConfigError("LLM_API_KEY must be set with LLM_BASE_URL")
+    if llm_base_url and hosted and not llm_base_url.startswith("https://"):
+        raise ConfigError(f"LLM_BASE_URL must be an https:// address on {where}")
     if hosted:
         local_only = [name for name in AZURE_LOCAL_ONLY if env.get(name)]
         if local_only:
@@ -125,6 +137,8 @@ def load(env: Mapping[str, str], *, receives_pushes: bool = True) -> Config:
         openai_endpoint=env.get("AZURE_OPENAI_ENDPOINT") or None,
         openai_key=env.get("AZURE_OPENAI_API_KEY") or None,
         openai_deployments=_deployments(env.get("AZURE_OPENAI_DEPLOYMENTS")),
+        llm_base_url=llm_base_url,
+        llm_api_key=llm_api_key,
         speech_region=env.get("AZURE_SPEECH_REGION") or None,
         speech_resource_id=env.get("AZURE_SPEECH_RESOURCE_ID") or None,
         speech_key=env.get("AZURE_SPEECH_KEY") or None,
