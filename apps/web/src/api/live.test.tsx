@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { addChild, changeTrainingOptIn, editChild, syncAccount } from '../account/actions';
@@ -8,6 +8,8 @@ import ChildFormPage from '../pages/ChildFormPage';
 import ReportDetailPage from '../pages/ReportDetailPage';
 import ReportsPage from '../pages/ReportsPage';
 import { createSessionDriver } from '../session/driverFactory';
+import { planUnlocked } from '../plan/access';
+import { usePlan } from '../report/plan';
 import { sampleReports } from '../report/reportFixture';
 import { ApiError } from './client';
 
@@ -219,6 +221,55 @@ describe('live build: editing a child and the recordings choice', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     expect(await screen.findByText('Back on the account screen')).toBeInTheDocument();
     expect(api.patch).toHaveBeenCalledWith('/v1/children/child_1', expect.objectContaining({ first_name: 'Adaeze' }));
+  });
+});
+
+describe('live build: plan', () => {
+  const plan = {
+    schema_version: 1 as const,
+    plan_id: 'plan_x',
+    session_id: sampleReports[0].session_id,
+    child_id: sampleReports[0].child_id,
+    activities: [{ activity_id: 'a', title: 'Sound hunt', text: 'Find three things.' }],
+    books: [],
+    next_session_at: '2026-10-29T09:00:00Z',
+  };
+
+  it('asks the API for the plan of this report and returns it', async () => {
+    api.get.mockResolvedValue(plan);
+    const { result } = renderHook(() => usePlan(sampleReports[0], true));
+    expect(result.current.status).toBe('loading');
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current).toEqual({ status: 'ready', plan });
+    expect(api.get).toHaveBeenCalledWith(`/v1/plans/${sampleReports[0].session_id}`);
+  });
+
+  it('is "no plan yet" for a 404, and a plain error otherwise', async () => {
+    api.get.mockRejectedValue(new ApiError(404, 'NOT_FOUND', false, 'x'));
+    const missing = renderHook(() => usePlan(sampleReports[0], true));
+    await waitFor(() => expect(missing.result.current.status).toBe('ready'));
+    expect(missing.result.current).toEqual({ status: 'ready', plan: null });
+
+    api.get.mockRejectedValue(new ApiError(503, 'X', true, 'Something went wrong on our side.'));
+    const down = renderHook(() => usePlan(sampleReports[0], true));
+    await waitFor(() => expect(down.result.current.status).toBe('error'));
+    expect(down.result.current).toEqual({ status: 'error', message: 'Something went wrong on our side.' });
+
+    api.get.mockRejectedValue(new Error('boom'));
+    const odd = renderHook(() => usePlan(sampleReports[0], true));
+    await waitFor(() => expect(odd.result.current.status).toBe('error'));
+  });
+
+  it('makes no call when the plan is not wanted or there is no report', () => {
+    expect(renderHook(() => usePlan(sampleReports[0], false)).result.current).toEqual({ status: 'ready', plan: null });
+    expect(renderHook(() => usePlan(null, true)).result.current).toEqual({ status: 'ready', plan: null });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it('is open to every signed-in guardian, with no subscription (study: payments are later work)', () => {
+    expect(accountStore.hasActiveSubscription()).toBe(false);
+    expect(planUnlocked(true)).toBe(true);
+    expect(planUnlocked(false)).toBe(false);
   });
 });
 

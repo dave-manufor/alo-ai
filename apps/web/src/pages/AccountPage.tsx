@@ -6,6 +6,7 @@ import { ApiError, dataMode } from '../api';
 import { auth, authMode } from '../auth';
 import { Button } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
+import { planUnlocked } from '../plan/access';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
 import { Avatar, Card, CheckRow, Notice, SectionLabel, Switch } from '../ui/primitives';
 
@@ -17,7 +18,7 @@ import { Avatar, Card, CheckRow, Notice, SectionLabel, Switch } from '../ui/prim
 export default function AccountPage() {
   const navigate = useNavigate();
   const { guardian, children } = useAccount();
-  const subscribed = accountStore.hasActiveSubscription();
+  const subscribed = planUnlocked(guardian !== null);
   const [signingOut, setSigningOut] = useState(false);
 
   async function signOut() {

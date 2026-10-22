@@ -39,6 +39,7 @@ CHILD = validator("child.schema.json")
 PASSAGE_GENERATE_REQUEST = validator("passage_generate_request.schema.json")
 PASSAGE_GENERATE_RESPONSE = validator("passage_generate_response.schema.json")
 STORY_REQUEST = validator("story_request.schema.json")
+GUARDIAN_PLAN = validator("guardian_plan.schema.json")
 
 
 def definition(schema_file: str, name: str) -> Draft202012Validator:
