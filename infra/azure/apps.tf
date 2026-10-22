@@ -79,8 +79,9 @@ locals {
   })
 
   env_reading_scorer = merge(local.base_env, local.ai_env, {
-    EVENT_QUEUE     = "scorer-events"
-    AZURE_CLIENT_ID = azurerm_user_assigned_identity.svc["reading-scorer"].client_id
+    EVENT_QUEUE       = "scorer-events"
+    AZURE_CLIENT_ID   = azurerm_user_assigned_identity.svc["reading-scorer"].client_id
+    SECOND_TRANSCRIPT = var.second_transcript
   })
 
   env_book_ingest = merge(local.base_env, local.ai_env, {
@@ -94,6 +95,11 @@ locals {
 # ---- Session Agent: the LiveKit worker. It dials out to LiveKit, so it has no ingress.
 
 resource "azurerm_container_app" "session_agent" {
+  lifecycle {
+    # Azure fills in "Consumption"; the provider would otherwise blank it on every plan.
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-session-agent"
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
@@ -159,6 +165,10 @@ resource "azurerm_container_app" "session_agent" {
 # core-events. The queue rule wakes it from zero when an event arrives.
 
 resource "azurerm_container_app" "core" {
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-core"
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
@@ -227,6 +237,10 @@ resource "azurerm_container_app" "core" {
 # ---- Reading Scorer: CPU only, 2 vCPU and 4 GiB (PRD 5.3). Events only: no ingress.
 
 resource "azurerm_container_app" "reading_scorer" {
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-reading-scorer"
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
@@ -281,6 +295,10 @@ resource "azurerm_container_app" "reading_scorer" {
 # the web app, the Paystack webhooks and the LiveKit token requests reach it.
 
 resource "azurerm_container_app" "account" {
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-account"
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
@@ -362,6 +380,10 @@ resource "azurerm_container_app" "account" {
 # ---- Book ingestion: built from the Core image (PRD 9.1), run by hand when the catalogue changes.
 
 resource "azurerm_container_app_job" "book_ingest" {
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-book-ingest"
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
@@ -427,6 +449,10 @@ resource "azurerm_static_web_app" "web" {
 # Speech, so it needs no roles of its own. Clips already there are never replaced.
 
 resource "azurerm_container_app_job" "seed" {
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
+
   name                         = "${var.prefix}-seed"
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
