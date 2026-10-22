@@ -123,4 +123,6 @@ class Phase1Scorer:
                 tokens, labels, times, self.pause_finder.pauses(audio), fluency.accuracy_pct
             ),
             model_versions=MODEL_VERSIONS if self.gemini else SINGLE_TRANSCRIPT_VERSIONS,
+            # One transcript scores with less certainty: the report is provisional (PRD 6.8).
+            flags=() if self.gemini else ("SINGLE_TRANSCRIPT",),
         )

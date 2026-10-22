@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "session_id": "sess_demo_001",
   "child_id": "child_demo_001",
   "guardian_id": "guardian_demo_001",

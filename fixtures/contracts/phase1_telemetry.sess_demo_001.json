@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "session_id": "sess_demo_001",
   "passage_id": "bank_p3_market_day",
   "passage_source": "BANK",
@@ -39,5 +39,5 @@
     { "token_index": 22, "target_word": "hat", "chirp_hypothesis": "hat", "gemini_hypothesis": "hat", "chirp_confidence": 0.95, "start_ms": 20380, "end_ms": 20850, "label": "CORRECT", "is_self_corrected": false, "pre_word_latency_ms": 120 }
   ],
   "flags": ["SHORT_READING"],
-  "model_versions": { "scoring_module": "1.0.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "transcription_prompt": "transcribe_v1", "alignment": "torchaudio-mms_fa", "word_alignment": "words_v2", "vad": "silero-vad-5" }
+  "model_versions": { "scoring_module": "1.0.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "transcription_prompt": "transcribe_v1", "alignment": "torchaudio-mms_fa", "word_alignment": "words_v3", "vad": "silero-vad-5" }
 }
