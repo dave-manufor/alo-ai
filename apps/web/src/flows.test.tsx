@@ -108,13 +108,14 @@ describe('the parent journey', () => {
     expect(screen.getByRole('heading', { name: 'Before your child reads' })).toBeInTheDocument();
   });
 
-  it('edits a child from the account', () => {
+  it('edits a child from the account', async () => {
     signInWithChild('Chidi');
     renderApp('/account');
     fireEvent.click(screen.getByRole('link', { name: 'Edit Chidi' }));
     fireEvent.change(screen.getByLabelText('First name'), { target: { value: 'Chidiebere' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-    expect(screen.getByText('Chidiebere')).toBeInTheDocument();
+    // Saving is asynchronous now (a live build waits for the Account API), so wait for it.
+    expect(await screen.findByText('Chidiebere')).toBeInTheDocument();
   });
 
   it('asks a second child’s consent again, because consent is per child', () => {

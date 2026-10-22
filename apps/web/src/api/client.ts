@@ -51,12 +51,13 @@ export interface ApiClientOptions {
 export interface ApiClient {
   get<T>(path: string): Promise<T>;
   post<T>(path: string, body: unknown): Promise<T>;
+  patch<T>(path: string, body: unknown): Promise<T>;
 }
 
 export function createApiClient(options: ApiClientOptions): ApiClient {
   const doFetch = options.fetchImpl ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
 
-  async function request<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+  async function request<T>(method: 'GET' | 'POST' | 'PATCH', path: string, body?: unknown): Promise<T> {
     const token = await options.getToken();
     if (!token) throw new ApiError(401, 'UNAUTHENTICATED', false, PLAIN.UNAUTHENTICATED);
     let response: Response;
@@ -96,5 +97,6 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   return {
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
+    patch: (path, body) => request('PATCH', path, body),
   };
 }

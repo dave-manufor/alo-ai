@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { addChild } from '../account/actions';
-import { CONSENT_TEXT, accountStore, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
-import { dataMode } from '../api';
+import { addChild, editChild } from '../account/actions';
+import { CONSENT_TEXT, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
 import { Button } from '../design-system/alo';
 import { consentDraft, useConsentDraft } from '../onboarding/draft';
 import { BackLink, CheckRow, Field, Notice, Segmented } from '../ui/primitives';
@@ -50,18 +49,6 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
   const years = Array.from({ length: 9 }, (_, index) => thisYear - 4 - index);
   const back = mode === 'onboarding' ? '/onboarding/consent' : mode === 'edit' ? '/account' : '/home';
 
-  // Editing needs an Account API call that does not exist yet; say so rather than pretend.
-  if (mode === 'edit' && dataMode === 'live') {
-    return (
-      <div className="page">
-        <BackLink to={back} />
-        <Notice tone="sky" role="note">
-          Changing a child&apos;s details is coming soon.
-        </Notice>
-      </div>
-    );
-  }
-
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (!trimmed) {
@@ -73,7 +60,7 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
     setSaving(true);
     try {
       if (mode === 'edit' && editing) {
-        accountStore.updateChild(editing.child_id, { firstName: trimmed, primaryClass, birthYear: year });
+        await editChild(editing.child_id, { firstName: trimmed, primaryClass, birthYear: year });
         navigate('/account');
         return;
       }

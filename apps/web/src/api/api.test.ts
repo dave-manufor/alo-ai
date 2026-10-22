@@ -29,6 +29,16 @@ describe('API client (D1)', () => {
     expect(init.body).toBe('{"a":1}');
   });
 
+  it('can PATCH, with the same token and JSON body', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse(200, { ok: true }));
+    await clientWith(fetchImpl as unknown as typeof fetch).patch('/v1/children/c1', { first_name: 'Ada' });
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://api.example.test/v1/children/c1');
+    expect(init.method).toBe('PATCH');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tok');
+    expect(init.body).toBe('{"first_name":"Ada"}');
+  });
+
   it('does not call the network without a token', async () => {
     const fetchImpl = vi.fn();
     await expect(clientWith(fetchImpl as unknown as typeof fetch, null).get('/v1/me')).rejects.toMatchObject({
