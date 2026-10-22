@@ -76,11 +76,17 @@ def test_chidi_profile_and_levels_match_the_worked_session():
     rc = scoring.comprehension_score(
         scoring.retell_coverage(6.5, 15), scoring.item_score([1, 2, 0])
     )
-    lc = scoring.comprehension_score(scoring.retell_coverage(4.0, 12), scoring.item_score([2, 0]))
+    lc = scoring.comprehension_score(
+        scoring.retell_coverage(4.0, 12), scoring.item_score([2, 0])
+    )
     assert (d_ok, shown(rc), shown(lc)) == (True, 58.9, 52.2)
     assert scoring.run_listening_module(rc)
-    assert scoring.listening_outcome(True, rc) == ListeningOutcome(lc_used=True, flag=None)
-    assert profile(d_ok, rc, lc) == Profile("FLUENT_NEEDS_LANGUAGE_SUPPORT", provisional=False)
+    assert scoring.listening_outcome(True, rc) == ListeningOutcome(
+        lc_used=True, flag=None
+    )
+    assert profile(d_ok, rc, lc) == Profile(
+        "FLUENT_NEEDS_LANGUAGE_SUPPORT", provisional=False
+    )
 
     band = scoring.performance_band(97.7, rc)
     assert band == "SUPPORTED"
@@ -224,7 +230,9 @@ def test_weights_and_credits_outside_the_rubric_are_refused(pair):
         scoring.weighted_credit([pair])
 
 
-@pytest.mark.parametrize("credit, coverage", [(9, 1.0), (12, 1.0), (4.5, 0.5), (0, 0.0)])
+@pytest.mark.parametrize(
+    "credit, coverage", [(9, 1.0), (12, 1.0), (4.5, 0.5), (0, 0.0)]
+)
 def test_full_retell_credit_at_60_percent_coverage(credit, coverage):
     assert scoring.retell_coverage(credit, 15) == coverage
 
@@ -306,7 +314,11 @@ def test_profile_decision_tree(d_ok, rc, lc, code):
 
 @pytest.mark.parametrize(
     "lc, code",
-    [(75.0, "DECODING_LIMITED"), (60.0, "NEEDS_SUPPORT_IN_BOTH"), (None, "INSUFFICIENT_EVIDENCE")],
+    [
+        (75.0, "DECODING_LIMITED"),
+        (60.0, "NEEDS_SUPPORT_IN_BOTH"),
+        (None, "INSUFFICIENT_EVIDENCE"),
+    ],
 )
 def test_a_reading_stopped_early_is_profiled_from_listening_alone(lc, code):
     assert profile(None, None, lc, stopped=True).code == code
@@ -315,7 +327,9 @@ def test_a_reading_stopped_early_is_profiled_from_listening_alone(lc, code):
 
 @pytest.mark.parametrize("flag", ["LOW_AUDIO", "OFF_TASK"])
 def test_a_blocking_flag_means_insufficient_evidence(flag):
-    assert profile(True, 95.0, None, flags=[flag]) == Profile("INSUFFICIENT_EVIDENCE", True)
+    assert profile(True, 95.0, None, flags=[flag]) == Profile(
+        "INSUFFICIENT_EVIDENCE", True
+    )
 
 
 def test_every_combination_maps_to_one_profile_and_rc_above_the_cut_ignores_lc():
@@ -323,9 +337,17 @@ def test_every_combination_maps_to_one_profile_and_rc_above_the_cut_ignores_lc()
     for d_ok, rc, stopped, flags in product(
         (True, False, None), scores, (True, False), ((), ("LOW_AUDIO",))
     ):
-        codes = {profile(d_ok, rc, lc, flags=flags, stopped=stopped).code for lc in scores}
+        codes = {
+            profile(d_ok, rc, lc, flags=flags, stopped=stopped).code for lc in scores
+        }
         assert codes <= PROFILE_CODES
-        if not stopped and not flags and d_ok is not None and rc is not None and rc >= 70:
+        if (
+            not stopped
+            and not flags
+            and d_ok is not None
+            and rc is not None
+            and rc >= 70
+        ):
             assert len(codes) == 1
 
 
@@ -349,6 +371,7 @@ def test_provisional_within_8_points_of_the_cut(rc, lc, provisional):
     [
         (["SHORT_READING"], True),
         (["HIGH_UNCERTAINTY", "DEMO_PROFILE"], True),
+        (["SINGLE_TRANSCRIPT"], True),  # scored from one transcript (PRD 5.3)
         (["DEMO_PROFILE", "LIVE_FALLBACK", "FALLBACK_PASSAGE"], False),
     ],
 )
@@ -391,7 +414,11 @@ def test_comprehension_bands(rc, band):
 
 @pytest.mark.parametrize(
     "accuracy, rc, band",
-    [(99.0, 60.0, "SUPPORTED"), (96.0, 95.0, "INSTRUCTIONAL"), (89.9, 95.0, "FRUSTRATION")],
+    [
+        (99.0, 60.0, "SUPPORTED"),
+        (96.0, 95.0, "INSTRUCTIONAL"),
+        (89.9, 95.0, "FRUSTRATION"),
+    ],
 )
 def test_the_band_is_the_lower_of_the_two(accuracy, rc, band):
     assert scoring.performance_band(accuracy, rc) == band
@@ -447,13 +474,18 @@ def test_arl_must_be_1_to_12(arl):
 
 
 @pytest.mark.parametrize(
-    "previous, current, confirmed", [(None, 4, False), (4, 4, True), (4, 5, True), (4, 6, False)]
+    "previous, current, confirmed",
+    [(None, 4, False), (4, 4, True), (4, 5, True), (4, 6, False)],
 )
-def test_a_level_is_confirmed_when_two_sessions_agree_within_one(previous, current, confirmed):
+def test_a_level_is_confirmed_when_two_sessions_agree_within_one(
+    previous, current, confirmed
+):
     assert scoring.level_confirmed(previous, current) is confirmed
 
 
-@pytest.mark.parametrize("arl, primary_class", [(1, 1), (2, 1), (3, 2), (4, 2), (11, 6), (12, 6)])
+@pytest.mark.parametrize(
+    "arl, primary_class", [(1, 1), (2, 1), (3, 2), (4, 2), (11, 6), (12, 6)]
+)
 def test_two_levels_per_primary_class(arl, primary_class):
     assert scoring.approx_primary_class(arl) == primary_class
 

@@ -28,7 +28,9 @@ from difflib import SequenceMatcher
 ATTEMPT_LIKENESS = 0.5  # [CAL] PRD 5.3: how alike a heard word must be to be a misreading
 # The rules above, in the telemetry's model_versions: bump it when a change gives the same
 # audio different word labels.
-ALIGNMENT_VERSION = "words_v2"  # v2: a stop phrase at the end is dropped (#34)
+ALIGNMENT_VERSION = (
+    "words_v3"  # v2: a stop phrase at the end is dropped (#34); v3: W3's single-transcript rule
+)
 # What the Session Agent hears as a stop, and the words a child may say with it
 # (services/session_agent/intents.py; the scorer image doesn't carry the agent, so
 # tests/test_words.py keeps the lists in step).

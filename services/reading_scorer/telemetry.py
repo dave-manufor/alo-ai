@@ -9,7 +9,7 @@ import aloai_scoring as scoring
 
 from .labels import WordLabel
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # 2: the SINGLE_TRANSCRIPT flag
 
 
 def error_counts(labels: Sequence[WordLabel]) -> dict[str, int]:
@@ -31,6 +31,7 @@ def build_telemetry(
     fluency: scoring.Fluency,
     prosody: scoring.Prosody,
     model_versions: Mapping[str, str],
+    flags: Sequence[str] = (),
 ) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -48,7 +49,7 @@ def build_telemetry(
         "self_correction_ratio": fluency.self_correction_ratio,
         "prosody": asdict(prosody),
         "word_events": [_event(label, times, index) for index, label in enumerate(labels)],
-        "flags": list(fluency.flags),
+        "flags": [*fluency.flags, *flags],
         "model_versions": dict(model_versions),
     }
 

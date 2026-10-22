@@ -4,16 +4,25 @@ Both have the passage word: CORRECT. Both have the same other word: SUBSTITUTION
 skip it: OMISSION. A word "That word is X." was played for: TOLD, from the agent's log.
 Any disagreement, or a word both have right that Chirp was unsure of, is UNCERTAIN and
 left out of the counts. MISPRONUNCIATION needs the phone-level check, which is not built.
+
+With one transcript (SECOND_TRANSCRIPT=off) there is no second hearing to agree with, so
+W3's single rule (2026-10-22) asks more of the one: a different word counts as a misreading
+only when the transcript was sure of it (SINGLE_SURE), and a transcript that gives no
+confidence at all scores nothing. The Scorer also flags every such reading
+SINGLE_TRANSCRIPT, which makes the report provisional.
 """
 
 from collections.abc import Collection, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from difflib import SequenceMatcher
 from typing import Literal
 
 from .words import Heard, Placed, normalize
 
 LOW_CONFIDENCE = 0.5  # [CAL] PRD 5.3
+# [CAL] PRD 5.3, one transcript only: how sure it must be of a different word for that word
+# to count as a misreading. Below it, and at or above LOW_CONFIDENCE, the word is UNCERTAIN.
+SINGLE_SURE = 0.8
 NEAR_MISS = 0.5  # how alike an attempt must be to the word for its correction to count
 
 Label = Literal["CORRECT", "SUBSTITUTION", "OMISSION", "TOLD", "UNCERTAIN"]
@@ -50,7 +59,14 @@ def label_words(
             for index, target in enumerate(targets)
         ]
     reached = [label.token_index for label in labels if label.label != "OMISSION"]
-    return labels[: reached[-1] + 1] if reached else []
+    labels = labels[: reached[-1] + 1] if reached else []
+    if gemini is None and not any(
+        p.heard is not None and p.heard.confidence is not None for p in chirp
+    ):
+        # One transcript with no confidence anywhere: a misreading can't be told apart from
+        # a mishearing, so nothing is scored (accuracy and WCPM stay empty rather than wrong).
+        labels = [replace(label, label="UNCERTAIN", is_self_corrected=False) for label in labels]
+    return labels
 
 
 def _label(index: int, target: str, chirp: Placed, gemini: Placed, told: bool) -> WordLabel:
@@ -74,28 +90,27 @@ def _label(index: int, target: str, chirp: Placed, gemini: Placed, told: bool) -
 
 
 def _label_single(index: int, target: str, chirp: Placed, told: bool) -> WordLabel:
-    """One transcript, no second opinion (SECOND_TRANSCRIPT=off). A word the transcript has
-    right counts unless it was unsure of it; a different word counts as a substitution unless
-    it was unsure, in which case it is left out as UNCERTAIN. A transcript with no confidence
-    is taken as sure. Proposed rule, for W3 to confirm or change (PRD 5.3, changelog)."""
+    """One transcript, no second opinion (SECOND_TRANSCRIPT=off; W3's rule). A right word
+    counts unless the transcript was unsure of it (LOW_CONFIDENCE); a different word counts
+    as a substitution only when it was sure (SINGLE_SURE); otherwise, or when it gives no
+    confidence for the word, the word is UNCERTAIN and left out."""
     word = normalize(target)
-    heard = normalize(chirp.heard.text) if chirp.heard else None
-    unsure = chirp.heard is not None and (
-        chirp.heard.confidence is not None and chirp.heard.confidence < LOW_CONFIDENCE
-    )
+    heard = chirp.heard
     self_corrected = False
     if told:
         label: Label = "TOLD"
     elif heard is None:
         label = "OMISSION"
-    elif unsure:
+    elif heard.confidence is None or heard.confidence < LOW_CONFIDENCE:
         label = "UNCERTAIN"
-    elif heard == word:
+    elif normalize(heard.text) == word:
         label = "CORRECT"
         self_corrected = _corrected(word, chirp)
-    else:
+    elif heard.confidence >= SINGLE_SURE:
         label = "SUBSTITUTION"
-    return WordLabel(index, target, chirp.heard, None, label, self_corrected)
+    else:
+        label = "UNCERTAIN"
+    return WordLabel(index, target, heard, None, label, self_corrected)
 
 
 def _corrected(word: str, placed: Placed) -> bool:

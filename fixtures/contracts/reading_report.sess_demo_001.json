@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "session_id": "sess_demo_001",
   "child_id": "child_demo_001",
   "guardian_id": "guardian_demo_001",
@@ -56,7 +56,7 @@
   "flags": ["DEMO_PROFILE", "SHORT_READING"],
   "parent_reporting": null,
   "versions": {
-    "scoring_module": "1.0.0",
+    "scoring_module": "1.1.0",
     "quick_model": "gemini-2.5-flash",
     "grader_model": "gemini-2.5-pro",
     "grader_prompt": "grader_v1",

@@ -17,7 +17,7 @@ from .asr import CHIRP_MODEL
 from .models import GRADER_MODEL, QUICK_MODEL
 from .prompts import PROMPT_VERSION
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # 2: the SINGLE_TRANSCRIPT flag
 
 VERSIONS = {
     "scoring_module": scoring.SCORING_MODULE,

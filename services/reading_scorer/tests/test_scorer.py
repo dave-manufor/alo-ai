@@ -32,6 +32,7 @@ def test_with_one_transcript_the_telemetry_is_valid_and_says_so():
     telemetry = store.get(telemetry_path(SESSION_ID))
     aloai_contracts.PHASE1_TELEMETRY.validate(telemetry)
     assert telemetry["model_versions"]["transcripts"] == "single"
+    assert "SINGLE_TRANSCRIPT" in telemetry["flags"]  # so the report is provisional
     for second_only in ("gemini_transcription", "transcription_prompt"):
         assert second_only not in telemetry["model_versions"]
     assert all(event["gemini_hypothesis"] is None for event in telemetry["word_events"])
@@ -41,7 +42,9 @@ def test_with_one_transcript_the_telemetry_is_valid_and_says_so():
 def test_with_two_transcripts_the_telemetry_does_not_say_single():
     store = seeded_store()
     scorer(store, MemoryPublisher()).handle(recorded())
-    assert "transcripts" not in store.get(telemetry_path(SESSION_ID))["model_versions"]
+    telemetry = store.get(telemetry_path(SESSION_ID))
+    assert "transcripts" not in telemetry["model_versions"]
+    assert "SINGLE_TRANSCRIPT" not in telemetry["flags"]
 
 
 def test_scoring_announces_phase1_scored():
