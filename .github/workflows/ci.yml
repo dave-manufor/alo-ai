@@ -34,7 +34,7 @@ jobs:
           # Keep the hard-rule minimum of 80%; generator has its own dedicated coverage job.
           - suite: core
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
-            command: pytest -c services/core/pyproject.toml services/core --cov=services/core --cov-fail-under=80
+            command: pytest -c services/core/pyproject.toml services/core --cov=services/core --cov-config=services/core/pyproject.toml --cov-fail-under=80
           - suite: generator
             # openai and azure-core: the Azure adapter test imports them (Core pins the same versions).
             install: pip install -r services/core/generator/requirements.txt openai==2.54.0 azure-cosmos==4.17.1 pytest pytest-cov
