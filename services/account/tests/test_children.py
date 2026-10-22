@@ -16,6 +16,7 @@ BODY = {
     "training_opt_in": False,
 }
 WEB_STORE = Path(__file__).resolve().parents[3] / "apps/web/src/account/store.ts"
+CONSENT_DOCS = Path(__file__).resolve().parents[3] / "docs/consent"
 
 
 def add_child(client, who=None, **changes):
@@ -27,6 +28,13 @@ def test_the_consent_text_is_the_one_the_web_app_shows():
     version = re.search(r"CONSENT_VERSION = '([^']+)'", source).group(1)
     pieces = re.search(r"CONSENT_TEXT =\s*'([^']+)'", source).group(1)
     assert (version, pieces) == (CONSENT_VERSION, CONSENT_TEXT)
+
+
+def test_the_printed_form_repeats_the_consent_text_and_names_its_version():
+    form = (CONSENT_DOCS / "signed-consent-form.md").read_text()
+    assert CONSENT_TEXT in form
+    assert CONSENT_VERSION in form
+    assert CONSENT_VERSION in (CONSENT_DOCS / "parent-information-sheet.md").read_text()
 
 
 def test_me_makes_the_guardian_once_and_keeps_the_first_record():
