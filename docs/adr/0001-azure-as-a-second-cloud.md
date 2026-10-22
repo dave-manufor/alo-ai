@@ -108,6 +108,6 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
 
 **Scope of the exception.** The Static Web Apps resource holds the site configuration and serves the built app from Azure's edge network. The app contains no child data: sign-in, children, consents and reports go to the Account API in the EU. The app's `connect-src` policy (`staticwebapp.config.json`) allows the site itself, Entra (`*.ciamlogin.com`, `login.microsoftonline.com`), `*.azurecontainerapps.io`, `*.blob.core.windows.net` and any `wss:` address (LiveKit); it is not narrowed to specific hosts.
 
-**Approval.** Approved by David (W2, acting for W1) on 2026-10-22. **Not yet acknowledged by Anthony (W1) or Nelson (W3):** this section stays a proposal until they confirm it in review of PR #143. If either declines, the fallback is to host the built app from the EU Storage account (static website), at the cost of the routing and CSP headers.
+**Approval.** Approved by David (W2, acting for W1) on 2026-10-22, and acknowledged by Nelson (W3) on #150 the same day. Not yet acknowledged by Anthony (W1). If either declines, the fallback is to host the built app from the EU Storage account (static website), at the cost of the routing and CSP headers.
 
 **Reverse it** by setting `web_location = "westeurope"` as soon as the region accepts new resources; the variable's validation allows it.
