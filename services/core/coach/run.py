@@ -30,6 +30,11 @@ from .plan import plan_path, save_next_check, write_template_plan
 from .tools import MAX_TAGS, CoachTools, catalogue_books, first_name, topic_tags
 
 logger = logging.getLogger(__name__)
+# ADK logs a failed run with its traceback ("Root node ... failed." in its runners), and the
+# error's message can quote the plan or summary it refused, with the child's name and results
+# (PRD 12: no child data in logs). Only critical ADK logs get through; _run_agent logs each
+# failure itself, by class.
+logging.getLogger("google_adk").setLevel(logging.CRITICAL)
 
 
 def _now() -> datetime:
