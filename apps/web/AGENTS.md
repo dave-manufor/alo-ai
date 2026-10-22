@@ -1,6 +1,6 @@
 # apps/web: Web app / PWA (W1, reviewed by W2 or W3)
 
-Landing, sign-in (Google or an emailed code, through Entra External ID), consent, child profiles, the session screen (mic, clip cache, reconnect), report screen, Paystack checkout and the teacher view **preview**. Read PRD 4.1, 4.4, 4.7, 14.1 and the root `AGENTS.md` first.
+A Parent/School first screen, sign-in (an emailed code, through Entra External ID), consent, child profiles, the session screen (mic, clip cache, reconnect), report screen, Paystack checkout and the teacher view **preview**. Read PRD 4.1, 4.4, 4.7, 14.1 and the root `AGENTS.md` first.
 
 ## Design system (mandatory)
 
