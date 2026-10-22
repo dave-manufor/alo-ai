@@ -1,35 +1,70 @@
 """The models an evaluation run uses (PRD 13.4).
 
-A live run calls Gemini (the Coach through ADK, the Grader directly) and spends from the
-shared budget; with recording on, it saves what the model did in the formats the
-recorded models replay (RecordedModel, FixtureGradingModel), so CI repeats the run free
-and deterministically. Red-team cases put the attacker's message into the conversation
+A live run calls the models of the chosen CLOUD, built exactly as Core builds them
+(services/core/main.py), and spends from that cloud's budget: on gcp, Gemini on Vertex AI;
+on azure, the role deployments through Azure OpenAI or, with LLM_BASE_URL, through an
+OpenAI-compatible provider and its key (the Coach through ADK and LiteLLM, the Grader
+directly). With recording on, it saves what the model did in the formats the recorded models
+replay (RecordedModel, FixtureGradingModel), so CI repeats the run free and
+deterministically. Recordings are kept per cloud (recorded/{cloud}/...), so one cloud's run
+never replaces another's. Red-team cases put the attacker's message into the conversation
 with InjectedModel.
 """
 
 import json
+import os
 from collections.abc import AsyncGenerator
 from pathlib import Path
+
+import aloai_env
 
 from google.adk.models import BaseLlm, Gemini, LlmRequest, LlmResponse
 from google.genai import types
 from pydantic import Field
 from services.core.coach.agent import COACH_MODEL, PROMPT_VERSION, RecordedModel
-from services.core.grader.models import GradingModel, GradingTask
+from services.core.grader.models import GradingModel, GradingTask, VertexGradingModel
 
 ROOT = Path(__file__).resolve().parent
 RECORDED = ROOT / "recorded"
 
 
-def live_coach_model(project: str, location: str) -> Gemini:
+def live_coach_model(settings: aloai_env.Config) -> BaseLlm:
+    """The Reading Coach's live model, as Core builds it for this cloud."""
+    if settings.cloud == "azure":
+        from services.core.coach.azure import azure_coach_model
+
+        return azure_coach_model(settings)("eval")
     return Gemini(
         model=COACH_MODEL,
-        client_kwargs={"vertexai": True, "project": project, "location": location},
+        client_kwargs={
+            "vertexai": True,
+            "project": settings.project,
+            "location": settings.location,
+        },
     )
 
 
+def live_grading_model(settings: aloai_env.Config) -> GradingModel:  # pragma: no cover
+    """The Grader's live model, as Core builds it for this cloud (a real client)."""
+    if settings.cloud == "azure":
+        from aloai_azure import open_openai
+        from services.core.grader.azure import azure_model
+
+        return azure_model(open_openai(settings), settings)
+    from google import genai
+
+    return VertexGradingModel(
+        genai.Client(vertexai=True, project=settings.project, location=settings.location)
+    )
+
+
+def recorded_dir(set_name: str) -> Path:
+    """Where a set's recordings for this cloud (CLOUD, gcp by default) are kept."""
+    return RECORDED / (os.environ.get("CLOUD") or "gcp") / set_name
+
+
 def recording_path(set_name: str, case_id: str) -> Path:
-    return RECORDED / set_name / f"{case_id}.json"
+    return recorded_dir(set_name) / f"{case_id}.json"
 
 
 def recorded_model(set_name: str, case_id: str) -> RecordedModel:
@@ -51,7 +86,7 @@ class RecordingModel(BaseLlm):
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        recording = {"model": COACH_MODEL, "prompt_version": PROMPT_VERSION, "turns": self.turns}
+        recording = {"model": self.model, "prompt_version": PROMPT_VERSION, "turns": self.turns}
         path.write_text(json.dumps(recording, indent=2, ensure_ascii=False) + "\n")
 
 

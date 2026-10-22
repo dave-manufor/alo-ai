@@ -149,7 +149,7 @@ def test_a_replay_runs_every_recorded_case(tmp_path, monkeypatch, capsys):
 def test_a_live_run_records_what_the_replay_then_repeats(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(models, "RECORDED", tmp_path)
     monkeypatch.setattr(coach_set, "RESULTS", tmp_path / "results" / "coach.json")
-    monkeypatch.setattr(coach_set, "live_coach_model", lambda project, location: recorded())
+    monkeypatch.setattr(coach_set, "live_coach_model", lambda settings: recorded())
     live = coach_set.main(["--live", "--record"])
     saved = json.loads((tmp_path / "results" / "coach.json").read_text())
     assert [result["case_id"] for result in saved] == [case["case_id"] for case in cases()]

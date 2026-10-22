@@ -111,8 +111,7 @@ def test_the_reading_is_saved_without_session_ids(tmp_path, monkeypatch, capsys)
         )
     )
     monkeypatch.setattr(grading_set, "RESULTS", tmp_path / "results" / "grading.json")
-    monkeypatch.setattr(grading_set, "FirestoreStore", lambda client: store)
-    monkeypatch.setattr(grading_set.firestore, "Client", lambda project: None)
+    monkeypatch.setattr(grading_set, "open_store", lambda settings: store)
     assert grading_set.main([str(hand)]) == 0
     saved = (tmp_path / "results" / "grading.json").read_text()
     assert "s1" not in saved

@@ -4,9 +4,11 @@ passes only if the result is safe, whatever the model said. The set passes at 20
 
 From the repository root, with libs/aloai on the path:
 
-    python -m eval.redteam                  replay eval/recorded/redteam/ (free; CI)
-    python -m eval.redteam --live           Gemini on Vertex AI (spends the shared budget)
+    python -m eval.redteam                  replay eval/recorded/{cloud}/redteam/ (free; CI)
+    python -m eval.redteam --live           the live models of CLOUD (spends budget)
     python -m eval.redteam --live --record  also save the model's turns for the replay
+
+The live Coach and Grader models are the ones Core runs on CLOUD (eval/models.py).
 """
 
 import argparse
@@ -22,7 +24,6 @@ import aloai_env
 from aloai_authz import POLICIES
 from aloai_events import MemoryPublisher
 from aloai_guardrails import BANNED_TERMS, NUMBER, traceable_numbers
-from google import genai
 from google.adk.models import BaseLlm
 from services.core.coach.clients import Outbox, StoryRequests
 from services.core.coach.plan import plan_path
@@ -32,19 +33,20 @@ from services.core.grader import paths
 from services.core.grader.asr import FixtureTranscriber, Transcriber
 from services.core.grader.assembly import ReportAssembler
 from services.core.grader.final import FinalGrader
-from services.core.grader.models import FixtureGradingModel, GradingModel, VertexGradingModel
+from services.core.grader.models import FixtureGradingModel, GradingModel
 
 from .coach_set import library_only
 from .harness import CATALOGUE, CHILD_ID, NOW, SESSION_ID, CoachRun, case_store, contract, run_case
 from .models import (
-    RECORDED,
     ROOT,
     InjectedModel,
     NoModel,
     RecordingGrader,
     RecordingModel,
     live_coach_model,
+    live_grading_model,
     recorded_model,
+    recorded_dir,
     recording_path,
 )
 
@@ -269,17 +271,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         results = evaluate(
             lambda case: recorded_model(SET, case["case_id"]),
-            lambda case: FixtureGradingModel(RECORDED / SET / case["case_id"]),
+            lambda case: FixtureGradingModel(recorded_dir(SET) / case["case_id"]),
         )
         print(markdown(results, "recorded"))
         return 0 if all(result.passed for result in results) else 1
     settings = aloai_env.load(os.environ)
-    vertex = genai.Client(vertexai=True, project=settings.project, location=settings.location)
     coaches: dict[str, RecordingModel] = {}
     graders: dict[str, RecordingGrader] = {}
 
     def coach(case: Mapping[str, Any]) -> BaseLlm:
-        model = live_coach_model(settings.project, settings.location)
+        model = live_coach_model(settings)
         if not options.record:
             return model
         coaches[case["case_id"]] = RecordingModel(model=model.model, inner=model)
@@ -287,15 +288,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     def grader(case: Mapping[str, Any]) -> GradingModel:
         if not options.record:
-            return VertexGradingModel(vertex)
-        graders[case["case_id"]] = RecordingGrader(VertexGradingModel(vertex))
+            return live_grading_model(settings)
+        graders[case["case_id"]] = RecordingGrader(live_grading_model(settings))
         return graders[case["case_id"]]
 
     results = evaluate(coach, grader)
     for case_id, recorder in coaches.items():
         recorder.save(recording_path(SET, case_id))
     for case_id, recorder in graders.items():
-        recorder.save(RECORDED / SET / case_id, SESSION_ID)
+        recorder.save(recorded_dir(SET) / case_id, SESSION_ID)
     RESULTS.parent.mkdir(exist_ok=True)
     RESULTS.write_text(json.dumps([asdict(r) for r in results], indent=2) + "\n")
     print(markdown(results, "live"))
@@ -305,7 +306,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _recorded(case: Mapping[str, Any]) -> bool:
     match case["agent"]:
         case "grader":
-            return (RECORDED / SET / case["case_id"] / f"{SESSION_ID}.json").exists()
+            return (recorded_dir(SET) / case["case_id"] / f"{SESSION_ID}.json").exists()
         case "coach" if case.get("model") is not False:
             return recording_path(SET, case["case_id"]).exists()
     return True
@@ -313,7 +314,9 @@ def _recorded(case: Mapping[str, Any]) -> bool:
 
 def _options(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="python -m eval.redteam")
-    parser.add_argument("--live", action="store_true", help="call Gemini (spends budget)")
+    parser.add_argument(
+        "--live", action="store_true", help="call the live models of CLOUD (spends budget)"
+    )
     parser.add_argument("--record", action="store_true", help="save the turns for replay")
     return parser.parse_args(argv)
 
