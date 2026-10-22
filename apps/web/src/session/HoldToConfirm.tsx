@@ -8,7 +8,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 // The ring fills as the hold progresses; under
 // `prefers-reduced-motion: reduce` the intermediate fill is skipped
 // and a press completes at once, so the ring simply appears filled.
-const HOLD_MS = 1000;
+const HOLD_MS = 2000;
 const TICK_MS = 50;
 
 function prefersReducedMotion(): boolean {
@@ -64,14 +64,14 @@ export default function HoldToConfirm({
   // On unmount only the interval needs clearing; no state update.
   useEffect(() => clearTimer, []);
 
-  const ringRadius = 10;
+  const ringRadius = 16;
   const circumference = 2 * Math.PI * ringRadius;
 
   return (
     <>
       <button
         type="button"
-        className="hold-to-confirm"
+        className="hold"
         aria-label={label}
         aria-describedby={hintId}
         onPointerDown={start}
@@ -87,12 +87,12 @@ export default function HoldToConfirm({
         }}
         onBlur={cancel}
       >
-        <svg className="hold-to-confirm__ring" viewBox="0 0 24 24" aria-hidden="true">
-          <circle className="hold-to-confirm__track" cx="12" cy="12" r={ringRadius} />
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle className="track" cx="20" cy="20" r={ringRadius} />
           <circle
-            className="hold-to-confirm__fill"
-            cx="12"
-            cy="12"
+            className="fill"
+            cx="20"
+            cy="20"
             r={ringRadius}
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
@@ -100,7 +100,7 @@ export default function HoldToConfirm({
         </svg>
         <span>{label}</span>
       </button>
-      <span id={hintId} className="caption hold-to-confirm__hint sr-only">
+      <span id={hintId} className="sr-only">
         Keep holding until the ring fills — press and hold, or hold the Enter or Space key.
       </span>
     </>
