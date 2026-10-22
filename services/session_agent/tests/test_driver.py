@@ -220,9 +220,9 @@ def test_a_reconnect_tells_the_web_app_which_step_it_is_back_in():
     driver.on_disconnected()
     driver.on_reconnected()
     after = ports.channel.sent[
-        ports.channel.sent.index({"schema_version": 2, "cmd": "reconnecting"}) :
+        ports.channel.sent.index({"schema_version": 3, "cmd": "reconnecting"}) :
     ]
-    assert {"schema_version": 2, "cmd": "step", "step": "INTEREST_CHAT"} in after
+    assert {"schema_version": 3, "cmd": "step", "step": "INTEREST_CHAT"} in after
 
 
 def test_a_demo_session_runs_end_to_end_and_publishes_valid_events(validate):
@@ -378,11 +378,23 @@ def test_a_missing_clip_is_sent_again_from_the_store():
         }
     ]
     assert ports.channel.sent[-1] == {
-        "schema_version": 2,
+        "schema_version": 3,
         "cmd": "play",
         "clip_id": "interest_prompt",
     }
     driver.on_client_message(b"not json")  # ignored
+
+
+def test_the_web_app_is_told_when_the_child_starts_and_stops_speaking():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    ports.channel.sent.clear()
+    driver.on_speech_started()
+    clock.ms += 500
+    driver.on_speech_ended()
+    signals = [m for m in ports.channel.sent if m["cmd"] == "child_speaking"]
+    assert [m["speaking"] for m in signals] == [True, False]
+    assert all(set(m) == {"schema_version", "cmd", "speaking"} for m in signals)
 
 
 def test_an_answer_heard_only_as_an_interim_transcript_is_still_scored():
