@@ -1,3 +1,4 @@
+import { dataMode } from '../api/mode';
 import { missingAck, playedAck, type ClipEntry, type ClientMessage } from './protocol';
 
 // Clip cache (PRD 4.4, protocol v2): every clip is fully downloaded
@@ -185,4 +186,21 @@ export function unlockAudio(): void {
   } catch {
     // No audio available; playback attempts will surface as missing.
   }
+}
+
+/**
+ * The cache this build uses (D4). Live build: every clip in the live
+ * clip_list is downloaded into Cache Storage and played from there, so a
+ * slow connection never delays a prompt, and a clip that could not be
+ * downloaded is answered `missing` when the agent plays it. Fixture
+ * build: nothing is fetched (the build stays network-free).
+ */
+export function createSessionClipCache(): ClipCache {
+  if (dataMode === 'live') {
+    return createClipCache({ load: loadClipIntoCache, player: browserPlayer });
+  }
+  return createClipCache({
+    load: async (url) => `fixture:${url}`,
+    player: { play: async () => undefined },
+  });
 }

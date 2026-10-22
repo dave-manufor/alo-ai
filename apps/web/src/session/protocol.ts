@@ -126,3 +126,20 @@ export function playedAck(clip_id: string): ClientMessage {
 export function missingAck(clip_id: string): ClientMessage {
   return { schema_version: 2, cmd: 'missing', clip_id };
 }
+
+/** The data-channel topic shared with the Session Agent (services/session_agent/livekit_worker.py). */
+export const SESSION_TOPIC = 'aloai.session';
+
+/** JSON bytes for a client message, as the agent expects on the data channel. */
+export function encodeClientMessage(message: ClientMessage): Uint8Array<ArrayBuffer> {
+  return new TextEncoder().encode(JSON.stringify(message));
+}
+
+/** Bytes from the data channel -> a validated agent message, or null if off-contract. */
+export function decodeAgentData(payload: Uint8Array): AgentMessage | null {
+  try {
+    return parseAgentMessage(new TextDecoder().decode(payload));
+  } catch {
+    return null;
+  }
+}
