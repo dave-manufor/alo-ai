@@ -84,8 +84,12 @@ export function messagesFor(event: DriverEvent, step: string | null): AgentMessa
     case 'session_started':
       return [
         { ...v2, cmd: 'clip_list', clips: fixtureClips },
-        { ...v2, cmd: 'step', step: 'INTEREST_CHAT' },
-        { ...v2, cmd: 'play', clip_id: 'interest_prompt' },
+        // Like a live session with INTEREST_CHAT=false, and like the design
+        // (the interests are spoken, with no buttons): open at the mic check.
+        // INTEREST_CHAT remains a valid protocol step ('topic_chosen' still
+        // moves on from it).
+        { ...v2, cmd: 'step', step: 'MIC_CHECK' },
+        { ...v2, cmd: 'play', clip_id: 'mic_check_prompt' },
       ];
     case 'topic_chosen':
       return [

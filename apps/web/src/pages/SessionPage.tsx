@@ -6,6 +6,7 @@ import {
   Japa,
   MicButton,
   MoonProgress,
+  Paper,
   RewardBadge,
   SpeechBubble,
 } from '../design-system/alo';
@@ -25,13 +26,6 @@ import { requestMic, type MicResult } from '../session/micPermission';
 import StoryPages from '../session/StoryPages';
 import Atmosphere from '../session/Atmosphere';
 import VoiceOrb from '../session/VoiceOrb';
-
-const TOPICS: { label: string; icon: 'book' | 'star' | 'lantern' | 'ear' }[] = [
-  { label: 'Animals', icon: 'book' },
-  { label: 'Football', icon: 'star' },
-  { label: 'Space', icon: 'lantern' },
-  { label: 'Food', icon: 'ear' },
-];
 
 const STEP_INDEX: Record<string, number> = {
   INTEREST_CHAT: 0,
@@ -267,20 +261,8 @@ export default function SessionPage({
 
       {started && !state.reconnecting && step === 'INTEREST_CHAT' ? (
         <section className="night-centre">
+          {/* The interests are spoken (the artifact's "seeds"): no buttons. */}
           <VoiceOrb state={orbState} />
-          <div className="night-topics">
-            {TOPICS.map((topic) => (
-              <Button
-                key={topic.label}
-                variant="secondary"
-                size="kid"
-                icon={topic.icon}
-                onClick={() => driverEvent('topic_chosen')}
-              >
-                {topic.label}
-              </Button>
-            ))}
-          </div>
         </section>
       ) : null}
 
@@ -358,14 +340,16 @@ export default function SessionPage({
 
       {started && handedOver ? (
         <section className="night-centre">
-          <div className="night-report-card">
+          {/* Grown-up mode, after the hold gate: one of the two places the
+              design system allows the light scope (Paper). */}
+          <Paper className="night-report-card night-report-card--paper">
             <p className="caption muted">Reading check · today</p>
             <h2 className="title">{childName}&apos;s report is ready</h2>
             <p className="body">See how {childName} read and what to try this week.</p>
             <Button variant="primary" size="grown" onClick={() => navigate('/reports')}>
               See the report
             </Button>
-          </div>
+          </Paper>
         </section>
       ) : null}
     </main>

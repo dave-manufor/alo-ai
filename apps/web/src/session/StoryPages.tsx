@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Button, ReadingPanel } from '../design-system/alo';
+import { Button, Paper, ReadingPanel, RoundButton } from '../design-system/alo';
 import {
   firstSentenceOfPage,
   fixedPages,
@@ -91,7 +91,7 @@ export default function StoryPages({
   const turn = () => setPageIndex((i) => Math.min(i + 1, last));
 
   return (
-    <div className="story-pages">
+    <Paper className="story-pages">
       <div
         ref={boxRef}
         className="story-pages__box"
@@ -127,13 +127,9 @@ export default function StoryPages({
               />
             ))}
           </span>
-          {pageIndex < last ? (
-            <Button variant="primary" size="kid" onClick={turn}>
-              Next
-            </Button>
-          ) : null}
+          {pageIndex < last ? <RoundButton kind="next" label="Next page" onClick={turn} /> : null}
         </div>
       ) : null}
-    </div>
+    </Paper>
   );
 }
