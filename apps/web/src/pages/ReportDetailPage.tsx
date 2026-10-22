@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom';
-import { accountStore, useAccount } from '../account/store';
+import { useAccount } from '../account/store';
 import { dataMode } from '../api';
 import { Button, ParentReportCard, ProfilePill } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
+import { planUnlocked } from '../plan/access';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
 import { formatLongDay, nextCheckIso } from '../report/childReports';
 import { formatReportDate, levelLabel } from '../report/reportFixture';
@@ -47,7 +48,7 @@ export default function ReportDetailPage() {
   const name = view.children[report.child_id]?.first_name ?? 'Your child';
   const noEvidence = report.profile.code === 'INSUFFICIENT_EVIDENCE';
   // Entitlement belongs to the guardian (subscriptions/{guardian_id}), not the report.
-  const entitled = guardian !== null && accountStore.hasActiveSubscription();
+  const entitled = planUnlocked(guardian !== null);
   const level = levelLabel(report);
 
   const stats: { label: string; value: string | number }[] = [];

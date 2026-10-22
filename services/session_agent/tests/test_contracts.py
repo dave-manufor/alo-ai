@@ -111,6 +111,7 @@ def test_every_schema_has_a_fixture():
         "guardian.schema.json",
         "child.schema.json",
         "session_start.schema.json",
+        "guardian_plan.schema.json",
     }
     assert {p.name for p in SCHEMAS.glob("*.schema.json")} == covered
 

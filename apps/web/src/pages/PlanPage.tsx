@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { accountStore, useAccount } from '../account/store';
+import { useAccount } from '../account/store';
 import NavButton from '../design-system/NavButton';
+import { planUnlocked } from '../plan/access';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
-import { formatLongDay, nextCheckIso } from '../report/childReports';
-import { sampleBooks, samplePlan } from '../report/reportFixture';
+import { formatLongDay } from '../report/childReports';
+import { usePlan } from '../report/plan';
 import { useLatestReport } from '../report/useReports';
 import { useActiveChild } from '../shell/activeChildContext';
 import { Card, ListRow, Notice, SectionLabel } from '../ui/primitives';
@@ -15,16 +16,29 @@ export default function PlanPage() {
   const { guardian } = useAccount();
   const { child } = useActiveChild();
   const { status, report } = useLatestReport(child?.child_id);
-  const entitled = guardian !== null && accountStore.hasActiveSubscription();
+  const entitled = planUnlocked(guardian !== null);
+  const hasEvidence = report !== null && report !== undefined && report.profile.code !== 'INSUFFICIENT_EVIDENCE';
+  const planState = usePlan(report, entitled && hasEvidence);
 
   if (!child) return null;
 
-  if (status !== 'ready') {
+  if (status === 'loading' || (entitled && hasEvidence && planState.status === 'loading')) {
     return (
       <div className="page page--mid">
         <h1 className="display-m">{child.first_name}&apos;s plan</h1>
         <Notice tone="plain" role="status">
-          {status === 'loading' ? 'Getting the plan…' : 'We could not load the plan. Please try again.'}
+          Getting the plan…
+        </Notice>
+      </div>
+    );
+  }
+
+  if (status === 'error' || planState.status === 'error') {
+    return (
+      <div className="page page--mid">
+        <h1 className="display-m">{child.first_name}&apos;s plan</h1>
+        <Notice tone="plain" role="status">
+          We could not load the plan. Please try again.
         </Notice>
       </div>
     );
@@ -47,7 +61,7 @@ export default function PlanPage() {
     );
   }
 
-  const books = report.recommendations.book_ids.flatMap((id) => (sampleBooks[id] ? [sampleBooks[id]] : []));
+  const plan = planState.status === 'ready' ? planState.plan : null;
 
   return (
     <div className="page page--mid">
@@ -58,12 +72,23 @@ export default function PlanPage() {
         </p>
       </div>
 
-      {entitled ? (
+      {entitled && !plan ? (
+        <Card>
+          <h2 className="title">The plan is being made</h2>
+          <p className="body">
+            It is made after each check. Please look again in a little while, or open the report for one thing to try
+            now.
+          </p>
+          <Link to={`/reports/${report.session_id}`} className="body card-title">
+            Back to the report
+          </Link>
+        </Card>
+      ) : entitled && plan ? (
         <>
           <section className="step" aria-labelledby="try-heading">
             <SectionLabel id="try-heading">Try at home</SectionLabel>
             <ul className="activity-list">
-              {samplePlan.map((activity) => (
+              {plan.activities.map((activity) => (
                 <li key={activity.activity_id}>
                   <Card>
                     <span className="body card-title">{activity.title}</span>
@@ -74,12 +99,12 @@ export default function PlanPage() {
             </ul>
           </section>
 
-          {books.length > 0 ? (
+          {plan.books.length > 0 ? (
             <section className="step" aria-labelledby="books-heading">
               <SectionLabel id="books-heading">Books for {child.first_name}</SectionLabel>
               <Card>
                 <div className="ui-list">
-                  {books.map((book) => (
+                  {plan.books.map((book) => (
                     <ListRow
                       key={book.book_id}
                       icon="book"
@@ -96,8 +121,7 @@ export default function PlanPage() {
                 </div>
               </Card>
               <p className="caption muted">
-                Open-licence African storybooks, chosen from the Alo.ai catalogue for {child.first_name}&apos;s level and
-                interests.
+                Open-licence African storybooks, chosen from the Alo.ai catalogue for {child.first_name}&apos;s level.
               </p>
             </section>
           ) : null}
@@ -105,7 +129,7 @@ export default function PlanPage() {
           <Card tone="leaf">
             <SectionLabel>Next check</SectionLabel>
             <p className="body card-title">
-              {formatLongDay(nextCheckIso(report))}, with a new story at {child.first_name}&apos;s level.
+              {formatLongDay(plan.next_session_at)}, with a new story at {child.first_name}&apos;s level.
             </p>
           </Card>
         </>
