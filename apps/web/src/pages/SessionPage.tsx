@@ -6,7 +6,6 @@ import {
   Japa,
   MicButton,
   MoonProgress,
-  ReadingPanel,
   RewardBadge,
   SpeechBubble,
 } from '../design-system/alo';
@@ -21,6 +20,8 @@ import {
   readingLevelForArl,
   recordAck,
 } from '../session/sessionState';
+import { requestMic, type MicResult } from '../session/micPermission';
+import StoryPages from '../session/StoryPages';
 import VoiceOrb from '../session/VoiceOrb';
 
 const TOPICS: { label: string; icon: 'book' | 'star' | 'lantern' | 'ear' }[] = [
@@ -62,6 +63,9 @@ export default function SessionPage({
   const { childId } = useParams();
   const navigate = useNavigate();
   const [started, setStarted] = useState(false);
+  // Before the session: 'greeting' (Start) -> 'explain' (why the mic, before the browser
+  // asks) -> started, or 'blocked' / 'unavailable' (a grown-up screen to recover).
+  const [micPhase, setMicPhase] = useState<'greeting' | 'explain' | MicResult>('greeting');
   const [state, setState] = useState(initialSessionState);
   const [starsCollected, setStarsCollected] = useState(false);
   const [handedOver, setHandedOver] = useState(false);
@@ -94,6 +98,17 @@ export default function SessionPage({
   function startSession() {
     driverRef.current = createDriver();
     driverRef.current.start(dispatch);
+  }
+
+  async function askForMic() {
+    const result = await requestMic();
+    if (result === 'granted') {
+      setMicPhase('granted');
+      setStarted(true);
+      startSession();
+    } else {
+      setMicPhase(result);
+    }
   }
 
   function driverEvent(event: ChildEvent) {
@@ -140,14 +155,58 @@ export default function SessionPage({
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {started && !state.reconnecting ? state.bubbleText : null}
       </p>
-      {handedOver ? null : (
+      {handedOver || micPhase === 'denied' || micPhase === 'unavailable' ? null : (
         <MoonProgress
           steps={['Say hello', 'Read', 'Tell', 'Answer']}
           current={step ? STEP_INDEX[step] : 0}
         />
       )}
 
-      {!started ? (
+      {micPhase === 'explain' ? (
+        <section className="night-centre">
+          <Japa pose="happy" />
+          <p className="kid-title">Auntie Kemi needs to hear you</p>
+          <p className="kid-body">
+            Ask a grown-up to tap Allow when the phone asks about the microphone.
+          </p>
+          <Button variant="primary" size="kid" onClick={() => void askForMic()}>
+            I’m ready
+          </Button>
+        </section>
+      ) : null}
+
+      {micPhase === 'denied' || micPhase === 'unavailable' ? (
+        <section className="night-centre night-grownup">
+          <div className="night-report-card">
+            <h1 className="title">
+              {micPhase === 'denied' ? 'The microphone is turned off' : 'No microphone found'}
+            </h1>
+            <p className="body">
+              Alo.ai listens to your child read aloud, so it needs the microphone.
+              {micPhase === 'denied'
+                ? ' To turn it on:'
+                : ' Please check that a microphone is working on this phone, and that you are using Chrome.'}
+            </p>
+            {micPhase === 'denied' ? (
+              <ol className="body">
+                <li>Tap the icon next to the web address at the top of the screen.</li>
+                <li>Open Permissions, then set Microphone to Allow.</li>
+                <li>Come back here and tap Try again.</li>
+              </ol>
+            ) : null}
+            <div className="row">
+              <Button variant="primary" size="grown" onClick={() => void askForMic()}>
+                Try again
+              </Button>
+              <Button variant="secondary" size="grown" onClick={() => navigate('/children')}>
+                Back to your children
+              </Button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {micPhase === 'greeting' ? (
         <section className="night-centre">
           <SpeechBubble tone="call">Àlọ́ o!</SpeechBubble>
           <Japa pose="happy" />
@@ -156,8 +215,7 @@ export default function SessionPage({
             className="night-start"
             onClick={() => {
               unlockAudio();
-              setStarted(true);
-              startSession();
+              setMicPhase('explain');
             }}
           >
             <span className="night-start__circle" aria-hidden="true">
@@ -173,7 +231,7 @@ export default function SessionPage({
       {started && state.reconnecting ? (
         <section className="night-centre">
           <VoiceOrb state="idle" />
-          <SpeechBubble>{state.bubbleText ?? 'Let’s wait for the internet.'}</SpeechBubble>
+          <SpeechBubble>Let’s wait for the internet.</SpeechBubble>
           <Japa pose="thinking" />
         </section>
       ) : null}
@@ -210,10 +268,10 @@ export default function SessionPage({
             <VoiceOrb state={orbState} small />
             <p className="label night-eyebrow">Your story</p>
           </span>
-          <ReadingPanel
+          <StoryPages
             title={state.passage.title}
             level={readingLevelForArl(state.passage.arl)}
-            text={state.passage.sentences}
+            sentences={state.passage.sentences}
           />
           <MicButton state={listening ? 'listening' : 'idle'} onClick={() => driverEvent('child_spoke')} />
         </section>
