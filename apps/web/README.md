@@ -58,6 +58,8 @@ Fixture stores live beside their screens (`src/account/store.ts`,
 
 Settings (all public values: the app is a public client with PKCE and holds no secret): `VITE_ENTRA_CLIENT_ID`, `VITE_ENTRA_AUTHORITY` (e.g. `https://aloai.ciamlogin.com/`), optionally `VITE_ENTRA_API_SCOPE` (the Account API's scope, once it exists; `auth().getAccessToken()` then returns a bearer token).
 
+**Fixture or live data** is chosen by the build alone (`src/api/mode.ts`). The build is *live* only when Entra sign-in is configured, `VITE_ALO_API_URL` (the Account API's address) is set, and `VITE_ALO_ENV` is not `local`. Then children, consent and reports go through the Account API (`src/api/`, with the Entra bearer token). Any other build is the *fixture* build: no network calls for account data. The browser, URL and user never choose. The teacher preview imports no data client in either build. The reports paths (`GET /v1/reports`, `/v1/reports/{session_id}`) follow the plan for C5 and are not built yet; change them in `src/report/useReports.ts` if C5 differs.
+
 **Until the Account service exists, the real build keeps a guardian's children and consents in memory for the life of the tab and then they are gone.** That is deliberate: a child's first name and birth year must not stay in `localStorage` on a shared family phone (PRD 12). It also means the real build cannot yet be used for real families. The sign-in session itself is in `sessionStorage` (closed with the tab). A sample build's leftovers on the same origin are removed when the real build first loads.
 
 The consent record's `sign_in_method` is `google`, `email_code` (the real build's emailed code) or `email_link` (the sample build only). The record's shape is `schemas/consent.schema.json`.

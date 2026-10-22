@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { addChild as addChildThroughBuild } from '../account/actions';
+import { ApiError } from '../api/client';
 import {
-  accountStore,
   ageFromBirthYear,
   attestationFor,
   useAccount,
@@ -36,14 +37,14 @@ export default function ChildrenPage() {
     );
   }
 
-  function addChild(event: React.FormEvent) {
+  async function addChild(event: React.FormEvent) {
     event.preventDefault();
     if (!firstName.trim()) {
       setError('Please add your child’s first name.');
       return;
     }
     try {
-      accountStore.addChildWithConsent({
+      await addChildThroughBuild({
         firstName,
         primaryClass,
         birthYear,
@@ -55,7 +56,13 @@ export default function ChildrenPage() {
       setTrainingOptIn(false);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'We could not add that child.');
+      setError(
+        err instanceof ApiError
+          ? err.plain
+          : err instanceof Error
+            ? err.message
+            : 'We could not add that child.',
+      );
     }
   }
 

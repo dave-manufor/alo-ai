@@ -190,6 +190,22 @@ export const accountStore = {
     });
     return { child, consent };
   },
+  /** Live build: replaces the children and consents with what the Account API holds. */
+  replaceFromServer(children: ChildProfile[], consents: ConsentRecord[]) {
+    setState({
+      ...state,
+      children,
+      consentsByChildId: Object.fromEntries(consents.map((consent) => [consent.child_id, consent])),
+    });
+  },
+  /** Live build: adds a child and consent the Account API has just saved. */
+  adoptServerChild(child: ChildProfile, consent: ConsentRecord) {
+    setState({
+      ...state,
+      children: [...state.children.filter((c) => c.child_id !== child.child_id), child],
+      consentsByChildId: { ...state.consentsByChildId, [child.child_id]: consent },
+    });
+  },
   consentFor(childId: string): ConsentRecord | null {
     const consent = state.consentsByChildId[childId];
     if (!consent || !state.guardian) return null;
