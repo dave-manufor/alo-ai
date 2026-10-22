@@ -159,12 +159,14 @@ resource "azurerm_cosmosdb_account" "main" {
   }
 }
 
-# Throughput is shared by the database's containers, so it stays inside the free 1000 RU/s.
+# Throughput is shared by the database's containers (here 600 RU/s) except `books`, which has its
+# own 400 RU/s because Cosmos DB refuses a vector index on shared throughput. 600 + 400 stays
+# inside the free tier's 1000 RU/s.
 resource "azurerm_cosmosdb_sql_database" "main" {
   name                = "aloai"
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.main.name
-  throughput          = 1000
+  throughput          = 600
 }
 
 # Every document: {id, pk, col, d} (libs/aloai/aloai_store.CosmosStore); pk is the top-level document.
@@ -186,6 +188,7 @@ resource "azapi_resource" "books" {
 
   body = {
     properties = {
+      options = { throughput = 400 }
       resource = {
         id           = "books"
         partitionKey = { paths = ["/pk"], kind = "Hash" }

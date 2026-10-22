@@ -133,13 +133,18 @@ variable "openai_deployments" {
     capacity = number
   }))
   default = {
-    grader     = { model = "gpt-4.1", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
-    quick      = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
-    coach      = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 30 }
+    # REVISIT: the chat roles were gpt-4.1 / gpt-4.1-mini on DataZoneStandard, but this subscription
+    # has no quota for them (2026-10-22), so they run on the regional Standard gpt-4o it does have
+    # (50 in all, split below; gpt-4o-mini 2024-07-18 is refused as deprecated). A model change
+    # needs the evaluation sets rerun (hard rule 6, alo-prompt-eval) before a real child is
+    # screened; revisit when gpt-4.1 quota is granted.
+    grader     = { model = "gpt-4o", version = "2024-11-20", sku = "Standard", capacity = 20 }
+    quick      = { model = "gpt-4o", version = "2024-11-20", sku = "Standard", capacity = 10 }
+    coach      = { model = "gpt-4o", version = "2024-11-20", sku = "Standard", capacity = 8 }
     embedding  = { model = "text-embedding-3-small", version = "1", sku = "DataZoneStandard", capacity = 50 }
     transcribe = { model = "gpt-4o-transcribe", version = "2025-03-20", sku = "DataZoneStandard", capacity = 30 }
-    generator  = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 50 }
-    tagger     = { model = "gpt-4.1-mini", version = "2025-04-14", sku = "DataZoneStandard", capacity = 20 }
+    generator  = { model = "gpt-4o", version = "2024-11-20", sku = "Standard", capacity = 8 }
+    tagger     = { model = "gpt-4o", version = "2024-11-20", sku = "Standard", capacity = 4 }
   }
   validation {
     condition     = alltrue([for d in values(var.openai_deployments) : contains(["Standard", "DataZoneStandard"], d.sku)])
@@ -176,11 +181,11 @@ variable "budget_start" {
 }
 
 variable "web_location" {
-  description = "Region for the Static Web Apps resource. It is offered in few regions; West Europe is the EU one. The site itself is served from Azure's edge."
+  description = "Region for the Static Web Apps resource. It is offered in few regions and West Europe, the EU one, was not accepting new customers on 2026-10-22, so the default is West US 2. Only the site configuration lives there: the pages are served from Azure's edge, the app holds no child data, and reports come from the Account API in the EU. Move back to westeurope when it reopens."
   type        = string
-  default     = "westeurope"
+  default     = "westus2"
   validation {
-    condition     = var.web_location == "westeurope"
-    error_message = "web_location must be westeurope, the EU region Static Web Apps is offered in."
+    condition     = contains(["westeurope", "westus2", "eastus2"], var.web_location)
+    error_message = "web_location must be westeurope, westus2 or eastus2 (the regions Static Web Apps is offered in that this project accepts)."
   }
 }
