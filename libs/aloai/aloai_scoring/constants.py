@@ -7,7 +7,7 @@ changelog line (alo-scoring-change).
 
 from typing import Literal
 
-SCORING_MODULE = "1.0.0"
+SCORING_MODULE = "1.1.0"  # 1.1.0: W3's single-transcript rule (SINGLE_SURE, SINGLE_TRANSCRIPT)
 
 Band = Literal["INDEPENDENT", "INSTRUCTIONAL", "SUPPORTED", "FRUSTRATION"]
 ProfileCode = Literal[
