@@ -89,6 +89,9 @@ locals {
     EVENT_QUEUE       = "scorer-events"
     AZURE_CLIENT_ID   = azurerm_user_assigned_identity.svc["reading-scorer"].client_id
     SECOND_TRANSCRIPT = var.second_transcript
+    # It calls no model in single-transcript mode and has no provider key, and aloai_env refuses
+    # an address without a key.
+    LLM_BASE_URL = ""
   })
 
   env_book_ingest = merge(local.base_env, local.ai_env, {
@@ -544,7 +547,8 @@ resource "azurerm_container_app_job" "seed" {
       command = ["python", "-m", "services.session_agent.seed"]
 
       dynamic "env" {
-        for_each = merge(local.env_session_agent, { TTS_VOICE = var.tts_voice })
+        # The seed only makes speech clips: no model, so no provider address (it has no key).
+        for_each = merge(local.env_session_agent, { TTS_VOICE = var.tts_voice, LLM_BASE_URL = "" })
         content {
           name  = env.key
           value = env.value
