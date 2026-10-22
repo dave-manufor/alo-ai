@@ -15,6 +15,8 @@ from aloai_azure import (
     bearer_token,
     build_ssml,
     deployment,
+    open_openai,
+    open_openai_async,
     openai_base_url,
     pcm16,
     speech_credentials,
@@ -272,3 +274,54 @@ def test_the_openai_credential_is_the_key_when_there_is_one(monkeypatch):
     assert bearer_token(azure(AZURE_OPENAI_API_KEY="k")) == "k"
     monkeypatch.setattr("aloai_azure.entra_token", lambda: "entra")
     assert bearer_token(azure()) == "entra"
+
+
+# ---- another OpenAI-compatible provider (LLM_BASE_URL)
+
+PROVIDER = "https://api.example.test/v1"
+
+
+def test_a_provider_address_needs_its_key_and_an_https_address_when_hosted():
+    with pytest.raises(aloai_env.ConfigError, match="LLM_API_KEY"):
+        azure(LLM_BASE_URL=PROVIDER)
+    hosted = {
+        "CLOUD": "azure",
+        "AI_MODE": "live",
+        "CONTAINER_APP_NAME": "aloai-core",
+        "LLM_API_KEY": "pk",
+    }
+    with pytest.raises(aloai_env.ConfigError, match="https"):
+        aloai_env.load(hosted | {"LLM_BASE_URL": "http://api.example.test/v1"})
+    settings = aloai_env.load(hosted | {"LLM_BASE_URL": PROVIDER})
+    assert (settings.llm_base_url, settings.llm_api_key) == (PROVIDER, "pk")
+    assert (azure().llm_base_url, azure().llm_api_key) == (None, None)
+
+
+def test_the_address_and_credential_follow_the_provider_and_never_ask_entra(monkeypatch):
+    monkeypatch.setattr("aloai_azure.entra_token", lambda: pytest.fail("asked Entra"))
+    settings = azure(LLM_BASE_URL=PROVIDER + "/", LLM_API_KEY="pk")
+    assert openai_base_url(settings) == PROVIDER + "/"
+    assert bearer_token(settings) == "pk"
+
+
+def test_a_provider_key_alone_does_not_move_the_azure_endpoint():
+    settings = azure(
+        LLM_API_KEY="pk",
+        AZURE_OPENAI_ENDPOINT="https://x.openai.azure.com",
+        AZURE_OPENAI_API_KEY="ak",
+    )
+    assert openai_base_url(settings) == "https://x.openai.azure.com/openai/v1/"
+    assert bearer_token(settings) == "ak"
+
+
+def test_the_clients_are_built_for_the_provider_with_its_own_key(monkeypatch):
+    import openai
+
+    built = []
+    monkeypatch.setattr(openai, "OpenAI", lambda **kwargs: built.append(("sync", kwargs)))
+    monkeypatch.setattr(openai, "AsyncOpenAI", lambda **kwargs: built.append(("async", kwargs)))
+    settings = azure(LLM_BASE_URL=PROVIDER, LLM_API_KEY="pk")
+    open_openai(settings)
+    open_openai_async(settings)
+    expected = {"base_url": PROVIDER + "/", "api_key": "pk"}
+    assert built == [("sync", expected), ("async", expected)]
