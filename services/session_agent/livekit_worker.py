@@ -223,6 +223,17 @@ def _prepared(passages: _Passages, passage_id: str | None):
         return None
 
 
+def _bank_opening(passages: _Passages, passage_id: str):
+    """A generic session (INTEREST_CHAT=false) opens at the mic check with the bank passage
+    chosen by the child's level. None if that passage can't be used, and the session then
+    opens with the interest chat as before rather than ending."""
+    try:
+        return passages.pair(passage_id)
+    except PassageError:
+        log.warning("bank passage %s can't be used; opening with the interest chat", passage_id)
+        return None
+
+
 def _consume_prepared(background: Background, db: Store, child_id: str) -> None:
     """A prepared story is read once. Clearing next_passage_id when the session starts
     means a session that ends INCOMPLETE (no plan.ready) can't give the child the same
@@ -368,6 +379,8 @@ async def entrypoint(ctx: JobContext) -> None:
     returning = _prepared(passages, start.passage_id)
     if returning is not None:
         _consume_prepared(background, db, start.child_id)
+    elif not cfg.interest_chat:
+        returning = _bank_opening(passages, bank_passage_id)
     driver.start(returning=returning)
     for publication in child.track_publications.values():
         if publication.track is not None:

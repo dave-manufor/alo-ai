@@ -23,6 +23,17 @@ def test_an_unclear_generator_switch_is_refused():
         config.load({"GENERATOR_ON": "yes"})
 
 
+def test_the_interest_chat_is_on_unless_the_server_turns_it_off():
+    assert config.load({}).interest_chat is True
+    assert config.load({"INTEREST_CHAT": "true"}).interest_chat is True
+    assert config.load({"INTEREST_CHAT": "false"}).interest_chat is False
+
+
+def test_an_unclear_interest_chat_switch_is_refused():
+    with pytest.raises(config.ConfigError, match="INTEREST_CHAT"):
+        config.load({"INTEREST_CHAT": "off"})
+
+
 def test_values_come_from_the_environment():
     loaded = config.load(
         {"ALO_ENV": "prod", "AI_MODE": "live", "VOICE_MODE": "live_first", "SESSION_PROFILE": "demo"}

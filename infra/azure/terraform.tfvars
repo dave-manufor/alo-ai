@@ -39,6 +39,10 @@ llm_models = {
 }
 openai_deployments = {}
 
+# A generic session (David, 2026-10-22): no interest chat. Every session opens at the mic check
+# with the bank passage for the child's level; nothing is chosen or generated from what they like.
+interest_chat = false
+
 # One transcript (Azure AI Speech): the Gemini endpoint has no /audio/transcriptions and a chat
 # transcript dropped a word in a test. Needs W3's confirmation before real children (PRD 5.3).
 second_transcript = "off"

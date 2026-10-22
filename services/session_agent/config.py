@@ -31,6 +31,9 @@ class Config:
     voice_mode: str
     session_profile: str
     generator_on: bool  # false: every session reads a bank passage (FALLBACK_PASSAGE)
+    # false: no interest chat; every session opens at the mic check with the bank passage
+    # chosen by the child's level, never by what they like (a generic session).
+    interest_chat: bool = True
 
 
 FLAGS = {"true": True, "false": False}
@@ -115,4 +118,5 @@ def load(env: Mapping[str, str]) -> Config:
         voice_mode=_choice(env, "VOICE_MODE", "cache_first", VOICE_MODES),
         session_profile=_choice(env, "SESSION_PROFILE", "standard", PROFILES),
         generator_on=_flag(env, "GENERATOR_ON", "false"),
+        interest_chat=_flag(env, "INTEREST_CHAT", "true"),
     )

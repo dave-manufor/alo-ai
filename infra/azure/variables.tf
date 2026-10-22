@@ -88,6 +88,12 @@ variable "llm_models" {
   default     = {}
 }
 
+variable "interest_chat" {
+  description = "false: a generic session. No interest chat; every session opens at the mic check with the bank passage chosen by the child's level, never by what they like. true: the session opens by asking what the child likes (PRD 4)."
+  type        = bool
+  default     = true
+}
+
 variable "second_transcript" {
   description = "\"on\": a word counts only where two transcripts agree (PRD 5.3). \"off\": the Reading Scorer scores from the Azure AI Speech transcript alone, which needs no OpenAI transcription deployment but relaxes that rule: leave it on unless W3 has confirmed the single-transcript rule and rerun the golden recordings."
   type        = string

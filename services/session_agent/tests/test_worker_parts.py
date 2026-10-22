@@ -392,6 +392,22 @@ def test_a_returning_childs_prepared_story_is_used_if_it_fits():
     assert _prepared(passages, None) is None
 
 
+def test_a_generic_session_opens_with_the_bank_passage_chosen_by_level():
+    from services.session_agent.livekit_worker import _bank_opening, _Passages
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    opening = _bank_opening(passages, "bank_p3_market_day")
+    assert opening.read["passage_id"] == "bank_p3_market_day"
+
+
+@pytest.mark.parametrize("passage_id", ["gen_next_missing", "bank_p3_school_garden"])
+def test_a_generic_session_with_a_bank_passage_that_cannot_be_used_opens_with_the_chat(passage_id):
+    from services.session_agent.livekit_worker import _bank_opening, _Passages
+
+    passages = _Passages(BANK, DEFAULT_BANK["demo"], DEMO, None)
+    assert _bank_opening(passages, passage_id) is None
+
+
 @pytest.mark.parametrize(
     "passage_id", ["gen_next_missing", "bank_l3_rain", "bank_p3_school_garden"]
 )
