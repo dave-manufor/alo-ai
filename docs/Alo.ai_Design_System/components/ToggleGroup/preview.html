@@ -1,0 +1,14 @@
+<!-- @dsCard group="Grown-ups" height=130 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ToggleGroup — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage alo-stage--col"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  var opts = ['P1','P2','P3','P4','P5','P6'].map(function (v) { return {value:v,label:v}; });
+  function Demo() { var s = React.useState('P3'); return h(A.ToggleGroup, {id:'class', label:'Class this school year', options:opts, value:s[0], onChange:s[1]}); }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

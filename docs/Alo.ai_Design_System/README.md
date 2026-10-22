@@ -82,6 +82,13 @@ Three Google families, each with one job:
 - Depth is a solid **press edge**, not a blur. A button sits on its own darker edge (`press-night`, `press-moon`, `press-coral`, `press-leaf`, `press-neutral`) and drops 4px onto it when tapped. Cards sit on `lift`.
 - Anything a child taps is at least `tap-kid` (64px) tall. Grown-up controls are at least `tap-grown` (44px).
 
+## Scoped light theme, breakpoints and utilities
+
+- **Scoped light theme.** Put `data-theme="light"` on any element (or use `Paper`) and everything inside takes the Day tokens, even inside a `data-theme="dark"` screen. Same token names, so no component changes. Allowed in exactly two places, by owner decision following the "Àlọ́ Night Session V" design: (1) the paper card that holds story text in the Night session, a surface for reading; (2) the hand-back report card shown after the grown-up hold gate, which is grown-up mode and must not carry kid pieces. Nowhere else: a screen is still either kid or grown-up mode, and the theme is never a way to mix them.
+- **Breakpoint.** `bp-tablet` is 900px (write `900px` in `@media (max-width: 900px)` with a comment naming the token; CSS cannot read variables there).
+- **Screen-reader-only.** `.alo-sr` hides text visually and keeps it in the accessibility tree: use it for the live region that carries Auntie Kemi's words and for labels on icon-only buttons.
+- **Pieces added with this:** `RoundButton`, `Paper`, `Eyebrow`, `Field`, `ToggleGroup`, `Banner`. Their READMEs say when to use them.
+
 ## The game layer: the story circle
 
 Alo.ai rewards **taking part**, never being right. Scores belong to grown-ups.

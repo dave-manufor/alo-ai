@@ -1,0 +1,14 @@
+<!-- @dsCard group="Grown-ups" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Field — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage alo-stage--col"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(A.Field, {id:'fname', label:'First name', defaultValue:'Chidi', hint:'Just a first name is enough.'}),
+    h(A.Field, {id:'byear', label:'Birth year', options:[{value:'2016',label:'2016'},{value:'2017',label:'2017'}], defaultValue:'2017'})));
+</script>
+</body>
+</html>

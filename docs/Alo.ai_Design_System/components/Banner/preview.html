@@ -1,0 +1,15 @@
+<!-- @dsCard group="Grown-ups" height=210 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Banner — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div id="root" class="alo-stage alo-stage--col"></div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(A.Banner, {tone:'good'}, 'Your connection is good enough for a check.'),
+    h(A.Banner, {tone:'info'}, 'The check takes about ten minutes.'),
+    h(A.Banner, {tone:'notice'}, 'Prices are drafts.')));
+</script>
+</body>
+</html>

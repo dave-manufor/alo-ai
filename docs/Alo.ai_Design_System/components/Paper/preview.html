@@ -1,0 +1,14 @@
+<!-- @dsCard group="Surfaces" height=200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Paper — preview</title></head>
+<body style="margin:0;background:var(--surface)">
+<div data-theme="dark" style="background:var(--surface);padding:var(--space-5)">
+  <div id="root"></div>
+</div>
+<script>
+  var A = window.Alo, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(A.Paper, null, h('p', {style:{margin:0,fontFamily:'var(--font-reading)',fontSize:'24px'}}, 'A light card inside the Night theme.')));
+</script>
+</body>
+</html>

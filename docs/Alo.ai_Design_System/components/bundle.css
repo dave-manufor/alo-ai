@@ -109,7 +109,44 @@
 .alo-pill--none { background: var(--surface-raised); color: var(--ink-muted); border: 2px solid var(--line-strong); }
 .alo-pill-prov { font-weight: 600; font-size: 12px; opacity: .85; }
 
+/* Round button (play, next) */
+.alo-round { display: inline-grid; place-items: center; width: var(--tap-kid); height: var(--tap-kid); padding: 0; border: 0; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--night); color: var(--on-night); box-shadow: 0 6px 16px color-mix(in srgb, var(--night) 35%, transparent);
+  transition: transform 120ms cubic-bezier(.34,1.56,.64,1); }
+.alo-round:active { transform: scale(.94); }
+.alo-round:disabled { opacity: .45; cursor: default; }
+.alo-round .alo-glyph { width: var(--space-5); height: var(--space-5); }
+
+/* Scoped light card: pair with data-theme="light" (see Paper) */
+.alo-paper { background: var(--surface-raised); color: var(--ink); border-radius: var(--radius-xl); box-shadow: var(--lift); padding: var(--space-5); font-family: var(--font-ui); }
+
+/* Eyebrow */
+.alo-eyebrow { font-family: var(--font-ui); font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--ink-muted); }
+
+/* Form field and toggle group (grown-up mode) */
+.alo-field { display: flex; flex-direction: column; gap: var(--space-2); font-family: var(--font-ui); color: var(--ink); }
+.alo-field-control { height: var(--tap-grown); box-sizing: border-box; padding: 0 var(--space-3); border: 2px solid var(--line-strong); border-radius: var(--radius-s);
+  font: 500 16px var(--font-ui); color: var(--ink); background: var(--surface-raised); }
+.alo-field-control:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.alo-field-hint { font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.alo-toggle-group { display: flex; flex-direction: column; gap: var(--space-2); font-family: var(--font-ui); color: var(--ink); }
+.alo-toggle-options { display: grid; grid-template-columns: repeat(var(--alo-toggle-cols, 6), minmax(0, 1fr)); gap: var(--space-2); }
+.alo-toggle { height: var(--tap-grown); border-radius: var(--radius-s); border: 2px solid var(--line-strong); background: var(--surface-raised); color: var(--ink); font: 800 15px var(--font-ui); cursor: pointer; }
+.alo-toggle[aria-pressed="true"] { border-color: var(--night); background: var(--night); color: var(--on-night); }
+.alo-toggle:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+
+/* Banner */
+.alo-banner { display: flex; gap: var(--space-3); align-items: center; border-radius: var(--radius-m); padding: var(--space-3) var(--space-4); font: 600 16px/24px var(--font-ui); color: var(--ink); }
+.alo-banner .alo-glyph { width: 24px; height: 24px; }
+.alo-banner--good { background: var(--leaf-soft); }
+.alo-banner--good .alo-glyph { color: var(--leaf-text); }
+.alo-banner--info { background: var(--sky-soft); }
+.alo-banner--info .alo-glyph { color: var(--sky-text); }
+.alo-banner--notice { background: var(--night-soft); }
+.alo-banner--notice .alo-glyph { color: var(--night); }
+
 @media (prefers-reduced-motion: reduce) {
-  .alo-btn, .alo-mic { transition: none; }
+  .alo-btn, .alo-mic, .alo-round { transition: none; }
+  .alo-round:active { transform: none; }
   .alo-mic--listening, .alo-dots i { animation: none; }
 }
