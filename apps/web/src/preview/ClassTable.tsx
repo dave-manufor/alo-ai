@@ -49,6 +49,29 @@ export default function ClassTable({ children }: { children: PreviewChild[] }) {
 
   return (
     <div className="table-scroll">
+      {/* On a phone the table becomes one card per child (preview.css); the column buttons
+          are then hidden, so sorting is offered here instead. */}
+      <label className="preview-sort">
+        <span className="label muted">Sort by</span>
+        <select
+          className="ui-input"
+          value={`${sortKey}:${ascending ? 'asc' : 'desc'}`}
+          onChange={(event) => {
+            const [key, direction] = event.target.value.split(':');
+            setSortKey(key as SortKey);
+            setAscending(direction === 'asc');
+          }}
+        >
+          {columns.flatMap((col) => [
+            <option key={`${col.key}:asc`} value={`${col.key}:asc`}>
+              {col.label}, low to high
+            </option>,
+            <option key={`${col.key}:desc`} value={`${col.key}:desc`}>
+              {col.label}, high to low
+            </option>,
+          ])}
+        </select>
+      </label>
       <table className="preview-table">
         <caption className="caption muted">P3B (sample), {children.length} children</caption>
         <thead>
@@ -75,18 +98,20 @@ export default function ClassTable({ children }: { children: PreviewChild[] }) {
         <tbody>
           {rows.map((child) => (
             <tr key={child.id} className={child.dueForCheck ? 'row-due' : undefined}>
-              <td>
-                <Link to={`/schools/preview/children/${child.id}`}>{child.name}</Link>
+              <td className="cell-name">
+                <Link to={`/schools/children/${child.id}`}>{child.name}</Link>
                 {child.dueForCheck ? <span className="due-pill">Due a check</span> : null}
               </td>
-              <td>{child.lastCheck}</td>
-              <td>{child.readingLevel}</td>
-              <td>
+              <td data-label="Last check">{child.lastCheck}</td>
+              <td data-label="Reading level">{child.readingLevel}</td>
+              <td className="cell-profile">
                 <ProfilePill profile={child.profile} provisional={child.provisional} />
               </td>
-              <td>{child.accuracyPct === null ? '—' : `${child.accuracyPct}%`}</td>
-              <td>{child.wcpm === null ? '—' : child.wcpm}</td>
-              <td>{flags(child).join(', ') || '—'}</td>
+              <td data-label="Accuracy">{child.accuracyPct === null ? '—' : `${child.accuracyPct}%`}</td>
+              <td data-label="Words a minute">{child.wcpm === null ? '—' : child.wcpm}</td>
+              <td data-label="Flags" data-empty={flags(child).length === 0 ? '' : undefined}>
+                {flags(child).join(', ') || '—'}
+              </td>
             </tr>
           ))}
         </tbody>

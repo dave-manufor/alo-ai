@@ -1,56 +1,66 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
-import ReportDetailPage from '../pages/ReportDetailPage';
-import ReportsPage from '../pages/ReportsPage';
-import { levelLabel, sampleReports } from './reportFixture';
+import { screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { accountStore } from '../account/store';
+import { renderApp, signInWithChild } from '../test/helpers';
+import { levelLabel, sampleBooks, samplePlan, sampleReports } from './reportFixture';
 
 describe('report screens (PRD 10.4, fixture-backed)', () => {
-  it('joins the report with its child and shows the Coach summary, not the profile label', () => {
-    render(
-      <MemoryRouter initialEntries={['/reports/sess_demo_001']}>
-        <Routes>
-          <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    const report = sampleReports[0];
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('joins the report with the guardian’s own child and shows the Coach summary', () => {
+    const { report } = signInWithChild('Adaeze');
+    renderApp(`/reports/${report.session_id}`);
     expect(screen.getByRole('heading', { name: "Adaeze's report" })).toBeInTheDocument();
     expect(screen.getByText(report.parent_reporting!.summary_script)).toBeInTheDocument();
     expect(screen.getByText(report.parent_reporting!.home_practice)).toBeInTheDocument();
     expect(screen.getByText(`${report.fluency.accuracy_pct}%`)).toBeInTheDocument();
     // Comprehension is a score out of 100, not a share of the story.
     expect(screen.getByText('70 out of 100')).toBeInTheDocument();
-    expect(document.body.textContent).not.toMatch(/diagnos|dyslex|failing/i);
-  });
-
-  it('keeps the weekly plan behind the entitlement and shows books with attribution', () => {
-    render(
-      <MemoryRouter initialEntries={['/reports/sess_demo_001']}>
-        <Routes>
-          <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    expect(screen.getByText(/The Goat at the Market/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Sample attribution/).length).toBeGreaterThan(0);
-    // Plan activities are the paid part (PRD 11.1): not shown free.
-    expect(screen.queryByText('Word cards')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Get the weekly plan' })).toBeInTheDocument();
-  });
-
-  it('shows no numbers and a try-again message for insufficient evidence', () => {
-    render(
-      <MemoryRouter initialEntries={['/reports/sess_demo_002']}>
-        <Routes>
-          <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole('heading', { name: "Tunde's report" })).toBeInTheDocument();
-    expect(screen.getByText(/try another check/i)).toBeInTheDocument();
+    expect(screen.getByText(/This is a screening to guide practice/)).toBeInTheDocument();
+    // Screening language only (PRD 3.1, 12; design system README).
+    expect(document.body.textContent).not.toMatch(/diagnos|dyslex|disorder|behind|failing|slow learner|hyperlexic|word caller/i);
     expect(document.body.textContent).not.toMatch(/null|NaN/);
-    expect(levelLabel(sampleReports[1])).toBeNull();
+  });
+
+  it('keeps the weekly plan behind the entitlement', () => {
+    const { report } = signInWithChild('Adaeze');
+    renderApp(`/reports/${report.session_id}`);
+    // The report offers the plan but does not show its activities (PRD 11.1).
+    expect(screen.getByRole('button', { name: /See the plan/ })).toBeInTheDocument();
+    expect(screen.queryByText(samplePlan[1].title)).not.toBeInTheDocument();
+  });
+
+  it('shows the plan activities and books with attribution once subscribed', () => {
+    signInWithChild('Adaeze');
+    accountStore.activateSampleSubscription();
+    renderApp('/plan');
+    expect(screen.getByRole('heading', { name: "Adaeze's plan" })).toBeInTheDocument();
+    expect(screen.getByText(samplePlan[1].title)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(sampleBooks.book_demo_001.title.replace(/[()]/g, '.')))).toBeInTheDocument();
+    expect(screen.getAllByText(/Sample attribution/).length).toBeGreaterThan(0);
+  });
+
+  it('before subscribing, the plan screen shows the free tip and the way to get the plan', () => {
+    const { report } = signInWithChild('Adaeze');
+    renderApp('/plan');
+    expect(screen.getByText(report.parent_reporting!.home_practice)).toBeInTheDocument();
+    expect(screen.queryByText(samplePlan[1].title)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /See the plan/ })).toBeInTheDocument();
+  });
+
+  it('lists the reports, and handles an unknown report kindly', () => {
+    signInWithChild('Adaeze');
+    renderApp('/reports');
+    expect(screen.getByRole('heading', { name: 'Reading reports' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Adaeze' })).toBeInTheDocument();
+  });
+
+  it('says "We could not find that report" for an unknown report', () => {
+    signInWithChild('Adaeze');
+    renderApp('/reports/nope');
+    expect(screen.getByRole('heading', { name: 'We could not find that report' })).toBeInTheDocument();
   });
 
   it('labels an independent level as "or above" (PRD 6.7)', () => {
@@ -60,25 +70,6 @@ describe('report screens (PRD 10.4, fixture-backed)', () => {
     };
     expect(levelLabel(independent)).toBe('ARL 2 or above');
     expect(levelLabel(sampleReports[0])).toBe('About ARL 2');
-  });
-
-  it('lists reports and handles an unknown report kindly', () => {
-    render(
-      <MemoryRouter>
-        <ReportsPage />
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole('heading', { name: 'Reading reports' })).toBeInTheDocument();
-
-    render(
-      <MemoryRouter initialEntries={['/reports/nope']}>
-        <Routes>
-          <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    expect(
-      screen.getByRole('heading', { name: 'We could not find that report' }),
-    ).toBeInTheDocument();
+    expect(levelLabel(sampleReports[1])).toBeNull();
   });
 });

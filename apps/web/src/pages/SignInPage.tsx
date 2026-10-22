@@ -1,30 +1,59 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { accountStore, useAccount } from '../account/store';
 import { auth, authMode, signInFailed } from '../auth';
 import { Button } from '../design-system/alo';
-import NavButton from '../design-system/NavButton';
+import { BackLink, Field, Notice } from '../ui/primitives';
 
-// Grown-up mode (PRD 4.4, 12). Two builds of this screen:
-//  - the sample build (no Entra settings): the fixture sign-in the MVP screens run on;
-//  - the real build: Microsoft Entra External ID. "Continue with Google" and "Continue with
-//    email" both go to Entra's hosted page, which verifies the guardian (Google's account, or
-//    a one-time code emailed to them) before anyone is signed in. We never store an address
-//    that has not been verified.
+// Grown-up mode (PRD 4.4, 12). The only way in is an email and a one-time code: no password,
+// no social sign-in. Two builds of this screen:
+//  - the real build (Entra settings present): we ask for the email, then send the guardian
+//    to Microsoft Entra External ID with it filled in; Entra emails the code and signs them
+//    in only once it is right. We never store an address that has not been verified;
+//  - the sample build: the same two steps (email, then a code), with the code shown on
+//    screen because no email is sent. It stands in for the return from Entra.
 export default function SignInPage() {
-  return authMode === 'entra' ? <EntraSignIn /> : <FixtureSignIn />;
+  const { guardian, children } = useAccount();
+  if (guardian) return <Navigate to={children.length === 0 ? '/onboarding/consent' : '/home'} replace />;
+  return (
+    <div className="page">
+      <BackLink to="/" />
+      <div className="page-stack">
+        <div className="step">
+          <h1 className="display-m">Sign in or create an account</h1>
+          <p className="body muted">
+            Enter your email and we will send you a code. There is no password to remember.
+          </p>
+        </div>
+        {authMode === 'entra' ? <EntraSignIn /> : <FixtureSignIn />}
+        <p className="caption muted">
+          By continuing you agree to the <Link to="/terms">terms</Link> and the{' '}
+          <Link to="/privacy">privacy notice</Link>.
+        </p>
+      </div>
+    </div>
+  );
 }
 
+const looksLikeEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
 export function EntraSignIn() {
-  const { guardian } = useAccount();
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [failedToStart, setFailedToStart] = useState(false);
 
-  async function start(method: 'google' | 'email') {
+  async function start(event: React.FormEvent) {
+    event.preventDefault();
+    if (!looksLikeEmail(email)) {
+      setError('Please enter a full email address, like you@example.com.');
+      return;
+    }
+    setError(null);
     setPending(true);
     setFailedToStart(false);
     try {
-      await (await auth()).signIn(method);
+      await (await auth()).signIn(email.trim());
     } catch {
       // The browser did not leave: the guardian can try again.
       setPending(false);
@@ -32,146 +61,145 @@ export function EntraSignIn() {
     }
   }
 
-  async function leave() {
-    accountStore.signOut();
-    try {
-      await (await auth()).signOut();
-    } catch {
-      // Already signed out on this phone; nothing more to end.
-    }
-  }
-
   return (
-    <main className="app-main">
-      <section className="card">
-        <h1 className="title">Welcome to Alo.ai</h1>
-        <p className="body">
-          Sign in so we can keep your child&apos;s reports safe and only show them to you.
-        </p>
-        {guardian ? (
-          <>
-            <p className="body" role="status">
-              Signed in as {guardian.email}.
-            </p>
-            <NavButton variant="primary" size="grown" to="/children">
-              Go to your children
-            </NavButton>
-            <Button variant="secondary" size="grown" onClick={leave}>
-              Sign out
-            </Button>
-          </>
-        ) : (
-          <>
-            {signInFailed() ? (
-              <p className="body" role="alert">
-                We couldn&apos;t finish signing you in. Please try again.
-              </p>
-            ) : null}
-            {failedToStart ? (
-              <p className="body" role="alert">
-                We couldn&apos;t start sign-in. Check your connection and try again.
-              </p>
-            ) : null}
-            {pending ? (
-              <p className="body" role="status">
-                Taking you to sign in…
-              </p>
-            ) : null}
-            <Button variant="primary" size="grown" disabled={pending} onClick={() => start('google')}>
-              Continue with Google
-            </Button>
-            <Button variant="secondary" size="grown" disabled={pending} onClick={() => start('email')}>
-              Continue with email
-            </Button>
-            <p className="body muted">
-              With email, we send you a code to type in. There is no password to remember.
-            </p>
-          </>
+    <form className="form" onSubmit={start} noValidate>
+      {signInFailed() ? (
+        <Notice tone="sky" role="alert">
+          We couldn&apos;t finish signing you in. Please try again.
+        </Notice>
+      ) : null}
+      {failedToStart ? (
+        <Notice tone="sky" role="alert">
+          We couldn&apos;t start sign-in. Check your connection and try again.
+        </Notice>
+      ) : null}
+      <Field label="Email address" error={error}>
+        {(props) => (
+          <input
+            {...props}
+            className="ui-input"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            value={email}
+            disabled={pending}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@example.com"
+          />
         )}
-      </section>
-    </main>
+      </Field>
+      <div className="form__footer">
+        <Button variant="primary" size="grown" type="submit" disabled={pending} style={{ width: '100%' }}>
+          Send me a code
+        </Button>
+        {pending ? (
+          <p className="caption muted" role="status">
+            Taking you to sign in…
+          </p>
+        ) : (
+          <p className="caption muted">
+            You will go to a secure page to type the code we email you, then come straight back.
+          </p>
+        )}
+      </div>
+    </form>
   );
 }
 
-// The sample sign-in. The email-link flow models a real one honestly: asking for a link does
-// NOT sign anyone in. The guardian is signed in only when they come back through the link
-// (here, the "I clicked the link" step stands in for that return), so an unverified typed
-// address is never stored as a verified email.
+// The sample code. Nothing is emailed in the sample build, so it is shown.
+export const SAMPLE_CODE = '123456';
+
 export function FixtureSignIn() {
   const navigate = useNavigate();
-  const { guardian } = useAccount();
   const [email, setEmail] = useState('');
-  const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  function requestLink(event: React.FormEvent) {
+  function requestCode(event: React.FormEvent) {
     event.preventDefault();
-    if (!email.includes('@')) return;
-    setLinkSentTo(email);
+    if (!looksLikeEmail(email)) {
+      setError('Please enter a full email address, like you@example.com.');
+      return;
+    }
+    setError(null);
+    setSentTo(email.trim());
   }
 
-  function completeEmailSignIn() {
-    if (!linkSentTo) return;
-    accountStore.signIn('email_link', linkSentTo);
-    navigate('/children');
+  function verify(event: React.FormEvent) {
+    event.preventDefault();
+    if (!sentTo) return;
+    if (code.trim() !== SAMPLE_CODE) {
+      setError('That code is not right. Check it and try again.');
+      return;
+    }
+    // Signed in only once the code is right, never on asking for it.
+    accountStore.signIn('email_code', sentTo);
+    navigate(accountStore.getState().children.length === 0 ? '/onboarding/consent' : '/home');
+  }
+
+  if (sentTo === null) {
+    return (
+      <form className="form" onSubmit={requestCode} noValidate>
+        <Field label="Email address" error={error}>
+          {(props) => (
+            <input
+              {...props}
+              className="ui-input"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+            />
+          )}
+        </Field>
+        <div className="form__footer">
+          <Button variant="primary" size="grown" type="submit" style={{ width: '100%' }}>
+            Send me a code
+          </Button>
+          <p className="caption muted">Sample sign-in for this build: no email is sent.</p>
+        </div>
+      </form>
+    );
   }
 
   return (
-    <main className="app-main">
-      <section className="card">
-        <h1 className="title">Welcome to Alo.ai</h1>
-        <p className="body">
-          Sign in so we can keep your child&apos;s reports safe and only
-          show them to you.
-        </p>
-        {guardian ? (
-          <p className="body" role="status">
-            Signed in as {guardian.email}.
-          </p>
-        ) : null}
+    <form className="form" onSubmit={verify} noValidate>
+      <Notice tone="night" role="status">
+        We sent a 6-digit code to {sentTo}.
+      </Notice>
+      <Field label="Code" error={error} hint={`Sample build: the code is ${SAMPLE_CODE}.`}>
+        {(props) => (
+          <input
+            {...props}
+            className="ui-input ui-input--code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            value={code}
+            onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
+          />
+        )}
+      </Field>
+      <div className="form__footer">
+        <Button variant="primary" size="grown" type="submit" style={{ width: '100%' }}>
+          Sign in
+        </Button>
         <Button
-          variant="primary"
+          variant="ghost"
           size="grown"
+          type="button"
           onClick={() => {
-            accountStore.signIn('google');
-            navigate('/children');
+            setSentTo(null);
+            setCode('');
+            setError(null);
           }}
         >
-          Continue with Google
+          Use a different email
         </Button>
-
-        {linkSentTo === null ? (
-          <form className="stack" onSubmit={requestLink}>
-            <label className="stack">
-              <span className="label">Email address</span>
-              <input
-                className="preview-input"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-              />
-            </label>
-            <Button variant="secondary" size="grown" type="submit">
-              Email me a sign-in link
-            </Button>
-          </form>
-        ) : (
-          <div className="stack" role="status">
-            <p className="body">
-              Check your email: we sent a sign-in link to {linkSentTo}. Open
-              it on this phone to finish signing in.
-            </p>
-            <Button variant="primary" size="grown" onClick={completeEmailSignIn}>
-              I clicked the link
-            </Button>
-          </div>
-        )}
-        <p className="body muted">
-          Sample sign-in for this build. Your real sign-in checks your email
-          before anything is saved.
-        </p>
-      </section>
-    </main>
+      </div>
+    </form>
   );
 }

@@ -42,11 +42,6 @@ const defaultFactory: MsalFactory = async (config) => {
   return createStandardPublicClientApplication(config);
 };
 
-/** Google signs people in through Entra's hosted page; the email code is its default. */
-function hintFor(method: 'google' | 'email'): Record<string, string> {
-  return method === 'google' ? { domain_hint: 'google.com' } : {};
-}
-
 export function userFrom(account: AccountInfo): AuthUser {
   const claims = (account.idTokenClaims ?? {}) as Record<string, unknown>;
   const idp = String(claims.idp ?? '');
@@ -88,8 +83,11 @@ export async function createEntraClient(
       return userFrom(account);
     },
 
-    async signIn(method) {
-      await app.loginRedirect({ scopes, extraQueryParameters: hintFor(method) });
+    async signIn(email) {
+      // The one-time code is Entra's default; the email the guardian typed is passed on so its
+      // page opens with the address filled in and sends the code straight away.
+      const loginHint = email.trim();
+      await app.loginRedirect({ scopes, ...(loginHint ? { loginHint } : {}) });
     },
 
     async signOut() {

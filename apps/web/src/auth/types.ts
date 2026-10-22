@@ -14,8 +14,9 @@ export interface AuthClient {
   /** Completes a sign-in the browser has just come back from, or restores one from
    *  this tab's session. Resolves to null when nobody is signed in. */
   restore(): Promise<AuthUser | null>;
-  /** Sends the guardian to sign in. Resolves only if the browser did not leave. */
-  signIn(method: 'google' | 'email'): Promise<void>;
+  /** Sends the guardian to Entra to sign in with a one-time code emailed to `email`.
+   *  Resolves only if the browser did not leave. */
+  signIn(email: string): Promise<void>;
   signOut(): Promise<void>;
   /** A bearer token for the Account API, or null when no API scope is configured. */
   getAccessToken(): Promise<string | null>;

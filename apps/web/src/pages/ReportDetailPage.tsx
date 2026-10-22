@@ -1,20 +1,18 @@
 import { useParams } from 'react-router-dom';
 import { accountStore, useAccount } from '../account/store';
-import { ParentReportCard, ProfilePill } from '../design-system/alo';
+import { dataMode } from '../api';
+import { Button, ParentReportCard, ProfilePill } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
-import {
-  formatReportDate,
-  levelLabel,
-  sampleBooks,
-  samplePlan,
-} from '../report/reportFixture';
+import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
+import { formatLongDay, nextCheckIso } from '../report/childReports';
+import { formatReportDate, levelLabel } from '../report/reportFixture';
 import { useReport } from '../report/useReports';
+import { BackLink, Card, Notice, SectionLabel } from '../ui/primitives';
 
-// Grown-up mode, signed-in guardians only (gated in App). One
-// ReadingReport joined with its child (PRD 10.4, 12). Free at this stage:
-// the Coach's spoken summary text and one home practice. The weekly plan
-// itself is what a subscription unlocks (PRD 11.1), so its activities
-// only appear with an active entitlement.
+// One ReadingReport joined with its child (PRD 10.4, 12). Free: the spoken-summary text, the
+// reading profile and one thing to try at home. The weekly plan and the books are what a
+// subscription unlocks (PRD 11.1), on their own screen. Every number comes from the report;
+// a report with no evidence shows none, and "null%" is never printed.
 export default function ReportDetailPage() {
   const { sessionId } = useParams();
   const { guardian } = useAccount();
@@ -22,40 +20,33 @@ export default function ReportDetailPage() {
 
   if (view.status !== 'ready') {
     return (
-      <main className="app-main">
-        <section className="stack">
-          <h1 className="title">Reading report</h1>
-          <p className="body muted" role="status">
-            {view.status === 'loading' ? 'Getting the report…' : view.message}
-          </p>
-          <NavButton variant="secondary" size="grown" to="/reports">
-            Back to reports
-          </NavButton>
-        </section>
-      </main>
+      <div className="page">
+        <BackLink to="/reports" />
+        <Notice tone={view.status === 'error' ? 'sky' : 'plain'} role={view.status === 'error' ? 'alert' : 'status'}>
+          {view.status === 'loading' ? 'Getting the report…' : view.message}
+        </Notice>
+      </div>
     );
   }
   const report = view.report;
   if (!report) {
     return (
-      <main className="app-main">
-        <section className="stack">
+      <div className="page">
+        <BackLink to="/reports" />
+        <Card>
           <h1 className="title">We could not find that report</h1>
           <p className="body">It may still be on its way. Reports appear here when they are ready.</p>
           <NavButton variant="secondary" size="grown" to="/reports">
             Back to reports
           </NavButton>
-        </section>
-      </main>
+        </Card>
+      </div>
     );
   }
 
-  const child = view.children[report.child_id];
-  const name = child?.first_name ?? 'Your child';
+  const name = view.children[report.child_id]?.first_name ?? 'Your child';
   const noEvidence = report.profile.code === 'INSUFFICIENT_EVIDENCE';
-  // Entitlement belongs to the guardian (subscriptions/{guardian_id}),
-  // not the report. Sample data has no active subscription in the
-  // fixture phase, so the plan stays described, not shown.
+  // Entitlement belongs to the guardian (subscriptions/{guardian_id}), not the report.
   const entitled = guardian !== null && accountStore.hasActiveSubscription();
   const level = levelLabel(report);
 
@@ -83,117 +74,108 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <main className="app-main">
-      <section className="stack">
-        <h1 className="title">{name}&apos;s report</h1>
-        <ProfilePill profile={report.profile.code} provisional={report.profile.provisional} />
+    <div className="page page--wide">
+      <BackLink to="/reports" />
+      <div className="step">
+        <h1 className="display-m">{name}&apos;s report</h1>
         <p className="body muted">
           {formatReportDate(report.timestamp_iso)} · Story: {report.passage.title}
         </p>
-        {report.flags.includes('SHORT_READING') ? (
-          <p className="body">
-            This was a short check, so think of it as a first look. The
-            reading level is a guide until two checks agree.
-          </p>
-        ) : null}
-      </section>
+        <div>
+          <ProfilePill profile={report.profile.code} provisional={report.profile.provisional} />
+        </div>
+      </div>
 
-      {noEvidence ? (
-        <section className="card">
-          <h2 className="title">Let&apos;s try another check</h2>
-          <p className="body">
-            We could not hear enough reading this time to learn anything
-            useful. Try again when it is quiet, with the phone close, and
-            we will listen properly.
-          </p>
-        </section>
-      ) : (
-        <ParentReportCard
-          title="How the reading went"
-          date={formatReportDate(report.timestamp_iso)}
-          summary={
-            report.parent_reporting
-              ? report.parent_reporting.summary_script
-              : 'Your summary is on its way. It will appear here as soon as it is ready.'
-          }
-          stats={stats}
-          workingOn={report.profile.instructional_focus}
-          tip={report.parent_reporting?.home_practice}
-        />
-      )}
-
-      {level !== null ? (
-        <section className="card" aria-labelledby="level-heading">
-          <h2 id="level-heading" className="title">
-            Reading level guide
-          </h2>
-          <p className="body">
-            {level}
-            {report.level.approx_primary_class
-              ? ` (${report.level.approx_primary_class}).`
-              : '.'}{' '}
-            {report.level.confirmed
-              ? 'Two checks agree on this level.'
-              : 'One more check will confirm this level.'}
-          </p>
-        </section>
+      {report.flags.includes('SHORT_READING') ? (
+        <Notice tone="sky" role="note">
+          This was a short check, so think of it as a first look. The reading level is a guide until two
+          checks agree.
+        </Notice>
       ) : null}
 
-      {report.recommendations.book_ids.length > 0 ? (
-        <section className="card" aria-labelledby="books-heading">
-          <h2 id="books-heading" className="title">
-            Books to try next
-          </h2>
-          <ul className="body">
-            {report.recommendations.book_ids.map((bookId) => {
-              const book = sampleBooks[bookId];
-              if (!book) return null;
-              return (
-                <li key={bookId}>
-                  {book.title} <span className="muted">by {book.author} (ARL {book.arl})</span>
-                  <br />
-                  <span className="muted caption">
-                    {book.licence}. {book.attribution}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-
-      {!noEvidence ? (
-        <section className="card" aria-labelledby="plan-heading">
-          <h2 id="plan-heading" className="title">
-            The weekly reading plan
-          </h2>
-          {entitled ? (
-            <ul className="body">
-              {samplePlan.map((activity) => (
-                <li key={activity.activity_id}>
-                  <strong>{activity.title}.</strong> {activity.text}
-                </li>
-              ))}
-            </ul>
+      <div className="page-grid">
+        <div className="page-stack">
+          {noEvidence ? (
+            <Card>
+              <h2 className="title">Let&apos;s try another check</h2>
+              <p className="body">
+                We could not hear enough reading this time to learn anything useful. Try again when it is quiet,
+                with the phone close, and we will listen properly.
+              </p>
+              <NavButton variant="primary" size="grown" icon="book" to={`/ready/${report.child_id}`}>
+                Start another check
+              </NavButton>
+            </Card>
           ) : (
             <>
-              <p className="body">
-                A two-week plan with a short activity each day, made for{' '}
-                {name} from this check, plus new stories every week. The
-                summary above and one thing to try at home are free with
-                every check.
-              </p>
-              <NavButton variant="primary" size="grown" to="/plan/checkout">
-                Get the weekly plan
-              </NavButton>
+              <div className="report-actions">
+                <Button variant="secondary" size="grown" icon="ear" disabled style={{ width: '100%' }}>
+                  Hear Kemi&apos;s summary
+                </Button>
+                <p className="caption muted">The spoken summary is coming soon. The same words are below.</p>
+              </div>
+              <ParentReportCard
+                title={`${name}'s reading`}
+                date={`Reading check · ${formatReportDate(report.timestamp_iso)}`}
+                summary={
+                  report.parent_reporting
+                    ? report.parent_reporting.summary_script
+                    : 'Your summary is on its way. It will appear here as soon as it is ready.'
+                }
+                stats={stats}
+                workingOn={report.profile.instructional_focus}
+                tip={report.parent_reporting?.home_practice}
+              />
             </>
           )}
-        </section>
-      ) : null}
+        </div>
 
-      <NavButton variant="secondary" size="grown" to="/reports">
-        Back to reports
-      </NavButton>
-    </main>
+        <div className="page-stack">
+          {!noEvidence ? (
+            <Card>
+              <SectionLabel>What the check showed</SectionLabel>
+              <p className="title">{report.profile.primary_need}</p>
+              {level !== null ? (
+                <p className="body">
+                  Reading level guide: {level}.
+                  {report.level.approx_primary_class ? ` ${report.level.approx_primary_class}.` : ''}{' '}
+                  {report.level.confirmed
+                    ? 'Two checks agree on this level.'
+                    : 'One more check will confirm this level.'}
+                </p>
+              ) : null}
+              <p className="caption muted">This is a screening to guide practice. A level is confirmed after two checks agree.</p>
+            </Card>
+          ) : null}
+
+          {!noEvidence ? (
+            <Card tone="night">
+              {entitled ? (
+                <>
+                  <p className="title">{name}&apos;s weekly plan</p>
+                  <p className="body">Activities for home and books matched to {name}.</p>
+                  <NavButton variant="primary" size="grown" to="/plan" style={{ width: '100%' }}>
+                    Open the plan
+                  </NavButton>
+                </>
+              ) : (
+                <>
+                  <p className="title">Get {name}&apos;s weekly plan</p>
+                  <p className="body">Activities for home and books at {name}&apos;s level, matched to what they like.</p>
+                  <NavButton variant="primary" size="grown" to="/upgrade" style={{ width: '100%' }}>
+                    See the plan · {PLAN_PRICE} {PLAN_PRICE_PERIOD}
+                  </NavButton>
+                </>
+              )}
+            </Card>
+          ) : null}
+
+          <p className="caption muted">Next check: {formatLongDay(nextCheckIso(report))}, with a new story.</p>
+          {dataMode !== 'live' ? (
+            <p className="caption muted">This is a sample report for the preview build.</p>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }

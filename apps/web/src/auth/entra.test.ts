@@ -123,22 +123,23 @@ describe('the Entra client', () => {
     expect(app.setActiveAccount).not.toHaveBeenCalled();
   });
 
-  it('sends the guardian to Google, or to the email code, through Entra', async () => {
+  it('sends the guardian to Entra for an emailed code, with their email filled in', async () => {
     const { made, app } = await client();
-    await made.signIn('google');
-    await made.signIn('email');
-    const [google, email] = app.loginRedirect.mock.calls.map((call) => call[0] as never) as {
+    await made.signIn('  guardian@example.com ');
+    const request = app.loginRedirect.mock.calls[0][0] as {
       scopes: string[];
-      extraQueryParameters: Record<string, string>;
-    }[];
-    expect(google.extraQueryParameters).toEqual({ domain_hint: 'google.com' });
-    expect(email.extraQueryParameters).toEqual({});
-    expect(google.scopes).toEqual(['openid', 'profile', 'email', 'api://client-1/access_as_user']);
+      loginHint?: string;
+      extraQueryParameters?: unknown;
+    };
+    expect(request.loginHint).toBe('guardian@example.com');
+    // No social provider is requested: the email code is the only way in.
+    expect(request.extraQueryParameters).toBeUndefined();
+    expect(request.scopes).toEqual(['openid', 'profile', 'email', 'api://client-1/access_as_user']);
   });
 
   it('asks only for the sign-in scopes when there is no API yet', async () => {
     const { made, app } = await client(fakeApp(), { ...config, apiScope: undefined });
-    await made.signIn('email');
+    await made.signIn('guardian@example.com');
     expect((app.loginRedirect.mock.calls[0][0] as { scopes: string[] }).scopes).toEqual([
       'openid',
       'profile',

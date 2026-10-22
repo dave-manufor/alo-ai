@@ -206,6 +206,55 @@ export const accountStore = {
       consentsByChildId: { ...state.consentsByChildId, [child.child_id]: consent },
     });
   },
+  /** Edits a child's profile. Only the guardian who holds the child's consent can. */
+  updateChild(
+    childId: string,
+    input: { firstName: string; primaryClass: number; birthYear: number },
+  ): ChildProfile {
+    const current = state.children.find((child) => child.child_id === childId);
+    if (!current || !this.consentFor(childId)) throw new Error('We could not find that child.');
+    const next: ChildProfile = {
+      ...current,
+      first_name: input.firstName.trim(),
+      primary_class: input.primaryClass,
+      birth_year: input.birthYear,
+      class_confirmed_year: new Date().getFullYear(),
+    };
+    setState({
+      ...state,
+      children: state.children.map((child) => (child.child_id === childId ? next : child)),
+    });
+    return next;
+  },
+  /** Deletes a child and everything kept for them here: the profile and the consent. */
+  removeChild(childId: string) {
+    if (!this.consentFor(childId)) throw new Error('We could not find that child.');
+    const rest = { ...state.consentsByChildId };
+    delete rest[childId];
+    setState({
+      ...state,
+      children: state.children.filter((child) => child.child_id !== childId),
+      consentsByChildId: rest,
+    });
+  },
+  /** The optional "recordings may help Alo.ai learn" choice, changeable any time (PRD 12). */
+  setTrainingOptIn(childId: string, optIn: boolean) {
+    const consent = this.consentFor(childId);
+    if (!consent) throw new Error('We could not find that child.');
+    setState({
+      ...state,
+      consentsByChildId: {
+        ...state.consentsByChildId,
+        [childId]: { ...consent, training_opt_in: optIn },
+      },
+    });
+  },
+  /** The sample build only: stands in for a Paystack payment so the plan can be seen. The
+   *  real entitlement is written by the Account and Payments service, never the browser. */
+  activateSampleSubscription() {
+    if (!state.guardian || authMode !== 'fixture') return;
+    setState({ ...state, subscription: { guardian_id: state.guardian.guardian_id, active: true } });
+  },
   consentFor(childId: string): ConsentRecord | null {
     const consent = state.consentsByChildId[childId];
     if (!consent || !state.guardian) return null;
