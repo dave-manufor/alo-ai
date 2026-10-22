@@ -8,12 +8,12 @@ import type { ReadingReport, ReportChild } from './reportFixture';
 // Reports for the grown-up screens (D5). Fixture build: the sample
 // reports, no network. Live build: the Account API's reports endpoint.
 //
-// CONTRACT ASSUMPTION: C5 (the reports API, #71) is not built yet. These
-// paths follow the plan: GET /v1/reports (the signed-in guardian's
-// reports, newest first) -> {"reports": [ReadingReport]} and
-// GET /v1/reports/{session_id} -> ReadingReport (schemas/
-// reading_report.schema.json). Each read is audit-logged server side.
-// Change the two paths here if C5 lands differently; nothing else moves.
+// CONTRACT (C5, services/account/reports.py): GET /v1/reports (the
+// signed-in guardian's reports, newest first) -> {"reports": [ReadingReport]}
+// and GET /v1/reports/{session_id} -> ReadingReport (schemas/
+// reading_report.schema.json), 404 for a report that is missing or not this
+// guardian's. Each read is audit-logged server side. Only these two paths
+// change if the API does; nothing else moves.
 
 export async function fetchReports(api: ApiClient): Promise<ReadingReport[]> {
   const { reports } = await api.get<{ reports: ReadingReport[] }>('/v1/reports');

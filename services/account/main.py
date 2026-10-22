@@ -15,7 +15,7 @@ from aloai_store import Store, open_store
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import children, errors, sessions
+from . import children, errors, reports, sessions
 from .access import Clock, NewId, ensure_guardian, utc_now
 from .auth import GuardianVerifier, Principal, current_guardian
 from .rooms import LiveKitRooms, Rooms
@@ -68,4 +68,5 @@ def build_app(
 
     app.include_router(children.router(store, guardian, now, new_id))
     app.include_router(sessions.router(store, guardian, rooms, now, new_id))
+    app.include_router(reports.router(store, guardian, now, new_id))
     return app
