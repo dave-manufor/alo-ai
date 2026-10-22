@@ -31,7 +31,7 @@ jobs:
           - suite: libs
             install: pip install ./libs/aloai[dev]
             command: pytest -c libs/aloai/pyproject.toml tests --cov=libs/aloai --cov-fail-under=100
-          # Keep the hard-rule minimum of 80%; add tests before changing this floor.
+          # Keep the hard-rule minimum of 80%; generator has its own dedicated coverage job.
           - suite: core
             install: pip install -r services/core/requirements.txt pytest pytest-cov httpx2
             command: pytest -c services/core/pyproject.toml services/core --cov=services/core --cov-fail-under=80
