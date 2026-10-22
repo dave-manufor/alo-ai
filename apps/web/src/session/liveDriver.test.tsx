@@ -57,6 +57,7 @@ function fakeRoom() {
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 const v2 = { schema_version: 2 as const };
+const v3 = { schema_version: 3 as const };
 
 describe('LiveKit driver (D3), against the documented protocol v2 with a fake room', () => {
   it('joins with the session token, publishes the mic, and delivers agent messages in order', async () => {
@@ -99,11 +100,23 @@ describe('LiveKit driver (D3), against the documented protocol v2 with a fake ro
     await tick();
     expect(fake.room.sent.map((s) => s.topic)).toEqual([SESSION_TOPIC, SESSION_TOPIC]);
     expect(JSON.parse(new TextDecoder().decode(fake.room.sent[0].payload))).toEqual({
-      ...v2,
+      ...v3,
       cmd: 'played',
       clip_id: 'interest_prompt',
     });
     expect(decodeAgentData(encodeClientMessage(playedAck('x')))).toBeNull(); // acks are not agent messages
+  });
+
+  it('passes the agent’s child_speaking on to the screen', async () => {
+    const fake = fakeRoom();
+    const seen: AgentMessage[] = [];
+    const driver = createLiveDriver({ startSession: async () => join, openRoom: async () => fake.room });
+    driver.start((m) => void seen.push(m));
+    await tick();
+    fake.push({ ...v3, cmd: 'child_speaking', speaking: true });
+    fake.push({ ...v3, cmd: 'child_speaking', speaking: false });
+    await tick();
+    expect(seen.map((m) => (m.cmd === 'child_speaking' ? m.speaking : null))).toEqual([true, false]);
   });
 
   it('shows reconnecting on a dropped connection, then follows the agent’s resend', async () => {

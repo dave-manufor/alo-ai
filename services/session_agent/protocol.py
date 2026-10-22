@@ -1,9 +1,10 @@
 """The session protocol on the LiveKit data channel (schemas/session_protocol.schema.json).
 
-Agent to web app: clip_list, play, step, show_passage, hide_passage, reconnecting.
-Web app to agent: played, missing (replies to a play). The agent decides every step and
-the web app only follows; it never shows a score, timer or red mark, and the agent never
-sends one.
+Agent to web app: clip_list, play, step, show_passage, hide_passage, reconnecting,
+child_speaking. Web app to agent: played, missing (replies to a play). The agent decides
+every step and the web app only follows; it never shows a score, timer or red mark, and
+the agent never sends one. child_speaking says only that the child is heard speaking,
+for the screen's light; it carries no words and no level.
 """
 
 import json
@@ -19,7 +20,7 @@ from .machine.types import (
     ShowReconnecting,
 )
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3  # 3 adds child_speaking; the web app accepts 2 and 3
 
 # The phases the web app has a screen for. INIT and TRANSITION (the 2 s blank after
 # reading) send nothing: the screen stays as it was.
@@ -52,6 +53,11 @@ def step(phase: Phase) -> dict | None:
     if phase not in STEPS:
         return None
     return {"schema_version": SCHEMA_VERSION, "cmd": "step", "step": phase.value}
+
+
+def child_speaking(speaking: bool) -> dict:
+    """The child started (True) or stopped (False) speaking, from the voice detector."""
+    return {"schema_version": SCHEMA_VERSION, "cmd": "child_speaking", "speaking": speaking}
 
 
 def show_passage(passage: dict) -> dict:

@@ -2,12 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "session_protocol.schema.json",
   "title": "SessionProtocolMessage",
-  "description": "LiveKit data-channel messages (topic aloai.session) between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: clip_list, play, step, show_passage, hide_passage, reconnecting. Client to agent: played, missing. The agent decides every step; the client only follows these messages and never moves the session on by itself. The client never shows a score, timer or red mark. schema_version 2 adds clip texts, the passage text on show_passage, and the step message.",
+  "description": "LiveKit data-channel messages (topic aloai.session) between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: clip_list, play, step, show_passage, hide_passage, reconnecting, child_speaking. Client to agent: played, missing. The agent decides every step; the client only follows these messages and never moves the session on by itself. The client never shows a score, timer or red mark. schema_version 2 adds clip texts, the passage text on show_passage, and the step message. schema_version 3 adds child_speaking; the web app accepts 2 and 3.",
   "oneOf": [
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "const": "clip_list" },
         "clips": {
           "type": "array",
@@ -34,7 +34,7 @@
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "const": "play" },
         "clip_id": { "type": "string", "minLength": 1 }
       },
@@ -45,7 +45,7 @@
       "type": "object",
       "description": "The task the session is in. Sent whenever the agent moves to a new task, and again after a reconnect, so the client can clear its waiting screen. The client shows the screen for this step; it never advances the step itself.",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "const": "step" },
         "step": {
           "enum": [
@@ -67,7 +67,7 @@
       "type": "object",
       "description": "Show the story for reading. Carries display text only: never the items, propositions or rubrics.",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "const": "show_passage" },
         "passage_id": { "type": "string", "minLength": 1 },
         "title": { "type": "string" },
@@ -89,7 +89,7 @@
     {
       "type": "object",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "enum": ["hide_passage", "reconnecting"] }
       },
       "required": ["schema_version", "cmd"],
@@ -97,9 +97,20 @@
     },
     {
       "type": "object",
+      "description": "Agent to client. The voice detector heard the child start (`speaking` true) or stop (false) speaking. It is only for the screen's light and carries no words, level or timing. The client never uses it to move the session on or to show a score or timer.",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 3 },
+        "cmd": { "const": "child_speaking" },
+        "speaking": { "type": "boolean" }
+      },
+      "required": ["schema_version", "cmd", "speaking"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
       "description": "Client to agent, only in reply to a `play`. `played`: the clip finished playing (the audio's `ended` event); the agent starts waiting for the child's answer from this moment. `missing`: the clip is not cached and could not be played; the agent streams it once with a one-clip clip_list followed by `play`. A client still downloading a clip waits for the download before answering.",
       "properties": {
-        "schema_version": { "type": "integer", "const": 2 },
+        "schema_version": { "type": "integer", "const": 3 },
         "cmd": { "enum": ["played", "missing"] },
         "clip_id": { "type": "string", "minLength": 1 }
       },

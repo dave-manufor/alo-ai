@@ -181,9 +181,11 @@ class Driver:
                 self.mic.feed(pcm)
 
     def on_speech_started(self) -> None:
+        self.ports.channel.send(protocol.child_speaking(True))
         self.turns.speech_started(self.clock_ms())
 
     def on_speech_ended(self) -> None:
+        self.ports.channel.send(protocol.child_speaking(False))
         self.turns.speech_ended(self.clock_ms())
 
     def on_transcript(self, text: str, *, final: bool) -> None:

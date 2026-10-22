@@ -1,6 +1,6 @@
 [
   {
-    "schema_version": 2,
+    "schema_version": 3,
     "cmd": "clip_list",
     "clips": [
       {
@@ -20,11 +20,11 @@
       }
     ]
   },
-  { "schema_version": 2, "cmd": "step", "step": "INTEREST_CHAT" },
-  { "schema_version": 2, "cmd": "play", "clip_id": "interest_prompt" },
-  { "schema_version": 2, "cmd": "step", "step": "READING" },
+  { "schema_version": 3, "cmd": "step", "step": "INTEREST_CHAT" },
+  { "schema_version": 3, "cmd": "play", "clip_id": "interest_prompt" },
+  { "schema_version": 3, "cmd": "step", "step": "READING" },
   {
-    "schema_version": 2,
+    "schema_version": 3,
     "cmd": "show_passage",
     "passage_id": "bank_p3_market_day",
     "title": "Market Day",
@@ -36,9 +36,11 @@
     ],
     "arl": 3
   },
-  { "schema_version": 2, "cmd": "play", "clip_id": "word_market" },
-  { "schema_version": 2, "cmd": "hide_passage" },
-  { "schema_version": 2, "cmd": "reconnecting" },
-  { "schema_version": 2, "cmd": "played", "clip_id": "word_market" },
-  { "schema_version": 2, "cmd": "missing", "clip_id": "word_market" }
+  { "schema_version": 3, "cmd": "play", "clip_id": "word_market" },
+  { "schema_version": 3, "cmd": "hide_passage" },
+  { "schema_version": 3, "cmd": "reconnecting" },
+  { "schema_version": 3, "cmd": "child_speaking", "speaking": true },
+  { "schema_version": 3, "cmd": "child_speaking", "speaking": false },
+  { "schema_version": 3, "cmd": "played", "clip_id": "word_market" },
+  { "schema_version": 3, "cmd": "missing", "clip_id": "word_market" }
 ]
