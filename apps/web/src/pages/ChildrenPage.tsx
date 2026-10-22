@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { addChild as addChildThroughBuild } from '../account/actions';
 import { ApiError } from '../api/client';
 import {
+  CONSENT_TEXT,
   ageFromBirthYear,
   attestationFor,
   useAccount,
@@ -140,7 +141,7 @@ export default function ChildrenPage() {
           <span className="body">
             {trimmedName
               ? attestationFor(trimmedName, ageFromBirthYear(birthYear))
-              : 'I am the parent or guardian of this child. I agree that Alo.ai can record them reading aloud, use the recording to make their reading report, and keep the audio for up to 90 days.'}
+              : `I am the parent or guardian of this child. ${CONSENT_TEXT}`}
           </span>
         </label>
         <label className="row">

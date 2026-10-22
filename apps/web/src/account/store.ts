@@ -15,9 +15,9 @@ import { authMode, type AuthUser, type SignInMethod } from '../auth';
 // database behind its authorisation (guardians see only their own children); only the
 // sign-in session persists in the browser (Entra, in this tab only: src/auth).
 
-export const CONSENT_VERSION = 'consent_v1_2026-10';
+export const CONSENT_VERSION = 'consent_v2_2026-10';
 export const CONSENT_TEXT =
-  'I agree that Alo.ai can record my child reading aloud, use the recording to make their reading report, and keep the audio for up to 90 days. Alo.ai is a screening tool that helps us practise reading.';
+  'I agree that Alo.ai can record my child reading aloud and answering questions, turn the recording into a written transcript, and use both to make a reading report for me. Recordings are kept for up to 90 days and then deleted. Transcripts and the report stay in my account until I ask for them to be deleted. Only my family and the Alo.ai study team can see them, and they are processed on secure servers in Europe. Alo.ai is a screening tool that helps us practise reading. My child can stop at any time, and I can ask for everything about my child to be deleted. Using recordings to help Alo.ai learn is a separate choice that stays off unless I turn it on.';
 
 export interface Guardian {
   guardian_id: string;
