@@ -4,7 +4,7 @@
 
 ## Why a transfer basis is needed
 
-The children read in Nigeria and the services run in the EU (PRD 12, ADR 0001), so their personal data leaves Nigeria. The Nigeria Data Protection Act 2023 and the GAID 2025 directive restrict transfers abroad and treat anyone under 18 as a child, whose data needs a guardian's consent. The Act's part on cross-border transfers allows one when the recipient is bound by law, binding corporate rules, contract clauses or a code that give adequate protection, and, failing that, on grounds such as the data subject's informed consent. The adviser confirms the exact sections that apply.
+The children read in Nigeria and the services run in the EU (PRD 12, ADR 0001), so their personal data leaves Nigeria. The Nigeria Data Protection Act 2023 and the GAID 2025 directive restrict transfers abroad and treat anyone under 18 as a child, whose data needs a guardian's consent. The Act's part on cross-border transfers allows one when the recipient is bound by law, binding corporate rules, contract clauses or a code that give adequate protection, and otherwise on grounds such as the data subject's informed consent. The adviser confirms the exact sections that apply.
 
 ## Where the data goes
 
