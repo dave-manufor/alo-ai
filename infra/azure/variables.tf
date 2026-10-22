@@ -60,6 +60,22 @@ variable "agent_on" {
   default     = false
 }
 
+variable "llm_base_url" {
+  description = "An OpenAI-compatible provider used for the model roles instead of Azure OpenAI deployments, or \"\" for Azure OpenAI. The provider's API key is the Key Vault secret `llm-api-key`, created by hand (`az keyvault secret set`) before the apply that sets this. Sending data to a provider needs a data-processing agreement and W3's evaluation first (see the comment in terraform.tfvars)."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.llm_base_url == "" || startswith(var.llm_base_url, "https://")
+    error_message = "llm_base_url must be empty or an https:// address."
+  }
+}
+
+variable "llm_models" {
+  description = "Role -> the provider's model name (grader, quick, coach, generator, tagger, embedding, transcribe). Used with llm_base_url; a role not named here keeps its Azure deployment name."
+  type        = map(string)
+  default     = {}
+}
+
 variable "second_transcript" {
   description = "\"on\": a word counts only where two transcripts agree (PRD 5.3). \"off\": the Reading Scorer scores from the Azure AI Speech transcript alone, which needs no OpenAI transcription deployment but relaxes that rule: leave it on unless W3 has confirmed the single-transcript rule and rerun the golden recordings."
   type        = string

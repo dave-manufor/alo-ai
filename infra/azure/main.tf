@@ -252,7 +252,12 @@ resource "azurerm_key_vault" "main" {
 }
 
 locals {
-  secrets = toset(["paystack-secret-key", "resend-api-key", "livekit-api-key", "livekit-api-secret"])
+  # llm-api-key (the key of the provider at var.llm_base_url) exists, and is created by hand
+  # like the others, only when a provider is configured.
+  secrets = toset(concat(
+    ["paystack-secret-key", "resend-api-key", "livekit-api-key", "livekit-api-secret"],
+    local.llm_on ? ["llm-api-key"] : [],
+  ))
 
   # The entries are created by `az keyvault secret set` (README.md), not by Terraform: a managed
   # azurerm_key_vault_secret reads its value into state on every refresh. Terraform only
@@ -362,6 +367,13 @@ locals {
       "session-agent-livekit-key"    = { principal = local.id["session-agent"], scope = local.secret_scope["livekit-api-key"], role = "Key Vault Secrets User" }
       "session-agent-livekit-secret" = { principal = local.id["session-agent"], scope = local.secret_scope["livekit-api-secret"], role = "Key Vault Secrets User" }
     },
+    # The services that call models read the provider's key: Core (grader, quick, Coach,
+    # generator), the Session Agent (tagger) and the book job (embeddings).
+    local.llm_on ? {
+      "core-llm-key"          = { principal = local.id["core"], scope = local.secret_scope["llm-api-key"], role = "Key Vault Secrets User" }
+      "session-agent-llm-key" = { principal = local.id["session-agent"], scope = local.secret_scope["llm-api-key"], role = "Key Vault Secrets User" }
+      "ingest-llm-key"        = { principal = local.id["ingest"], scope = local.secret_scope["llm-api-key"], role = "Key Vault Secrets User" }
+    } : {},
   )
 }
 

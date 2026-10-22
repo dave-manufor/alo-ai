@@ -40,8 +40,8 @@ output "key_vault" {
 }
 
 output "openai_deployments" {
-  description = "AZURE_OPENAI_DEPLOYMENTS: role -> deployment name."
-  value       = local.deployment_names
+  description = "AZURE_OPENAI_DEPLOYMENTS: role -> deployment name, or the provider's model name with llm_base_url."
+  value       = local.model_names
 }
 
 output "servicebus_queues" {
