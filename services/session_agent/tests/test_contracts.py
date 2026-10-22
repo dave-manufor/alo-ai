@@ -121,6 +121,7 @@ PASSAGE_FIXTURES = [
     "passage.bank_p2_lost_ball.json",
     "passage.bank_p4_night_bus.json",
     "passage.bank_p5_music_contest.json",
+    "passage.bank_p6_river_crossing.json",
     "passage.bank_l3_market.json",
     "passage.bank_l9_rocket.json",
 ]
