@@ -71,6 +71,7 @@ def test_session_protocol_fixture_messages_validate():
     for message in messages:
         validator.validate(message)
     assert {m["cmd"] for m in messages} == {
+        "child_speaking",
         "clip_list",
         "play",
         "step",
@@ -339,7 +340,23 @@ def test_audio_uri_must_be_gcs():
 
 
 def test_protocol_message_with_extra_field_is_rejected():
-    message = {"schema_version": 2, "cmd": "play", "clip_id": "x", "score": 90}
+    message = {"schema_version": 3, "cmd": "play", "clip_id": "x", "score": 90}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+@pytest.mark.parametrize("extra", ["score", "transcript", "level"])
+def test_child_speaking_cannot_carry_words_or_a_score(extra):
+    message = {"schema_version": 3, "cmd": "child_speaking", "speaking": True, extra: "x"}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+def test_child_speaking_needs_a_yes_or_no():
+    message = {"schema_version": 3, "cmd": "child_speaking", "speaking": "yes"}
+    assert not _validator("session_protocol.schema.json").is_valid(message)
+
+
+def test_protocol_version_2_is_no_longer_what_the_agent_sends():
+    message = {"schema_version": 2, "cmd": "reconnecting"}
     assert not _validator("session_protocol.schema.json").is_valid(message)
 
 
@@ -363,7 +380,7 @@ def test_every_clip_says_what_it_says_or_null():
 
 
 def test_a_step_must_be_a_known_task():
-    message = {"schema_version": 2, "cmd": "step", "step": "SHOW_SCORE"}
+    message = {"schema_version": 3, "cmd": "step", "step": "SHOW_SCORE"}
     assert not _validator("session_protocol.schema.json").is_valid(message)
 
 
