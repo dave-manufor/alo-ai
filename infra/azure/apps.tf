@@ -22,6 +22,11 @@ resource "azurerm_container_app_environment" "main" {
 locals {
   deployment_names = { for role, _ in var.openai_deployments : role => "${var.prefix}-${role}" }
 
+  # Another provider (var.llm_base_url) for the model roles: its model names replace the Azure
+  # deployment names, and its key comes from the Key Vault secret llm-api-key.
+  llm_on      = var.llm_base_url != ""
+  model_names = local.llm_on ? merge(local.deployment_names, var.llm_models) : local.deployment_names
+
   # what every service reads to reach the data layer
   base_env = {
     CLOUD                      = "azure"
@@ -38,7 +43,8 @@ locals {
   # what a service reads to reach Azure OpenAI and Speech
   ai_env = {
     AZURE_OPENAI_ENDPOINT    = azurerm_cognitive_account.openai.endpoint
-    AZURE_OPENAI_DEPLOYMENTS = jsonencode(local.deployment_names)
+    AZURE_OPENAI_DEPLOYMENTS = jsonencode(local.model_names)
+    LLM_BASE_URL             = var.llm_base_url
     AZURE_SPEECH_REGION      = azurerm_cognitive_account.speech.location
     AZURE_SPEECH_RESOURCE_ID = azurerm_cognitive_account.speech.id
     AZURE_SPEECH_LOCALE      = var.speech_locale
@@ -69,6 +75,7 @@ locals {
     GENERATOR_ON             = tostring(var.generator_on)
     AZURE_OPENAI_ENDPOINT    = local.ai_env.AZURE_OPENAI_ENDPOINT # the tagger
     AZURE_OPENAI_DEPLOYMENTS = local.ai_env.AZURE_OPENAI_DEPLOYMENTS
+    LLM_BASE_URL             = local.ai_env.LLM_BASE_URL
     VOICE_MODE               = var.voice_mode
     SESSION_PROFILE          = var.session_profile
     VOICE_PROFILE_ID         = var.voice_profile_id
@@ -128,6 +135,15 @@ resource "azurerm_container_app" "session_agent" {
     key_vault_secret_id = local.secret_uri["livekit-api-secret"]
   }
 
+  dynamic "secret" {
+    for_each = local.llm_on ? ["llm-api-key"] : []
+    content {
+      name                = secret.value
+      identity            = azurerm_user_assigned_identity.svc["session-agent"].id
+      key_vault_secret_id = local.secret_uri[secret.value]
+    }
+  }
+
   template {
     min_replicas = var.agent_on || local.warm ? 1 : 0
     max_replicas = 2
@@ -154,6 +170,14 @@ resource "azurerm_container_app" "session_agent" {
       env {
         name        = "LIVEKIT_API_SECRET"
         secret_name = "livekit-api-secret"
+      }
+
+      dynamic "env" {
+        for_each = local.llm_on ? ["llm-api-key"] : []
+        content {
+          name        = "LLM_API_KEY"
+          secret_name = env.value
+        }
       }
     }
   }
@@ -183,6 +207,15 @@ resource "azurerm_container_app" "core" {
   registry {
     server   = azurerm_container_registry.main.login_server
     identity = azurerm_user_assigned_identity.svc["core"].id
+  }
+
+  dynamic "secret" {
+    for_each = local.llm_on ? ["llm-api-key"] : []
+    content {
+      name                = secret.value
+      identity            = azurerm_user_assigned_identity.svc["core"].id
+      key_vault_secret_id = local.secret_uri[secret.value]
+    }
   }
 
   ingress {
@@ -226,6 +259,14 @@ resource "azurerm_container_app" "core" {
         content {
           name  = env.key
           value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = local.llm_on ? ["llm-api-key"] : []
+        content {
+          name        = "LLM_API_KEY"
+          secret_name = env.value
         }
       }
     }
@@ -407,6 +448,15 @@ resource "azurerm_container_app_job" "book_ingest" {
     identity = azurerm_user_assigned_identity.svc["ingest"].id
   }
 
+  dynamic "secret" {
+    for_each = local.llm_on ? ["llm-api-key"] : []
+    content {
+      name                = secret.value
+      identity            = azurerm_user_assigned_identity.svc["ingest"].id
+      key_vault_secret_id = local.secret_uri[secret.value]
+    }
+  }
+
   template {
     container {
       name   = "book-ingest"
@@ -423,6 +473,14 @@ resource "azurerm_container_app_job" "book_ingest" {
         content {
           name  = env.key
           value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = local.llm_on ? ["llm-api-key"] : []
+        content {
+          name        = "LLM_API_KEY"
+          secret_name = env.value
         }
       }
     }
