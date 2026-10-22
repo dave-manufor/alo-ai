@@ -162,13 +162,6 @@
   max-width: var(--measure-reading);
 }
 
-.night-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  justify-content: center;
-}
-
 /* The big round Start of the demo. The design system has no icon-only
    play button, so this is built from its tokens: raised surface, night
    glyph, pill radius, well over tap-kid. Deviation noted in the PR. */
@@ -640,7 +633,7 @@
 }
 
 /* Tablet and wider: more room around the same single column. */
-@media (min-width: 48rem) {
+@media (min-width: 48rem) and (min-height: 40rem) {
   .night-session {
     gap: var(--space-7);
     padding-left: calc(var(--space-7) + env(safe-area-inset-left, 0px));
@@ -691,16 +684,75 @@
   gap: var(--space-2);
 }
 
+/* Pill dots, as in the artifact: the page you are on is a longer pill. */
+.story-pages__dots {
+  align-items: center;
+  gap: calc(var(--space-1) * 1.5);
+}
+
 .story-pages__dot {
   width: var(--space-2);
   height: var(--space-2);
   border-radius: var(--radius-pill);
-  border: 1px solid var(--line-strong);
+  background: var(--line);
+  transition: width 300ms, background 300ms;
 }
 
 .story-pages__dot--now {
-  background: var(--ink);
-  border-color: var(--ink);
+  width: calc(var(--space-5) - var(--space-1) / 2);
+  background: var(--night);
+}
+
+/* The story card is the light paper card (Paper, data-theme="light"):
+   one of the two places the design system allows the light scope. The
+   panel inside gives up its own card look so there is one card, not two. */
+.story-pages.alo-paper {
+  padding: var(--space-4) var(--space-5);
+  box-sizing: border-box;
+}
+
+.story-pages .alo-reading {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Tablet: the design system fixes the story at 32/26/22px. On a tablet
+   that is small, so the app scales it, leaving the system's sizes alone.
+   Pages are re-measured on resize, so fewer, bigger pages fit. */
+@media (min-width: 48rem) {
+  .story-pages .alo-reading-text {
+    zoom: 1.4;
+  }
+}
+
+/* What the artifact does not show on the child's screen stays for screen
+   readers: the step-moon labels, the speaker label and the mic caption.
+   The orb and the mic's glow are the visual cue. */
+.night-session .alo-moon-label,
+.night-session .alo-bubble-who,
+.night-session .alo-mic-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.night-report-card--paper {
+  border: 0;
+  box-shadow: var(--lift);
+  border-radius: var(--radius-xl);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-pages__dot {
+    transition: none;
+  }
 }
 
 /* Landscape phone: the mic sits beside the story, so the story box
@@ -708,7 +760,12 @@
    fold). After the base rule so it wins. */
 @media (orientation: landscape) and (max-height: 30rem) {
   .story-pages__box {
-    height: max(calc(var(--space-8) * 2), calc(100dvh - var(--space-8) * 4));
+    height: max(calc(var(--space-8) * 2), calc(100dvh - var(--space-8) * 3.25));
+  }
+
+  .story-pages.alo-paper {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
   }
 }
 

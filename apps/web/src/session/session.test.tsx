@@ -282,13 +282,9 @@ describe('kid session screen (PRD 4.1, agent-driven)', () => {
     );
 
     startSessionScreen();
-    // The bubble shows the interest clip's exact text.
-    expect(
-      await screen.findByText('Before we read, tell me: what kind of stories do you like?'),
-    ).toBeInTheDocument();
+    // No interest buttons: the session opens at the mic check (the design).
+    expect(screen.queryByRole('button', { name: /Animals/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /help with a word/i })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Animals/ }));
     // The mic-check bubble shows PR #24's mic_check_prompt text.
     expect(
       await screen.findByText("Let's count together. Say one, two, three, four, five."),

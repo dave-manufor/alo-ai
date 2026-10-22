@@ -58,10 +58,10 @@ describe('StoryPages', () => {
   it('Next and Back buttons turn the page and stop at the ends', () => {
     render(<StoryPages title="T" level="p1" sentences={story} />);
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
     expect(screen.getByText('Five.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Next page' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByText(/Three\. Four\./)).toBeInTheDocument();
   });

@@ -24,7 +24,7 @@ describe('fixtureDriver as a SessionDriver', () => {
     driver.start((message) => {
       seen.push(message);
     });
-    driver.send('topic_chosen'); // MIC_CHECK
+    // The session opens at MIC_CHECK (no interest buttons, as in the design).
     driver.send('child_spoke'); // -> READING
     driver.send('child_spoke'); // -> RETELL
     driver.send('child_spoke'); // -> QUESTIONS
@@ -32,7 +32,7 @@ describe('fixtureDriver as a SessionDriver', () => {
     driver.send('child_spoke'); // answer 2 -> CLOSE
     await settle();
     const steps = seen.filter((m) => m.cmd === 'step').map((m) => (m as { step: string }).step);
-    expect(steps).toEqual(['INTEREST_CHAT', 'MIC_CHECK', 'READING', 'RETELL', 'QUESTIONS', 'CLOSE']);
+    expect(steps).toEqual(['MIC_CHECK', 'READING', 'RETELL', 'QUESTIONS', 'CLOSE']);
     driver.stop();
   });
 
