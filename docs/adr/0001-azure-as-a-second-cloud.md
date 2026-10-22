@@ -99,3 +99,15 @@ Today each service builds Google clients directly (`services/core/main.py`, `ser
    - `services/core/books/embedding.py` fixes the one text a book is embedded from (`book_text`: description, then its topic tags written as interests are), and `python -m services.core.books.reembed` embeds again every book still on another model, checking each new vector (768 numbers, and the whole document against `book.schema.json`) before it writes. **There is no catalogue to move.** The book ingestion job (PRD 9.1) was never built and no real, open-licence books exist in the repository, so nothing here was run on real books and none are invented. The ingestion job must embed with `book_text` so the catalogue never holds two kinds of text.
    - Two manual jobs in `infra/azure`: `seed` (the Session Agent's identity and image) and `book_ingest` (the Core image, now running the re-embed command rather than its web server).
    - Not run against Azure. There is no Core Dockerfile yet, so the `book_ingest` job has no image to run.
+
+## Exception to the EU-only rule: the web app's Static Web Apps region (2026-10-22)
+
+**What.** `web_location` (the region of the `azurerm_static_web_app` resource) is `westus2` instead of `westeurope`. Everything else stays in `swedencentral`: Cosmos DB, Storage, Service Bus, Key Vault, the Container Apps, Azure OpenAI and Azure AI Speech.
+
+**Why.** `westeurope` refused the resource on the first apply: "The selected region is currently not accepting new customers" (`RequestDisallowedByAzure`). Static Web Apps is offered in few regions, and `westeurope` was the only EU one.
+
+**Scope of the exception.** The Static Web Apps resource holds the site configuration and serves the built app from Azure's edge network. The app contains no child data: sign-in, children, consents and reports go to the Account API in the EU. The app's `connect-src` policy (`staticwebapp.config.json`) allows the site itself, Entra (`*.ciamlogin.com`, `login.microsoftonline.com`), `*.azurecontainerapps.io`, `*.blob.core.windows.net` and any `wss:` address (LiveKit); it is not narrowed to specific hosts.
+
+**Approval.** Approved by David (W2, acting for W1) on 2026-10-22. **Not yet acknowledged by Anthony (W1) or Nelson (W3):** this section stays a proposal until they confirm it in review of PR #143. If either declines, the fallback is to host the built app from the EU Storage account (static website), at the cost of the routing and CSP headers.
+
+**Reverse it** by setting `web_location = "westeurope"` as soon as the region accepts new resources; the variable's validation allows it.
