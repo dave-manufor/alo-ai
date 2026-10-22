@@ -132,5 +132,5 @@ Rounded 2.5px strokes on a 24px grid, `ink` outlines with one fill colour from t
 
 - All text meets 4.5:1 contrast, and large text, icons and control borders meet 3:1, in both themes.
 - Keyboard focus is a solid 3px `focus-ring` with a 3px offset.
-- Everything Auntie Kemi says also appears as text in the speech bubble, so a grown-up can follow along.
+- Everything Auntie Kemi says is available as text to assistive technology, in a visually hidden `aria-live="polite"` region, so a grown-up using a screen reader can follow along. The child's screen shows no subtitles: the only words on it are the call ("Àlọ́ o!"), the story and the hand-back to a grown-up. (Changed from "also appears in the speech bubble", following the "Àlọ́ Night Session V" design.)
 - Children never need to read an instruction to use the product: every step is spoken, and every button has an icon and a word.
