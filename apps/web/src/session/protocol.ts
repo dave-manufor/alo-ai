@@ -1,7 +1,7 @@
-// The web app's side of W2's session protocol, schema_version 2
-// (schemas/session_protocol.schema.json on feat/session-protocol-v2,
-// PR #24; producer: Session Agent). Agent to web app: clip_list, play,
-// step, show_passage, hide_passage, reconnecting. Web app to agent, only
+// The web app's side of W2's session protocol, schema_version 3 (2 is
+// still accepted; schemas/session_protocol.schema.json, producer: Session
+// Agent). Agent to web app: clip_list, play, step, show_passage,
+// hide_passage, reconnecting, child_speaking. Web app to agent, only
 // in reply to a play: played (the clip FINISHED playing), missing (not
 // cached and could not be played). The agent decides every step; the
 // client only follows these messages. Nothing may carry a score, timer
@@ -25,28 +25,44 @@ export type SessionStep =
   | 'CLOSE'
   | 'ENDED';
 
+/** The agent sends 3 (3 adds child_speaking); 2 is still accepted so an older
+ *  agent or a recorded session keeps working. */
+export type ProtocolVersion = 2 | 3;
+const CLIENT_VERSION: ProtocolVersion = 3;
+
 export type AgentMessage =
-  | { schema_version: 2; cmd: 'clip_list'; clips: ClipEntry[] }
-  | { schema_version: 2; cmd: 'play'; clip_id: string }
-  | { schema_version: 2; cmd: 'step'; step: SessionStep }
+  | { schema_version: ProtocolVersion; cmd: 'clip_list'; clips: ClipEntry[] }
+  | { schema_version: ProtocolVersion; cmd: 'play'; clip_id: string }
+  | { schema_version: ProtocolVersion; cmd: 'step'; step: SessionStep }
   | {
-      schema_version: 2;
+      schema_version: ProtocolVersion;
       cmd: 'show_passage';
       passage_id: string;
       title: string;
       sentences: string[];
       arl: number;
     }
-  | { schema_version: 2; cmd: 'hide_passage' }
-  | { schema_version: 2; cmd: 'reconnecting' };
+  | { schema_version: ProtocolVersion; cmd: 'hide_passage' }
+  | { schema_version: ProtocolVersion; cmd: 'reconnecting' }
+  /** The child is heard speaking (true) or stopped (false): only for the
+   *  stage's light. No words, no level. */
+  | { schema_version: ProtocolVersion; cmd: 'child_speaking'; speaking: boolean };
 
 export type ClientMessage = {
-  schema_version: 2;
+  schema_version: ProtocolVersion;
   cmd: 'played' | 'missing';
   clip_id: string;
 };
 
-const AGENT_COMMANDS = ['clip_list', 'play', 'step', 'show_passage', 'hide_passage', 'reconnecting'];
+const AGENT_COMMANDS = [
+  'clip_list',
+  'play',
+  'step',
+  'show_passage',
+  'hide_passage',
+  'reconnecting',
+  'child_speaking',
+];
 const STEPS: SessionStep[] = [
   'INTEREST_CHAT',
   'MIC_CHECK',
@@ -70,7 +86,8 @@ export function parseAgentMessage(raw: unknown): AgentMessage | null {
   }
   if (typeof message !== 'object' || message === null) return null;
   const m = message as Record<string, unknown>;
-  if (m.schema_version !== 2 || typeof m.cmd !== 'string') return null;
+  const version = m.schema_version;
+  if ((version !== 2 && version !== 3) || typeof m.cmd !== 'string') return null;
   if (!AGENT_COMMANDS.includes(m.cmd)) return null;
 
   switch (m.cmd) {
@@ -84,16 +101,16 @@ export function parseAgentMessage(raw: unknown): AgentMessage | null {
         typeof (clip as ClipEntry).url === 'string' &&
         ((clip as ClipEntry).text === null || typeof (clip as ClipEntry).text === 'string');
       return m.clips.every(valid)
-        ? { schema_version: 2, cmd: 'clip_list', clips: m.clips as ClipEntry[] }
+        ? { schema_version: version, cmd: 'clip_list', clips: m.clips as ClipEntry[] }
         : null;
     }
     case 'play':
       return typeof m.clip_id === 'string' && m.clip_id
-        ? { schema_version: 2, cmd: 'play', clip_id: m.clip_id }
+        ? { schema_version: version, cmd: 'play', clip_id: m.clip_id }
         : null;
     case 'step':
       return typeof m.step === 'string' && STEPS.includes(m.step as SessionStep)
-        ? { schema_version: 2, cmd: 'step', step: m.step as SessionStep }
+        ? { schema_version: version, cmd: 'step', step: m.step as SessionStep }
         : null;
     case 'show_passage':
       return typeof m.passage_id === 'string' &&
@@ -106,7 +123,7 @@ export function parseAgentMessage(raw: unknown): AgentMessage | null {
         m.arl >= 1 &&
         m.arl <= 12
         ? {
-            schema_version: 2,
+            schema_version: version,
             cmd: 'show_passage',
             passage_id: m.passage_id,
             title: m.title,
@@ -114,17 +131,21 @@ export function parseAgentMessage(raw: unknown): AgentMessage | null {
             arl: m.arl,
           }
         : null;
+    case 'child_speaking':
+      return typeof m.speaking === 'boolean'
+        ? { schema_version: version, cmd: 'child_speaking', speaking: m.speaking }
+        : null;
     default:
-      return { schema_version: 2, cmd: m.cmd as 'hide_passage' | 'reconnecting' };
+      return { schema_version: version, cmd: m.cmd as 'hide_passage' | 'reconnecting' };
   }
 }
 
 export function playedAck(clip_id: string): ClientMessage {
-  return { schema_version: 2, cmd: 'played', clip_id };
+  return { schema_version: CLIENT_VERSION, cmd: 'played', clip_id };
 }
 
 export function missingAck(clip_id: string): ClientMessage {
-  return { schema_version: 2, cmd: 'missing', clip_id };
+  return { schema_version: CLIENT_VERSION, cmd: 'missing', clip_id };
 }
 
 /** The data-channel topic shared with the Session Agent (services/session_agent/livekit_worker.py). */

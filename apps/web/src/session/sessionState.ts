@@ -23,6 +23,8 @@ export interface SessionViewState {
    *  and for the listening story there must never be a bubble update. */
   bubbleText: string | null;
   playingClipId: string | null;
+  /** The agent hears the child speaking (the stage's light only). */
+  childSpeaking: boolean;
   acksSent: ClientMessage[];
 }
 
@@ -33,6 +35,7 @@ export const initialSessionState: SessionViewState = {
   reconnecting: false,
   bubbleText: null,
   playingClipId: null,
+  childSpeaking: false,
   acksSent: [],
 };
 
@@ -45,7 +48,10 @@ export function applyAgentMessage(
   const reconnecting = message.cmd === 'reconnecting';
   switch (message.cmd) {
     case 'reconnecting':
-      return { ...state, reconnecting: true };
+      // A "stopped speaking" sent during the break may have been lost.
+      return { ...state, reconnecting: true, childSpeaking: false };
+    case 'child_speaking':
+      return { ...state, reconnecting, childSpeaking: message.speaking };
     case 'clip_list':
       return { ...state, reconnecting };
     case 'step':
