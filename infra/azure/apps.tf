@@ -357,7 +357,8 @@ resource "azurerm_container_app" "account" {
   }
 
   dynamic "secret" {
-    for_each = local.secrets
+    # Not the model provider's key: the Account service calls no model and has no role on it.
+    for_each = setsubtract(local.secrets, ["llm-api-key"])
     content {
       name                = secret.value
       identity            = azurerm_user_assigned_identity.svc["account"].id
