@@ -6,10 +6,9 @@ import {
   formatReportDate,
   levelLabel,
   sampleBooks,
-  sampleChildren,
   samplePlan,
-  sampleReports,
 } from '../report/reportFixture';
+import { useReport } from '../report/useReports';
 
 // Grown-up mode, signed-in guardians only (gated in App). One
 // ReadingReport joined with its child (PRD 10.4, 12). Free at this stage:
@@ -19,8 +18,24 @@ import {
 export default function ReportDetailPage() {
   const { sessionId } = useParams();
   const { guardian } = useAccount();
-  const report = sampleReports.find((item) => item.session_id === sessionId);
+  const view = useReport(sessionId);
 
+  if (view.status !== 'ready') {
+    return (
+      <main className="app-main">
+        <section className="stack">
+          <h1 className="title">Reading report</h1>
+          <p className="body muted" role="status">
+            {view.status === 'loading' ? 'Getting the report…' : view.message}
+          </p>
+          <NavButton variant="secondary" size="grown" to="/reports">
+            Back to reports
+          </NavButton>
+        </section>
+      </main>
+    );
+  }
+  const report = view.report;
   if (!report) {
     return (
       <main className="app-main">
@@ -35,7 +50,7 @@ export default function ReportDetailPage() {
     );
   }
 
-  const child = sampleChildren[report.child_id];
+  const child = view.children[report.child_id];
   const name = child?.first_name ?? 'Your child';
   const noEvidence = report.profile.code === 'INSUFFICIENT_EVIDENCE';
   // Entitlement belongs to the guardian (subscriptions/{guardian_id}),

@@ -1,15 +1,27 @@
 import { ParentReportCard, ProfilePill } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
-import {
-  formatReportDate,
-  sampleChildren,
-  sampleReports,
-} from '../report/reportFixture';
+import { formatReportDate } from '../report/reportFixture';
+import { useReports } from '../report/useReports';
 
 // Grown-up mode, signed-in guardians only (gated in App). Every number
 // comes from the ReadingReport document; a report with no evidence shows
 // no numbers at all.
 export default function ReportsPage() {
+  const view = useReports();
+  if (view.status !== 'ready') {
+    return (
+      <main className="app-main">
+        <section className="stack">
+          <h1 className="title">Reading reports</h1>
+          <p className="body muted" role="status">
+            {view.status === 'loading' ? 'Getting the reports…' : view.message}
+          </p>
+        </section>
+      </main>
+    );
+  }
+  const sampleReports = view.reports;
+  const sampleChildren = view.children;
   return (
     <main className="app-main">
       <section className="stack">
