@@ -1,0 +1,183 @@
+/* Per-screen layout for the grown-up app. Token variables only. */
+
+/* Welcome: the Parent / School choice. */
+.welcome {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+  padding-top: var(--space-6);
+}
+
+.welcome__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.welcome__lede {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.welcome__choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  box-shadow: var(--lift);
+  text-decoration: none;
+}
+
+.role-card:hover {
+  border-color: var(--night);
+}
+
+.role-card__icon {
+  flex: none;
+  width: var(--space-7);
+  height: var(--space-7);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--night-soft);
+  color: var(--night);
+}
+
+.role-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.role-card__title {
+  font-weight: 800;
+}
+
+.role-card__chevron {
+  color: var(--night);
+  transform: rotate(180deg);
+}
+
+@media (min-width: 48rem) {
+  .welcome {
+    padding-top: var(--space-8);
+  }
+}
+
+@media (min-width: 64rem) {
+  .welcome {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+/* Onboarding steps. */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Home. */
+.home-greeting {
+  padding: 0 var(--space-2);
+}
+
+.child-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.child-card__name {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Plan, books and upgrade. */
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.price__amount {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 700;
+}
+
+.card-title {
+  font-weight: 800;
+}
+
+.activity-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.legal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.legal h2 {
+  margin-top: var(--space-3);
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.account-row__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--sky-soft);
+  border-radius: var(--radius-m);
+}
+
+.report-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

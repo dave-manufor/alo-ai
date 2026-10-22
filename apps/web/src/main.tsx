@@ -7,6 +7,9 @@ import { accountStore } from './account/store';
 import App from './App';
 import { restoreSignIn } from './auth';
 import './styles/app.css';
+import './styles/shell.css';
+import './styles/ui.css';
+import './styles/screens.css';
 import './styles/preview.css';
 
 registerSW({ immediate: true });

@@ -59,3 +59,143 @@
   text-decoration: underline;
   text-decoration-thickness: 3px;
 }
+
+/* Class view (wireframe 23). */
+.preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.preview-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.preview-tile {
+  gap: var(--space-1);
+}
+
+.preview-columns {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.preview-columns > * {
+  min-width: 0;
+}
+
+.preview-sort {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+@media (min-width: 40rem) {
+  .preview-sort {
+    display: none;
+  }
+
+  .table-scroll {
+    border-radius: var(--radius-m);
+    box-shadow: var(--lift);
+  }
+}
+
+@media (min-width: 48rem) {
+  .preview-tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 64rem) {
+  .preview-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+/* On a phone the table is one card per child instead of a sideways scroll. */
+@media (max-width: 39.99rem) {
+  .preview-table,
+  .preview-table tbody,
+  .preview-table tr,
+  .preview-table td {
+    display: block;
+  }
+
+  .preview-table {
+    background: none;
+  }
+
+  .preview-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .preview-table caption {
+    display: block;
+    text-align: left;
+    padding-bottom: var(--space-2);
+  }
+
+  .preview-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-raised);
+    border-radius: var(--radius-m);
+    box-shadow: var(--lift);
+  }
+
+  .preview-table tr.row-due {
+    background: var(--sky-soft);
+  }
+
+  .preview-table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .preview-table .cell-name,
+  .preview-table .cell-profile {
+    grid-column: 1 / -1;
+  }
+
+  /* "Flags: none" is noise on a card. */
+  .preview-table td[data-empty] {
+    display: none;
+  }
+
+  .preview-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 800;
+  }
+}
+
+/* Side by side and sized to their text from tablet width up (full width on a phone). */
+@media (min-width: 40rem) {
+  .preview-actions > * {
+    flex: 0 0 auto;
+  }
+}
+
+/* Cards in the groups panel fill the column instead of shrinking to their text. */
+.preview-columns .stack {
+  align-items: stretch;
+}

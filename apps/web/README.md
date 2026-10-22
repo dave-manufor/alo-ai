@@ -36,14 +36,18 @@ The session screen follows the "Àlọ́ Night Session V" design. `src/session/D
 
 | Route | Mode | What it does | Live replacement |
 |---|---|---|---|
-| `/` | Grown-up | Landing. No report links: grown-up data sits behind sign-in (PRD 12) | — |
-| `/signin` | Grown-up | Sample build: Google, or an email link that only signs in when clicked. Real build (Entra settings present): "Continue with Google" or "Continue with email" (a code) through Entra External ID, which signs the guardian in only after verifying them | Entra External ID (`src/auth`) |
-| `/consent` | Grown-up | What consent means + the per-child records on file | Account service `consents/` |
-| `/children` | Grown-up | Child profiles. Adding a child records **that child's** consent (attestation names the child and age; `consents/{consent_id}` shape with `guardian_id` + `child_id`) | Account service `children/` + `consents/` |
+| `/` | Grown-up | First screen: **Parent or guardian** (sign in) or **School or teacher** (the preview). A signed-in guardian goes on to their Home. No data on it (PRD 12) | — |
+| `/signin` | Grown-up | **Email and a one-time code; no Google, no password.** Sample build: email, then a code step (the sample code is shown, nothing is emailed); signed in only when the code is right. Real build (Entra settings present): our screen takes the email and sends the guardian to Entra External ID with it as `loginHint`; Entra emails the code and signs them in only after verifying it | Entra External ID (`src/auth`) |
+| `/onboarding/consent`, `/onboarding/child` | Grown-up | Step 1 of 2: what we keep and the parent-or-guardian tick. Step 2: first name, class (P1 to P6), birth year; saving records **that child's** consent (the attestation names the child and age, shown in full first). Consent is per child, so `/children/new` asks again | Account service `children/` + `consents/` |
+| `/home`, `/reports`, `/plan`, `/account` | Grown-up | The signed-in app. A tab bar fixed to the bottom on phones; the same four links in the top bar from 48rem up. Home (child, last/next check, tip), Reports, the weekly plan, and Account (children, recordings choice, delete with an in-page confirm, plan, sign out) | Account service; Account API has no edit, delete or opt-in change yet, so those controls say "coming soon" in a live build |
+| `/ready/:childId` | Grown-up | Get ready: tips, who is reading, connection check, then the session. No tab bar | — |
+| `/children/new`, `/children/:childId/edit` | Grown-up | Add another child, or edit one (sample build only) | `POST /v1/children`; edit needs an endpoint |
+| `/privacy`, `/terms` | Grown-up | Plain-words summaries linked from sign-in and consent (need legal review before a pilot) | — |
+| `/children`, `/consent`, `/schools/preview*` | — | Redirects to the screens above, so old links keep working | — |
 | `/session/:childId` | Kid | The Night session (design-system Night theme). Start, then a short microphone explainer before the browser prompt (a grown-up recovery screen if the mic is blocked or missing). Voice orb while Kemi speaks/listens, the story in measured pages (tap to turn, dots only) from `show_passage`, moon-and-constellation reward, then "give the phone to a grown-up" with a press-and-hold gate (pointer, or hold Space/Enter) to the report-ready card. Gated on that child's consent record. Follows **session protocol v2**: the agent's `step` drives the screen, clip `text` goes to a hidden live region (no subtitles), clips fully download before play and `played` means playback finished. The build picks the driver: fixture replay, or LiveKit (`src/session/liveDriver.ts`) in a live build | LiveKit room + `POST /v1/sessions` (live build) |
-| `/reports`, `/reports/:sessionId` | Grown-up | Signed-in only. Report joined with its child: Coach summary + home practice free, weekly-plan activities only with an active subscription, null-safe for checks with no evidence | Live build: Account API reports (`src/report/useReports.ts`) + `/v1/children` |
-| `/plan/checkout` | Grown-up | Signed-in only. Weekly-plan checkout placeholder | Paystack inline checkout, initialized by the Account service (PRD 11.1) |
-| `/schools/preview`, `/schools/preview/children/:childId` | Grown-up | Teacher view preview: sample P3B class of 23, sortable table, groups, child pages, scripted assistant. No network calls (tested) | Real teacher view comes after the hackathon (PRD 4.7) |
+| `/reports/:sessionId` | Grown-up | Signed-in only. Report joined with its child: Coach summary, profile and one home practice free; the weekly plan and books only with an active subscription (`/plan`); null-safe for checks with no evidence. In the sample build each child gets one sample report (`src/report/childReports.ts`) | Live build: Account API reports (`src/report/useReports.ts`) + `/v1/children` |
+| `/upgrade`, `/plan/checkout` | Grown-up | Signed-in only. The plan's price card, then the Paystack placeholder. The sample build adds a labelled "switch the plan on" button | Paystack inline checkout, initialized by the Account service (PRD 11.1) |
+| `/schools`, `/schools/children/:childId` | Grown-up | Teacher view preview, **no sign-in**, sample banner on every screen: sample P3B class of 23, stat tiles, a sortable table (one card per child on a phone), groups, child pages, scripted assistant. No network calls (tested) | Real teacher view comes after the hackathon (PRD 4.7) |
 
 Fixture stores live beside their screens (`src/account/store.ts`,
 `src/report/reportFixture.ts`, `src/preview/teacherFixture.ts`,
@@ -55,8 +59,10 @@ Fixture stores live beside their screens (`src/account/store.ts`,
 
 | Build | When | Sign-in | Where the account lives |
 |---|---|---|---|
-| Sample (default) | `VITE_ENTRA_CLIENT_ID` or `VITE_ENTRA_AUTHORITY` is missing, or `VITE_ALO_ENV=local` | The fixture sign-in the MVP screens run on | `localStorage`, sample data only |
-| Real | Both Entra settings are present | **Microsoft Entra External ID**: Google, or a one-time code emailed to the guardian. Both go through Entra's hosted page, which verifies the guardian first | **This tab only.** Nothing is written to the browser |
+| Sample (default) | `VITE_ENTRA_CLIENT_ID` or `VITE_ENTRA_AUTHORITY` is missing, or `VITE_ALO_ENV=local` | The fixture email-and-code sign-in the MVP screens run on | `localStorage`, sample data only |
+| Real | Both Entra settings are present | **Microsoft Entra External ID**, one-time code emailed to the guardian, on Entra's hosted page (our screen passes the email as `loginHint`). The only method: the user flow should offer *Email one-time passcode* and not Google | **This tab only.** Nothing is written to the browser |
+
+**Follow-up: typing the code on our own screen** (MSAL "native authentication", `@azure/msal-browser/custom-auth`) is not set up. Checked against the `aloaiauth` tenant on 2026-10-22: its native-auth endpoint answers `AADSTS550022` (the app registration is not enabled for native authentication) and sends no CORS headers, so it needs the app registration changed in the portal and a small same-origin proxy (for example a Static Web Apps managed Function under `/api/auth/*`), which is W1 infra.
 
 Settings (all public values: the app is a public client with PKCE and holds no secret): `VITE_ENTRA_CLIENT_ID`, `VITE_ENTRA_AUTHORITY` (e.g. `https://aloai.ciamlogin.com/`), optionally `VITE_ENTRA_API_SCOPE` (the Account API's scope, once it exists; `auth().getAccessToken()` then returns a bearer token).
 

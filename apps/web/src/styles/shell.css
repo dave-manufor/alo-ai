@@ -1,0 +1,229 @@
+/* Grown-up app shells: the top bar, the phone tab bar, page columns. Token variables only.
+   The breakpoints (48rem = tablet, 64rem = desktop) cannot read a CSS variable, so they are
+   written here; --bp-tablet in the tokens is 900px and is not used because the tab bar should
+   move to the top as soon as a tablet is held upright. */
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: calc(-1 * var(--space-8));
+  z-index: 100;
+  min-height: var(--tap-grown);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  background: var(--night);
+  color: var(--on-night);
+  border-radius: var(--radius-m);
+  font-weight: 800;
+}
+
+.skip-link:focus {
+  top: var(--space-3);
+}
+
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.shell-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.shell-top--plain {
+  justify-content: space-between;
+}
+
+.shell-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-grown);
+  margin-right: auto;
+}
+
+.shell-brand-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.shell-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-grown);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* "Class view" has no room beside the logo on a phone. */
+.shell-label {
+  display: none;
+}
+
+@media (min-width: 40rem) {
+  .shell-label {
+    display: inline;
+  }
+}
+
+.shell-child {
+  display: flex;
+}
+
+.shell-main {
+  flex: 1;
+  width: 100%;
+  /* Room for the fixed tab bar on a phone (its height plus the home-bar inset). */
+  padding-bottom: calc(var(--tap-grown) + var(--space-5) + var(--space-3) + env(safe-area-inset-bottom));
+}
+
+.shell--focus .shell-main,
+.shell--school .shell-main {
+  padding-bottom: 0;
+}
+
+.shell-main:focus {
+  outline: none;
+}
+
+/* One <nav>: a tab bar fixed to the bottom of a phone ... */
+.shell-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--surface-raised);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.shell-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: calc(var(--tap-grown) + var(--space-4));
+  padding: var(--space-2) var(--space-1);
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+.shell-tab[aria-current='page'] {
+  color: var(--night);
+  font-weight: 800;
+  box-shadow: inset 0 3px 0 var(--night);
+}
+
+/* ... and the same links in the top bar from tablet width up. */
+@media (min-width: 48rem) {
+  .shell-top {
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .shell-nav {
+    position: static;
+    display: flex;
+    gap: var(--space-2);
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .shell-tab {
+    flex-direction: row;
+    gap: var(--space-2);
+    min-height: var(--tap-grown);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .shell-tab[aria-current='page'] {
+    background: var(--night-soft);
+    box-shadow: none;
+  }
+
+  .shell-main {
+    padding-bottom: 0;
+  }
+}
+
+/* Page columns. */
+.page {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.page--wide {
+  max-width: 72rem;
+}
+
+.page--mid {
+  max-width: 48rem;
+}
+
+.page :is(h1, h2, h3, p, ul) {
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .page {
+    padding: var(--space-6) var(--space-5) var(--space-8);
+    gap: var(--space-6);
+  }
+}
+
+/* Two columns on a desktop, one stack everywhere else. */
+.page-grid {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.page-grid > * {
+  min-width: 0;
+}
+
+/* The design-system report card caps itself at 380px, made for a phone. In the app's wide
+   layouts it fills its column instead (a design-system deviation, noted in the PR). */
+.page-grid .alo-report {
+  max-width: none;
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+@media (min-width: 64rem) {
+  .page-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-6);
+  }
+}

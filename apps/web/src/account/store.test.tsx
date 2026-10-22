@@ -1,10 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
-import ChildrenPage from '../pages/ChildrenPage';
-import ConsentPage from '../pages/ConsentPage';
-import SignInPage from '../pages/SignInPage';
 import { CONSENT_VERSION, accountStore } from './store';
+
+const adaeze = {
+  firstName: 'Adaeze',
+  primaryClass: 3,
+  birthYear: 2017,
+  attested: true,
+  trainingOptIn: false,
+};
 
 describe('fixture account store (PRD 12 per-child consent)', () => {
   beforeEach(() => {
@@ -13,24 +16,10 @@ describe('fixture account store (PRD 12 per-child consent)', () => {
   });
 
   it('records per-child consent naming the child, and gates the session on it', () => {
-    accountStore.signIn('google');
-    expect(() =>
-      accountStore.addChildWithConsent({
-        firstName: 'Adaeze',
-        primaryClass: 3,
-        birthYear: 2017,
-        attested: false,
-        trainingOptIn: false,
-      }),
-    ).toThrow(/consent/i);
+    accountStore.signIn('email_code');
+    expect(() => accountStore.addChildWithConsent({ ...adaeze, attested: false })).toThrow(/consent/i);
 
-    const { child, consent } = accountStore.addChildWithConsent({
-      firstName: 'Adaeze',
-      primaryClass: 3,
-      birthYear: 2017,
-      attested: true,
-      trainingOptIn: false,
-    });
+    const { child, consent } = accountStore.addChildWithConsent(adaeze);
     expect(consent.text_version).toBe(CONSENT_VERSION);
     expect(consent.guardian_id).toBe('guardian_sample_001');
     expect(consent.child_id).toBe(child.child_id);
@@ -41,68 +30,42 @@ describe('fixture account store (PRD 12 per-child consent)', () => {
     expect(accountStore.canStartSession('nobody')).toBe(false);
   });
 
-  it('walks sign-in to children and adds a child with its consent in the UI', () => {
-    render(
-      <MemoryRouter initialEntries={['/signin']}>
-        <Routes>
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/consent" element={<ConsentPage />} />
-          <Route path="/children" element={<ChildrenPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
-    expect(screen.getByRole('heading', { name: 'Your children' })).toBeInTheDocument();
-
-    fireEvent.change(screen.getByPlaceholderText('First name'), {
-      target: { value: 'Adaeze' },
-    });
-    fireEvent.click(screen.getByLabelText(/parent or guardian of Adaeze, aged/));
-    fireEvent.click(screen.getByRole('button', { name: 'Add child' }));
-    expect(screen.getByRole('heading', { name: 'Adaeze' })).toBeInTheDocument();
-    expect(screen.getByText(/Consent on file/)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Start a reading check' }),
-    ).toBeInTheDocument();
+  it('edits a child’s details', () => {
+    accountStore.signIn('email_code');
+    const { child } = accountStore.addChildWithConsent(adaeze);
+    const edited = accountStore.updateChild(child.child_id, { firstName: ' Ada ', primaryClass: 4, birthYear: 2016 });
+    expect(edited).toMatchObject({ first_name: 'Ada', primary_class: 4, birth_year: 2016 });
+    expect(accountStore.getState().children[0].first_name).toBe('Ada');
+    expect(() => accountStore.updateChild('nobody', { firstName: 'X', primaryClass: 1, birthYear: 2019 })).toThrow();
   });
 
-  it('does not sign in on an email link until the link is clicked', () => {
-    render(
-      <MemoryRouter initialEntries={['/signin']}>
-        <Routes>
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/children" element={<ChildrenPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    fireEvent.change(screen.getByLabelText(/Email address/), {
-      target: { value: 'parent@example.com' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Email me a sign-in link' }));
-    expect(screen.getByText(/Check your email/)).toBeInTheDocument();
-    expect(accountStore.getState().guardian).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'I clicked the link' }));
-    expect(accountStore.getState().guardian?.email).toBe('parent@example.com');
-    expect(screen.getByRole('heading', { name: 'Your children' })).toBeInTheDocument();
+  it('changes the recordings choice without changing anything else on the consent', () => {
+    accountStore.signIn('email_code');
+    const { child, consent } = accountStore.addChildWithConsent(adaeze);
+    accountStore.setTrainingOptIn(child.child_id, true);
+    const after = accountStore.consentFor(child.child_id)!;
+    expect(after.training_opt_in).toBe(true);
+    expect(after.attestation).toBe(consent.attestation);
+    expect(after.consent_id).toBe(consent.consent_id);
   });
 
-  it('lists per-child consent records on the consent page', () => {
-    accountStore.signIn('google');
-    accountStore.addChildWithConsent({
-      firstName: 'Adaeze',
-      primaryClass: 3,
-      birthYear: 2017,
-      attested: true,
-      trainingOptIn: true,
-    });
-    render(
-      <MemoryRouter>
-        <ConsentPage />
-      </MemoryRouter>,
-    );
-    expect(screen.getByText(/Consent, in plain words/)).toBeInTheDocument();
-    expect(screen.getByText(/recordings to help Alo.ai learn: yes/)).toBeInTheDocument();
+  it('deletes a child with their consent, so no session can start for them', () => {
+    accountStore.signIn('email_code');
+    const { child } = accountStore.addChildWithConsent(adaeze);
+    accountStore.removeChild(child.child_id);
+    expect(accountStore.getState().children).toHaveLength(0);
+    expect(accountStore.consentFor(child.child_id)).toBeNull();
+    expect(accountStore.canStartSession(child.child_id)).toBe(false);
+  });
+
+  it('only holds a plan for the signed-in guardian, and only in the sample build', () => {
+    expect(accountStore.hasActiveSubscription()).toBe(false);
+    accountStore.activateSampleSubscription(); // nobody signed in: nothing happens
+    expect(accountStore.hasActiveSubscription()).toBe(false);
+    accountStore.signIn('email_code');
+    accountStore.activateSampleSubscription();
+    expect(accountStore.hasActiveSubscription()).toBe(true);
+    accountStore.signOut();
+    expect(accountStore.hasActiveSubscription()).toBe(false);
   });
 });

@@ -3,10 +3,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { accountStore } from '../account/store';
 import { auth, signInFailed } from '../auth';
-import { EntraSignIn } from './SignInPage';
+import SignInPage, { EntraSignIn } from './SignInPage';
 
-// The real build's sign-in screen (Entra External ID). The auth module is replaced: nothing
-// here reaches Entra.
+// The real build's sign-in (Entra External ID, email and a one-time code). The auth module is
+// replaced: nothing here reaches Entra.
 vi.mock('../auth', () => ({
   authMode: 'entra',
   auth: vi.fn(),
@@ -20,10 +20,13 @@ function show() {
     <MemoryRouter initialEntries={['/signin']}>
       <Routes>
         <Route path="/signin" element={<EntraSignIn />} />
-        <Route path="/children" element={<h1>Your children</h1>} />
       </Routes>
     </MemoryRouter>,
   );
+}
+
+function typeEmail(value: string) {
+  fireEvent.change(screen.getByLabelText('Email address'), { target: { value } });
 }
 
 describe('sign-in with Entra External ID (PRD 4.4, 12)', () => {
@@ -36,33 +39,36 @@ describe('sign-in with Entra External ID (PRD 4.4, 12)', () => {
     vi.mocked(signInFailed).mockReturnValue(false);
   });
 
-  it('offers Google and an emailed code, and says what the email does', () => {
+  it('asks for an email and offers a code, with no Google and no password', () => {
     show();
-    expect(screen.getByRole('heading', { name: 'Welcome to Alo.ai' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Continue with email' })).toBeEnabled();
-    expect(screen.getByText(/we send you a code to type in/i)).toBeInTheDocument();
-    // None of the sample build's controls or its sample-sign-in note.
-    expect(screen.queryByPlaceholderText('you@example.com')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Email address')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Send me a code' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: /google/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/sample sign-in/i)).not.toBeInTheDocument();
   });
 
-  it.each([
-    ['Continue with Google', 'google'],
-    ['Continue with email', 'email'],
-  ])('%s takes the guardian to Entra and holds the buttons meanwhile', async (name, method) => {
+  it('takes the guardian to Entra with their email and holds the form meanwhile', async () => {
     client.signIn.mockReturnValue(new Promise(() => undefined)); // the browser is leaving
     show();
-    fireEvent.click(screen.getByRole('button', { name }));
+    typeEmail('guardian@example.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a code' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Taking you to sign in');
-    expect(client.signIn).toHaveBeenCalledWith(method);
-    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Continue with email' })).toBeDisabled();
+    expect(client.signIn).toHaveBeenCalledWith('guardian@example.com');
+    expect(screen.getByRole('button', { name: 'Send me a code' })).toBeDisabled();
+  });
+
+  it('does not go to Entra for something that is not an email address', () => {
+    show();
+    typeEmail('guardian');
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a code' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('full email address');
+    expect(client.signIn).not.toHaveBeenCalled();
   });
 
   it('does not sign anyone in itself: only the verified return does', async () => {
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
+    typeEmail('guardian@example.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a code' }));
     await waitFor(() => expect(client.signIn).toHaveBeenCalled());
     expect(accountStore.getState().guardian).toBeNull();
   });
@@ -70,9 +76,10 @@ describe('sign-in with Entra External ID (PRD 4.4, 12)', () => {
   it('says so, and lets the guardian try again, when sign-in cannot start', async () => {
     client.signIn.mockRejectedValue(new Error('offline'));
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
+    typeEmail('guardian@example.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a code' }));
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't start sign-in");
-    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Send me a code' })).toBeEnabled();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -82,30 +89,18 @@ describe('sign-in with Entra External ID (PRD 4.4, 12)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent("We couldn't finish signing you in");
   });
 
-  it('shows who is signed in and goes on to the children', () => {
+  it('sends a guardian who has just come back signed in on to onboarding, or to Home', () => {
     accountStore.signInVerified({ id: 'oid-1', email: 'guardian@example.com', method: 'email_code' });
-    show();
-    expect(screen.getByRole('status')).toHaveTextContent('Signed in as guardian@example.com.');
-    expect(screen.queryByRole('button', { name: 'Continue with Google' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Go to your children' }));
-    expect(screen.getByRole('heading', { name: 'Your children' })).toBeInTheDocument();
-  });
-
-  it('signs out of this phone and of Entra', async () => {
-    accountStore.signInVerified({ id: 'oid-1', email: 'guardian@example.com', method: 'google' });
-    show();
-    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
-    await waitFor(() => expect(client.signOut).toHaveBeenCalled());
-    expect(accountStore.getState().guardian).toBeNull();
-  });
-
-  it('is signed out here even if Entra cannot be reached to end the session', async () => {
-    client.signOut.mockRejectedValue(new Error('offline'));
-    accountStore.signInVerified({ id: 'oid-1', email: 'guardian@example.com', method: 'google' });
-    show();
-    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
-    await waitFor(() => expect(client.signOut).toHaveBeenCalled());
-    expect(accountStore.getState().guardian).toBeNull();
+    render(
+      <MemoryRouter initialEntries={['/signin']}>
+        <Routes>
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/onboarding/consent" element={<h1>Before your child reads</h1>} />
+          <Route path="/home" element={<h1>Home</h1>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('heading', { name: 'Before your child reads' })).toBeInTheDocument();
   });
 });
 
