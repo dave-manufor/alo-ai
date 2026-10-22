@@ -19,6 +19,9 @@ norecursedirs = ["generator", ".*", "__pycache__"]
 [tool.coverage.report]
 show_missing = true
 
+[tool.coverage.run]
+omit = ["services/core/generator/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
