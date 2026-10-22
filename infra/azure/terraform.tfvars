@@ -51,3 +51,6 @@ second_transcript = "off"
 entra_tenant_id    = "d611df49-f494-4953-9681-5a99d88b0d06"
 entra_authority    = "https://aloaiauth.ciamlogin.com"
 entra_api_audience = "15b55da5-38e0-4a9c-8b47-38f39e717bfe"
+
+# The LiveKit Cloud project address (not a secret; its key and secret are Key Vault entries).
+livekit_url = "wss://alo-ai-cu5s6vox.livekit.cloud"
