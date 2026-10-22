@@ -12,7 +12,9 @@ import type {
   LanternStreakProps,
   MicButtonProps,
   MoonProgressProps,
+  PaperProps,
   ParentReportCardProps,
+  RoundButtonProps,
   ProfilePillProps,
   ReadingPanelProps,
   RewardBadgeProps,
@@ -32,6 +34,8 @@ export const LanternStreak = Alo.LanternStreak as ComponentType<LanternStreakPro
 export const Japa = Alo.Japa as ComponentType<JapaProps>;
 export const ParentReportCard = Alo.ParentReportCard as ComponentType<ParentReportCardProps>;
 export const ProfilePill = Alo.ProfilePill as ComponentType<ProfilePillProps>;
+export const Paper = Alo.Paper as ComponentType<PaperProps>;
+export const RoundButton = Alo.RoundButton as ComponentType<RoundButtonProps>;
 
 export type {
   ButtonProps,
@@ -39,7 +43,9 @@ export type {
   LanternStreakProps,
   MicButtonProps,
   MoonProgressProps,
+  PaperProps,
   ParentReportCardProps,
+  RoundButtonProps,
   ProfilePillProps,
   ReadingPanelProps,
   RewardBadgeProps,
