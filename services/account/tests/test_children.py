@@ -192,6 +192,19 @@ def test_a_consent_needs_the_attestation_and_the_guardians_own_child():
     assert len([p for p in store.docs if p.startswith("consents/")]) == 1
 
 
+def test_an_existing_guardians_stored_email_is_used_when_a_later_token_omits_email():
+    client, store = make_client()
+    child_id = add_child(client).json()["child_id"]
+    later, _ = make_client(store=store, at=NOW.replace(hour=10))
+    added = later.post(
+        "/v1/consents",
+        json={"child_id": child_id, "attested": True},
+        headers=bearer(email=None),
+    )
+    assert added.status_code == 201
+    assert added.json()["verified_email"] == "guardian@example.com"
+
+
 def test_a_child_with_no_consent_has_none_to_read():
     client, store = make_client()
     child_id = add_child(client).json()["child_id"]

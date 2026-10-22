@@ -69,6 +69,7 @@ def router(
             raise AccountError(
                 400, "CONSENT_REQUIRED", "Consent is needed before adding a child.", retryable=False
             )
+        guardian = ensure_guardian(store, principal, now)
         moment = now()
         document = {
             "schema_version": 1,
@@ -78,7 +79,7 @@ def router(
             "text_version": CONSENT_VERSION,
             "attestation": attestation_for(child["first_name"], moment.year - child["birth_year"]),
             "sign_in_method": principal.sign_in_method,
-            "verified_email": principal.email,
+            "verified_email": guardian["email"],
             "timestamp": stamp(moment),
             "training_opt_in": opt_in,
         }
