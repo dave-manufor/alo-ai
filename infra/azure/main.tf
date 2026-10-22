@@ -420,6 +420,30 @@ resource "azurerm_cosmosdb_sql_role_assignment" "data" {
   scope               = "${azurerm_cosmosdb_account.main.id}/dbs/${azurerm_cosmosdb_sql_database.main.name}"
 }
 
+# The study operators (var.operator_object_ids, normally one person) read and write the one
+# database and read the queue counts, so the cloud smoke test and the study-day runbook can run
+# from their `az login`. Nothing else is granted here (no storage, no Key Vault), and the list is
+# empty by default, so nobody has this access unless the apply names them.
+resource "azurerm_cosmosdb_sql_role_assignment" "operator" {
+  for_each            = toset(var.operator_object_ids)
+  resource_group_name = azurerm_resource_group.main.name
+  account_name        = azurerm_cosmosdb_account.main.name
+  role_definition_id  = local.cosmos_data_contributor
+  principal_id        = each.value
+  scope               = "${azurerm_cosmosdb_account.main.id}/dbs/${azurerm_cosmosdb_sql_database.main.name}"
+}
+
+resource "azurerm_role_assignment" "operator_queues" {
+  for_each = {
+    for pair in setproduct(var.operator_object_ids, keys(local.queue_id)) :
+    "${pair[0]}-${pair[1]}" => { principal = pair[0], scope = local.queue_id[pair[1]] }
+  }
+  principal_id         = each.value.principal
+  scope                = each.value.scope
+  role_definition_name = "Azure Service Bus Data Owner"
+  principal_type       = "User"
+}
+
 # ---- budget: alerts at $50, $100 and $130 of the $150 credit
 
 resource "azurerm_consumption_budget_resource_group" "main" {
