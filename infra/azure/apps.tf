@@ -76,6 +76,7 @@ locals {
     AZURE_OPENAI_ENDPOINT    = local.ai_env.AZURE_OPENAI_ENDPOINT # the tagger
     AZURE_OPENAI_DEPLOYMENTS = local.ai_env.AZURE_OPENAI_DEPLOYMENTS
     LLM_BASE_URL             = local.ai_env.LLM_BASE_URL
+    INTEREST_CHAT            = tostring(var.interest_chat)
     VOICE_MODE               = var.voice_mode
     SESSION_PROFILE          = var.session_profile
     VOICE_PROFILE_ID         = var.voice_profile_id
