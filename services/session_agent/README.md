@@ -31,7 +31,7 @@ The bank by class (`passages.STANDARD_BANK`): the worker reads `children/{child_
 | P3 | 5 | `bank_p3_school_garden` | `bank_l5_before_rain` (ARL 5) |
 | P4 | 7 | `bank_p4_night_bus` | `bank_l9_rocket` (ARL 9) |
 | P5 | 9 | `bank_p5_music_contest` | `bank_l9_rocket` (ARL 9) |
-| P6 | 11 | the P5 passage, until P6 has its own | `bank_l9_rocket` |
+| P6 | 11 | `bank_p6_river_crossing` | `bank_l9_rocket` (ARL 9) |
 
 Not yet: the Gemini Live conductor (`SpeakLive` plays the clip) and LiveKit's turn detector (it runs inside the LLM pipeline, so it comes with the conductor).
 

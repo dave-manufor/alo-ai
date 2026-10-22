@@ -11,6 +11,7 @@ BUILT = [
     "bank_p2_lost_ball",
     "bank_p4_night_bus",
     "bank_p5_music_contest",
+    "bank_p6_river_crossing",
     "bank_l3_market",
     "bank_l9_rocket",
 ]

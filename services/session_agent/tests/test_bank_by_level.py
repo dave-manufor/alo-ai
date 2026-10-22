@@ -32,8 +32,8 @@ LISTEN_WORDS_MAX = 120  # PRD 4.1: a standard listening story is 80 to 120 words
         (8, "bank_p4_night_bus"),
         (9, "bank_p5_music_contest"),
         (10, "bank_p5_music_contest"),
-        (11, "bank_p5_music_contest"),  # Primary 6 has no passage of its own yet
-        (12, "bank_p5_music_contest"),
+        (11, "bank_p6_river_crossing"),
+        (12, "bank_p6_river_crossing"),
     ],
 )
 def test_the_standard_profile_gets_the_passage_nearest_the_level(level, passage_id):
@@ -84,7 +84,7 @@ def pick(docs: dict, profile: str = "standard", child_id: str = "child_a") -> st
         (3, "bank_p3_school_garden"),
         (4, "bank_p4_night_bus"),
         (5, "bank_p5_music_contest"),
-        (6, "bank_p5_music_contest"),
+        (6, "bank_p6_river_crossing"),
     ],
 )
 def test_a_first_session_gets_the_passage_for_the_childs_class(primary_class, passage_id):
