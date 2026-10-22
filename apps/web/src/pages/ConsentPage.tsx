@@ -28,13 +28,19 @@ export default function ConsentPage() {
         <h1 className="title">Consent, in plain words</h1>
         <p className="body">
           For each child you add, we ask you to agree that Alo.ai can record
-          them reading aloud, use the recording to make their reading
-          report, and keep the audio for up to 90 days. Alo.ai is a
-          screening tool that helps you practise reading.
+          them reading aloud and answering questions, turn the recording
+          into a written transcript, and use both to make a reading report
+          for you. Recordings are kept for up to 90 days and then deleted.
+          Transcripts and the report stay in your account until you ask for
+          them to be deleted. Only your family and the Alo.ai study team can
+          see them, and they are processed on secure servers in Europe.
+          Alo.ai is a screening tool that helps you practise reading.
         </p>
         <p className="body">
-          Letting recordings help Alo.ai learn is a separate choice for each
-          child, and it is off unless you turn it on.
+          Your child can stop at any time, and you can ask for everything
+          about your child to be deleted. Letting recordings help Alo.ai
+          learn is a separate choice for each child, and it is off unless
+          you turn it on.
         </p>
         <p className="body muted">
           No reading check can start for a child until their consent is
