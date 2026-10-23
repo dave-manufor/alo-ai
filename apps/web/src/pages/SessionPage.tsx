@@ -6,7 +6,13 @@ import { createSessionClipCache, unlockAudio } from '../session/clipCache';
 import type { SessionDriver } from '../session/driver';
 import { createSessionDriver } from '../session/driverFactory';
 import HoldToConfirm from '../session/HoldToConfirm';
-import { createMicMeter, primeAudioContext, useMicWatch, type MicMeter } from '../session/micLevel';
+import {
+  createMicMeter,
+  primeAudioContext,
+  useCountedWords,
+  useMicWatch,
+  type MicMeter,
+} from '../session/micLevel';
 import { openMic, stopMic, type MicResult } from '../session/micPermission';
 import japaBase from '../session/assets/japa-base.svg';
 import NightStage from '../session/NightStage';
@@ -76,6 +82,8 @@ export default function SessionPage({
   const meterRef = useRef<MicMeter | null>(null);
   const [meter, setMeter] = useState<MicMeter | null>(null);
   const [quietDismissed, setQuietDismissed] = useState(false);
+  // The next clip is still loading: the session is being made ready behind the scenes.
+  const [waitingClip, setWaitingClip] = useState(false);
 
   // Fixture build: clips are simulated locally. Live build: every clip is
   // downloaded into Cache Storage before it can be played (D4).
@@ -107,7 +115,9 @@ export default function SessionPage({
       driverRef.current?.ack?.(shownAck(message.passage_id));
     }
     if (message.cmd === 'play') {
+      if (!clipCache.has(message.clip_id)) setWaitingClip(true); // still downloading
       const ack = await clipCache.play(message.clip_id);
+      setWaitingClip(false);
       setState((current) => recordAck(current, ack));
       driverRef.current?.ack?.(ack); // live: tell the agent played / missing
     }
@@ -198,6 +208,20 @@ export default function SessionPage({
   const micQuiet = watch.quiet && !quietDismissed;
   const savedEarly = started && failure !== null && step !== null;
   const reading = step === 'READING' && state.passageVisible && state.passage !== null;
+  // The count lights follow what the child counts, once Kemi has finished asking them to.
+  const countActive = started && step === 'MIC_CHECK' && !state.reconnecting && !speaking;
+  const counted = useCountedWords(meter, countActive);
+  const countMeasured = meter !== null && meter.usable?.() !== false;
+  // The session is being made ready behind the scenes: connecting, the story still on its
+  // way, or the next clip still loading.
+  const preparing =
+    started &&
+    !state.reconnecting &&
+    failure === null &&
+    (step === null ||
+      waitingClip ||
+      (step === 'MIC_CHECK' && state.playingClipId === 'story_almost_ready') ||
+      (step === 'READING' && state.passage === null && !speaking));
 
   let mode: Mode = 'start';
   if (started) {
@@ -221,9 +245,14 @@ export default function SessionPage({
       // The green lights: the agent heard the child, or this phone's microphone does.
       childSpeaking: state.childSpeaking || watch.heard,
       counting: mode === 'count' && !speaking,
+      // Following the child's own count when the microphone is measured; else on a timer.
+      countHeard: mode === 'count' && countMeasured ? counted : null,
+      preparing,
       questionsLit: ending ? 3 : questionsLit,
       seeds: 0,
-      peek: mode === 'reading' && (state.playingClipId?.startsWith('word_') ?? false),
+      // "That word is X." is Kemi speaking: her light pulses (speaking, above), and nothing else.
+      // Jàpá (the turtle) does not come out for it.
+      peek: false,
       nod: false,
       pageVisible: state.passageVisible && state.passage !== null,
       showStart: micPhase === 'greeting' || micPhase === 'explain',
@@ -235,7 +264,9 @@ export default function SessionPage({
       questionsLit,
       state.childSpeaking,
       watch.heard,
-      state.playingClipId,
+      counted,
+      countMeasured,
+      preparing,
       state.passageVisible,
       state.passage,
       micPhase,
@@ -395,7 +426,13 @@ export default function SessionPage({
       start={start}
       hand={hand}
       grownUp={grownUp}
-      srText={started && !state.reconnecting ? state.bubbleText : null}
+      srText={
+        started && !state.reconnecting
+          ? preparing && !state.bubbleText
+            ? 'Getting your reading check ready.'
+            : state.bubbleText
+          : null
+      }
     />
   );
 }

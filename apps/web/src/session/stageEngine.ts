@@ -30,6 +30,14 @@ export interface StageInput {
   childSpeaking: boolean;
   /** The child is counting (mic check): a light for each number. */
   counting: boolean;
+  /** How many numbers the child has counted so far (0 to 5), measured on this phone's
+   *  microphone. While it is a number the lights follow the child's count; null means it is
+   *  not measured (no microphone level), and the lights come on by themselves, one every
+   *  0.75 s, as before. */
+  countHeard: number | null;
+  /** The session is being made ready behind the scenes (connecting, the story, a clip still
+   *  loading): the light shimmers, and after a few seconds a soft caption says so. */
+  preparing: boolean;
   /** How many of the three question points are lit (0 to 3). */
   questionsLit: number;
   /** How many seed drawings (0 to 2) orbit the light. Not sent by the driver yet. */
@@ -49,6 +57,8 @@ export const defaultInput: StageInput = {
   speaking: false,
   childSpeaking: false,
   counting: false,
+  countHeard: null,
+  preparing: false,
   questionsLit: 0,
   seeds: 0,
   peek: false,
@@ -57,6 +67,7 @@ export const defaultInput: StageInput = {
   showStart: true,
 };
 
+const PREP_NOTE_AFTER_S = 2.5; // a wait this long gets a few words saying what is happening
 const FS_MIN = 22;
 const FS_MAX = 28;
 const FS_FLOOR = 16;
@@ -152,6 +163,10 @@ export class StageEngine {
   private nodEnv = 0;
   private callAt: number | null = null;
   private countAt: number | null = null;
+  private countHeardAt: number[] = [-9, -9, -9, -9, -9];
+  private countHeardSeen = 0;
+  private prepEnv = 0;
+  private prepAt: number | null = null;
   private litAt: number[] = [-9, -9, -9];
   private litSeen = 0;
   private seedAt: number[] = [];
@@ -210,6 +225,13 @@ export class StageEngine {
     }
     if (this.input.counting && this.countAt === null) this.countAt = this.t;
     if (!this.input.counting) this.countAt = null;
+    // The child's own count: each new number lights the next light at that moment.
+    const heard = this.input.countHeard ?? 0;
+    if (heard < this.countHeardSeen) this.countHeardSeen = heard;
+    for (let k = this.countHeardSeen; k < heard && k < 5; k++) this.countHeardAt[k] = this.t;
+    this.countHeardSeen = heard;
+    if (this.input.preparing && this.prepAt === null) this.prepAt = this.t;
+    if (!this.input.preparing) this.prepAt = null;
     for (let k = this.litSeen; k < this.input.questionsLit && k < 3; k++) this.litAt[k] = this.t;
     this.litSeen = this.input.questionsLit;
     for (let k = this.seedsSeen; k < this.input.seeds && k < 2; k++) this.seedAt[k] = this.t;
@@ -545,7 +567,12 @@ export class StageEngine {
     const level = I.speaking && !this.reduced ? 0.4 + 0.6 * Math.abs(Math.sin(t * 10.7) * Math.sin(t * 4.3 + 1)) : 0;
     this.tf('orbLvl', `scale(${(1 + 0.14 * level).toFixed(3)})`);
     this.op('rings', this.kemiTalk);
-    this.op('shim', V((mo) => (mo === 'think' ? 1 : 0)));
+    // "Getting ready": the same turning ring as thinking, whenever the session is waiting on
+    // something behind the scenes, and a soft caption if the wait goes past a few seconds.
+    this.prepEnv = approach(this.prepEnv, I.preparing ? 1 : 0, I.preparing ? 0.3 : 0.4);
+    this.op('shim', Math.max(V((mo) => (mo === 'think' ? 1 : 0)), this.prepEnv));
+    const prepNote = this.prepAt === null ? 0 : clamp((t - this.prepAt - PREP_NOTE_AFTER_S) * 1.2);
+    this.op('prepNote', prepNote * this.prepEnv);
     this.op('outline', V((mo) => (mo === 'reconnect' ? 1 : 0)));
 
     // the child's voice
@@ -585,7 +612,15 @@ export class StageEngine {
     for (let k = 0; k < 5; k++) {
       const el = this.$('c' + k);
       const a = ((50 + k * 20) * Math.PI) / 180;
-      const c0 = this.countAt !== null ? this.countAt + 0.4 + k * 0.75 : null;
+      // Following the child's count when it is measured; else one light every 0.75 s.
+      const c0 =
+        I.countHeard !== null
+          ? k < I.countHeard
+            ? this.countHeardAt[k]
+            : null
+          : this.countAt !== null
+            ? this.countAt + 0.4 + k * 0.75
+            : null;
       this.op('c' + k, cvis);
       el.classList.toggle('lit', c0 !== null && t >= c0);
       const pop = c0 !== null ? 1 + 0.5 * pulse(t, c0, 0.4) : 1;

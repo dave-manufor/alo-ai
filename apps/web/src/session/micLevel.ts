@@ -161,3 +161,49 @@ export function useMicWatch(
 
   return watch;
 }
+
+// ---- counting along with the child
+
+// A spoken number is a burst of voice with a short gap before the next: "one, two, three...".
+// The lights follow that, from this phone's microphone, so they come on as the child says each
+// number and not on a timer. A burst starts above COUNT_ON; the next only counts once the level
+// has been below COUNT_OFF for COUNT_REARM_MS (a dip inside a word is not a gap).
+export const COUNT_ON_DBFS = -45;
+export const COUNT_OFF_DBFS = -52;
+export const COUNT_REARM_MS = 120;
+
+/**
+ * How many numbers the child has counted (0 to `max`) while `active` (the mic check is
+ * listening and Kemi is not speaking). Starts again from 0 each time `active` turns on, so
+ * "count again" starts the lights over. Silence from a suspended audio context is not heard.
+ */
+export function useCountedWords(
+  meter: MicMeter | null,
+  active: boolean,
+  tickMs = 40,
+  max = 5,
+): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const state = { armed: true, quietFor: 0, count: 0 };
+    setCount(0);
+    if (!meter || !active) return undefined;
+    const timer = setInterval(() => {
+      if (meter.usable && !meter.usable()) return;
+      const level = meter.level();
+      if (level > COUNT_ON_DBFS) {
+        if (state.armed && state.count < max) {
+          state.count += 1;
+          setCount(state.count);
+        }
+        state.armed = false;
+        state.quietFor = 0;
+      } else if (level < COUNT_OFF_DBFS) {
+        state.quietFor += tickMs;
+        if (state.quietFor >= COUNT_REARM_MS) state.armed = true;
+      }
+    }, tickMs);
+    return () => clearInterval(timer);
+  }, [meter, active, tickMs, max]);
+  return count;
+}
