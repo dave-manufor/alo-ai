@@ -283,6 +283,22 @@ def _bank(settings: config.WorkerSettings, db: Store) -> PassageBank:
     return PassageBank(lambda passage_id: db.get(f"passages/{passage_id}"))
 
 
+# The room is made when the guardian taps Start, and the child joins a moment later. If nobody
+# does (the tab was closed, the mic prompt was never answered), the agent would wait for ever and
+# hold a worker slot; give up after this long. LiveKit closes the empty room after 300 s anyway.
+CHILD_JOIN_WAIT_S = 180
+
+
+async def _wait_for_child(ctx: JobContext, wait_s: float) -> rtc.RemoteParticipant | None:
+    """The participant who joined, or None (and the job is shut down) if nobody did in time."""
+    try:
+        return await asyncio.wait_for(ctx.wait_for_participant(), wait_s)
+    except TimeoutError:
+        log.info("nobody joined the room in %s s; leaving", wait_s)
+        ctx.shutdown(reason="nobody joined")
+        return None
+
+
 async def entrypoint(ctx: JobContext) -> None:
     cfg = config.load(os.environ)
     settings = config.worker_settings(os.environ)
@@ -310,7 +326,9 @@ async def entrypoint(ctx: JobContext) -> None:
     passages.pair(bank_passage_id)
 
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
-    child = await ctx.wait_for_participant()
+    child = await _wait_for_child(ctx, CHILD_JOIN_WAIT_S)
+    if child is None:
+        return
     loop = asyncio.get_running_loop()
 
     background = Background()
