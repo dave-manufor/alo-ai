@@ -77,7 +77,11 @@ export default function AccountPage() {
             <span className="account-row__text">
               <span className="body card-title">{subscribed ? 'Weekly plan' : 'No plan yet'}</span>
               <span className="caption muted">
-                {subscribed ? `${PLAN_PRICE} ${PLAN_PRICE_PERIOD} · paid by card` : 'One tip per check is free.'}
+                {!subscribed
+                  ? 'One tip per check is free.'
+                  : dataMode === 'live'
+                    ? 'Included while we run the reading study.'
+                    : `${PLAN_PRICE} ${PLAN_PRICE_PERIOD} · paid by card`}
               </span>
             </span>
             <Link to={subscribed ? '/plan' : '/upgrade'} className="body card-title ui-tap">

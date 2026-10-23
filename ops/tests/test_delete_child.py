@@ -20,6 +20,8 @@ def seed() -> tuple[MemoryStore, MemoryBlobs]:
             "consents/k1": {"child_id": "c1"},
             "consents/k1b": {"child_id": "c1"},
             "consents/k2": {"child_id": "c2"},
+            "session_starts/s1": {"guardian_id": "g1", "child_id": "c1"},
+            "session_starts/s2": {"guardian_id": "g2", "child_id": "c2"},
             "sessions/s1": {"child_id": "c1", "passage_source": "BANK", "passage_id": "bank_x"},
             "sessions/s1/turns/t1": {"audio_uri": AUDIO + "u1.flac"},
             "sessions/s1/turns/t2": {"audio_uri": AUDIO + "u2.flac"},
@@ -59,6 +61,7 @@ def test_the_footprint_is_everything_that_belongs_to_the_child_and_nothing_else(
         "children/c1",
         "consents/k1",
         "consents/k1b",
+        "session_starts/s1",
         "sessions/s1",
         "sessions/s1/turns/t1",
         "sessions/s1/turns/t2",
@@ -80,7 +83,7 @@ def test_a_dry_run_changes_nothing():
     store, blobs = seed()
     before = (dict(store.docs), dict(blobs.blobs))
     found = delete_child(store, blobs, "c1", operator="someone")
-    assert len(found.documents) == 16
+    assert len(found.documents) == 17
     assert (store.docs, blobs.blobs) == before
 
 
@@ -93,7 +96,8 @@ def test_deleting_removes_the_child_and_leaves_everyone_else():
     assert "passages/gen_3" not in store.docs
     # The other child, the guardian and the shared bank passage are untouched.
     for kept in ("children/c2", "consents/k2", "sessions/s2", "sessions/s2/turns/t5",
-                 "reports/s2", "plans/plan_s2", "guardians/g1", "passages/bank_x"):
+                 "reports/s2", "plans/plan_s2", "guardians/g1", "passages/bank_x",
+                 "session_starts/s2"):
         assert kept in store.docs
     assert blobs.blobs == {AUDIO + "u5.flac": b"5"}
 
@@ -108,7 +112,7 @@ def test_the_deletion_is_audited_without_the_child_id_or_any_name():
             "operator": "david",
             "action": "child.delete",
             "child_sha256": hashlib.sha256(b"c1").hexdigest(),
-            "documents": 16,
+            "documents": 17,
             "blobs": 3,
             "at": "2026-02-01T12:00:00Z",
         }
@@ -141,7 +145,7 @@ def test_an_unknown_child_is_not_found():
     store, blobs = seed()
     with pytest.raises(ChildNotFound):
         delete_child(store, blobs, "nobody", operator="david", dry_run=False)
-    assert len(store.docs) == 24 and len(blobs.blobs) == 4
+    assert len(store.docs) == 26 and len(blobs.blobs) == 4
 
 
 def test_a_child_with_only_a_consent_is_still_found():
@@ -153,7 +157,7 @@ def test_the_command_is_a_dry_run_unless_asked(capsys):
     store, blobs = seed()
     assert main(["--child-id", "c1", "--operator", "me"], store=store, blobs=blobs) == 0
     out = capsys.readouterr().out
-    assert "Would delete" in out and "16 documents and 3 audio files" in out
+    assert "Would delete" in out and "17 documents and 3 audio files" in out
     assert "children/c1" in store.docs
 
 
@@ -161,7 +165,7 @@ def test_the_command_deletes_with_yes_and_prints_counts_not_ids(capsys):
     store, blobs = seed()
     assert main(["--child-id", "c1", "--operator", "me", "--yes"], store=store, blobs=blobs) == 0
     out = capsys.readouterr().out
-    assert out.startswith("Deleted: 16 documents and 3 audio files")
+    assert out.startswith("Deleted: 17 documents and 3 audio files")
     assert "c1" not in out and "Demo" not in out
     assert "children/c1" not in store.docs
 

@@ -1,15 +1,26 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ProfilePill } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
 import { formatReportDate } from '../report/reportFixture';
 import { useReports } from '../report/useReports';
+import { usePendingReport, type PendingReport } from '../session/status';
 import { useActiveChild } from '../shell/activeChildContext';
 import { Avatar, Card, Notice } from '../ui/primitives';
 
 // Reports (a tab): every reading check, newest first, one card each. Every number lives on
 // the report itself; this list shows only who, when, the story and the reader profile.
+const PENDING_TEXT: Record<Exclude<PendingReport, 'none' | 'ready'>, string> = {
+  waiting: 'The report is being made. This usually takes a minute or two, and it will appear here on its own.',
+  unfinished:
+    'That reading check stopped before the end, so there is no report for it. You can start another one when you are ready.',
+  unknown: 'The report is taking longer than usual. Please look again in a little while.',
+};
+
 export default function ReportsPage() {
-  const view = useReports();
+  // /reports?pending=<session id> is where a finished reading check sends the grown-up.
+  const [params] = useSearchParams();
+  const pending = usePendingReport(params.get('pending'));
+  const view = useReports(pending === 'ready' ? 'ready' : '');
   const { child } = useActiveChild();
 
   return (
@@ -20,6 +31,12 @@ export default function ReportsPage() {
           A plain look at each reading check: a strength first, then one thing to work on and one thing to do.
         </p>
       </div>
+
+      {pending !== 'none' && pending !== 'ready' ? (
+        <Notice tone={pending === 'waiting' ? 'plain' : 'sky'} role="status">
+          {PENDING_TEXT[pending]}
+        </Notice>
+      ) : null}
 
       {view.status !== 'ready' ? (
         <Notice tone={view.status === 'error' ? 'sky' : 'plain'} role={view.status === 'error' ? 'alert' : 'status'}>

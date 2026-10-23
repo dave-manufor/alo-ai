@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { addChild, editChild } from '../account/actions';
 import { CONSENT_TEXT, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
+import { ApiError } from '../api';
 import { Button } from '../design-system/alo';
 import { consentDraft, useConsentDraft } from '../onboarding/draft';
 import { BackLink, CheckRow, Field, Notice, Segmented } from '../ui/primitives';
@@ -68,7 +69,7 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
       consentDraft.clear();
       navigate('/home');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'We could not save that. Please try again.');
+      setError(err instanceof ApiError ? err.plain : 'We could not save that. Please try again.');
       setSaving(false);
     }
   }

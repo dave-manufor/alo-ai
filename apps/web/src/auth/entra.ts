@@ -1,4 +1,5 @@
 import type { AccountInfo, Configuration, IPublicClientApplication } from '@azure/msal-browser';
+import { clearReturnTo, saveReturnTo } from './returnTo';
 import type { AuthClient, AuthUser } from './types';
 
 // Sign-in with Microsoft Entra External ID (the customer tenant, `*.ciamlogin.com`): a
@@ -92,6 +93,7 @@ export async function createEntraClient(
 
     async signOut() {
       const account = activeAccount();
+      clearReturnTo();
       await app.logoutRedirect(account ? { account } : undefined);
     },
 
@@ -105,6 +107,7 @@ export async function createEntraClient(
         // The session needs the guardian again (expired, or consent changed): go back through
         // sign-in. This leaves the page, so there is no token to return.
         if ((error as { name?: string }).name === 'InteractionRequiredAuthError') {
+          saveReturnTo(window.location.pathname + window.location.search);
           await app.acquireTokenRedirect({ scopes: [config.apiScope], account });
           return null;
         }
