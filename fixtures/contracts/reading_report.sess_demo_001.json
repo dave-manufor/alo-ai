@@ -16,7 +16,7 @@
   },
   "fluency": {
     "accuracy_pct": 90.9,
-    "wcpm": 68.0,
+    "wcpm": 59.6,
     "words_attempted": 23,
     "reading_seconds": 19.65,
     "self_correction_ratio": 0.5,
@@ -56,7 +56,7 @@
   "flags": ["DEMO_PROFILE", "SHORT_READING"],
   "parent_reporting": null,
   "versions": {
-    "scoring_module": "1.1.0",
+    "scoring_module": "1.2.0",
     "quick_model": "gemini-2.5-flash",
     "grader_model": "gemini-2.5-pro",
     "grader_prompt": "grader_v1",

@@ -56,7 +56,7 @@ def test_the_handler_ignores_a_type_the_scorer_does_not_handle():
 
 def test_the_handler_parks_a_recording_that_can_never_be_scored_and_returns():
     store, publisher = seeded_store(), MemoryPublisher()
-    told = recorded(told_token_indices=[3, 6, 9, 12])
+    told = recorded(told_token_indices=[2, 3, 4, 5, 6, 7, 8, 9, 10])  # 9 waits of 2.5 s: more than the reading
     event_handler(scorer(store, publisher))(envelope("phase1.recorded", SESSION_ID, told, now=NOW))
     assert store.get(f"sessions/{SESSION_ID}/errors/phase1.recorded")["error"] == "ValueError"
     assert publisher.events == []

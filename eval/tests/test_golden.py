@@ -13,7 +13,7 @@ DEMO_HAND = {"words_attempted": 23, "errors": 3, "told": 1, "reading_seconds": 1
 
 def test_the_hand_count_follows_the_scoring_rules():
     hand = hand_fluency(DEMO_HAND)
-    assert (hand.wcpm, hand.accuracy_pct) == (60 * 20 / 17.65, 100 * 20 / 23)
+    assert (hand.wcpm, hand.accuracy_pct) == (60 * 20 / 20.15, 100 * 20 / 23)  # the 2.5 s wait is 0.5 s under the norms' 3 s
 
 
 def test_a_told_first_word_has_no_wait_to_take_off():
@@ -26,7 +26,7 @@ def scored(store, session_id, wcpm, accuracy):
 
 @pytest.mark.parametrize(
     "wcpm, accuracy, within",
-    [(68.0, 87.0, True), (72.9, 89.9, True), (73.1, 87.0, False), (68.0, 83.9, False)],
+    [(59.6, 87.0, True), (64.5, 89.9, True), (64.7, 87.0, False), (59.6, 83.9, False)],
 )
 def test_the_scorer_must_land_within_five_wcpm_and_three_points(wcpm, accuracy, within):
     store = MemoryStore()
@@ -56,7 +56,7 @@ def test_the_index_is_empty_until_there_are_recordings(capsys):
 
 def test_the_check_runs_the_index_against_the_telemetry(tmp_path, monkeypatch, capsys):
     store = MemoryStore()
-    scored(store, "s1", 70.0, 88.0)
+    scored(store, "s1", 60.0, 88.0)
     index = tmp_path / "index.json"
     recording = {"recording_id": "g1", "session_id": "s1", "hand": DEMO_HAND}
     index.write_text(json.dumps({"recordings": [recording]}))
