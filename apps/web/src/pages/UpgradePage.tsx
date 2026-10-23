@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { accountStore, useAccount } from '../account/store';
-import { authMode } from '../auth';
+import { dataMode } from '../api';
 import { Button } from '../design-system/alo';
 import NavButton from '../design-system/NavButton';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
@@ -56,7 +56,7 @@ export default function UpgradePage() {
           You will pay by card on Paystack&apos;s secure page. Paystack never receives anything about {name}.
         </p>
         <p className="caption muted ui-center">Prices are drafts.</p>
-        {authMode === 'fixture' && !already ? (
+        {dataMode !== 'live' && !already ? (
           <Button
             variant="ghost"
             size="grown"
