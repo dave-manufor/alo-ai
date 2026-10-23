@@ -22,7 +22,7 @@ import type { AgentMessage } from './protocol';
 const v2 = { schema_version: 2 as const };
 
 describe('the microphone, opened once', () => {
-  it('asks with the constraints that keep a quiet voice, and keeps the stream', async () => {
+  it('asks with the browser’s voice processing on, and keeps the stream', async () => {
     const track = { stop: vi.fn(), getSettings: () => ({ echoCancellation: true, sampleRate: 48000 }) };
     const stream = { getTracks: () => [track], getAudioTracks: () => [track] } as unknown as MediaStream;
     const getUserMedia = vi.fn(async () => stream);
@@ -30,7 +30,13 @@ describe('the microphone, opened once', () => {
     const opened = await openMic({ getUserMedia });
     expect(opened).toEqual({ result: 'granted', stream });
     expect(getUserMedia).toHaveBeenCalledWith({ audio: MIC_CONSTRAINTS });
-    expect(MIC_CONSTRAINTS).toMatchObject({ echoCancellation: true, noiseSuppression: false });
+    // All three processing options on: switching noise suppression off cost 10 to 30 dB of
+    // signal on Safari in a live session (the automatic gain went with it).
+    expect(MIC_CONSTRAINTS).toMatchObject({
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    });
     expect(track.stop).not.toHaveBeenCalled(); // kept for the room and the meter
     expect(info).toHaveBeenCalledWith('microphone settings:', expect.objectContaining({ sampleRate: 48000 }));
     stopMic(opened.stream);
