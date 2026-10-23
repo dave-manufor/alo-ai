@@ -7,14 +7,16 @@
 // quieter or muted input, and the agent then hears nothing.
 export type MicResult = 'granted' | 'denied' | 'unavailable';
 
-// Echo cancellation stays on (Kemi's voice plays out of the same phone). Noise suppression is
-// off: it can take a quiet child's voice for noise and leave the agent almost silence. Gain is
-// automatic so a soft voice is lifted.
+// The browser's own voice processing, all three on (these are also what LiveKit asks for by
+// default). Echo cancellation is needed because Kemi's voice plays out of the same phone.
+// Turning noise suppression OFF was tried and made things worse: on Safari it also took away
+// the automatic gain, and the signal the agent received fell by 10 to 30 dB, so speech to text
+// returned nothing for the retell and the questions. A measured regression, not a guess:
+// keep these on unless a live session's input levels (the agent logs them per turn) say so.
 export const MIC_CONSTRAINTS: MediaTrackConstraints = {
   echoCancellation: true,
-  noiseSuppression: false,
+  noiseSuppression: true,
   autoGainControl: true,
-  channelCount: 1,
 };
 
 export interface OpenedMic {
