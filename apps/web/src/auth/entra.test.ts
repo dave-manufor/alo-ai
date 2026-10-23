@@ -137,6 +137,28 @@ describe('the Entra client', () => {
     expect(request.scopes).toEqual(['openid', 'profile', 'email', 'api://client-1/access_as_user']);
   });
 
+  it('clears a stuck "sign-in in progress" marker and tries once more', async () => {
+    window.sessionStorage.setItem('msal.client-1.interaction.status', 'interaction_in_progress');
+    const { made, app } = await client();
+    app.loginRedirect.mockRejectedValueOnce(
+      Object.assign(new Error('x'), { errorCode: 'interaction_in_progress' }),
+    );
+    await made.signIn('guardian@example.com');
+    expect(app.loginRedirect).toHaveBeenCalledTimes(2);
+    expect(window.sessionStorage.getItem('msal.client-1.interaction.status')).toBeNull();
+  });
+
+  it('logs only the error code when sign-in cannot start, and passes the error on', async () => {
+    const { made, app } = await client();
+    const failure = Object.assign(new Error('a@b.example failed'), { errorCode: 'endpoints_resolution_error' });
+    app.loginRedirect.mockRejectedValueOnce(failure);
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await expect(made.signIn('guardian@example.com')).rejects.toBe(failure);
+    expect(logged).toHaveBeenCalledWith('sign-in could not start:', 'endpoints_resolution_error');
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('a@b.example');
+    logged.mockRestore();
+  });
+
   it('asks only for the sign-in scopes when there is no API yet', async () => {
     const { made, app } = await client(fakeApp(), { ...config, apiScope: undefined });
     await made.signIn('guardian@example.com');
