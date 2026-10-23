@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { accountStore } from '../account/store';
@@ -299,7 +299,9 @@ describe('live session screen', () => {
     listener('We could not start the reading check. Please check the internet and try again.');
     expect(await screen.findByText(/Please check the internet and try again/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-    expect(create).toHaveBeenCalledTimes(2);
+    // Try again opens the microphone afresh (stopping a driver ends the track it published),
+    // so the new driver comes a moment later.
+    await waitFor(() => expect(create).toHaveBeenCalledTimes(2));
     expect(screen.queryByText('We could not start')).not.toBeInTheDocument();
   });
 });

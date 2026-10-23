@@ -33,7 +33,8 @@ export interface LiveRoom {
   onData(listener: (payload: Uint8Array, topic: string | undefined) => void): void;
   onConnection(listener: (event: RoomEvent) => void): void;
   publishData(payload: Uint8Array<ArrayBuffer>, topic: string): Promise<void>;
-  enableMicrophone(): Promise<void>;
+  /** Publish the microphone: the given live track if there is one, else a fresh capture. */
+  enableMicrophone(track?: MediaStreamTrack): Promise<void>;
   disconnect(): void;
 }
 
@@ -41,7 +42,7 @@ export type OpenRoom = (url: string, token: string) => Promise<LiveRoom>;
 
 /** The real room, from livekit-client (loaded only when a live session starts). */
 export const openLiveKitRoom: OpenRoom = async (url, token) => {
-  const { Room, RoomEvent: Events } = await import('livekit-client');
+  const { Room, RoomEvent: Events, Track } = await import('livekit-client');
   const room = new Room({ adaptiveStream: false, dynacast: false });
   await room.connect(url, token);
   return {
@@ -57,7 +58,14 @@ export const openLiveKitRoom: OpenRoom = async (url, token) => {
     },
     publishData: (payload, topic) =>
       room.localParticipant.publishData(payload, { reliable: true, topic }),
-    enableMicrophone: async () => {
+    enableMicrophone: async (track) => {
+      // The track the app already opened (and the level meter listens to). A room that
+      // disconnects stops the tracks it published, so after a rejoin the track may be dead:
+      // then ask the browser again.
+      if (track && track.readyState === 'live') {
+        await room.localParticipant.publishTrack(track, { source: Track.Source.Microphone });
+        return;
+      }
       await room.localParticipant.setMicrophoneEnabled(true);
     },
     disconnect: () => void room.disconnect(),
@@ -74,6 +82,8 @@ export function createLiveDriver(options: {
   maxRejoins?: number;
   /** Wait before a rejoin; tests set 0. */
   rejoinDelayMs?: number;
+  /** The microphone stream the app already opened; its track is what gets published. */
+  micStream?: MediaStream;
 }): SessionDriver {
   const openRoom = options.openRoom ?? openLiveKitRoom;
   const maxRejoins = options.maxRejoins ?? 2;
@@ -130,7 +140,7 @@ export function createLiveDriver(options: {
       if (event === 'disconnected' && !stopped && !ended) void rejoin();
     });
     try {
-      await room.enableMicrophone();
+      await room.enableMicrophone(options.micStream?.getAudioTracks()[0]);
     } catch {
       fail('The microphone could not be used. Please check it is allowed and try again.');
     }

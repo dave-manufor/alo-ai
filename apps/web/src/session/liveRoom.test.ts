@@ -7,9 +7,11 @@ const lk = vi.hoisted(() => ({
   disconnect: vi.fn(async () => undefined),
   publishData: vi.fn(async () => undefined),
   setMicrophoneEnabled: vi.fn(async () => undefined),
+  publishTrack: vi.fn(async () => undefined),
 }));
 
 vi.mock('livekit-client', () => ({
+  Track: { Source: { Microphone: 'microphone' } },
   RoomEvent: {
     DataReceived: 'data',
     Reconnecting: 'reconnecting',
@@ -20,6 +22,7 @@ vi.mock('livekit-client', () => ({
     localParticipant = {
       publishData: lk.publishData,
       setMicrophoneEnabled: lk.setMicrophoneEnabled,
+      publishTrack: lk.publishTrack,
     };
     connect = lk.connect;
     disconnect = lk.disconnect;
@@ -54,5 +57,24 @@ describe('openLiveKitRoom', () => {
     expect(lk.setMicrophoneEnabled).toHaveBeenCalledWith(true);
     room.disconnect();
     expect(lk.disconnect).toHaveBeenCalled();
+  });
+
+  it('publishes the microphone track the app already opened, and does not ask for another', async () => {
+    lk.setMicrophoneEnabled.mockClear();
+    const room = await openLiveKitRoom('wss://lk.example.test', 'tok');
+    const track = { readyState: 'live' } as MediaStreamTrack;
+    await room.enableMicrophone(track);
+    expect(lk.publishTrack).toHaveBeenCalledWith(track, { source: 'microphone' });
+    expect(lk.setMicrophoneEnabled).not.toHaveBeenCalled();
+  });
+
+  it('asks the browser again when there is no track, or the track has ended (after a rejoin)', async () => {
+    lk.publishTrack.mockClear();
+    lk.setMicrophoneEnabled.mockClear();
+    const room = await openLiveKitRoom('wss://lk.example.test', 'tok');
+    await room.enableMicrophone();
+    await room.enableMicrophone({ readyState: 'ended' } as MediaStreamTrack);
+    expect(lk.publishTrack).not.toHaveBeenCalled();
+    expect(lk.setMicrophoneEnabled).toHaveBeenCalledTimes(2);
   });
 });
