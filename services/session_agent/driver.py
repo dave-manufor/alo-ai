@@ -386,7 +386,8 @@ class Driver:
             self.state.profile.n_questions,
             self.state.profile.n_listening_items,
         )
-        self.ports.channel.send(protocol.clip_list(clips))
+        for message in protocol.clip_lists(clips):
+            self.ports.channel.send(message)
 
     def _listening_id(self, pair: PassagePair | None = None) -> str | None:
         pair = pair or self.pair

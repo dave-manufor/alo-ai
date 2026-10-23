@@ -163,6 +163,21 @@ def read_passage(driver, clock):
     driver.tick()
 
 
+# ---- the clip lists
+
+
+def test_the_session_clip_list_is_sent_after_the_prompts_words_first_and_small():
+    from services.session_agent import protocol
+
+    driver, ports, clock, _ = make_driver()
+    driver.start(returning=PAIR)
+    lists = [m for m in ports.channel.sent if m["cmd"] == "clip_list"]
+    assert len(lists) >= 2  # the prompts, then the session's clips (cut up if they are many)
+    assert all(len(protocol.encode(m)) <= protocol.CLIP_LIST_MAX_BYTES for m in lists)
+    assert lists[0]["clips"][0]["clip_id"] == "interest_prompt"
+    assert lists[1]["clips"][0]["clip_id"].startswith("word_")
+
+
 # ---- what the agent heard (logs only)
 
 

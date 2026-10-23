@@ -17,6 +17,7 @@ has no text: the child must hear it, not read it.
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from urllib.parse import quote
 
 from .keys import clean_word, word_key
 from .prompts import PROMPT_TEXTS, WORD_CLIP_TEXT
@@ -72,7 +73,12 @@ class ClipCatalog:
         raise ValueError(f"no clip store object for {clip_id!r}")
 
     def url(self, clip_id: str, **passages: str | None) -> str:
-        return f"{self.base_url.rstrip('/')}/{self.object_name(clip_id, **passages)}"
+        # A name is a literal object name. A word's key is already percent-encoded (it holds a
+        # name's IPA and apostrophes), so the object's name contains real "%" characters, and in
+        # a URL they have to be encoded again or the storage service decodes them to other
+        # characters and finds nothing (16 of 402 word clips answered 404).
+        name = quote(self.object_name(clip_id, **passages), safe="/~")
+        return f"{self.base_url.rstrip('/')}/{name}"
 
     def text(
         self, clip_id: str, read: dict | None = None, listening: dict | None = None
@@ -97,15 +103,19 @@ class ClipCatalog:
     def session_clips(
         self, read: dict, listening: dict | None, n_questions: int, n_listening_items: int
     ) -> list[tuple[str, str, str | None]]:
-        """(clip_id, url, text) for every clip a session on these passages can play."""
+        """(clip_id, url, text) for every clip a session on these passages can play, in the
+        order the session needs them: the reading's word clips first (a stalled child hears
+        "That word is X." within seconds), then the questions, then the listening module,
+        its long story last. The prompts were already sent, so they come last."""
         ids = {"passage_id": read["passage_id"]}
         if listening is not None:
             ids["listening_passage_id"] = listening["passage_id"]
-        clip_ids = [*PROMPTS, *(f"question:{n}" for n in range(n_questions))]
+        clip_ids = _unique(self.word_clip_id(t) for t in _words(read["tokens"]))
+        clip_ids += [f"question:{n}" for n in range(n_questions)]
         if listening is not None:
-            clip_ids += ["listening_story"]
             clip_ids += [f"listening_item:{n}" for n in range(n_listening_items)]
-        clip_ids += _unique(self.word_clip_id(t) for t in _words(read["tokens"]))
+            clip_ids += ["listening_story"]
+        clip_ids += list(PROMPTS)
         return [
             (clip_id, self.url(clip_id, **ids), self.text(clip_id, read, listening))
             for clip_id in clip_ids

@@ -160,6 +160,31 @@ def test_clip_ids_map_to_clip_store_objects(catalog):
     )
 
 
+def test_a_word_clip_url_encodes_the_percent_signs_in_the_objects_name(catalog):
+    # The object is stored under a name that holds literal "%" characters (the word's key is
+    # already percent-encoded). In a URL they are encoded again, or storage reads them as other
+    # characters and answers 404 (16 of the bank's 402 word clips did).
+    ipa = "word_ada~%CB%88%C9%91%CB%90d%C9%91"
+    assert catalog.object_name(ipa) == "vp_google_v1/v1/words/ada~%CB%88%C9%91%CB%90d%C9%91.mp3"
+    assert catalog.url(ipa) == (
+        "https://storage.googleapis.com/aloai-dev-clips/"
+        "vp_google_v1/v1/words/ada~%25CB%2588%25C9%2591%25CB%2590d%25C9%2591.mp3"
+    )
+    assert catalog.url("word_teacher%27s").endswith("/words/teacher%2527s.mp3")
+    assert catalog.url("word_market").endswith("/words/market.mp3")  # nothing to encode
+
+
+def test_session_clips_come_in_the_order_the_session_needs_them(catalog):
+    read = json.loads((CONTRACTS / "passage.bank_p3_market_day.json").read_text())
+    listening = json.loads((CONTRACTS / "passage.bank_l3_rain.json").read_text())
+    ids = [clip_id for clip_id, _, _ in catalog.session_clips(read, listening, 2, 1)]
+    first_other = next(i for i, clip_id in enumerate(ids) if not clip_id.startswith("word_"))
+    assert all(clip_id.startswith("word_") for clip_id in ids[:first_other])  # words first
+    assert ids.index("question:0") < ids.index("listening_item:0") < ids.index("listening_story")
+    assert ids.index("listening_story") < ids.index(PROMPTS[0])  # the big story before the prompts
+    assert ids[-len(PROMPTS) :] == list(PROMPTS)  # already sent, so last
+
+
 @pytest.mark.parametrize("clip_id", ["question:1", "listening_story", "nonsense", "question:x"])
 def test_unknown_or_passageless_clips_are_refused(catalog, clip_id):
     with pytest.raises(ValueError, match="no clip store object"):

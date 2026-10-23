@@ -48,6 +48,29 @@ def clip_list(clips: Sequence[tuple[str, str, str | None]]) -> dict:
     }
 
 
+# A reliable LiveKit data message is best kept small (about 15 KiB). The whole session's clip
+# list is over 20 KiB, so it is sent in several messages, each under this many bytes.
+CLIP_LIST_MAX_BYTES = 14_000
+
+
+def clip_lists(
+    clips: Sequence[tuple[str, str, str | None]], max_bytes: int = CLIP_LIST_MAX_BYTES
+) -> list[dict]:
+    """The same clips as `clip_list`, cut into messages that each encode to at most
+    `max_bytes` (a single clip bigger than that goes alone), in the given order."""
+    lists: list[dict] = []
+    batch: list[tuple[str, str, str | None]] = []
+    for clip in clips:
+        trial = clip_list([*batch, clip])
+        if batch and len(encode(trial)) > max_bytes:
+            lists.append(clip_list(batch))
+            batch = []
+        batch.append(clip)
+    if batch:
+        lists.append(clip_list(batch))
+    return lists
+
+
 def step(phase: Phase) -> dict | None:
     """The step message for a phase, or None for a phase without a screen of its own."""
     if phase not in STEPS:
