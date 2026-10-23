@@ -32,6 +32,10 @@ The children read in Nigeria and the services run in the EU (PRD 12, ADR 0001), 
 - [ ] No transcript or name appears in the logs (I7, #112).
 - [ ] No child data reaches the Gemini key: the AI roles see fictional data only, or a covered route has replaced it.
 
+## Decision log
+
+- **2026-10-22, David (W2): real children's words may go to the Gemini key "for now".** Azure OpenAI is refused on the subscription (715-123420), so the study's model roles run on Google AI Studio's Gemini API (`infra/azure/terraform.tfvars`), and David gave explicit permission to use it with the recruited children. **This disagrees with the position above** (point 2 and the last gate), which is W3's draft and has not been changed: until W3 and the data-protection adviser review it, the two statements stand side by side and the table row for the Gemini key still says "Not allowed". Risks that remain, as recorded in `terraform.tfvars`: the key is not pinned to the EU, there is no data processing agreement, and on a free tier Google may use inputs to improve its models. To do: the parent information sheet and the consent text name Google as a processor (I1), W3 reruns the grading, tagger and Coach evaluation sets on these models and confirms the single-transcript rule (PRD 5.3), and a paid, agreement-covered route with EU processing is chosen before anything beyond the study. Guardians must be told before their child reads; a family that is not comfortable can decline.
+
 ## Before the pilot
 
 The DPIA (PRD 12); the adviser's review of this note; whether the pilot needs a stronger check of the guardian than a verified email plus an attestation (PRD 12); and whether Alo.ai must register with the Nigeria Data Protection Commission.

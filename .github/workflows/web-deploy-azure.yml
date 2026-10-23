@@ -4,12 +4,13 @@
 # so it does not run on every push. It signs in to Azure with GitHub's OIDC token (no key files)
 # and reads the Static Web Apps deployment token at run time, so no token is stored anywhere.
 #
-# Not run yet: written without an Azure subscription to hand. Expect a first run to need fixes.
-#
 # Repository variables it reads (Settings > Secrets and variables > Actions > Variables), all
 # public values: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID (the CI identity),
 # AZURE_RESOURCE_GROUP (aloai-rg), AZURE_WEB_APP_NAME (output web_app_name), and for the build
-# VITE_ENTRA_CLIENT_ID, VITE_ENTRA_AUTHORITY and optionally VITE_ENTRA_API_SCOPE.
+# VITE_ENTRA_CLIENT_ID, VITE_ENTRA_AUTHORITY, VITE_ENTRA_API_SCOPE and VITE_ALO_API_URL (output
+# account_url). All four VITE_* are required: the build is a live build only when they are set
+# (apps/web/src/api/mode.ts), and without them the deployed site would quietly be the sample build,
+# so the first step fails the run if one is missing.
 name: Deploy web app to Azure
 
 on:
@@ -32,6 +33,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check the live-build settings are present
+        working-directory: .
+        run: |
+          missing=0
+          for name in VITE_ENTRA_CLIENT_ID VITE_ENTRA_AUTHORITY VITE_ENTRA_API_SCOPE VITE_ALO_API_URL; do
+            if [ -z "${!name}" ]; then echo "::error::repository variable $name is not set"; missing=1; fi
+          done
+          exit $missing
+        env:
+          VITE_ENTRA_CLIENT_ID: ${{ vars.VITE_ENTRA_CLIENT_ID }}
+          VITE_ENTRA_AUTHORITY: ${{ vars.VITE_ENTRA_AUTHORITY }}
+          VITE_ENTRA_API_SCOPE: ${{ vars.VITE_ENTRA_API_SCOPE }}
+          VITE_ALO_API_URL: ${{ vars.VITE_ALO_API_URL }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -48,6 +63,7 @@ jobs:
           VITE_ENTRA_CLIENT_ID: ${{ vars.VITE_ENTRA_CLIENT_ID }}
           VITE_ENTRA_AUTHORITY: ${{ vars.VITE_ENTRA_AUTHORITY }}
           VITE_ENTRA_API_SCOPE: ${{ vars.VITE_ENTRA_API_SCOPE }}
+          VITE_ALO_API_URL: ${{ vars.VITE_ALO_API_URL }}
 
       - uses: azure/login@v2
         with:
