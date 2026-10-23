@@ -16,8 +16,8 @@ import aloai_env
 from aloai_azure import deployment, open_openai
 from aloai_store import open_store
 
-from ..grader.azure import EMBEDDING_MODEL, AzureEmbedder
-from .embedding import reembed_books
+from ..grader.azure import AzureEmbedder
+from .embedding import azure_embedding_model, reembed_books
 
 
 def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None) -> int:
@@ -30,14 +30,15 @@ def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None
         if settings.cloud != "azure" or settings.ai_mode != "live":
             raise aloai_env.ConfigError("re-embedding needs CLOUD=azure and AI_MODE=live")
         embedder = AzureEmbedder(open_openai(settings), deployment(settings, "embedding"))
+        model = azure_embedding_model(settings)
     except aloai_env.ConfigError as error:
         print(f"refusing to re-embed: {error}", file=sys.stderr)
         return 1
     report = reembed_books(
-        open_store(settings), embedder, EMBEDDING_MODEL, dry_run=args.dry_run, only=args.book_id
+        open_store(settings), embedder, model, dry_run=args.dry_run, only=args.book_id
     )
     verb = "would re-embed" if args.dry_run else "re-embedded"
-    print(f"{verb} {len(report.done)} books; {report.already} already on {EMBEDDING_MODEL}")
+    print(f"{verb} {len(report.done)} books; {report.already} already on {model}")
     for book_id, reason in report.failed.items():
         print(f"  FAILED {book_id}: {reason}")
     return 1 if report.failed else 0

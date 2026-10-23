@@ -8,6 +8,7 @@ adc.json
 application_default_credentials.json
 
 # Child data and large media: never commit (PRD 12, CONTRIBUTING)
+fixtures/books/raw/
 *.wav
 *.mp3
 *.webm

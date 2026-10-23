@@ -33,3 +33,5 @@ litellm==1.106.2
 mcp==2.3.0
 azure-cognitiveservices-speech==1.52.0
 soundfile==0.14.0
+# The book ingestion job (services/core/books/extract.py) reads PDF books.
+pypdf==6.19.0

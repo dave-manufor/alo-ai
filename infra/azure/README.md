@@ -42,6 +42,14 @@ The Account app is the only holder of the Paystack secret (PRD 11.1, `services/a
 3. **Webhook:** on the same API Keys & Webhooks page, set the **test** webhook URL to `<account_url output>/webhooks/paystack`. Paystack signs each event with the secret key, and the Account app refuses any event whose `x-paystack-signature` doesn't match.
 4. **Paywall:** keep `plans_need_subscription = false` for the mini-study, so every consented guardian sees the plan. Set it to `true` for the demo, so a test payment is what unlocks the weekly plan.
 5. **Try it:** sign in, open the plan, then Upgrade and Pay with Paystack. Use Paystack's test card from its "Test payments" page. The plan opens once the server has confirmed the payment with Paystack (the popup's confirm call, or the webhook, whichever comes first). The documents are `checkouts/`, `subscriptions/` and `payment_events/` in Cosmos.
+## The book catalogue (PRD 9.1)
+
+The ingestion job reads real open-licence books (PDF or EPUB) and `services/core/books/catalogue.json`, the manifest a person checks against each publisher's page. Nothing in it is invented. Keep the book files out of Git; the job keeps each one in the private `books` container under its hash.
+
+1. Put the files in one folder, and add an entry for each to the manifest. `services/core/books/ingest.py` lists the fields; the publisher's level must be one `levels.py` maps, or give `arl` with an `arl_reason`.
+2. Check first, with no store or model: `PYTHONPATH=libs/aloai python -m services.core.books.ingest --files <folder> --check`. It prints each book's mapped ARL and any book the text estimate holds.
+3. Ingest, with your `az login` (Cosmos DB data contributor and Storage Blob Data Contributor) and the model key read from Key Vault into the shell: `CLOUD=azure AI_MODE=live AZURE_COSMOS_ENDPOINT=... AZURE_STORAGE_ACCOUNT=... BOOKS_BUCKET=books LLM_BASE_URL=... LLM_API_KEY=... AZURE_OPENAI_DEPLOYMENTS='{"embedding": "gemini-embedding-001"}' PYTHONPATH=libs/aloai python -m services.core.books.ingest --files <folder>`. Running it again changes nothing.
+4. A held book stays out of every recommendation until a person checks it and sets `held_for_review` to false.
 
 ## Smoke test
 
