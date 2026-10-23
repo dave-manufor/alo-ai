@@ -69,11 +69,14 @@ locals {
   })
 
   env_core = merge(local.base_env, local.ai_env, {
-    EVENT_QUEUE     = "core-events"
-    COACH_ON        = tostring(var.coach_on)
-    GENERATOR_ON    = tostring(var.generator_on)
-    TTS_VOICE       = var.tts_voice
-    ACCOUNT_URL     = "https://${azurerm_container_app.account.ingress[0].fqdn}"
+    EVENT_QUEUE  = "core-events"
+    COACH_ON     = tostring(var.coach_on)
+    GENERATOR_ON = tostring(var.generator_on)
+    TTS_VOICE    = var.tts_voice
+    ACCOUNT_URL  = "https://${azurerm_container_app.account.ingress[0].fqdn}"
+    # The Account app has no /internal/notify yet, so the Coach leaves the report-ready request in
+    # outbox/ instead (services/core/main.py). Remove this line when the endpoint and its auth land.
+    NOTIFIER        = "outbox"
     AZURE_CLIENT_ID = azurerm_user_assigned_identity.svc["core"].client_id
   })
 

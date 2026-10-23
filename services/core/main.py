@@ -10,7 +10,7 @@ Vertex AI, Speech-to-Text and Text-to-Speech on gcp, Azure OpenAI and Azure AI S
 (the report then records the Azure deployments as the models used). The Passage Generator
 uses the "generator" deployment on azure.
 The Coach's email goes to the Account and Payments service at ACCOUNT_URL, or to the
-Firestore outbox with ALO_ENV=local. COACH_ON=false turns the Coach off, so every plan is the
+outbox collection with ALO_ENV=local or NOTIFIER=outbox. COACH_ON=false turns the Coach off, so every plan is the
 template plan.
 GENERATOR_ON (default false, a server setting from terraform.tfvars) lets plan.ready
 pre-generate the child's next story; off, plan.ready is ignored and the Session Agent
@@ -228,7 +228,13 @@ def _coach_model(settings: aloai_env.Config) -> Callable[[str], BaseLlm | str]:
 
 
 def _notifier(settings: aloai_env.Config, env: Mapping[str, str], store: Store) -> Notifier:
-    if settings.alo_env == "local":
+    # NOTIFIER=outbox (a server setting) leaves the request in outbox/{session}_{template} instead
+    # of calling the Account service, which has no /internal/notify yet. The report and plan are
+    # not held up by it; nothing sends the email until that endpoint and its auth exist.
+    choice = env.get("NOTIFIER", "account") or "account"
+    if choice not in ("account", "outbox"):
+        raise ValueError("NOTIFIER must be 'account' or 'outbox'")
+    if settings.alo_env == "local" or choice == "outbox":
         return Outbox(store)
     return AccountNotifier(
         _required(env, "ACCOUNT_URL"),
