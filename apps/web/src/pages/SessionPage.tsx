@@ -18,6 +18,8 @@ import type { Mode, StageInput } from '../session/stageEngine';
 // hand-back (the artifact: 8 s after the light becomes the moon).
 const END_MS = 8000;
 const QUESTION_CLIP = /^question:(\d+)$/;
+// How long showing the passage waits for its word clips (they are listed first).
+const WORD_CLIPS_WAIT_MS = 8000;
 // The steps in which the child is expected to talk.
 const LISTEN_STEPS = new Set([
   'INTEREST_CHAT',
@@ -70,7 +72,14 @@ export default function SessionPage({
 
   async function dispatch(message: AgentMessage) {
     if (message.cmd === 'clip_list') {
-      await clipCache.downloadAll(message.clips);
+      // Downloaded in the background: nothing waits for the whole list, and a clip is
+      // played as soon as its own download is done (a `play` jumps the queue).
+      void clipCache.downloadAll(message.clips);
+    }
+    if (message.cmd === 'show_passage') {
+      // Reading starts with the word clips ready ("That word is X." must start at once),
+      // but never waits for the rest of the list, and never for long.
+      await clipCache.settled((id) => id.startsWith('word_'), WORD_CLIPS_WAIT_MS);
     }
     if (message.cmd === 'play') {
       const q = QUESTION_CLIP.exec(message.clip_id);

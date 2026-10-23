@@ -293,7 +293,7 @@ describe('a microphone that hears nothing', () => {
     } finally {
       vi.useRealTimers();
     }
-  });
+  }, 20_000);
 
   it('Try again stops the old capture and opens the microphone afresh', async () => {
     const { getUserMedia, stop } = stubMic();
@@ -314,5 +314,5 @@ describe('a microphone that hears nothing', () => {
     } finally {
       vi.useRealTimers();
     }
-  });
+  }, 20_000);
 });

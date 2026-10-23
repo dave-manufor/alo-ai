@@ -1,14 +1,18 @@
 import { dataMode } from '../api/mode';
 import { missingAck, playedAck, type ClipEntry, type ClientMessage } from './protocol';
 
-// Clip cache (PRD 4.4, protocol v2): every clip is fully downloaded
-// before it is played, so a slow connection never delays a prompt —
-// most of all a told word, which must start at once, every time.
-//   - `missing` is only ever a reply to a `play`, never sent at download
-//     time (the agent answers a download-time missing by streaming clips
-//     out of order). Failed downloads retry quietly instead.
-//   - A `play` for a clip still downloading WAITS for that download
-//     before answering, so the two sides cannot loop on missing.
+// Clip cache (PRD 4.4, protocol v2): the clips are downloaded into the phone before they
+// are played, so a slow connection never delays a prompt — most of all a told word, which
+// must start at once, every time.
+//   - Downloads run in the background, a few at a time, in the order the agent listed them
+//     (it lists what the session needs first). Nothing waits for the whole list: a clip is
+//     played as soon as ITS download is done.
+//   - A `play` for a clip that has not started downloading jumps the queue, and WAITS for
+//     that one download before answering, so the two sides cannot loop on missing.
+//   - `missing` is only ever a reply to a `play`, never sent at download time (the agent
+//     answers a download-time missing by streaming clips out of order). A download that
+//     fails twice is forgotten, so a later clip_list for the same clip (the agent's stream
+//     retry) tries again instead of being handed the old failure.
 //   - `played` is sent when playback FINISHES (the audio's ended event),
 //     because the agent starts the child's answer window from that ack.
 
@@ -18,41 +22,79 @@ export interface ClipPlayer {
 }
 
 export interface ClipCache {
-  /** Fully downloads a clip_list (retrying failures quietly). Never acks. */
+  /** Queues a clip_list for download (retrying failures quietly). Never acks. The promise
+   *  resolves when THESE clips are done; callers should not wait on it before playing. */
   downloadAll(clips: ClipEntry[]): Promise<void>;
   /** Plays in reply to an agent `play`; resolves with the ack to send. */
   play(clip_id: string): Promise<ClientMessage>;
+  /** Resolves when every clip listed so far that matches `filter` has finished downloading
+   *  (or failed), or after `timeoutMs`, whichever is first. */
+  settled(filter: (clip_id: string) => boolean, timeoutMs: number): Promise<void>;
   has(clip_id: string): boolean;
   textFor(clip_id: string): string | null;
 }
 
+/** How many clips download at once. A phone on mobile data does better with a few. */
+export const MAX_PARALLEL_DOWNLOADS = 4;
+
 export function createClipCache(deps: {
   load: (url: string) => Promise<string | undefined>;
   player: ClipPlayer;
+  parallel?: number;
 }): ClipCache {
+  const parallel = deps.parallel ?? MAX_PARALLEL_DOWNLOADS;
   const downloads = new Map<string, Promise<boolean>>();
   const objectUrls = new Map<string, string>();
   const texts = new Map<string, string | null>();
+  const finish = new Map<string, (ok: boolean) => void>();
+  const waiting: ClipEntry[] = []; // queued, not started
+  let active = 0;
+
+  async function fetchClip(clip: ClipEntry): Promise<void> {
+    let ok = false;
+    for (let attempt = 0; attempt < 2 && !ok; attempt += 1) {
+      try {
+        const objectUrl = await deps.load(clip.url);
+        if (objectUrl) {
+          objectUrls.set(clip.clip_id, objectUrl);
+          ok = true;
+        }
+      } catch {
+        // Retry quietly; never answer missing outside a play.
+      }
+    }
+    // A failure is forgotten before anyone is told, so the next clip_list tries again.
+    if (!ok) downloads.delete(clip.clip_id);
+    finish.get(clip.clip_id)?.(ok);
+    finish.delete(clip.clip_id);
+  }
+
+  function pump(): void {
+    while (active < parallel && waiting.length > 0) {
+      const clip = waiting.shift() as ClipEntry;
+      active += 1;
+      void fetchClip(clip).finally(() => {
+        active -= 1;
+        pump();
+      });
+    }
+  }
 
   function startDownload(clip: ClipEntry): Promise<boolean> {
     const existing = downloads.get(clip.clip_id);
     if (existing) return existing;
-    const promise = (async () => {
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          const objectUrl = await deps.load(clip.url);
-          if (objectUrl) {
-            objectUrls.set(clip.clip_id, objectUrl);
-            return true;
-          }
-        } catch {
-          // Retry quietly; never answer missing outside a play.
-        }
-      }
-      return false;
-    })();
+    if (objectUrls.has(clip.clip_id)) return Promise.resolve(true);
+    const promise = new Promise<boolean>((resolve) => finish.set(clip.clip_id, resolve));
     downloads.set(clip.clip_id, promise);
+    waiting.push(clip);
+    pump();
     return promise;
+  }
+
+  /** A clip about to be played goes to the front of the queue. */
+  function prioritise(clip_id: string): void {
+    const at = waiting.findIndex((clip) => clip.clip_id === clip_id);
+    if (at > 0) waiting.unshift(...waiting.splice(at, 1));
   }
 
   return {
@@ -61,19 +103,28 @@ export function createClipCache(deps: {
       await Promise.all(clips.map((clip) => startDownload(clip)));
     },
     async play(clip_id) {
-      const inFlight = downloads.get(clip_id);
-      if (inFlight) await inFlight;
-      if (!objectUrls.has(clip_id) && !downloads.has(clip_id)) {
-        return missingAck(clip_id);
+      if (!objectUrls.has(clip_id)) {
+        const inFlight = downloads.get(clip_id);
+        if (!inFlight) return missingAck(clip_id); // never listed, or it failed
+        prioritise(clip_id);
+        if (!(await inFlight)) return missingAck(clip_id);
       }
-      const downloaded = downloads.has(clip_id) ? await downloads.get(clip_id) : false;
-      if (!downloaded && !objectUrls.has(clip_id)) return missingAck(clip_id);
       try {
         await deps.player.play(clip_id, objectUrls.get(clip_id));
         return playedAck(clip_id);
       } catch {
         return missingAck(clip_id);
       }
+    },
+    async settled(filter, timeoutMs) {
+      const open = [...downloads.entries()].filter(([id]) => filter(id)).map(([, promise]) => promise);
+      if (open.length === 0) return;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, timeoutMs);
+      });
+      await Promise.race([Promise.all(open).then(() => undefined), timeout]);
+      clearTimeout(timer);
     },
     has: (clip_id) => objectUrls.has(clip_id),
     textFor: (clip_id) => texts.get(clip_id) ?? null,
@@ -117,7 +168,9 @@ function getSharedAudio(): HTMLAudioElement {
 }
 
 /** A tiny silent WAV (80 samples at 8 kHz), built in code so no asset
- *  ships for it. Played inside the tap gesture to unlock the element. */
+ *  ships for it. Played inside the tap gesture to unlock the element. It is a blob: URL,
+ *  not a data: URL, because the site's Content-Security-Policy (media-src) allows blob: only:
+ *  with data: the unlock was blocked and iOS then refused the agent's later plays. */
 function silentClipUrl(): string {
   const sampleRate = 8000;
   const samples = 80;
@@ -138,12 +191,7 @@ function silentClipUrl(): string {
   view.setUint16(34, 16, true);
   writeAscii(36, 'data');
   view.setUint32(40, samples * 2, true); // sample bytes stay zero: silence
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return `data:audio/wav;base64,${btoa(binary)}`;
+  return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
 }
 
 /** Browser player: plays through the shared element and resolves on
@@ -181,6 +229,7 @@ export function unlockAudio(): void {
           audio.pause();
           audio.currentTime = 0;
         }
+        URL.revokeObjectURL(silentUrl);
       })
       .catch(() => undefined);
   } catch {

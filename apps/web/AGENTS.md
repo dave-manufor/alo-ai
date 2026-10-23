@@ -17,7 +17,7 @@ Follow the project design system **as closely as possible** in every UI change:
 
 - Children never see a score, timer, leaderboard, ad or red mark. Screening language only.
 - Built for ordinary Android phones on mobile data: small payloads, touch targets, contrast, screen-reader support.
-- The browser never chooses `VOICE_MODE` or `SESSION_PROFILE`. The session screen follows W2's session protocol (`play`, `show_passage`, `hide_passage`, `reconnecting`); all clips download before reading starts.
+- The browser never chooses `VOICE_MODE` or `SESSION_PROFILE`. The session screen follows W2's session protocol (`play`, `show_passage`, `hide_passage`, `reconnecting`); clips download in the background, a few at a time in the order the agent lists them, and a clip plays as soon as its own download is done. The passage is shown only once its word clips ("That word is X.") are downloaded, or after 8 s.
 - **Teacher view is a preview**: fictional sample data only, a banner on every screen, no data client imports and no network calls (unit test enforces it). Never presented as live.
 - Screenshots and fixtures use sample data only. Local mode (`VITE_ALO_ENV=local`) talks to the emulators.
 - **Consumes:** `ReadingReport` (W3), session protocol (W2). **Produces:** nothing others depend on except via the Account service. Contract changes: `alo-contract-change`.
