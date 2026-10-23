@@ -632,15 +632,15 @@
     {
       "type": "LITERAL",
       "target_sentence_index": 0,
-      "prompt_text": "What color is Femi's ball?",
+      "prompt_text": "What colour is Femi's ball?",
       "rubric": {
         "2": "Says red.",
-        "1": "Says a color that is close, like pink or orange.",
-        "0": "Another color, or no answer."
+        "1": "Says a ball or a toy, without the colour.",
+        "0": "Another colour, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p1_red_ball_q1",
       "order": 1,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Red.",
@@ -651,7 +651,7 @@
           "points": 2
         },
         {
-          "answer": "Pink.",
+          "answer": "A ball.",
           "points": 1
         },
         {
@@ -669,9 +669,9 @@
         "1": "Says up high, or into a tree without saying big.",
         "0": "Somewhere else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p1_red_ball_q2",
       "order": 2,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Into a big tree.",
@@ -700,9 +700,9 @@
         "1": "Says Papa helped him, or was kind.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p1_red_ball_q3",
       "order": 3,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Because Papa is tall and he got the ball out of the tree.",

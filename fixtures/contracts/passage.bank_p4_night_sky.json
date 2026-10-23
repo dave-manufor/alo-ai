@@ -12,7 +12,7 @@
   "genre": "NARRATIVE",
   "arl_level": 7,
   "word_count": 165,
-  "text_content": "Obi loved the night sky more than anything else in the world. One evening, Grandpa carried an old telescope up to the flat roof of their house. Obi looked through it and gasped, because the moon looked enormous and full of craters. Grandpa smiled and pointed to a bright planet that twinkled in the east. That planet is the biggest one in our solar system, he said. Then Obi spotted a streak of light racing across the darkness. A meteor, he shouted, and he made a wish before it vanished. Grandpa laughed and said a meteor is only a tiny rock that burns up in the air. Obi was surprised, because it had looked so magical. They stayed for hours, naming the groups of stars that Grandpa remembered. When Mama called them for supper, Obi did not want to leave. He promised himself that one day he would study the stars as a scientist. Every night after that, he looked up and remembered that evening.",
+  "text_content": "Obi loved the night sky more than anything else in the world. One evening, Grandpa carried an old telescope up to the flat roof of their house. Obi looked through it and gasped, because the moon looked enormous and full of craters. Grandpa smiled and pointed to a bright planet that glowed in the east. That planet is the biggest one in our solar system, he said. Then Obi spotted a streak of light racing across the darkness. A meteor, he shouted, and he made a wish before it vanished. Grandpa laughed and said a meteor is only a tiny rock that burns up in the air. Obi was surprised, because it had looked so magical. They stayed for hours, naming the groups of stars that Grandpa remembered. When Mama called them for supper, Obi did not want to leave. He promised himself that one day he would study the stars as a scientist. Every night after that, he looked up and remembered that evening.",
   "voice_profile_id": "vp_google_v1",
   "length_profile": "STANDARD",
   "tokens": [
@@ -529,12 +529,12 @@
     {
       "token_index": 51,
       "sentence_index": 3,
-      "text": "twinkled",
-      "clean_text": "twinkled",
+      "text": "glowed",
+      "clean_text": "glowed",
       "is_content_word": true,
       "syntactic_boundary_after": "NONE",
       "name_ipa": null,
-      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/twinkled.mp3"
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/glowed.mp3"
     },
     {
       "token_index": 52,
@@ -1742,9 +1742,9 @@
         "1": "Says holes or bumps, or that the moon looked big.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p4_night_sky_q1",
       "order": 1,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Craters.",
@@ -1773,9 +1773,9 @@
         "1": "Says a rock, or a piece of something.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p4_night_sky_q2",
       "order": 2,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "A tiny piece of rock that burns up in the air.",
@@ -1801,12 +1801,12 @@
       "prompt_text": "Why did Obi not want to leave the roof when Mama called?",
       "rubric": {
         "2": "Says he loved the night sky and was enjoying looking at the stars with Grandpa.",
-        "1": "Says he liked the roof, or he was not hungry.",
+        "1": "Says he liked being on the roof, or he was having fun.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p4_night_sky_q3",
       "order": 3,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Because he loved the sky and was happy watching the stars with Grandpa.",

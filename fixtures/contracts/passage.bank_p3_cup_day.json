@@ -1542,9 +1542,9 @@
         "1": "Says a friend or a boy from the class, without the name.",
         "0": "Someone else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_cup_day_q1",
       "order": 1,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Tolu.",
@@ -1573,9 +1573,9 @@
         "1": "Says the match or a prize.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_cup_day_q2",
       "order": 2,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "The trophy.",
@@ -1597,31 +1597,31 @@
     },
     {
       "type": "INFERENTIAL",
-      "target_sentence_index": 5,
-      "prompt_text": "Why did Dayo kick the ball to Tolu?",
+      "target_sentence_index": 12,
+      "prompt_text": "Why did Dayo say that the best part was the pass?",
       "rubric": {
-        "2": "Says Tolu was alone near the goal, so he had a better chance to score than Dayo.",
-        "1": "Says Tolu was alone, or Dayo wanted to help his friend.",
+        "2": "Says his pass let Tolu score the winning goal, and a good captain gives his friends a chance.",
+        "1": "Says the pass helped the team win, or he was being kind to Tolu.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_cup_day_q3",
       "order": 3,
-      "max_points": 2,
       "exemplars": [
         {
-          "answer": "Because Tolu was free next to the goal, and he could score.",
+          "answer": "Because his pass gave Tolu the chance to score, and that goal won them the cup.",
           "points": 2
         },
         {
-          "answer": "Tolu dey near the goal alone, so he fit score am.",
+          "answer": "Because na im pass make Tolu score, so all of dem win.",
           "points": 2
         },
         {
-          "answer": "Because Tolu was alone.",
+          "answer": "Because it helped them win.",
           "points": 1
         },
         {
-          "answer": "Because the match was over.",
+          "answer": "Because he wanted the trophy for himself.",
           "points": 0
         }
       ]

@@ -11,8 +11,8 @@
   ],
   "genre": "NARRATIVE",
   "arl_level": 11,
-  "word_count": 202,
-  "text_content": "Chioma spent three weeks building a rocket for the science competition, and it was made from a plastic bottle, a bicycle pump, and some colourful paper. Her teacher promised that the winner would represent the school in Lagos. On the morning of the competition, Chioma carried the rocket carefully across the crowded playground. Her classmates gathered around the table, whispering with excitement, while the judges walked slowly along the rows of different experiments. When they reached Chioma, she explained that air pressure would push the water out and lift the rocket. Then she pumped the handle again and again until the pressure was strong enough, and the rocket shot upward with a loud hiss and landed in the football field. Everyone cheered, and the judges wrote busily in their notebooks. Later that afternoon, the headmaster announced the winners in front of the entire school. Chioma could hardly believe it, and her heart pounded when she heard her name. She had never imagined that a simple bottle could take her so far. Chioma understood that patience and careful practice are just as important as a clever idea. That night, she looked up at the bright stars and dreamed of building a real rocket.",
+  "word_count": 203,
+  "text_content": "Chioma spent three weeks building a rocket for the science competition, and it was made from a plastic bottle, a bicycle pump, and some colourful paper. Her teacher promised that the winner would represent the school in Lagos. On the morning of the competition, Chioma carried the rocket carefully across the crowded playground. Her classmates gathered around the table, whispering with excitement, while the judges walked slowly along the rows of different experiments. When they reached Chioma, she explained that air pressure would push out the water inside and lift the rocket. Then she pumped the handle again and again until the pressure was strong enough, and the rocket shot upward with a loud hiss and landed in the football field. Everyone cheered, and the judges wrote busily in their notebooks. Later that afternoon, the headmaster announced the winners in front of the entire school. Chioma could hardly believe it, and her heart pounded when she heard her name. She had never imagined that a simple bottle could take her so far. Chioma understood that patience and careful practice are just as important as a clever idea. That night, she looked up at the bright stars and dreamed of building a real rocket.",
   "voice_profile_id": "vp_google_v1",
   "length_profile": "STANDARD",
   "tokens": [
@@ -859,6 +859,16 @@
     {
       "token_index": 84,
       "sentence_index": 4,
+      "text": "out",
+      "clean_text": "out",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/out.mp3"
+    },
+    {
+      "token_index": 85,
+      "sentence_index": 4,
       "text": "the",
       "clean_text": "the",
       "is_content_word": false,
@@ -867,7 +877,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 85,
+      "token_index": 86,
       "sentence_index": 4,
       "text": "water",
       "clean_text": "water",
@@ -877,17 +887,17 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/water.mp3"
     },
     {
-      "token_index": 86,
+      "token_index": 87,
       "sentence_index": 4,
-      "text": "out",
-      "clean_text": "out",
-      "is_content_word": false,
+      "text": "inside",
+      "clean_text": "inside",
+      "is_content_word": true,
       "syntactic_boundary_after": "CLAUSE",
       "name_ipa": null,
-      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/out.mp3"
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/inside.mp3"
     },
     {
-      "token_index": 87,
+      "token_index": 88,
       "sentence_index": 4,
       "text": "and",
       "clean_text": "and",
@@ -897,7 +907,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 88,
+      "token_index": 89,
       "sentence_index": 4,
       "text": "lift",
       "clean_text": "lift",
@@ -907,7 +917,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/lift.mp3"
     },
     {
-      "token_index": 89,
+      "token_index": 90,
       "sentence_index": 4,
       "text": "the",
       "clean_text": "the",
@@ -917,7 +927,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 90,
+      "token_index": 91,
       "sentence_index": 4,
       "text": "rocket.",
       "clean_text": "rocket",
@@ -927,7 +937,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rocket.mp3"
     },
     {
-      "token_index": 91,
+      "token_index": 92,
       "sentence_index": 5,
       "text": "Then",
       "clean_text": "then",
@@ -937,7 +947,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/then.mp3"
     },
     {
-      "token_index": 92,
+      "token_index": 93,
       "sentence_index": 5,
       "text": "she",
       "clean_text": "she",
@@ -947,7 +957,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
     },
     {
-      "token_index": 93,
+      "token_index": 94,
       "sentence_index": 5,
       "text": "pumped",
       "clean_text": "pumped",
@@ -957,7 +967,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pumped.mp3"
     },
     {
-      "token_index": 94,
+      "token_index": 95,
       "sentence_index": 5,
       "text": "the",
       "clean_text": "the",
@@ -967,7 +977,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 95,
+      "token_index": 96,
       "sentence_index": 5,
       "text": "handle",
       "clean_text": "handle",
@@ -977,7 +987,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/handle.mp3"
     },
     {
-      "token_index": 96,
+      "token_index": 97,
       "sentence_index": 5,
       "text": "again",
       "clean_text": "again",
@@ -987,7 +997,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/again.mp3"
     },
     {
-      "token_index": 97,
+      "token_index": 98,
       "sentence_index": 5,
       "text": "and",
       "clean_text": "and",
@@ -997,7 +1007,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 98,
+      "token_index": 99,
       "sentence_index": 5,
       "text": "again",
       "clean_text": "again",
@@ -1007,7 +1017,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/again.mp3"
     },
     {
-      "token_index": 99,
+      "token_index": 100,
       "sentence_index": 5,
       "text": "until",
       "clean_text": "until",
@@ -1017,7 +1027,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/until.mp3"
     },
     {
-      "token_index": 100,
+      "token_index": 101,
       "sentence_index": 5,
       "text": "the",
       "clean_text": "the",
@@ -1027,7 +1037,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 101,
+      "token_index": 102,
       "sentence_index": 5,
       "text": "pressure",
       "clean_text": "pressure",
@@ -1037,7 +1047,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pressure.mp3"
     },
     {
-      "token_index": 102,
+      "token_index": 103,
       "sentence_index": 5,
       "text": "was",
       "clean_text": "was",
@@ -1047,7 +1057,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
     },
     {
-      "token_index": 103,
+      "token_index": 104,
       "sentence_index": 5,
       "text": "strong",
       "clean_text": "strong",
@@ -1057,7 +1067,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/strong.mp3"
     },
     {
-      "token_index": 104,
+      "token_index": 105,
       "sentence_index": 5,
       "text": "enough,",
       "clean_text": "enough",
@@ -1067,7 +1077,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/enough.mp3"
     },
     {
-      "token_index": 105,
+      "token_index": 106,
       "sentence_index": 5,
       "text": "and",
       "clean_text": "and",
@@ -1077,7 +1087,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 106,
+      "token_index": 107,
       "sentence_index": 5,
       "text": "the",
       "clean_text": "the",
@@ -1087,7 +1097,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 107,
+      "token_index": 108,
       "sentence_index": 5,
       "text": "rocket",
       "clean_text": "rocket",
@@ -1097,7 +1107,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rocket.mp3"
     },
     {
-      "token_index": 108,
+      "token_index": 109,
       "sentence_index": 5,
       "text": "shot",
       "clean_text": "shot",
@@ -1107,7 +1117,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shot.mp3"
     },
     {
-      "token_index": 109,
+      "token_index": 110,
       "sentence_index": 5,
       "text": "upward",
       "clean_text": "upward",
@@ -1117,7 +1127,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/upward.mp3"
     },
     {
-      "token_index": 110,
+      "token_index": 111,
       "sentence_index": 5,
       "text": "with",
       "clean_text": "with",
@@ -1127,7 +1137,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
     },
     {
-      "token_index": 111,
+      "token_index": 112,
       "sentence_index": 5,
       "text": "a",
       "clean_text": "a",
@@ -1137,7 +1147,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
     },
     {
-      "token_index": 112,
+      "token_index": 113,
       "sentence_index": 5,
       "text": "loud",
       "clean_text": "loud",
@@ -1147,7 +1157,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/loud.mp3"
     },
     {
-      "token_index": 113,
+      "token_index": 114,
       "sentence_index": 5,
       "text": "hiss",
       "clean_text": "hiss",
@@ -1157,7 +1167,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hiss.mp3"
     },
     {
-      "token_index": 114,
+      "token_index": 115,
       "sentence_index": 5,
       "text": "and",
       "clean_text": "and",
@@ -1167,7 +1177,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 115,
+      "token_index": 116,
       "sentence_index": 5,
       "text": "landed",
       "clean_text": "landed",
@@ -1177,7 +1187,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/landed.mp3"
     },
     {
-      "token_index": 116,
+      "token_index": 117,
       "sentence_index": 5,
       "text": "in",
       "clean_text": "in",
@@ -1187,7 +1197,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
     },
     {
-      "token_index": 117,
+      "token_index": 118,
       "sentence_index": 5,
       "text": "the",
       "clean_text": "the",
@@ -1197,7 +1207,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 118,
+      "token_index": 119,
       "sentence_index": 5,
       "text": "football",
       "clean_text": "football",
@@ -1207,7 +1217,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/football.mp3"
     },
     {
-      "token_index": 119,
+      "token_index": 120,
       "sentence_index": 5,
       "text": "field.",
       "clean_text": "field",
@@ -1217,7 +1227,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/field.mp3"
     },
     {
-      "token_index": 120,
+      "token_index": 121,
       "sentence_index": 6,
       "text": "Everyone",
       "clean_text": "everyone",
@@ -1227,7 +1237,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/everyone.mp3"
     },
     {
-      "token_index": 121,
+      "token_index": 122,
       "sentence_index": 6,
       "text": "cheered,",
       "clean_text": "cheered",
@@ -1237,7 +1247,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/cheered.mp3"
     },
     {
-      "token_index": 122,
+      "token_index": 123,
       "sentence_index": 6,
       "text": "and",
       "clean_text": "and",
@@ -1247,7 +1257,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 123,
+      "token_index": 124,
       "sentence_index": 6,
       "text": "the",
       "clean_text": "the",
@@ -1257,7 +1267,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 124,
+      "token_index": 125,
       "sentence_index": 6,
       "text": "judges",
       "clean_text": "judges",
@@ -1267,7 +1277,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/judges.mp3"
     },
     {
-      "token_index": 125,
+      "token_index": 126,
       "sentence_index": 6,
       "text": "wrote",
       "clean_text": "wrote",
@@ -1277,7 +1287,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wrote.mp3"
     },
     {
-      "token_index": 126,
+      "token_index": 127,
       "sentence_index": 6,
       "text": "busily",
       "clean_text": "busily",
@@ -1287,7 +1297,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/busily.mp3"
     },
     {
-      "token_index": 127,
+      "token_index": 128,
       "sentence_index": 6,
       "text": "in",
       "clean_text": "in",
@@ -1297,7 +1307,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
     },
     {
-      "token_index": 128,
+      "token_index": 129,
       "sentence_index": 6,
       "text": "their",
       "clean_text": "their",
@@ -1307,7 +1317,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/their.mp3"
     },
     {
-      "token_index": 129,
+      "token_index": 130,
       "sentence_index": 6,
       "text": "notebooks.",
       "clean_text": "notebooks",
@@ -1317,7 +1327,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/notebooks.mp3"
     },
     {
-      "token_index": 130,
+      "token_index": 131,
       "sentence_index": 7,
       "text": "Later",
       "clean_text": "later",
@@ -1327,7 +1337,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/later.mp3"
     },
     {
-      "token_index": 131,
+      "token_index": 132,
       "sentence_index": 7,
       "text": "that",
       "clean_text": "that",
@@ -1337,7 +1347,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
     },
     {
-      "token_index": 132,
+      "token_index": 133,
       "sentence_index": 7,
       "text": "afternoon,",
       "clean_text": "afternoon",
@@ -1347,7 +1357,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/afternoon.mp3"
     },
     {
-      "token_index": 133,
+      "token_index": 134,
       "sentence_index": 7,
       "text": "the",
       "clean_text": "the",
@@ -1357,7 +1367,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 134,
+      "token_index": 135,
       "sentence_index": 7,
       "text": "headmaster",
       "clean_text": "headmaster",
@@ -1367,7 +1377,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/headmaster.mp3"
     },
     {
-      "token_index": 135,
+      "token_index": 136,
       "sentence_index": 7,
       "text": "announced",
       "clean_text": "announced",
@@ -1377,7 +1387,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/announced.mp3"
     },
     {
-      "token_index": 136,
+      "token_index": 137,
       "sentence_index": 7,
       "text": "the",
       "clean_text": "the",
@@ -1387,7 +1397,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 137,
+      "token_index": 138,
       "sentence_index": 7,
       "text": "winners",
       "clean_text": "winners",
@@ -1397,7 +1407,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/winners.mp3"
     },
     {
-      "token_index": 138,
+      "token_index": 139,
       "sentence_index": 7,
       "text": "in",
       "clean_text": "in",
@@ -1407,7 +1417,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
     },
     {
-      "token_index": 139,
+      "token_index": 140,
       "sentence_index": 7,
       "text": "front",
       "clean_text": "front",
@@ -1417,7 +1427,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/front.mp3"
     },
     {
-      "token_index": 140,
+      "token_index": 141,
       "sentence_index": 7,
       "text": "of",
       "clean_text": "of",
@@ -1427,7 +1437,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
     },
     {
-      "token_index": 141,
+      "token_index": 142,
       "sentence_index": 7,
       "text": "the",
       "clean_text": "the",
@@ -1437,7 +1447,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 142,
+      "token_index": 143,
       "sentence_index": 7,
       "text": "entire",
       "clean_text": "entire",
@@ -1447,7 +1457,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/entire.mp3"
     },
     {
-      "token_index": 143,
+      "token_index": 144,
       "sentence_index": 7,
       "text": "school.",
       "clean_text": "school",
@@ -1457,7 +1467,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/school.mp3"
     },
     {
-      "token_index": 144,
+      "token_index": 145,
       "sentence_index": 8,
       "text": "Chioma",
       "clean_text": "chioma",
@@ -1467,7 +1477,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chioma~t%CA%83i%CB%88%C9%94m%C9%91.mp3"
     },
     {
-      "token_index": 145,
+      "token_index": 146,
       "sentence_index": 8,
       "text": "could",
       "clean_text": "could",
@@ -1477,7 +1487,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
     },
     {
-      "token_index": 146,
+      "token_index": 147,
       "sentence_index": 8,
       "text": "hardly",
       "clean_text": "hardly",
@@ -1487,7 +1497,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hardly.mp3"
     },
     {
-      "token_index": 147,
+      "token_index": 148,
       "sentence_index": 8,
       "text": "believe",
       "clean_text": "believe",
@@ -1497,7 +1507,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/believe.mp3"
     },
     {
-      "token_index": 148,
+      "token_index": 149,
       "sentence_index": 8,
       "text": "it,",
       "clean_text": "it",
@@ -1507,7 +1517,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
     },
     {
-      "token_index": 149,
+      "token_index": 150,
       "sentence_index": 8,
       "text": "and",
       "clean_text": "and",
@@ -1517,7 +1527,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 150,
+      "token_index": 151,
       "sentence_index": 8,
       "text": "her",
       "clean_text": "her",
@@ -1527,7 +1537,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
     },
     {
-      "token_index": 151,
+      "token_index": 152,
       "sentence_index": 8,
       "text": "heart",
       "clean_text": "heart",
@@ -1537,7 +1547,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/heart.mp3"
     },
     {
-      "token_index": 152,
+      "token_index": 153,
       "sentence_index": 8,
       "text": "pounded",
       "clean_text": "pounded",
@@ -1547,7 +1557,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pounded.mp3"
     },
     {
-      "token_index": 153,
+      "token_index": 154,
       "sentence_index": 8,
       "text": "when",
       "clean_text": "when",
@@ -1557,7 +1567,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/when.mp3"
     },
     {
-      "token_index": 154,
+      "token_index": 155,
       "sentence_index": 8,
       "text": "she",
       "clean_text": "she",
@@ -1567,7 +1577,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
     },
     {
-      "token_index": 155,
+      "token_index": 156,
       "sentence_index": 8,
       "text": "heard",
       "clean_text": "heard",
@@ -1577,7 +1587,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/heard.mp3"
     },
     {
-      "token_index": 156,
+      "token_index": 157,
       "sentence_index": 8,
       "text": "her",
       "clean_text": "her",
@@ -1587,7 +1597,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
     },
     {
-      "token_index": 157,
+      "token_index": 158,
       "sentence_index": 8,
       "text": "name.",
       "clean_text": "name",
@@ -1597,7 +1607,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/name.mp3"
     },
     {
-      "token_index": 158,
+      "token_index": 159,
       "sentence_index": 9,
       "text": "She",
       "clean_text": "she",
@@ -1607,7 +1617,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
     },
     {
-      "token_index": 159,
+      "token_index": 160,
       "sentence_index": 9,
       "text": "had",
       "clean_text": "had",
@@ -1617,7 +1627,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/had.mp3"
     },
     {
-      "token_index": 160,
+      "token_index": 161,
       "sentence_index": 9,
       "text": "never",
       "clean_text": "never",
@@ -1627,7 +1637,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/never.mp3"
     },
     {
-      "token_index": 161,
+      "token_index": 162,
       "sentence_index": 9,
       "text": "imagined",
       "clean_text": "imagined",
@@ -1637,7 +1647,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/imagined.mp3"
     },
     {
-      "token_index": 162,
+      "token_index": 163,
       "sentence_index": 9,
       "text": "that",
       "clean_text": "that",
@@ -1647,7 +1657,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
     },
     {
-      "token_index": 163,
+      "token_index": 164,
       "sentence_index": 9,
       "text": "a",
       "clean_text": "a",
@@ -1657,7 +1667,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
     },
     {
-      "token_index": 164,
+      "token_index": 165,
       "sentence_index": 9,
       "text": "simple",
       "clean_text": "simple",
@@ -1667,7 +1677,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/simple.mp3"
     },
     {
-      "token_index": 165,
+      "token_index": 166,
       "sentence_index": 9,
       "text": "bottle",
       "clean_text": "bottle",
@@ -1677,7 +1687,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bottle.mp3"
     },
     {
-      "token_index": 166,
+      "token_index": 167,
       "sentence_index": 9,
       "text": "could",
       "clean_text": "could",
@@ -1687,7 +1697,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
     },
     {
-      "token_index": 167,
+      "token_index": 168,
       "sentence_index": 9,
       "text": "take",
       "clean_text": "take",
@@ -1697,7 +1707,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/take.mp3"
     },
     {
-      "token_index": 168,
+      "token_index": 169,
       "sentence_index": 9,
       "text": "her",
       "clean_text": "her",
@@ -1707,7 +1717,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
     },
     {
-      "token_index": 169,
+      "token_index": 170,
       "sentence_index": 9,
       "text": "so",
       "clean_text": "so",
@@ -1717,7 +1727,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/so.mp3"
     },
     {
-      "token_index": 170,
+      "token_index": 171,
       "sentence_index": 9,
       "text": "far.",
       "clean_text": "far",
@@ -1727,7 +1737,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/far.mp3"
     },
     {
-      "token_index": 171,
+      "token_index": 172,
       "sentence_index": 10,
       "text": "Chioma",
       "clean_text": "chioma",
@@ -1737,7 +1747,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chioma~t%CA%83i%CB%88%C9%94m%C9%91.mp3"
     },
     {
-      "token_index": 172,
+      "token_index": 173,
       "sentence_index": 10,
       "text": "understood",
       "clean_text": "understood",
@@ -1747,7 +1757,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/understood.mp3"
     },
     {
-      "token_index": 173,
+      "token_index": 174,
       "sentence_index": 10,
       "text": "that",
       "clean_text": "that",
@@ -1757,7 +1767,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
     },
     {
-      "token_index": 174,
+      "token_index": 175,
       "sentence_index": 10,
       "text": "patience",
       "clean_text": "patience",
@@ -1767,7 +1777,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/patience.mp3"
     },
     {
-      "token_index": 175,
+      "token_index": 176,
       "sentence_index": 10,
       "text": "and",
       "clean_text": "and",
@@ -1777,7 +1787,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 176,
+      "token_index": 177,
       "sentence_index": 10,
       "text": "careful",
       "clean_text": "careful",
@@ -1787,7 +1797,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/careful.mp3"
     },
     {
-      "token_index": 177,
+      "token_index": 178,
       "sentence_index": 10,
       "text": "practice",
       "clean_text": "practice",
@@ -1797,7 +1807,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/practice.mp3"
     },
     {
-      "token_index": 178,
+      "token_index": 179,
       "sentence_index": 10,
       "text": "are",
       "clean_text": "are",
@@ -1807,7 +1817,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/are.mp3"
     },
     {
-      "token_index": 179,
+      "token_index": 180,
       "sentence_index": 10,
       "text": "just",
       "clean_text": "just",
@@ -1817,7 +1827,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/just.mp3"
     },
     {
-      "token_index": 180,
+      "token_index": 181,
       "sentence_index": 10,
       "text": "as",
       "clean_text": "as",
@@ -1827,7 +1837,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/as.mp3"
     },
     {
-      "token_index": 181,
+      "token_index": 182,
       "sentence_index": 10,
       "text": "important",
       "clean_text": "important",
@@ -1837,7 +1847,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/important.mp3"
     },
     {
-      "token_index": 182,
+      "token_index": 183,
       "sentence_index": 10,
       "text": "as",
       "clean_text": "as",
@@ -1847,7 +1857,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/as.mp3"
     },
     {
-      "token_index": 183,
+      "token_index": 184,
       "sentence_index": 10,
       "text": "a",
       "clean_text": "a",
@@ -1857,7 +1867,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
     },
     {
-      "token_index": 184,
+      "token_index": 185,
       "sentence_index": 10,
       "text": "clever",
       "clean_text": "clever",
@@ -1867,7 +1877,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/clever.mp3"
     },
     {
-      "token_index": 185,
+      "token_index": 186,
       "sentence_index": 10,
       "text": "idea.",
       "clean_text": "idea",
@@ -1877,7 +1887,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/idea.mp3"
     },
     {
-      "token_index": 186,
+      "token_index": 187,
       "sentence_index": 11,
       "text": "That",
       "clean_text": "that",
@@ -1887,7 +1897,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
     },
     {
-      "token_index": 187,
+      "token_index": 188,
       "sentence_index": 11,
       "text": "night,",
       "clean_text": "night",
@@ -1897,7 +1907,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/night.mp3"
     },
     {
-      "token_index": 188,
+      "token_index": 189,
       "sentence_index": 11,
       "text": "she",
       "clean_text": "she",
@@ -1907,7 +1917,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
     },
     {
-      "token_index": 189,
+      "token_index": 190,
       "sentence_index": 11,
       "text": "looked",
       "clean_text": "looked",
@@ -1917,7 +1927,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
     },
     {
-      "token_index": 190,
+      "token_index": 191,
       "sentence_index": 11,
       "text": "up",
       "clean_text": "up",
@@ -1927,7 +1937,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
     },
     {
-      "token_index": 191,
+      "token_index": 192,
       "sentence_index": 11,
       "text": "at",
       "clean_text": "at",
@@ -1937,7 +1947,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/at.mp3"
     },
     {
-      "token_index": 192,
+      "token_index": 193,
       "sentence_index": 11,
       "text": "the",
       "clean_text": "the",
@@ -1947,7 +1957,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
     },
     {
-      "token_index": 193,
+      "token_index": 194,
       "sentence_index": 11,
       "text": "bright",
       "clean_text": "bright",
@@ -1957,7 +1967,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bright.mp3"
     },
     {
-      "token_index": 194,
+      "token_index": 195,
       "sentence_index": 11,
       "text": "stars",
       "clean_text": "stars",
@@ -1967,7 +1977,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stars.mp3"
     },
     {
-      "token_index": 195,
+      "token_index": 196,
       "sentence_index": 11,
       "text": "and",
       "clean_text": "and",
@@ -1977,7 +1987,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
     },
     {
-      "token_index": 196,
+      "token_index": 197,
       "sentence_index": 11,
       "text": "dreamed",
       "clean_text": "dreamed",
@@ -1987,7 +1997,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dreamed.mp3"
     },
     {
-      "token_index": 197,
+      "token_index": 198,
       "sentence_index": 11,
       "text": "of",
       "clean_text": "of",
@@ -1997,7 +2007,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
     },
     {
-      "token_index": 198,
+      "token_index": 199,
       "sentence_index": 11,
       "text": "building",
       "clean_text": "building",
@@ -2007,7 +2017,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/building.mp3"
     },
     {
-      "token_index": 199,
+      "token_index": 200,
       "sentence_index": 11,
       "text": "a",
       "clean_text": "a",
@@ -2017,7 +2027,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
     },
     {
-      "token_index": 200,
+      "token_index": 201,
       "sentence_index": 11,
       "text": "real",
       "clean_text": "real",
@@ -2027,7 +2037,7 @@
       "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/real.mp3"
     },
     {
-      "token_index": 201,
+      "token_index": 202,
       "sentence_index": 11,
       "text": "rocket.",
       "clean_text": "rocket",
@@ -2056,7 +2066,7 @@
       "id": "p3",
       "sentence_index": 4,
       "category": "MAIN_IDEA",
-      "description": "Air pressure pushes the water out and lifts the rocket.",
+      "description": "Air pressure pushes out the water inside and lifts the rocket.",
       "weight": 2
     },
     {
@@ -2105,9 +2115,9 @@
         "1": "Says only a bottle, or only a pump.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p6_science_fair_rocket_q1",
       "order": 1,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "A plastic bottle, a bicycle pump and colourful paper.",
@@ -2136,9 +2146,9 @@
         "1": "Says on the ground, or far away.",
         "0": "Somewhere else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p6_science_fair_rocket_q2",
       "order": 2,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "In the football field.",
@@ -2167,9 +2177,9 @@
         "1": "Says she was excited, or nervous.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p6_science_fair_rocket_q3",
       "order": 3,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "She was surprised and excited that her simple bottle rocket had won.",
