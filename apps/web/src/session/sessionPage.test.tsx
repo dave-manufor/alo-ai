@@ -158,14 +158,15 @@ describe('the Night session screen', () => {
       { ...v2, cmd: 'step', step: 'CLOSE' },
       { ...v2, cmd: 'play', clip_id: 'close_praise' },
     ];
-    // The moon and star stay for 8 s before the hand-back; skip the wait with a short timer.
+    // The moon and star stay for 4 s before the hand-back; skip the wait with a short timer.
     const realSetTimeout = window.setTimeout;
     window.setTimeout = ((fn: () => void, ms?: number, ...rest: unknown[]) =>
-      realSetTimeout(fn, ms === 8000 ? 20 : ms, ...rest)) as typeof window.setTimeout;
+      realSetTimeout(fn, ms === 4000 ? 20 : ms, ...rest)) as typeof window.setTimeout;
     try {
       renderSession(signedInChild());
       startSessionScreen();
-      const hold = await screen.findByRole('button', { name: /press and hold/i }, { timeout: 4000 });
+      // 5 s, not 4 s: the 4 s end-screen timer is shortened above, and so would be this one.
+      const hold = await screen.findByRole('button', { name: /press and hold/i }, { timeout: 5000 });
       const report = screen.getByText(/reading check is done/);
       expect(report.closest('.report')).not.toHaveClass('shown');
       // matchMedia is absent in jsdom: the hold runs for its full time, so it is released early here.

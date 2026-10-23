@@ -1,0 +1,672 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_demo_animals",
+  "title": "A Hen and Her Eggs",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "animals"
+  ],
+  "genre": "EXPOSITORY",
+  "arl_level": 3,
+  "word_count": 54,
+  "text_content": "A hen sits on her eggs for many days. She keeps them warm all the time. Then the eggs open, and small chicks come out. The chicks are soft and yellow. They follow their mother to find food. She keeps them safe, and she keeps them warm. At night, they sleep under her wings.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "A",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "hen",
+      "clean_text": "hen",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hen.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "sits",
+      "clean_text": "sits",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/sits.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "on",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "eggs",
+      "clean_text": "eggs",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/eggs.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "for",
+      "clean_text": "for",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/for.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 0,
+      "text": "many",
+      "clean_text": "many",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/many.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 0,
+      "text": "days.",
+      "clean_text": "days",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/days.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "She",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 1,
+      "text": "keeps",
+      "clean_text": "keeps",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/keeps.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "them",
+      "clean_text": "them",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/them.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "warm",
+      "clean_text": "warm",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/warm.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "all",
+      "clean_text": "all",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/all.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "time.",
+      "clean_text": "time",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/time.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 2,
+      "text": "Then",
+      "clean_text": "then",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/then.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 2,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 2,
+      "text": "eggs",
+      "clean_text": "eggs",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/eggs.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 2,
+      "text": "open,",
+      "clean_text": "open",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/open.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 2,
+      "text": "small",
+      "clean_text": "small",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/small.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 2,
+      "text": "chicks",
+      "clean_text": "chicks",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chicks.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 2,
+      "text": "come",
+      "clean_text": "come",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/come.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 2,
+      "text": "out.",
+      "clean_text": "out",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/out.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 3,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 3,
+      "text": "chicks",
+      "clean_text": "chicks",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chicks.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 3,
+      "text": "are",
+      "clean_text": "are",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/are.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 3,
+      "text": "soft",
+      "clean_text": "soft",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/soft.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 3,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 3,
+      "text": "yellow.",
+      "clean_text": "yellow",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/yellow.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 4,
+      "text": "They",
+      "clean_text": "they",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/they.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 4,
+      "text": "follow",
+      "clean_text": "follow",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/follow.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 4,
+      "text": "their",
+      "clean_text": "their",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/their.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 4,
+      "text": "mother",
+      "clean_text": "mother",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mother.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 4,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 4,
+      "text": "find",
+      "clean_text": "find",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/find.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 4,
+      "text": "food.",
+      "clean_text": "food",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/food.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 5,
+      "text": "She",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 5,
+      "text": "keeps",
+      "clean_text": "keeps",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/keeps.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 5,
+      "text": "them",
+      "clean_text": "them",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/them.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 5,
+      "text": "safe,",
+      "clean_text": "safe",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/safe.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 5,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 5,
+      "text": "she",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 5,
+      "text": "keeps",
+      "clean_text": "keeps",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/keeps.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 5,
+      "text": "them",
+      "clean_text": "them",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/them.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 5,
+      "text": "warm.",
+      "clean_text": "warm",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/warm.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 6,
+      "text": "At",
+      "clean_text": "at",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/at.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 6,
+      "text": "night,",
+      "clean_text": "night",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/night.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 6,
+      "text": "they",
+      "clean_text": "they",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/they.mp3"
+    },
+    {
+      "token_index": 50,
+      "sentence_index": 6,
+      "text": "sleep",
+      "clean_text": "sleep",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/sleep.mp3"
+    },
+    {
+      "token_index": 51,
+      "sentence_index": 6,
+      "text": "under",
+      "clean_text": "under",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/under.mp3"
+    },
+    {
+      "token_index": 52,
+      "sentence_index": 6,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 53,
+      "sentence_index": 6,
+      "text": "wings.",
+      "clean_text": "wings",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wings.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "A hen sits on her eggs for many days.",
+      "weight": 1,
+      "example_paraphrases": [
+        "The hen stays on her eggs for a long time."
+      ]
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "MAIN_IDEA",
+      "description": "The hen keeps the eggs warm.",
+      "weight": 2,
+      "example_paraphrases": [
+        "She makes sure the eggs stay warm."
+      ]
+    },
+    {
+      "id": "p3",
+      "sentence_index": 2,
+      "category": "DETAIL",
+      "description": "Small chicks come out of the eggs.",
+      "weight": 2,
+      "example_paraphrases": [
+        "Baby chicks hatch from the eggs."
+      ]
+    },
+    {
+      "id": "p4",
+      "sentence_index": 4,
+      "category": "DETAIL",
+      "description": "The chicks follow their mother to find food.",
+      "weight": 1,
+      "example_paraphrases": [
+        "The chicks go with their mother to look for food."
+      ]
+    },
+    {
+      "id": "p5",
+      "sentence_index": 6,
+      "category": "DETAIL",
+      "description": "At night the chicks sleep under her wings.",
+      "weight": 1,
+      "example_paraphrases": [
+        "The chicks sleep under their mother at night."
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 0,
+      "prompt_text": "What does the hen sit on?",
+      "rubric": {
+        "2": "Says her eggs.",
+        "1": "Says the nest or the ground.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_animals_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Her eggs.",
+          "points": 2
+        },
+        {
+          "answer": "A nest.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 6,
+      "prompt_text": "Why do the chicks sleep under their mother at night?",
+      "rubric": {
+        "2": "Says it keeps them safe or warm.",
+        "1": "Gives a reason that is not in the story, such as liking her.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_animals_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "So they stay warm and safe with their mother.",
+          "points": 2
+        },
+        {
+          "answer": "Na so dem go dey warm and safe.",
+          "points": 2
+        },
+        {
+          "answer": "They like her.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_rain"
+}

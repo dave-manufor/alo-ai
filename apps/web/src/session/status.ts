@@ -29,7 +29,7 @@ export async function fetchSessionStatus(api: ApiClient, sessionId: string): Pro
 /** What the reports screen should say about the check the guardian has just finished. */
 export type PendingReport = 'none' | 'waiting' | 'ready' | 'unfinished' | 'unknown';
 
-export const POLL_MS = 5000;
+export const POLL_MS = 1500; // a status read is one small document, so ask often: the report shows as soon as it exists
 // Grading takes a minute or two; past this the screen stops asking and says to look again later.
 export const POLL_LIMIT_MS = 10 * 60 * 1000;
 

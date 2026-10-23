@@ -190,9 +190,10 @@ The Session Agent owns the order of every session through a pure state machine; 
 
 | |`standard` (default)|`demo`|
 |---|---|---|
-|Story|Blueprint length for the child's ARL|75 words (±5); other limits from the child's ARL|
+|Story|Blueprint length for the child's ARL|A 50-word (±5) bank story for the first topic in the interest-chat answer (12 stories, one per topic)|
 |Questions|3 (2 literal, 1 inferential)|2 (1 literal, 1 inferential)|
-|Listening module|When triggered: an 80–120-word story, retell, 2 items|When triggered: a ~50-word story, retell, 1 item|
+|Retell|Cap 45 s, one "Anything else?"|Cap 25 s, no follow-up|
+|Listening module|When triggered: an 80–120-word story, retell, 2 items|Never: the session closes after the last question, with shorter waits|
 |Flag|—|`DEMO_PROFILE`|
 
 **The one decision made during the session** (PRD 7.4): run the listening module when the quick RC is below 78. If the quick score is late (6 s), run it anyway.

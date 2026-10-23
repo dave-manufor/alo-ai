@@ -24,7 +24,7 @@ import type { Mode, StageInput } from '../session/stageEngine';
 
 // How long the moon, the constellation and the child's star stay before the
 // hand-back (the artifact: 8 s after the light becomes the moon).
-const END_MS = 8000;
+const END_MS = 4000;
 const QUESTION_CLIP = /^question:(\d+)$/;
 /** Resolves after the browser has drawn what React just rendered (two frames; a timeout where
  *  there is no animation frame, as in tests). */

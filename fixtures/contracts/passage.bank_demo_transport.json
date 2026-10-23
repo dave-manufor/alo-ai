@@ -1,0 +1,612 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_demo_transport",
+  "title": "The Yellow Bus",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "transport"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 48,
+  "text_content": "Uche rode the yellow bus to school. One morning, the bus stopped on the road. The driver got down and looked at a wheel. It was flat, so everyone sat in the shade. The driver put on a spare wheel. Soon the bus moved again, and Uche laughed.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Uche",
+      "clean_text": "uche",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈutʃɛ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/uche~%CB%88ut%CA%83%C9%9B.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "rode",
+      "clean_text": "rode",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rode.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "yellow",
+      "clean_text": "yellow",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/yellow.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "bus",
+      "clean_text": "bus",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bus.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "school.",
+      "clean_text": "school",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/school.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 1,
+      "text": "One",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 1,
+      "text": "morning,",
+      "clean_text": "morning",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/morning.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 1,
+      "text": "bus",
+      "clean_text": "bus",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bus.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "stopped",
+      "clean_text": "stopped",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stopped.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "on",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "road.",
+      "clean_text": "road",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/road.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 2,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 2,
+      "text": "driver",
+      "clean_text": "driver",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/driver.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 2,
+      "text": "got",
+      "clean_text": "got",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/got.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 2,
+      "text": "down",
+      "clean_text": "down",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/down.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 2,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 2,
+      "text": "at",
+      "clean_text": "at",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/at.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 2,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 2,
+      "text": "wheel.",
+      "clean_text": "wheel",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wheel.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 3,
+      "text": "It",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 3,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 3,
+      "text": "flat,",
+      "clean_text": "flat",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/flat.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 3,
+      "text": "so",
+      "clean_text": "so",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/so.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 3,
+      "text": "everyone",
+      "clean_text": "everyone",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/everyone.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 3,
+      "text": "sat",
+      "clean_text": "sat",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/sat.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 3,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 3,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 3,
+      "text": "shade.",
+      "clean_text": "shade",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shade.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 4,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 4,
+      "text": "driver",
+      "clean_text": "driver",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/driver.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 4,
+      "text": "put",
+      "clean_text": "put",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/put.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 4,
+      "text": "on",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 4,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 4,
+      "text": "spare",
+      "clean_text": "spare",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/spare.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 4,
+      "text": "wheel.",
+      "clean_text": "wheel",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wheel.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 5,
+      "text": "Soon",
+      "clean_text": "soon",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/soon.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 5,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 5,
+      "text": "bus",
+      "clean_text": "bus",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bus.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 5,
+      "text": "moved",
+      "clean_text": "moved",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/moved.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 5,
+      "text": "again,",
+      "clean_text": "again",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/again.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 5,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 5,
+      "text": "Uche",
+      "clean_text": "uche",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈutʃɛ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/uche~%CB%88ut%CA%83%C9%9B.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 5,
+      "text": "laughed.",
+      "clean_text": "laughed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/laughed.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "Uche rode the yellow bus to school.",
+      "weight": 1,
+      "example_paraphrases": [
+        "Uche took the yellow bus to school."
+      ]
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "PROBLEM",
+      "description": "The bus stopped on the road.",
+      "weight": 2,
+      "example_paraphrases": [
+        "The bus could not go on."
+      ]
+    },
+    {
+      "id": "p3",
+      "sentence_index": 3,
+      "category": "DETAIL",
+      "description": "The wheel was flat so everyone sat in the shade.",
+      "weight": 1,
+      "example_paraphrases": [
+        "A flat wheel made everyone wait in the shade."
+      ]
+    },
+    {
+      "id": "p4",
+      "sentence_index": 4,
+      "category": "ACTION",
+      "description": "The driver put on a spare wheel.",
+      "weight": 2,
+      "example_paraphrases": [
+        "He changed the wheel."
+      ]
+    },
+    {
+      "id": "p5",
+      "sentence_index": 5,
+      "category": "RESOLUTION",
+      "description": "The bus moved again and Uche laughed.",
+      "weight": 1,
+      "example_paraphrases": [
+        "The bus went on and Uche was happy."
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 0,
+      "prompt_text": "What colour was the bus?",
+      "rubric": {
+        "2": "Says yellow.",
+        "1": "Says it was a bus Uche rode to school.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_transport_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Yellow.",
+          "points": 2
+        },
+        {
+          "answer": "The bus Uche rode.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 3,
+      "prompt_text": "Why did the bus stop on the road?",
+      "rubric": {
+        "2": "Says one of its wheels was flat.",
+        "1": "Gives a reason that is not in the story, such as no fuel.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_transport_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because one of its wheels was flat.",
+          "points": 2
+        },
+        {
+          "answer": "Na the wheel burst, so e no fit move.",
+          "points": 2
+        },
+        {
+          "answer": "It had no fuel.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_rain"
+}

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ReportsPage from '../pages/ReportsPage';
+import { POLL_MS } from './status';
 
 const get = vi.fn();
 vi.mock('../api', async () => {
@@ -43,7 +44,7 @@ describe('the reports screen after a reading check (live build)', () => {
     try {
       renderReports();
       expect(await screen.findByText(/report is being made/i)).toBeInTheDocument();
-      await vi.advanceTimersByTimeAsync(5100);
+      await vi.advanceTimersByTimeAsync(POLL_MS + 100);
       await waitFor(() => expect(screen.queryByText(/report is being made/i)).not.toBeInTheDocument());
       expect(get.mock.calls.filter(([path]) => path === '/v1/reports').length).toBeGreaterThanOrEqual(2);
     } finally {

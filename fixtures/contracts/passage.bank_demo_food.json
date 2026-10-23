@@ -1,0 +1,622 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_demo_food",
+  "title": "Rice for Lunch",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "food"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 49,
+  "text_content": "Mama cooked rice for lunch, and Amaka helped her. Amaka washed the rice in a bowl. Mama put it in the pot with water. The pot was hot, so Amaka stood back. Soon the rice was soft and ready to eat. They ate together, and Amaka said thank you.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Mama",
+      "clean_text": "mama",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈmɑːmɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama~%CB%88m%C9%91%CB%90m%C9%91.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "cooked",
+      "clean_text": "cooked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/cooked.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "rice",
+      "clean_text": "rice",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rice.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "for",
+      "clean_text": "for",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/for.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "lunch,",
+      "clean_text": "lunch",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/lunch.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "Amaka",
+      "clean_text": "amaka",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ɑˈmɑkɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/amaka~%C9%91%CB%88m%C9%91k%C9%91.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 0,
+      "text": "helped",
+      "clean_text": "helped",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/helped.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 0,
+      "text": "her.",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "Amaka",
+      "clean_text": "amaka",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ɑˈmɑkɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/amaka~%C9%91%CB%88m%C9%91k%C9%91.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 1,
+      "text": "washed",
+      "clean_text": "washed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/washed.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "rice",
+      "clean_text": "rice",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rice.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "bowl.",
+      "clean_text": "bowl",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bowl.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 2,
+      "text": "Mama",
+      "clean_text": "mama",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈmɑːmɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama~%CB%88m%C9%91%CB%90m%C9%91.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 2,
+      "text": "put",
+      "clean_text": "put",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/put.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 2,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 2,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 2,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 2,
+      "text": "pot",
+      "clean_text": "pot",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pot.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 2,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 2,
+      "text": "water.",
+      "clean_text": "water",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/water.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 3,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 3,
+      "text": "pot",
+      "clean_text": "pot",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pot.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 3,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 3,
+      "text": "hot,",
+      "clean_text": "hot",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hot.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 3,
+      "text": "so",
+      "clean_text": "so",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/so.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 3,
+      "text": "Amaka",
+      "clean_text": "amaka",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ɑˈmɑkɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/amaka~%C9%91%CB%88m%C9%91k%C9%91.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 3,
+      "text": "stood",
+      "clean_text": "stood",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stood.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 3,
+      "text": "back.",
+      "clean_text": "back",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/back.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 4,
+      "text": "Soon",
+      "clean_text": "soon",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/soon.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 4,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 4,
+      "text": "rice",
+      "clean_text": "rice",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rice.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 4,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 4,
+      "text": "soft",
+      "clean_text": "soft",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/soft.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 4,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 4,
+      "text": "ready",
+      "clean_text": "ready",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ready.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 4,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 4,
+      "text": "eat.",
+      "clean_text": "eat",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/eat.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 5,
+      "text": "They",
+      "clean_text": "they",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/they.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 5,
+      "text": "ate",
+      "clean_text": "ate",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ate.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 5,
+      "text": "together,",
+      "clean_text": "together",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/together.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 5,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 5,
+      "text": "Amaka",
+      "clean_text": "amaka",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ɑˈmɑkɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/amaka~%C9%91%CB%88m%C9%91k%C9%91.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 5,
+      "text": "said",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 5,
+      "text": "thank",
+      "clean_text": "thank",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/thank.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 5,
+      "text": "you.",
+      "clean_text": "you",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/you.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "Mama cooked rice for lunch and Amaka helped.",
+      "weight": 1,
+      "example_paraphrases": [
+        "Amaka helped Mama cook the rice."
+      ]
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "ACTION",
+      "description": "Amaka washed the rice in a bowl.",
+      "weight": 1,
+      "example_paraphrases": [
+        "She cleaned the rice in a bowl."
+      ]
+    },
+    {
+      "id": "p3",
+      "sentence_index": 3,
+      "category": "ACTION",
+      "description": "The pot was hot so Amaka stood back.",
+      "weight": 2,
+      "example_paraphrases": [
+        "Amaka moved away from the hot pot."
+      ]
+    },
+    {
+      "id": "p4",
+      "sentence_index": 4,
+      "category": "RESOLUTION",
+      "description": "The rice was soft and ready to eat.",
+      "weight": 2,
+      "example_paraphrases": [
+        "The rice was cooked."
+      ]
+    },
+    {
+      "id": "p5",
+      "sentence_index": 5,
+      "category": "DETAIL",
+      "description": "They ate together and Amaka said thank you.",
+      "weight": 1,
+      "example_paraphrases": [
+        "They ate, and she thanked her mother."
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 1,
+      "prompt_text": "What did Amaka wash?",
+      "rubric": {
+        "2": "Says the rice.",
+        "1": "Says something that went in a bowl.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_food_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "The rice.",
+          "points": 2
+        },
+        {
+          "answer": "Something in a bowl.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 3,
+      "prompt_text": "Why did Amaka stand back from the pot?",
+      "rubric": {
+        "2": "Says the pot was hot and she could get hurt.",
+        "1": "Gives a reason that is not in the story, such as being tired.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_food_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because the pot was hot and she could get hurt.",
+          "points": 2
+        },
+        {
+          "answer": "Na because the pot hot well well.",
+          "points": 2
+        },
+        {
+          "answer": "She was tired.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_rain"
+}

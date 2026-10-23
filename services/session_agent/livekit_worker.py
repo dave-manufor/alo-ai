@@ -45,6 +45,7 @@ from .passages import (
     PassageBank,
     PassageError,
     folder_bank,
+    passage_id_for_demo_interest,
     passage_id_for_interest,
     passage_id_for_level,
 )
@@ -307,10 +308,20 @@ def _interest_picker(
     """Matches what the child said they like to the bank passage that fits it best, so a
     session reads a story about their interest even while the Passage Generator is off or has
     no story for them. Only the tagger sees the child's words (it returns topic tags);
-    None in fixtures mode, without the interest chat, and for the demo profile."""
-    if cfg.ai_mode != "live" or not cfg.interest_chat or profile.name != "standard":
+    None in fixtures mode and without the interest chat. The demo profile has one level, so
+    its story is the demo passage for the child's first topic and no child record is read."""
+    if cfg.ai_mode != "live" or not cfg.interest_chat:
         return None
     tagger = _tagger(settings, shared)
+
+    if profile.name == "demo":
+
+        async def pick_demo(answer: str) -> str:
+            interest = await tagger.tag(answer)
+            log.info("interest tags %s for the demo story", list(interest.tags))
+            return passage_id_for_demo_interest(interest.tags, bank_passage_id)
+
+        return pick_demo
 
     async def pick(answer: str) -> str:
         interest, child = await asyncio.gather(

@@ -244,7 +244,8 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
     assert state.status == "COMPLETE"
 
 
-def test_a_session_stopped_early_publishes_the_listening_passage(validate):
+def test_a_session_stopped_early_publishes_the_listening_passage(validate, override_profile):
+    override_profile("demo", listening_module=True)  # the demo profile closes instead
     log, publisher = audio_log(), MemoryPublisher()
     state = initial_state("demo", "cache_first")
     for event in [

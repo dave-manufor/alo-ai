@@ -7,27 +7,6 @@ run_listening_module, so no [CAL] value lives here.
 
 from .types import Profile
 
-STANDARD = Profile(
-    name="standard",
-    reading_cap_ms=90_000,
-    n_questions=3,
-    n_listening_items=2,
-    listening_story_ms=40_000,
-)
-
-# Demo: 75-word passage, 2 questions, ~50-word listening story, 1 listening item.
-# Reading is capped at 90 s in both profiles (PRD 4.1); "demo: 45-60 s" is how long
-# a demo reading usually takes, not a cap.
-DEMO = Profile(
-    name="demo",
-    reading_cap_ms=90_000,
-    n_questions=2,
-    n_listening_items=1,
-    listening_story_ms=20_000,
-)
-
-PROFILES = {STANDARD.name: STANDARD, DEMO.name: DEMO}
-
 VOICE_MODES = ("cache_first", "live_first")
 
 SHOWN_WAIT_MS = 20_000  # then the reading starts even if the web app never says the story is up
@@ -52,3 +31,38 @@ CLOSE_MS = 5_000
 MAX_SILENCES = 2  # two 8 s silences on one prompt: move on
 LIVE_LATENCY_MS = 2_500
 LIVE_SLOW_TURNS = 2
+
+STANDARD = Profile(
+    name="standard",
+    reading_cap_ms=90_000,
+    n_questions=3,
+    n_listening_items=2,
+    listening_story_ms=40_000,
+    listening_module=True,
+    retell_follow_up=True,
+    retell_cap_ms=RETELL_CAP_MS,
+    transition_ms=TRANSITION_MS,
+    close_ms=CLOSE_MS,
+    reading_done_quiet_ms=READING_DONE_QUIET_MS,
+)
+
+# Demo: a 50-word passage that matches the child's interest, 2 questions, and no listening
+# module, so a session runs in under two minutes (PRD 4.1). The retell has no follow-up and a
+# shorter cap, and the waits between stages are shorter. The listening fields are unused.
+# Reading is capped at 90 s in both profiles (PRD 4.1); that cap, "That word is X." after
+# TOLD_WORD_MS, and the answer rules are the same, so a demo reading is read the same way.
+DEMO = Profile(
+    name="demo",
+    reading_cap_ms=90_000,
+    n_questions=2,
+    n_listening_items=1,
+    listening_story_ms=20_000,
+    listening_module=False,
+    retell_follow_up=False,
+    retell_cap_ms=25_000,
+    transition_ms=1_000,
+    close_ms=2_000,
+    reading_done_quiet_ms=3_000,
+)
+
+PROFILES = {STANDARD.name: STANDARD, DEMO.name: DEMO}
