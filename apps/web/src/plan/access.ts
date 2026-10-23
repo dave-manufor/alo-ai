@@ -3,11 +3,15 @@ import { dataMode } from '../api';
 
 /** Whether this guardian sees the weekly plan.
  *
- *  A live build opens it to every signed-in guardian: payments are later work (PRD changelog,
- *  2026-10-22), so the mini-study gives the plan to everyone with a consented child, and the
- *  Account API serves it without a subscription check. The sample build keeps the demo
- *  paywall so the upgrade screens can still be walked. When payments land, this one function
- *  is where the live rule changes. */
+ *  A live build follows the Account service: with its PLANS_NEED_SUBSCRIPTION setting off (the
+ *  mini-study) every signed-in guardian sees the plan; on (the demo), only a guardian whose
+ *  Paystack payment the server has confirmed. The server's plan route enforces the same rule
+ *  (402), so this only decides what the screen offers. The sample build keeps the demo paywall
+ *  so the upgrade screens can still be walked. */
 export function planUnlocked(signedIn: boolean): boolean {
-  return signedIn && (dataMode === 'live' || accountStore.hasActiveSubscription());
+  if (!signedIn) return false;
+  if (dataMode === 'live') {
+    return !accountStore.getState().plansNeedSubscription || accountStore.hasActiveSubscription();
+  }
+  return accountStore.hasActiveSubscription();
 }

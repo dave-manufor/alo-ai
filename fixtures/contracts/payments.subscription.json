@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "guardian_id": "guardian_demo_001",
+  "status": "active",
+  "plan_code": "PLN_demo0000000001",
+  "last_reference": "pay_0000000000000000000000000000demo",
+  "paid_at": "2026-10-23T12:00:00Z",
+  "current_period_end": "2026-11-23T12:00:00Z",
+  "customer_code": "CUS_demo0000000001",
+  "subscription_code": "SUB_demo0000000001",
+  "updated_at": "2026-10-23T12:00:05Z"
+}
