@@ -18,7 +18,7 @@ import logging
 import os
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -41,7 +41,13 @@ from .core_client import CoreClient
 from .driver import Driver, Ports
 from .machine.profiles import PASSAGE_WAIT_MS
 from .machine.types import Profile, Timer
-from .passages import PassageBank, PassageError, folder_bank, passage_id_for_level
+from .passages import (
+    PassageBank,
+    PassageError,
+    folder_bank,
+    passage_id_for_interest,
+    passage_id_for_level,
+)
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
@@ -160,9 +166,12 @@ class _Passages:
         passage_id: str,
         profile: Profile,
         requester: generation.StoryRequester | None,
+        pick: Callable[[str], Awaitable[str]] | None = None,
     ) -> None:
         self._bank, self._passage_id, self._profile = bank, passage_id, profile
         self._requester = requester
+        # What the child likes -> the bank passage that fits it best (None: the level's passage).
+        self._pick = pick
         self._calls: set[asyncio.Task] = set()
         self.driver: Driver | None = None
 
@@ -170,21 +179,39 @@ class _Passages:
         return self._bank.pair(passage_id, self._profile)
 
     def generate(self, interest: str | None, deadline_ms: int) -> None:
-        if self._requester is None:
-            log.info("no story requester (AI_MODE=fixtures or GENERATOR_ON=false): bank passage")
+        if self._requester is None and self._pick is None:
+            log.info("no story requester and no interest picker: the level's bank passage")
             self.bank()
             return
 
         async def call() -> None:
-            pair = await self._requester.request(interest, deadline_ms)
-            if pair is None:
-                self.bank()
-            else:
-                self.driver.passage_arrived(pair, fallback=False)
+            if self._requester is not None:
+                pair = await self._requester.request(interest, deadline_ms)
+                if pair is not None:
+                    self.driver.passage_arrived(pair, fallback=False)
+                    return
+            await self._bank_for(interest)
 
         task = asyncio.create_task(call())
         self._calls.add(task)
         task.add_done_callback(self._calls.discard)
+
+    async def _bank_for(self, interest: str | None) -> None:
+        """No generated story: the bank passage that fits what the child likes (within two
+        levels of theirs), else the one for their level. Never raises."""
+        passage_id = self._passage_id
+        if self._pick is not None and interest:
+            try:
+                passage_id = await self._pick(interest)
+            except Exception:
+                log.exception("could not match a bank passage to the child's interest")
+        try:
+            pair = self.pair(passage_id)
+        except PassageError:
+            log.warning("bank passage %s can't be used; using the level's", passage_id)
+            pair = self.pair(self._passage_id)
+        log.info("bank passage %s for this session", passage_id)
+        self.driver.passage_arrived(pair, fallback=True)
 
     def bank(self) -> None:
         pair = self.pair(self._passage_id)
@@ -268,6 +295,35 @@ def _clip_maker(settings: config.WorkerSettings, cfg: config.Config, shared: alo
     return seed.story_clip_maker(cfg, shared, os.environ, store)
 
 
+def _interest_picker(
+    settings: config.WorkerSettings,
+    cfg: config.Config,
+    start: metadata.SessionStart,
+    profile: Profile,
+    bank_passage_id: str,
+    db: Store,
+    shared: aloai_env.Config,
+) -> Callable[[str], Awaitable[str]] | None:
+    """Matches what the child said they like to the bank passage that fits it best, so a
+    session reads a story about their interest even while the Passage Generator is off or has
+    no story for them. Only the tagger sees the child's words (it returns topic tags);
+    None in fixtures mode, without the interest chat, and for the demo profile."""
+    if cfg.ai_mode != "live" or not cfg.interest_chat or profile.name != "standard":
+        return None
+    tagger = _tagger(settings, shared)
+
+    async def pick(answer: str) -> str:
+        interest, child = await asyncio.gather(
+            tagger.tag(answer),
+            asyncio.get_running_loop().run_in_executor(None, db.get, f"children/{start.child_id}"),
+        )
+        level = generation.start_arl(child, date.today())
+        log.info("interest tags %s at level %s", list(interest.tags), level)
+        return passage_id_for_interest(level, interest.tags, bank_passage_id)
+
+    return pick
+
+
 def _story_requester(
     settings: config.WorkerSettings,
     cfg: config.Config,
@@ -337,6 +393,7 @@ async def entrypoint(ctx: JobContext) -> None:
         bank_passage_id,
         profile,
         _story_requester(settings, cfg, start, profile, bank, db, shared),
+        _interest_picker(settings, cfg, start, profile, bank_passage_id, db, shared),
     )
     # Fail before the child joins, not mid-session, if the fallback passage doesn't fit
     # SESSION_PROFILE.

@@ -1,0 +1,169 @@
+"""A session reads a story about what the child likes: the interest matched to the bank."""
+
+import asyncio
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+from aloai_store import MemoryStore
+from services.session_agent import generation
+from services.session_agent.livekit_worker import _interest_picker, _Passages
+from services.session_agent.machine.profiles import DEMO, STANDARD
+from services.session_agent.passages import (
+    INTEREST_BANK,
+    MAX_LEVEL_GAP,
+    folder_bank,
+    passage_id_for_interest,
+)
+
+CONTRACTS = Path(__file__).resolve().parents[3] / "fixtures" / "contracts"
+DEFAULT = "bank_p3_school_garden"
+
+
+def test_the_interest_index_is_the_standard_read_passages_in_the_bank():
+    found = {}
+    for path in sorted(CONTRACTS.glob("passage.*.json")):
+        passage = json.loads(path.read_text())
+        if passage["mode"] == "READ" and passage["length_profile"] == "STANDARD":
+            found[passage["passage_id"]] = (passage["arl_level"], tuple(passage["topic_tags"]))
+    assert INTEREST_BANK == found
+
+
+def test_every_indexed_passage_loads_as_a_fitting_pair():
+    bank = folder_bank(CONTRACTS)
+    for passage_id in INTEREST_BANK:
+        pair = bank.pair(passage_id, STANDARD)
+        assert len(pair.read["items"]) == STANDARD.n_questions
+        assert len(pair.listening["items"]) == STANDARD.n_listening_items
+
+
+def test_a_child_gets_the_story_that_matches_what_they_like():
+    # Level 5 child who likes football: the football story two levels down beats the school one.
+    assert passage_id_for_interest(5, ["football"], DEFAULT) == "bank_p2_lost_ball"
+    assert passage_id_for_interest(9, ["music"], "x") == "bank_p5_music_contest"
+
+
+def test_the_first_tag_counts_double_and_a_second_tag_can_win_alone():
+    # Level 4: farming (school garden, 5) is two away... football (lost ball, 3) is one away.
+    assert passage_id_for_interest(4, ["farming", "football"], DEFAULT) == "bank_p3_school_garden"
+    assert passage_id_for_interest(4, ["space", "football"], DEFAULT) == "bank_p2_lost_ball"
+
+
+def test_nothing_that_matches_within_two_levels_means_the_levels_own_passage():
+    assert passage_id_for_interest(1, ["space"], "bank_p1_ada_and_the_dog") == (
+        "bank_p1_ada_and_the_dog"
+    )
+    # Football exists, but five levels away from a level 8 child.
+    far = [p for p, (arl, tags) in INTEREST_BANK.items() if "football" in tags and arl > 5]
+    assert not far or passage_id_for_interest(8, ["football"], DEFAULT) != far[0]
+    assert MAX_LEVEL_GAP == 2
+
+
+def test_no_tags_or_no_known_level_means_the_default():
+    assert passage_id_for_interest(5, [], DEFAULT) == DEFAULT
+    assert passage_id_for_interest(None, ["football"], DEFAULT) == DEFAULT
+
+
+def test_a_tie_goes_to_the_nearer_level_then_the_easier():
+    tied = passage_id_for_interest(4, ["family"], DEFAULT)
+    # family: lost ball (3), night bus (7), river crossing (11): only lost ball is in reach
+    assert tied == "bank_p2_lost_ball"
+
+
+# ---- _Passages
+
+
+class _Driver:
+    def __init__(self):
+        self.arrived = []
+
+    def passage_arrived(self, pair, *, fallback):
+        self.arrived.append((pair.read["passage_id"], fallback))
+
+
+BANK = folder_bank(CONTRACTS)
+
+
+def _arrives(requester, pick, interest="i like football", level_default="bank_p3_school_garden"):
+    async def main():
+        passages = _Passages(BANK, level_default, STANDARD, requester, pick)
+        passages.driver = _Driver()
+        passages.generate(interest, 20_000)
+        await asyncio.gather(*passages._calls)
+        return passages.driver.arrived
+
+    return asyncio.run(main())
+
+
+def test_with_no_generator_the_story_is_the_one_that_matches_the_interest():
+    async def pick(answer):
+        return "bank_p2_lost_ball"
+
+    assert _arrives(None, pick) == [("bank_p2_lost_ball", True)]
+
+
+def test_when_the_generator_gives_no_story_the_interest_still_picks_the_bank_passage():
+    class Requester:
+        client = None
+
+        async def request(self, interest, deadline_ms):
+            return None
+
+    async def pick(answer):
+        return "bank_p2_lost_ball"
+
+    assert _arrives(Requester(), pick) == [("bank_p2_lost_ball", True)]
+
+
+def test_a_failing_match_or_an_unusable_passage_falls_back_to_the_levels_passage():
+    async def broken(answer):
+        raise TimeoutError("the tagger took too long")
+
+    async def unusable(answer):
+        return "no_such_passage"
+
+    assert _arrives(None, broken) == [("bank_p3_school_garden", True)]
+    assert _arrives(None, unusable) == [("bank_p3_school_garden", True)]
+
+
+def test_a_child_who_said_nothing_gets_the_levels_passage_without_asking_the_tagger():
+    async def pick(answer):
+        raise AssertionError("not asked")
+
+    assert _arrives(None, pick, interest=None) == [("bank_p3_school_garden", True)]
+
+
+# ---- the picker the worker builds
+
+
+def _config(**changes):
+    values = {"ai_mode": "live", "interest_chat": True}
+    return SimpleNamespace(**{**values, **changes})
+
+
+def test_there_is_no_picker_in_fixtures_mode_without_the_chat_or_for_the_demo_profile():
+    start = SimpleNamespace(child_id="child_1")
+    for cfg, profile in (
+        (_config(ai_mode="fixtures"), STANDARD),
+        (_config(interest_chat=False), STANDARD),
+        (_config(), DEMO),
+    ):
+        assert _interest_picker(None, cfg, start, profile, DEFAULT, MemoryStore({}), None) is None
+
+
+def test_the_picker_tags_the_answer_and_matches_it_at_the_childs_level(monkeypatch):
+    from services.session_agent import livekit_worker
+
+    class Tagger:
+        async def tag(self, answer):
+            assert answer == "i like football"
+            return generation.Interest(("football",))
+
+    monkeypatch.setattr(livekit_worker, "_tagger", lambda settings, shared: Tagger())
+    store = MemoryStore({"children/child_1": {"primary_class": 3, "next_passage_arl": 5}})
+    start = SimpleNamespace(child_id="child_1")
+    pick = _interest_picker(None, _config(), start, STANDARD, DEFAULT, store, None)
+    assert asyncio.run(pick("i like football")) == "bank_p2_lost_ball"
+    # a child record that gives no level: the default for them
+    pick = _interest_picker(None, _config(), start, STANDARD, DEFAULT, MemoryStore({}), None)
+    assert asyncio.run(pick("i like football")) == DEFAULT
