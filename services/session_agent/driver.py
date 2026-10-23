@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Protocol
 
 from . import protocol, quick_grade, session_store
+from .audio_stats import AudioStats
 from .clips.catalog import PROMPTS, ClipCatalog
 from .events import Publisher, SessionContext, build_event
 from .intents import intent
@@ -58,6 +59,7 @@ from .recording import AudioLog, Turn
 from .turns import TurnKind, TurnTaker
 
 log = logging.getLogger(__name__)
+STATS_EVERY_MS = 10_000  # how often the audio counters are written to the log
 
 
 class Channel(Protocol):
@@ -140,6 +142,11 @@ class Driver:
     _interim: str = ""
     _transcripts: dict[tuple[str, int], list[str]] = field(default_factory=dict)
     _reading: bool = False
+    # What the agent heard, for the logs only (audio_stats.py): a session that hears nothing
+    # looks the same as one that hears a child unless these are written down.
+    stats: AudioStats = field(default_factory=AudioStats)
+    _clip_playing: bool = False  # a play was sent and its ack has not come back
+    _stats_logged_ms: int = 0
 
     # ---- lifecycle
 
@@ -175,20 +182,24 @@ class Driver:
             self._run(action)
 
     def on_audio(self, pcm: bytes) -> None:
+        self.stats.frame(pcm, self.clock_ms())
         if self._turn is not None:
             self.ports.recorder.feed(pcm)
             if self._turn.phase == "MIC_CHECK":
                 self.mic.feed(pcm)
 
     def on_speech_started(self) -> None:
+        self.stats.vad_started(self._clip_playing)
         self.ports.channel.send(protocol.child_speaking(True))
         self.turns.speech_started(self.clock_ms())
 
     def on_speech_ended(self) -> None:
+        self.stats.vad_ended()
         self.ports.channel.send(protocol.child_speaking(False))
         self.turns.speech_ended(self.clock_ms())
 
     def on_transcript(self, text: str, *, final: bool) -> None:
+        self.stats.transcript(text, final=final)
         now = self.clock_ms()
         if self._reading and self.tracker is not None:
             (self.tracker.on_final if final else self.tracker.on_partial)(text, now)
@@ -206,6 +217,7 @@ class Driver:
         ack = protocol.parse_client(raw)
         if ack is None:
             return
+        self._clip_playing = False
         if ack.status == "played":
             self.turns.prompt_finished(self.clock_ms())
         self.handle(ack)
@@ -227,6 +239,9 @@ class Driver:
     def tick(self) -> None:
         """Called a few times a second: reading progress, and the end of a turn."""
         now = self.clock_ms()
+        if now - self._stats_logged_ms >= STATS_EVERY_MS:
+            self._stats_logged_ms = now
+            log.info("audio: %s", self.stats.line())
         if self._reading and self.tracker is not None:
             self._reading_tick(now)
         ended = self.turns.tick(now)
@@ -286,6 +301,8 @@ class Driver:
                     self.ports.channel.send(message)
 
     def _send(self, message: dict) -> None:
+        if message.get("cmd") == "play":
+            self._clip_playing = True
         self.ports.channel.send({"schema_version": protocol.SCHEMA_VERSION, **message})
 
     def _emit(self, action: EmitEvent) -> None:
@@ -332,6 +349,9 @@ class Driver:
         self.turns.stop()
         self.ports.recorder.stop()
         text = " ".join([*self._final, self._interim]).strip()
+        # Numbers only, never the words: whether this turn was heard at all, and how loud.
+        log.info("turn %s %d ended: %s; %s", turn.phase, turn.index, self.stats.end_turn(),
+                 self.stats.line())
         self._transcripts.setdefault((turn.phase, turn.index), []).append(text)
         self.ports.documents.set(
             session_store.turn_path(self.ctx.session_id, turn.turn_id),
