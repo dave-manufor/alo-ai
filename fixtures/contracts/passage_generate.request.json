@@ -4,7 +4,7 @@
   "child_ref": "child_demo_001",
   "target_arl": 4,
   "tags": ["animals", "adventure"],
-  "detail": "goat",
+  "details": ["goat", "football", "red car"],
   "genre_hint": "NARRATIVE",
   "voice_profile_id": "vp_google_v1",
   "length_profile": "DEMO",

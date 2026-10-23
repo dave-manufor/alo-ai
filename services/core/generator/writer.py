@@ -94,14 +94,14 @@ _VALIDATOR = Draft202012Validator(OUTPUT_SCHEMA)
 
 @dataclass(frozen=True)
 class Brief:
-    """What the Writer is asked for. detail has already passed detail.safe_detail."""
+    """What the Writer is asked for. Every detail has already passed detail.safe_details."""
 
     session_id: str
     target_arl: int
     length_profile: str
     genre: str  # NARRATIVE | EXPOSITORY
     topics: tuple[Topic, ...]
-    detail: str | None
+    details: tuple[str, ...]
     names: NameList
     attempt: int = 1
     feedback: str = ""  # the failed checks of the first attempt, for the retry
@@ -180,12 +180,18 @@ def build_prompt(brief: Brief) -> str:
 
 
 def _topic(brief: Brief) -> str:
-    if not brief.topics:
-        return "Topic: any everyday topic a Nigerian child enjoys."
-    line = "Topic: " + " and ".join(topic.description for topic in brief.topics) + "."
-    if brief.detail:
-        line += f" Include {brief.detail} in the story."
+    if brief.topics:
+        line = "Topic: " + " and ".join(topic.description for topic in brief.topics) + "."
+    else:
+        line = "Topic: any everyday topic a Nigerian child enjoys."
+    if brief.details:
+        line += f" Include {_listed(brief.details)} in the story."
     return line
+
+
+def _listed(items: tuple[str, ...]) -> str:
+    """The things the child named, as one phrase: "a", "a and b", "a, b and c"."""
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 
 def _items(rules: blueprint.LengthRules) -> str:

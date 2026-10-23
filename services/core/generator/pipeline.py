@@ -1,7 +1,7 @@
 """The Story Writer + Critic loop (PRD 4.5 G1-G4, SDD 5): plain code, not an agent
 workflow, because the order of the checks and the deadline must be exact.
 
-1. Check the safe detail again (G1).
+1. Check every safe detail again (G1).
 2. The Writer writes a story (G2).
 3. The code checks run (G4). Only if they all pass does the Critic run.
 4. If anything failed, one retry with the failed checks as feedback, and only while the
@@ -22,7 +22,7 @@ from spacy.language import Language
 
 from . import artifact, clips, critic, data, gate, textlevel, writer
 from .data import Taxonomy
-from .detail import safe_detail
+from .detail import safe_details
 from .gate import Check
 from .models import Model, ModelError, UpstreamErrors
 from .names import Blocklist, NameList
@@ -47,6 +47,14 @@ class DeadlineExceeded(Exception):
     pass
 
 
+def _details(body: Mapping) -> tuple[str, ...]:
+    """The things the child named: `details`, plus the older single `detail` if sent."""
+    found = list(body.get("details") or [])
+    if body.get("detail") is not None:
+        found.append(body["detail"])
+    return tuple(dict.fromkeys(found))  # once each, in order
+
+
 @dataclass(frozen=True)
 class Request:
     """The fields of a passage_generate_request the loop uses. deadline_ms is None for a
@@ -58,7 +66,7 @@ class Request:
     length_profile: str
     voice_profile_id: str
     deadline_ms: int | None
-    detail: str | None = None
+    details: tuple[str, ...] = ()
     genre_hint: str | None = None
 
     @classmethod
@@ -70,7 +78,7 @@ class Request:
             length_profile=body["length_profile"],
             voice_profile_id=body["voice_profile_id"],
             deadline_ms=body["deadline_ms"],
-            detail=body.get("detail"),
+            details=_details(body),
             genre_hint=body.get("genre_hint"),
         )
 
@@ -133,14 +141,14 @@ class Generator:
     def _generate(
         self, request: Request, passage_id: str, listening_passage_id: str, clock: _Clock
     ) -> Generated:
-        detail = safe_detail(request.detail, self.nlp, self.names, self.blocklist)
+        details = safe_details(request.details, self.nlp, self.names, self.blocklist)
         brief = writer.Brief(
             session_id=request.session_id,
             target_arl=request.target_arl,
             length_profile=request.length_profile,
             genre=self.taxonomy.genre(list(request.tags), request.genre_hint),
             topics=tuple(self.taxonomy.topic(tag) for tag in request.tags),
-            detail=detail,
+            details=details,
             names=self.names,
         )
         checks: list[Check] = []

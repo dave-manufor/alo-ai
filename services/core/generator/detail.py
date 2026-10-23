@@ -7,6 +7,7 @@ enough for the level, is not on the blocklist, and is not on the name list.
 """
 
 import re
+from collections.abc import Sequence
 
 from spacy.language import Language
 from wordfreq import zipf_frequency
@@ -17,6 +18,22 @@ from .text import clean_word
 PATTERN = re.compile(r"^[a-z]{2,20}( [a-z]{2,20})?$")  # same as passage_generate_request
 MIN_ZIPF = 3.0  # [CAL] common enough for a P1 to P6 reader to know
 NOUN_TAGS = frozenset({"NOUN", "PROPN"})
+
+
+MAX_DETAILS = 6  # the contract's limit; the Writer's prompt stays short
+
+
+def safe_details(
+    details: Sequence[str], nlp: Language, names: NameList, blocklist: Blocklist
+) -> tuple[str, ...]:
+    """The details to give the Writer: each one that passes safe_detail, once, in the order
+    the child said them, at most MAX_DETAILS. An unsafe one is dropped, never the whole list."""
+    kept: list[str] = []
+    for detail in details:
+        safe = safe_detail(detail, nlp, names, blocklist)
+        if safe is not None and safe not in kept:
+            kept.append(safe)
+    return tuple(kept[:MAX_DETAILS])
 
 
 def safe_detail(

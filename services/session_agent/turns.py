@@ -23,7 +23,8 @@ from typing import Literal
 
 SILENCE_MS = 8_000  # no speech at all: one SILENCE (PRD 4.3)
 RETELL_END_MS = 4_000  # the retell ends after 4 s of silence (PRD 4.1)
-ANSWER_END_MS = 1_500  # a pause that ends an answer or the chat; rehearse before changing
+ANSWER_END_MS = 1_500  # a pause that ends an answer; rehearse before changing
+CHAT_END_MS = 3_000  # the interest chat: a child listing what they like pauses between things
 MIC_END_MS = 2_000  # the count to five has ended: a child counts with pauses between numbers
 MIC_MIN_VOICED_MS = 2_000  # about how long the count takes
 MIC_SHORT_END_MS = 4_000  # a count shorter than that ends after this pause instead
@@ -32,8 +33,13 @@ ECHO_TAIL_MS = 300  # the end of a clip's sound still in the room after its ack
 
 log = logging.getLogger(__name__)
 
-TurnKind = Literal["answer", "retell", "mic"]
-_END_MS = {"answer": ANSWER_END_MS, "retell": RETELL_END_MS, "mic": MIC_END_MS}
+TurnKind = Literal["answer", "chat", "retell", "mic"]
+_END_MS = {
+    "answer": ANSWER_END_MS,
+    "chat": CHAT_END_MS,
+    "retell": RETELL_END_MS,
+    "mic": MIC_END_MS,
+}
 
 
 @dataclass

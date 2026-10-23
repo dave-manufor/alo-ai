@@ -17,7 +17,7 @@ class ChatFake:
     def __init__(self, content=None, choices=None):
         self.calls = []
         answer = (
-            content if content is not None else json.dumps({"tags": ["animals"], "detail": "goat"})
+            content if content is not None else json.dumps({"tags": ["animals"], "details": ["goat"]})
         )
         self._response = SimpleNamespace(
             choices=choices
@@ -37,7 +37,7 @@ def tag(client, answer="I like goats"):
 
 def test_the_answer_is_tagged_by_the_tagger_deployment_in_the_same_schema_and_time():
     client = ChatFake()
-    assert tag(client) == generation.Interest(("animals",), "goat")
+    assert tag(client) == generation.Interest(("animals",), ("goat",))
     [sent] = client.calls
     assert sent["model"] == "aloai-tagger"
     assert (sent["temperature"], sent["timeout"]) == (0, generation.TAGGER_TIMEOUT_S)
@@ -49,8 +49,8 @@ def test_the_answer_is_tagged_by_the_tagger_deployment_in_the_same_schema_and_ti
 
 
 def test_only_known_tags_and_a_safe_detail_survive():
-    client = ChatFake(json.dumps({"tags": ["animals", "wizards", "animals"], "detail": "Tunde!"}))
-    assert tag(client) == generation.Interest(("animals",), None)
+    client = ChatFake(json.dumps({"tags": ["animals", "wizards", "animals"], "details": ["Tunde!"]}))
+    assert tag(client) == generation.Interest(("animals",), ())
 
 
 @pytest.mark.parametrize(

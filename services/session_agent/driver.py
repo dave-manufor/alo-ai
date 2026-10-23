@@ -114,6 +114,7 @@ class Ports:
 
 
 _TURN_KIND: dict[str, TurnKind] = {
+    "INTEREST_CHAT": "chat",
     "MIC_CHECK": "mic",
     "RETELL": "retell",
     "LISTENING_RETELL": "retell",

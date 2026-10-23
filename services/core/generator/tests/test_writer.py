@@ -15,7 +15,7 @@ def brief(**changes) -> writer.Brief:
         "length_profile": "DEMO",
         "genre": "NARRATIVE",
         "topics": (data.taxonomy().topic("animals"), data.taxonomy().topic("adventure")),
-        "detail": "goat",
+        "details": ("goat",),
         "names": data.names(),
     }
     return writer.Brief(**{**fields, **changes})
@@ -49,8 +49,8 @@ def test_the_prompt_names_the_topics_the_detail_and_every_listed_name():
 
 
 def test_no_detail_and_no_topic():
-    assert "in the story." not in writer.build_prompt(brief(detail=None))
-    assert "any everyday topic" in writer.build_prompt(brief(topics=(), detail=None))
+    assert "in the story." not in writer.build_prompt(brief(details=()))
+    assert "any everyday topic" in writer.build_prompt(brief(topics=(), details=()))
 
 
 def test_an_expository_text_gets_the_main_idea_plan():
@@ -90,3 +90,18 @@ def test_the_output_schema_takes_the_story_the_gate_reads():
 def test_output_that_breaks_the_schema_is_refused(broken):
     with pytest.raises(ModelError, match="writer/1 broke the output schema"):
         writer.write(ScriptedModel({"writer/1": broken}), brief(), timeout_s=1)
+
+
+def test_the_things_the_child_named_are_listed_in_the_prompt():
+    assert "Include goat and ball in the story." in writer.build_prompt(
+        brief(details=("goat", "ball"))
+    )
+    assert "Include goat, ball and red car in the story." in writer.build_prompt(
+        brief(details=("goat", "ball", "red car"))
+    )
+
+
+def test_the_interests_are_used_even_when_no_topic_fits():
+    prompt = writer.build_prompt(brief(topics=(), details=("dinosaur", "drum")))
+    assert "any everyday topic" in prompt
+    assert "Include dinosaur and drum in the story." in prompt
