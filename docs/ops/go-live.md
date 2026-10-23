@@ -33,7 +33,7 @@ Where the pieces are, for the commands below: resource group `aloai-rg`; apps an
 ## 4. The web app
 
 1. GitHub repository variables (Settings > Secrets and variables > Actions > Variables), all public values:
-   `VITE_ENTRA_CLIENT_ID` (the SPA's client id), `VITE_ENTRA_AUTHORITY` (`https://aloaiauth.ciamlogin.com/`), `VITE_ENTRA_API_SCOPE` (`api://<entra_api_audience>/access_as_user`), `VITE_ALO_API_URL` (the `account_url` output, no trailing slash), plus `AZURE_RESOURCE_GROUP` (`aloai-rg`) and `AZURE_WEB_APP_NAME` (the `web_app_name` output).
+   `VITE_ENTRA_CLIENT_ID` (the SPA's client id), `VITE_ENTRA_AUTHORITY` (`https://aloaiauth.ciamlogin.com/<entra_tenant_id>/`, with the tenant id: the bare address fails with `endpoints_resolution_error`), `VITE_ENTRA_API_SCOPE` (`api://<entra_api_audience>/access_as_user`), `VITE_ALO_API_URL` (the `account_url` output, no trailing slash), plus `AZURE_RESOURCE_GROUP` (`aloai-rg`) and `AZURE_WEB_APP_NAME` (the `web_app_name` output).
 2. Run **Deploy web app to Azure** (`web-deploy-azure.yml`). It fails at its first step if one of the four `VITE_*` variables is missing, because without them the site would be the sample build.
    **Without Actions:** from `apps/web`, with the four values exported as `VITE_*`: `npm ci && npm run build`, then `token=$(az staticwebapp secrets list --name <web_app_name> --resource-group aloai-rg --query properties.apiKey -o tsv)` and `npx @azure/static-web-apps-cli@2.0.8 deploy dist --deployment-token "$token" --env production`.
 3. Check that it is the live build, not the sample one: open the site; the sign-in screen must send you to `aloaiauth.ciamlogin.com`, not show a code on screen.

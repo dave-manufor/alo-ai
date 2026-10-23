@@ -40,6 +40,21 @@ CHILD = {
     "first_name": "Smoke",
     "saved_tags": ["food", "football"],
 }
+# The Coach makes no plan for a child without a consent on file for this guardian (PRD 12), so
+# the fictional child has one. Fictional words, the shape of schemas/consent.schema.json.
+CONSENT_ID = "consent_smoke"
+CONSENT = {
+    "schema_version": 1,
+    "consent_id": CONSENT_ID,
+    "guardian_id": GUARDIAN_ID,
+    "child_id": CHILD_ID,
+    "text_version": "consent_v2_2026-10",
+    "attestation": "Fictional consent for the cloud smoke test. No real child.",
+    "sign_in_method": "email_code",
+    "verified_email": "smoke@example.com",
+    "timestamp": "2026-01-01T00:00:00Z",
+    "training_opt_in": False,
+}
 
 
 @dataclass(frozen=True)
@@ -113,6 +128,7 @@ def run_smoke(
     result ({"ended": bool, ...}). Returns every check, passed or not."""
     session_id = new_session_id()
     store.set(f"children/{CHILD_ID}", CHILD)
+    store.set(f"consents/{CONSENT_ID}", CONSENT)
     checks: list[Check] = []
     try:
         result = drive(session_id, CHILD_ID)
