@@ -698,6 +698,17 @@
   min-height: 48px;
   touch-action: auto;
 }
+/* the grown-up's sound switch: a quieter button than "I'm ready" */
+.night-stage .pill--quiet {
+  margin-top: 10px;
+  min-height: 44px;
+  border-color: rgb(var(--art-ink-rgb) / 0.15);
+  font-weight: 600;
+  opacity: 0.85;
+}
+.night-stage .pill--quiet[aria-pressed='false'] {
+  opacity: 0.6;
+}
 .night-stage .hold svg {
   width: 40px;
   height: 40px;
