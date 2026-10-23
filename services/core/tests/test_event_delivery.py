@@ -311,6 +311,27 @@ def test_the_coach_email_is_called_with_a_token_for_the_chosen_cloud(monkeypatch
     assert sent == [("https://account.internal/internal/notify", {"Authorization": "Bearer t"})]
 
 
+def test_notifier_outbox_keeps_the_request_without_calling_the_account_service(monkeypatch):
+    monkeypatch.setattr(main.requests, "post", lambda *a, **k: pytest.fail("no call expected"))
+    store = MemoryStore()
+    notifier = main._notifier(settings("azure", ALO_ENV=""), {"NOTIFIER": "outbox"}, store)
+    for _ in range(2):  # a retried event changes nothing
+        delivery = notifier.notify(
+            template_id="report_ready", guardian_id="g", child_id="c", session_id=SESSION_ID
+        )
+    assert delivery == f"{SESSION_ID}_report_ready"
+    assert store.get(f"outbox/{delivery}") == {
+        "template_id": "report_ready",
+        "guardian_id": "g",
+        "child_id": "c",
+    }
+
+
+def test_notifier_setting_must_be_known():
+    with pytest.raises(ValueError, match="NOTIFIER"):
+        main._notifier(settings("azure", ALO_ENV=""), {"NOTIFIER": "email"}, MemoryStore())
+
+
 # ---- plan.ready pre-generates the next story, on either cloud (GENERATOR_ON)
 
 
