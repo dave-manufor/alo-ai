@@ -19,7 +19,7 @@ from collections.abc import Iterable, Sequence
 from difflib import SequenceMatcher
 
 from .clips.keys import clean_word
-from .machine.profiles import TOLD_WORD_MS
+from .machine.profiles import FIRST_WORD_EXTRA_MS, TOLD_WORD_MS
 from .machine.types import ReadingDone, ReadingProgress, Silence
 
 SIMILARITY = 0.75  # how alike a heard word and a passage word must be
@@ -41,6 +41,7 @@ class PositionTracker:
         self._last_advance_ms = 0
         self._stalled_on: set[int] = set()
         self._skip_blank()
+        self._first = self._position  # the first word to read
 
     @property
     def position(self) -> int:
@@ -74,12 +75,20 @@ class PositionTracker:
         self.on_partial(transcript, now_ms)
         self._segment_start = self._position
 
+    def hold(self, now_ms: int) -> None:
+        """Kemi is speaking (or her sound is still in the room): the child has not been able
+        to start. Until the first word is read, the wait for it begins when she stops."""
+        if self._position == self._first:
+            self._last_advance_ms = max(self._last_advance_ms, now_ms)
+
     def stall(self, now_ms: int) -> Silence | None:
-        """No progress for TOLD_WORD_MS on one word. Reported once per word."""
+        """No progress for TOLD_WORD_MS on one word (the first word gets FIRST_WORD_EXTRA_MS
+        more, to settle in). Reported once per word."""
         if self._started_ms is None or self.done_reached:
             return None
         waited = now_ms - self._last_advance_ms
-        if waited < TOLD_WORD_MS or self._position in self._stalled_on:
+        limit = TOLD_WORD_MS + (FIRST_WORD_EXTRA_MS if self._position == self._first else 0)
+        if waited < limit or self._position in self._stalled_on:
             return None
         self._stalled_on.add(self._position)
         return Silence(ms=waited, word_index=self._position)

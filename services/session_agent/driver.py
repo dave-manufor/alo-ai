@@ -387,6 +387,8 @@ class Driver:
             self.turns.start("mic", now)
 
     def _reading_tick(self, now: int) -> None:
+        if self.turns.ignoring(now):
+            self.tracker.hold(now)  # Kemi is still speaking: the first word's wait has not begun
         for event in (
             self.tracker.stall(now),
             self.tracker.progress(now, self.state.told),
