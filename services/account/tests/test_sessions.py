@@ -3,7 +3,12 @@ import logging
 from pathlib import Path
 
 import pytest
-from aloai_contracts import SESSION_ROOM_METADATA, SESSION_START_REQUEST, SESSION_START_RESPONSE
+from aloai_contracts import (
+    SESSION_ROOM_METADATA,
+    SESSION_START_REQUEST,
+    SESSION_START_RESPONSE,
+    SESSION_STATUS,
+)
 from services.account.tests.support import GUARDIAN, bearer, make_client
 from services.account.tests.test_children import OTHER, add_child
 
@@ -143,6 +148,52 @@ def test_the_fixtures_are_the_shapes_the_schema_describes():
         ("request", SESSION_START_REQUEST),
         ("response", SESSION_START_RESPONSE),
         ("room_metadata", SESSION_ROOM_METADATA),
+        ("status", SESSION_STATUS),
     ):
         check.validate(json.loads((FIXTURES / f"session_start.{name}.json").read_text()))
     assert not SESSION_START_REQUEST.is_valid({"child_id": "c", "voice_mode": "live_first"})
+
+
+def status(client, session_id, who=None):
+    return client.get(f"/v1/sessions/{session_id}", headers=bearer(**(who or {})))
+
+
+def test_a_session_the_agent_has_not_written_yet_is_pending():
+    client, _store, _rooms, child_id = started()
+    session_id = start(client, child_id).json()["session_id"]
+    reply = status(client, session_id).json()
+    SESSION_STATUS.validate(reply)
+    assert (reply["status"], reply["report_ready"], reply["plan_ready"]) == ("PENDING", False, False)
+
+
+def test_the_status_follows_the_session_and_says_when_report_and_plan_exist():
+    client, store, _rooms, child_id = started()
+    session_id = start(client, child_id).json()["session_id"]
+    store.set(f"sessions/{session_id}", {"child_id": child_id, "status": "STARTED"})
+    assert status(client, session_id).json()["status"] == "STARTED"
+    store.set(f"sessions/{session_id}", {"child_id": child_id, "status": "COMPLETE"})
+    store.set(f"reports/{session_id}", {"session_id": session_id})
+    reply = status(client, session_id).json()
+    assert (reply["status"], reply["report_ready"], reply["plan_ready"]) == ("COMPLETE", True, False)
+    store.set(f"plans/plan_{session_id}", {"session_id": session_id})
+    assert status(client, session_id).json()["plan_ready"] is True
+
+
+def test_someone_elses_session_and_an_unknown_one_look_the_same():
+    client, _store, _rooms, child_id = started()
+    session_id = start(client, child_id).json()["session_id"]
+    refused = status(client, session_id, {"oid": OTHER})
+    missing = status(client, "sess_missing")
+    assert (refused.status_code, missing.status_code) == (404, 404)
+    assert refused.json() == missing.json()
+    assert status(client, "bad.id").status_code == 404
+
+
+def test_reading_the_status_needs_a_sign_in_and_is_audited_without_the_id_in_clear():
+    client, store, _rooms, child_id = started()
+    session_id = start(client, child_id).json()["session_id"]
+    assert client.get(f"/v1/sessions/{session_id}").status_code == 401
+    status(client, session_id)
+    logged = store.where("audit_log", "action", "session.read")
+    assert len(logged) == 1
+    assert session_id not in json.dumps(logged[0])

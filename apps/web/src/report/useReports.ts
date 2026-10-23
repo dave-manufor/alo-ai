@@ -47,7 +47,8 @@ function useChildNames(): Record<string, ReportChild> {
   );
 }
 
-export function useReports(): ReportsState {
+/** `refreshKey`: load again when it changes (the screen sets it once a new report exists). */
+export function useReports(refreshKey = ''): ReportsState {
   const { children } = useAccount();
   const names = useChildNames();
   const [state, setState] = useState<ReportsState>({ status: 'loading' });
@@ -64,9 +65,9 @@ export function useReports(): ReportsState {
     return () => {
       cancelled = true;
     };
-    // names is derived from the account store; reload only on mount.
+    // names is derived from the account store; reload on mount and when the key changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refreshKey]);
   if (dataMode !== 'live') {
     // Fixture build: one sample check per child the guardian has added (childReports.ts).
     return { status: 'ready', reports: reportsFor(children), children: names };

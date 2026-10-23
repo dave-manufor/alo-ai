@@ -7,21 +7,24 @@ VOICE_MODE and SESSION_PROFILE are server settings."""
 
 import json
 import logging
+import re
 from collections.abc import Callable
 from typing import Annotated, Any, Literal
 
-from aloai_contracts import SESSION_ROOM_METADATA, SESSION_START_RESPONSE
+from aloai_contracts import SESSION_ROOM_METADATA, SESSION_START_RESPONSE, SESSION_STATUS
 from aloai_store import Store
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
-from .access import Clock, NewId, audit, owned_child, utc_now
+from .access import Clock, NewId, audit, not_found, owned_child, utc_now
 from .auth import Principal
 from .children import default_id
 from .errors import AccountError
 from .rooms import Rooms
 
 log = logging.getLogger("aloai.account.sessions")
+_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
+STATUS_VERSION = 2
 
 
 class NewSession(BaseModel):
@@ -73,12 +76,39 @@ def router(
             # The class only: a LiveKit error can echo the request, which carries a child id.
             log.error("could not open the session room: %s", type(error).__name__)
             raise unavailable() from None
+        # Remembers who was handed this id, so the status can be read before the agent writes
+        # sessions/{id} and so a session is only ever readable by the guardian who started it.
+        store.set(
+            f"session_starts/{session_id}",
+            {"guardian_id": principal.guardian_id, "child_id": body.child_id},
+        )
         audit(
             store, principal, "session.start",
             {"child_id": body.child_id, "session_id": session_id}, now, new_id,
         )  # fmt: skip
         reply = {"session_id": session_id, "livekit_url": rooms.url, "token": token}
         SESSION_START_RESPONSE.validate(reply)
+        return reply
+
+    @routes.get("/v1/sessions/{session_id}")
+    def session_status(
+        session_id: str, principal: Annotated[Principal, current]
+    ) -> dict[str, Any]:
+        if not _ID.fullmatch(session_id):
+            raise not_found()
+        issued = store.get(f"session_starts/{session_id}")
+        if issued is None or issued.get("guardian_id") != principal.guardian_id:
+            raise not_found()
+        written = store.get(f"sessions/{session_id}")
+        reply = {
+            "schema_version": STATUS_VERSION,
+            "session_id": session_id,
+            "status": written["status"] if written else "PENDING",
+            "report_ready": store.get(f"reports/{session_id}") is not None,
+            "plan_ready": store.get(f"plans/plan_{session_id}") is not None,
+        }
+        SESSION_STATUS.validate(reply)
+        audit(store, principal, "session.read", {"session_id": session_id}, now, new_id)
         return reply
 
     return routes

@@ -25,4 +25,6 @@ export interface SessionDriver {
   /** Register a listener for a session that cannot start or cannot continue.
    *  `plain` is a sentence for a grown-up. Live drivers only. */
   onFailed?(listener: (plain: string) => void): void;
+  /** The id of the session this driver started, once it has one. Live drivers only. */
+  sessionId?(): string | null;
 }

@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
-import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { retrySync, useSyncFailed } from './account/syncStatus';
+import { dataMode } from './api';
 import { useAccount } from './account/store';
+import { saveReturnTo } from './auth/returnTo';
+import { Button } from './design-system/alo';
+import { Notice } from './ui/primitives';
 import AccountPage from './pages/AccountPage';
 import ChildFormPage from './pages/ChildFormPage';
 import CheckoutPlaceholderPage from './pages/CheckoutPlaceholderPage';
@@ -27,13 +32,32 @@ import SchoolShell from './shell/SchoolShell';
 // SessionPage itself.
 function RequireGuardian({ children }: { children: ReactNode }) {
   const { guardian } = useAccount();
+  const location = useLocation();
+  // Keep the screen they asked for, so sign-in can bring them back to it.
+  if (!guardian) saveReturnTo(location.pathname + location.search);
   return guardian ? <>{children}</> : <Navigate to="/signin" replace />;
 }
 
-// A guardian with no child yet goes through the two onboarding steps first.
+// A guardian with no child yet goes through the two onboarding steps first. In a live build an
+// empty list can also mean the children could not be loaded: that is said, not treated as new,
+// so a guardian does not add the same child twice because the connection blipped.
 function RequireChild({ children }: { children: ReactNode }) {
   const { children: kids } = useAccount();
-  return kids.length > 0 ? <>{children}</> : <Navigate to="/onboarding/consent" replace />;
+  const failed = useSyncFailed();
+  if (kids.length > 0) return <>{children}</>;
+  if (failed) {
+    return (
+      <div className="page page--mid">
+        <Notice tone="sky" role="alert">
+          We could not load your children. Please check the internet and try again.
+        </Notice>
+        <Button variant="primary" size="grown" onClick={() => void retrySync()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
+  return <Navigate to="/onboarding/consent" replace />;
 }
 
 // Old paths keep working: the session screen and earlier links still use some of them.
@@ -86,8 +110,8 @@ export default function App() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
         <Route path="/plan" element={<PlanPage />} />
-        <Route path="/upgrade" element={<UpgradePage />} />
-        <Route path="/plan/checkout" element={<CheckoutPlaceholderPage />} />
+        <Route path="/upgrade" element={dataMode === 'live' ? <Navigate to="/plan" replace /> : <UpgradePage />} />
+        <Route path="/plan/checkout" element={dataMode === 'live' ? <Navigate to="/plan" replace /> : <CheckoutPlaceholderPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/children/new" element={<ChildFormPage mode="new" />} />
         <Route path="/children/:childId/edit" element={<ChildFormPage mode="edit" />} />
