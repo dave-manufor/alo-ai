@@ -28,6 +28,9 @@ const PLAIN: Record<string, string> = {
   NOT_FOUND: 'We could not find that. Please go back and try again.',
   UNAUTHENTICATED: 'Please sign in again.',
   FORBIDDEN: 'This is not available for your account.',
+  PAYMENT_REQUIRED: 'The weekly plan comes with the subscription.',
+  PAYMENTS_UNAVAILABLE: 'Payment is not open just now. Please try again in a moment.',
+  ALREADY_SUBSCRIBED: 'You already have the weekly plan.',
 };
 
 export function plainMessage(status: number, code: string): string {
