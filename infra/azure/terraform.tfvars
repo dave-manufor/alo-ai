@@ -37,8 +37,8 @@ llm_models = {
   grader    = "gemini-3.1-flash-lite"
   quick     = "gemini-3.1-flash-lite"
   coach     = "gemini-3.1-flash-lite"
-  generator = "gemini-3.1-flash-lite"
-  tagger    = "gemini-3.1-flash-lite"
+  generator = "gemini-3.5-flash-lite"
+  tagger    = "gemini-3.5-flash-lite"
   embedding = "gemini-embedding-001"
 }
 openai_deployments = {}
