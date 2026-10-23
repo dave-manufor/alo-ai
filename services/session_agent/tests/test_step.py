@@ -584,7 +584,8 @@ def test_the_grader_saying_no_listening_goes_to_close():
 def test_the_grader_saying_listening_runs_the_listening_module():
     state, actions = step(at_awaiting(), QuickScore(run_listening_module=True))
     assert state.phase is Phase.LISTENING and state.listening_run
-    assert actions[0] == PlayClip("listening_story")
+    assert actions[0] == PlayClip("listening_intro")  # tell the child what comes next
+    assert actions[1] == PlayClip("listening_story")
 
 
 def test_quick_score_timeout_runs_the_listening_module():
@@ -603,14 +604,14 @@ def test_awaiting_quick_ignores_other_events():
 
 def test_listening_story_is_a_clip_even_in_live_first():
     _, actions = step(at_awaiting(voice="live_first"), QuickScore(True))
-    assert actions[0] == PlayClip("listening_story")
+    assert actions[1] == PlayClip("listening_story")
 
 
 def test_listening_story_length_follows_the_profile():
     _, standard = step(at_awaiting(), QuickScore(True))
     _, demo = step(at_awaiting(profile="demo"), QuickScore(True))
-    assert StartTimer(standard[1].name, 40_000) == standard[1]
-    assert StartTimer(demo[1].name, 20_000) == demo[1]
+    assert StartTimer(standard[2].name, 40_000) == standard[2]
+    assert StartTimer(demo[2].name, 20_000) == demo[2]
 
 
 def test_story_then_retell_then_items_then_close():
@@ -906,3 +907,45 @@ def test_profile_values_match_the_prd():
     assert cfg.STANDARD.reading_cap_ms == cfg.DEMO.reading_cap_ms == 90_000
     assert cfg.TOLD_WORD_MS == 5_000
     assert not hasattr(cfg, "LISTENING_RC_THRESHOLD")  # the listening decision is scoring's
+
+
+# ---- guidance between the stages
+
+
+def says(actions):
+    return [a.clip_id for a in actions if isinstance(a, PlayClip)]
+
+
+def test_the_child_is_told_to_read_before_the_story_appears():
+    state, actions = step(at_mic(), MicResult(True))
+    assert state.phase is Phase.READING
+    spoken = says(actions)
+    assert spoken == ["reading_prompt"]
+    # her instruction comes first, so the web app (which plays messages in order) shows the
+    # story when she has finished
+    assert actions.index(PlayClip("reading_prompt")) < actions.index(ShowPassage("p1"))
+
+
+def test_a_finished_reading_is_thanked_at_once_and_the_retell_follows():
+    state = reading_shown()
+    state, _ = step(state, PassageShown("p1"))
+    state, actions = step(state, ReadingDone(60_000))
+    assert says(actions) == ["reading_praise"]
+    state, actions = step(state, T(state, "transition"))
+    assert says(actions) == ["retell_prompt"]
+
+
+def test_the_questions_are_introduced_before_the_first_one():
+    state = at_retell()
+    state, actions = step(state, ANSWERED)  # the retell answer, then the follow-up
+    state, actions = step(state, ANSWERED)
+    assert says(actions)[:2] == ["questions_intro", "question:0"]
+
+
+def test_the_listening_story_is_introduced_except_after_the_kind_ending():
+    _, normal = step(at_awaiting(), QuickScore(True))
+    assert says(normal)[:2] == ["listening_intro", "listening_story"]
+    state = reading_shown()
+    state, _ = step(state, PassageShown("p1"))
+    _, kind = step(state, ReadingProgress(30_000, 4))  # fewer than 10 words: the kind ending
+    assert says(kind) == ["kind_end", "listening_story"]  # it already says "now a story"

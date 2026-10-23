@@ -135,7 +135,7 @@ def played(driver, clock=None, after_ms=0):
     """The web app finished playing the clip the agent last sent (if one is playing)."""
     if clock is not None:
         clock.ms += after_ms
-    if driver._clip_playing:
+    while driver._clip_playing:  # every clip the agent has queued, one after another
         driver.on_client_message(PLAYED)
     if clock is not None:
         clock.ms += 400  # past the echo tail: the room is quiet again
@@ -227,6 +227,68 @@ def test_the_kindness_window_runs_from_when_the_story_is_shown_not_from_when_it_
     played(driver, clock)
     driver.on_transcript("ada and mama", final=False)
     wait(driver, clock, 20_000)  # 20 s of reading, short of the 30 s window
+    assert driver.state.phase is Phase.READING
+
+
+# ---- the reading ends when the reader has stopped
+
+
+def read_aloud(driver, clock, words, *, seconds=4):
+    """The child reads the first `words` words of the story out loud (one speech segment)."""
+    played(driver, clock)
+    text = " ".join(PAIR.read["text_content"].split()[:words])
+    driver.on_speech_started()
+    driver.on_transcript(text, final=False)
+    clock.ms += seconds * 1_000
+    driver.on_speech_ended()
+
+
+def test_a_reader_who_has_finished_does_not_wait_for_the_cap():
+    # Speech to text followed nearly all of the story but never matched its last word. The
+    # old rule waited for the 90 s cap (a live session waited about 40 s after the child
+    # had finished); now the reading ends 8 s after they stopped.
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    total = len(PAIR.read["text_content"].split())
+    read_aloud(driver, clock, total - 2)
+    assert driver.state.phase is Phase.READING and not driver.tracker.done_reached
+    wait(driver, clock, 7_000)
+    assert driver.state.phase is Phase.READING  # not yet: they may only be taking a breath
+    wait(driver, clock, 2_000)
+    assert driver.state.phase is Phase.TRANSITION
+    assert ports.channel.plays()[-1] == "reading_praise"  # thanked at once
+
+
+def test_a_reader_who_stopped_part_way_is_not_cut_off_early():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    total = len(PAIR.read["text_content"].split())
+    read_aloud(driver, clock, max(11, total // 2))  # past the kindness minimum, short of 80%
+    wait(driver, clock, 14_000)
+    assert driver.state.phase is Phase.READING
+    wait(driver, clock, 2_000)  # 15 s of quiet after 10+ words: they have stopped
+    assert driver.state.phase is Phase.TRANSITION
+
+
+def test_a_child_who_read_only_a_few_words_still_gets_the_kind_ending_not_an_early_done():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    read_aloud(driver, clock, 4)
+    wait(driver, clock, 25_000)  # well past 15 s quiet, short of the 30 s window
+    assert driver.state.phase is Phase.READING
+    wait(driver, clock, 6_000)
+    assert driver.state.phase is Phase.LISTENING and driver.state.reading_stopped_early
+
+
+def test_the_reading_does_not_end_while_kemis_clip_is_playing():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    total = len(PAIR.read["text_content"].split())
+    read_aloud(driver, clock, total - 2)
+    # "That word is X." goes out and the phone has not finished playing it yet
+    clock.ms += 10_000
+    driver._send({"cmd": "play", "clip_id": "word_x"})
+    driver.tick()
     assert driver.state.phase is Phase.READING
 
 
@@ -404,7 +466,10 @@ def test_the_web_app_can_follow_a_whole_session_from_the_protocol_alone(validate
         "ENDED",
     ]
     reading = next(i for i, m in enumerate(sent) if m.get("step") == "READING")
-    shown = sent[reading + 1]
+    # Kemi tells the child what to do first; the web app plays messages in order, so the story
+    # appears when she has finished.
+    assert sent[reading + 1] == {"schema_version": 3, "cmd": "play", "clip_id": "reading_prompt"}
+    shown = sent[reading + 2]
     assert shown["cmd"] == "show_passage" and shown["passage_id"] == "bank_p3_market_day"
     assert " ".join(shown["sentences"]) == PAIR.read["text_content"]
 

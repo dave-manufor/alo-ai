@@ -30,8 +30,14 @@ PROFILES = {STANDARD.name: STANDARD, DEMO.name: DEMO}
 
 VOICE_MODES = ("cache_first", "live_first")
 
-SHOWN_WAIT_MS = 12_000  # then the reading starts even if the web app never says the story is up
+SHOWN_WAIT_MS = 20_000  # then the reading starts even if the web app never says the story is up
 TOLD_WORD_MS = 5_000  # no progress on the same word before "That word is X." (PRD 4.1)
+# The reading also ends when the child has stopped, not only at the story's last word (which
+# speech to text often misses) or the 90 s cap [CAL]. Until now a reader who finished but whose
+# last words were not recognised waited out the cap (a live session waited about 40 s).
+READING_DONE_FRACTION = 0.8  # this much of the story followed...
+READING_DONE_QUIET_MS = 8_000  # ...and this long since the child last spoke: they have finished
+READING_GAVE_UP_QUIET_MS = 15_000  # 10+ words read, then this long quiet: they have stopped
 KINDNESS_WINDOW_MS = 30_000  # first 30 s of reading
 KINDNESS_MIN_WORDS = 10  # fewer than this in the window ends the reading kindly
 TRANSITION_MS = 2_000

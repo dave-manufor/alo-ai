@@ -22,6 +22,7 @@ from .clips.catalog import PROMPTS, ClipCatalog
 from .events import Publisher, SessionContext, build_event
 from .intents import intent
 from .machine import initial_state, step
+from .machine import profiles as cfg
 from .machine.types import (
     Action,
     CallQuickScore,
@@ -38,6 +39,7 @@ from .machine.types import (
     Phase,
     PlayClip,
     PlayWordClip,
+    ReadingDone,
     QuickScore,
     Reconnected,
     RequestPassage,
@@ -146,8 +148,12 @@ class Driver:
     # What the agent heard, for the logs only (audio_stats.py): a session that hears nothing
     # looks the same as one that hears a child unless these are written down.
     stats: AudioStats = field(default_factory=AudioStats)
-    _clip_playing: bool = False  # a play was sent and its ack has not come back
+    _plays_out: int = 0  # clips sent whose ack has not come back (several can be queued)
     _stats_logged_ms: int = 0
+
+    @property
+    def _clip_playing(self) -> bool:
+        return self._plays_out > 0
 
     # ---- lifecycle
 
@@ -227,7 +233,7 @@ class Driver:
         if isinstance(ack, PassageShown):
             self.handle(ack)  # the story is up: the reading clock starts
             return
-        self._clip_playing = False
+        self._plays_out = max(0, self._plays_out - 1)
         # A clip that could not play is over too: do not wait for it.
         self.turns.prompt_finished(self.clock_ms())
         self.handle(ack)
@@ -312,7 +318,7 @@ class Driver:
 
     def _send(self, message: dict) -> None:
         if message.get("cmd") == "play":
-            self._clip_playing = True
+            self._plays_out += 1
             self.turns.prompt_started(self.clock_ms())
         self.ports.channel.send({"schema_version": protocol.SCHEMA_VERSION, **message})
 
@@ -382,9 +388,27 @@ class Driver:
             self.tracker.stall(now),
             self.tracker.progress(now, self.state.told),
             self.tracker.done(now),
+            self._reader_finished(now),
         ):
             if event is not None and self._reading:
                 self.handle(event)
+
+    def _reader_finished(self, now: int) -> ReadingDone | None:
+        """The child has stopped reading although speech to text never matched the last word:
+        most of the story followed and a while since they spoke, or any words and a long
+        quiet. Without this the reading waited out the 90 s cap."""
+        quiet = self.turns.quiet_ms(now)
+        if quiet is None or self.turns.ignoring(now) or self.tracker.done_reached:
+            return None
+        far = self.tracker.fraction_read >= cfg.READING_DONE_FRACTION
+        # A child who read only a few words and stopped is not "done": the kindness rule
+        # (fewer than 10 words in 30 s) ends that reading kindly, as before.
+        read_enough = self.tracker.words_read >= cfg.KINDNESS_MIN_WORDS
+        if (far and quiet >= cfg.READING_DONE_QUIET_MS) or (
+            read_enough and quiet >= cfg.READING_GAVE_UP_QUIET_MS
+        ):
+            return ReadingDone(elapsed_ms=self.tracker.elapsed(now))
+        return None
 
     # ---- passages and records
 

@@ -98,6 +98,14 @@ class PositionTracker:
     def done_reached(self) -> bool:
         return self._position >= len(self._words)
 
+    @property
+    def fraction_read(self) -> float:
+        """How much of the story the child has been followed through, 0 to 1."""
+        return min(1.0, self._position / len(self._words)) if self._words else 1.0
+
+    def elapsed(self, now_ms: int) -> int:
+        return self._elapsed(now_ms)
+
     # ---- internals
 
     def _elapsed(self, now_ms: int) -> int:

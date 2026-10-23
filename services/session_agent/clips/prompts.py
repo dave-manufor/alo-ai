@@ -14,6 +14,11 @@ PROMPT_TEXTS: dict[str, str] = {
     "mic_closer": "Bring the phone a little closer. Count again.",  # PRD 4.1
     "mic_softer": "Speak a little softer. Count again.",  # PRD 4.1
     "story_almost_ready": "Your story is almost ready!",  # PRD 4.1
+    # Guidance between the stages: a child is told what to do and what comes next.
+    "reading_prompt": "Well done! Now read your story out loud.",
+    "reading_praise": "Thank you for reading!",
+    "questions_intro": "Now I have some questions for you.",
+    "listening_intro": "Now listen to my story.",
     "retell_prompt": "In your own words, tell me everything you remember from the story.",
     "anything_else": "Anything else?",  # PRD 4.1
     "take_your_time": "Take your time.",  # PRD 4.2
