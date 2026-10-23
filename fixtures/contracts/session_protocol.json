@@ -42,5 +42,6 @@
   { "schema_version": 3, "cmd": "child_speaking", "speaking": true },
   { "schema_version": 3, "cmd": "child_speaking", "speaking": false },
   { "schema_version": 3, "cmd": "played", "clip_id": "word_market" },
-  { "schema_version": 3, "cmd": "missing", "clip_id": "word_market" }
+  { "schema_version": 3, "cmd": "missing", "clip_id": "word_market" },
+  { "schema_version": 3, "cmd": "shown", "passage_id": "bank_p3_market_day" }
 ]

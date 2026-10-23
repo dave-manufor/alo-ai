@@ -34,6 +34,7 @@ from .machine.types import (
     MicResult,
     PassageFallback,
     PassageReady,
+    PassageShown,
     Phase,
     PlayClip,
     PlayWordClip,
@@ -222,6 +223,9 @@ class Driver:
     def on_client_message(self, raw: bytes) -> None:
         ack = protocol.parse_client(raw)
         if ack is None:
+            return
+        if isinstance(ack, PassageShown):
+            self.handle(ack)  # the story is up: the reading clock starts
             return
         self._clip_playing = False
         # A clip that could not play is over too: do not wait for it.

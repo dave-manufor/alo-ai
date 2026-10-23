@@ -35,6 +35,7 @@ from .types import (
     PlayClip,
     PlayWordClip,
     QuickScore,
+    PassageShown,
     ReadingDone,
     ReadingProgress,
     Reconnected,
@@ -362,7 +363,9 @@ def _mic_done(state: SessionState) -> Result:
 
 
 def _enter_reading(state: SessionState) -> Result:
-    state = _next_task(state, phase=Phase.READING, sub="", told=(), kindness_checked=False)
+    state = _next_task(
+        state, phase=Phase.READING, sub="", told=(), kindness_checked=False, reading_live=False
+    )
     return state, [
         EmitEvent(
             "session.started",
@@ -373,6 +376,18 @@ def _enter_reading(state: SessionState) -> Result:
             },
         ),
         ShowPassage(state.passage_id),
+        # The reading clock does not start until the child can see the story (the web app's
+        # `shown`), or this wait runs out: the web app may still be loading the word clips.
+        _timer("shown_wait", state, cfg.SHOWN_WAIT_MS),
+    ]
+
+
+def _start_reading(state: SessionState) -> Result:
+    """The story is on the child's screen: record, follow the reading, start the 90 s cap."""
+    if state.reading_live:
+        return state, [Log("reading already started")]
+    state = replace(state, reading_live=True)
+    return state, [
         StartRecording("READING"),
         _timer("reading_cap", state, state.profile.reading_cap_ms),
     ]
@@ -398,6 +413,10 @@ def _reading(state: SessionState, event: Event) -> Result:
         case ReadingDone():
             # SHORT_READING is the Scorer's flag, from forced alignment (PRD 6.1).
             return _finish_reading(state, kindly=False)
+        case PassageShown(passage_id=passage_id) if passage_id == state.passage_id:
+            return _start_reading(state)
+        case Timer() if _is_timer(event, "shown_wait", state):
+            return _start_reading(state)
         case Timer() if _is_timer(event, "reading_cap", state):
             return _finish_reading(state, kindly=False)
     return _ignored(state, event)

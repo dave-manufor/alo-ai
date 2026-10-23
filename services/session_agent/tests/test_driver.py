@@ -164,6 +164,12 @@ def fire(driver, timers, kind):
 
 
 def to_reading(driver, ports, clock):
+    to_story(driver, ports, clock)
+    shown(driver)
+
+
+def to_story(driver, ports, clock):
+    """Everything up to the story being sent to the web app, which has not said it is up."""
     driver.start()
     speak(driver, clock, "i like football", then_quiet_ms=1_500)
     assert ports.passages.calls == [("generate", "i like football", 20_000)]
@@ -174,11 +180,54 @@ def to_reading(driver, ports, clock):
     assert driver.state.phase is Phase.READING
 
 
+def shown(driver):
+    """The web app says the story is on the child's screen: the reading clock starts."""
+    passage_id = driver.state.passage_id
+    driver.on_client_message(
+        f'{{"schema_version": 3, "cmd": "shown", "passage_id": "{passage_id}"}}'.encode()
+    )
+
+
 def read_passage(driver, clock):
     played(driver, clock)
     driver.on_transcript(PAIR.read["text_content"], final=False)
     clock.ms += 250
     driver.tick()
+
+
+# ---- the reading clock starts when the story is on the child's screen
+
+
+def test_the_reading_clock_waits_for_the_story_to_be_shown():
+    driver, ports, clock, _ = make_driver()
+    to_story(driver, ports, clock)
+    assert [m["cmd"] for m in ports.channel.sent].count("show_passage") == 1
+    assert driver._reading is False  # no recording of the reading, no word tracking yet
+    assert [t.phase for t in ports.recorder.turns][-1] != "READING"
+    wait(driver, clock, 8_000)  # the phone is still loading the word clips
+    assert driver.state.phase is Phase.READING and driver._reading is False
+    shown(driver)  # now the child can see it
+    assert driver._reading is True
+    assert ports.recorder.turns[-1].phase == "READING"
+    assert ports.timers.last("reading_cap")
+
+
+def test_a_web_app_that_never_says_shown_still_gets_its_reading_after_the_wait():
+    driver, ports, clock, _ = make_driver()
+    to_story(driver, ports, clock)
+    fire(driver, ports.timers, "shown_wait")
+    assert driver._reading is True and ports.recorder.turns[-1].phase == "READING"
+
+
+def test_the_kindness_window_runs_from_when_the_story_is_shown_not_from_when_it_was_sent():
+    driver, ports, clock, _ = make_driver()
+    to_story(driver, ports, clock)
+    wait(driver, clock, 25_000)  # a slow phone: 25 s before the story is up
+    shown(driver)
+    played(driver, clock)
+    driver.on_transcript("ada and mama", final=False)
+    wait(driver, clock, 20_000)  # 20 s of reading, short of the 30 s window
+    assert driver.state.phase is Phase.READING
 
 
 # ---- Kemi's prompts are not the child

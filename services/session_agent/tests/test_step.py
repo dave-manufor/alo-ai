@@ -19,6 +19,7 @@ from services.session_agent.machine.types import (
     MicResult,
     PassageFallback,
     PassageReady,
+    PassageShown,
     Phase,
     PlayClip,
     PlayWordClip,
@@ -239,14 +240,52 @@ def test_mic_ok_with_passage_ready_starts_reading():
         "session_profile": "standard",
     }
     assert ShowPassage("p1") in actions
-    assert StartRecording("READING") in actions
+    # The reading clock waits for the story to be on the child's screen.
+    assert StartRecording("READING") not in actions
+    assert not any(isinstance(a, StartTimer) and a.ms == 90_000 for a in actions)
+    assert has_timer(actions, "shown_wait")
+
+
+def reading_shown(profile="standard"):
+    state, _ = step(at_mic(profile=profile), MicResult(True))
+    return state
+
+
+def test_the_story_being_on_screen_starts_the_reading_clock():
+    state = reading_shown()
+    state, actions = step(state, PassageShown("p1"))
+    assert state.reading_live
+    assert actions[0] == StartRecording("READING")
     assert any(isinstance(a, StartTimer) and a.ms == 90_000 for a in actions)
 
 
 def test_demo_reading_has_the_same_90_second_cap():
     # PRD 4.1: reading is capped at 90 s; a slower reader on stage still finishes.
-    _, actions = step(at_mic(profile="demo"), MicResult(True))
+    _, actions = step(reading_shown("demo"), PassageShown("p1"))
     assert any(isinstance(a, StartTimer) and a.ms == 90_000 for a in actions)
+
+
+def test_a_web_app_that_never_says_shown_does_not_stall_the_reading():
+    state = reading_shown()
+    state, actions = step(state, T(state, "shown_wait"))
+    assert state.reading_live and StartRecording("READING") in actions
+    assert any(isinstance(a, StartTimer) and a.ms == 90_000 for a in actions)
+
+
+def test_shown_twice_or_after_the_wait_runs_the_clock_once():
+    state = reading_shown()
+    state, _ = step(state, PassageShown("p1"))
+    again, actions = step(state, PassageShown("p1"))
+    assert again == state and not any(isinstance(a, StartRecording) for a in actions)
+    late, actions = step(state, T(state, "shown_wait"))
+    assert late == state and not any(isinstance(a, StartRecording) for a in actions)
+
+
+def test_shown_for_another_story_does_not_start_the_clock():
+    state = reading_shown()
+    same, actions = step(state, PassageShown("some-other-story"))
+    assert same == state and not state.reading_live
+    assert any(isinstance(a, Log) for a in actions)
 
 
 def test_mic_ok_without_passage_waits_with_the_cover_clip():

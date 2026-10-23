@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "session_protocol.schema.json",
   "title": "SessionProtocolMessage",
-  "description": "LiveKit data-channel messages (topic aloai.session) between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: clip_list, play, step, show_passage, hide_passage, reconnecting, child_speaking. Client to agent: played, missing. The agent decides every step; the client only follows these messages and never moves the session on by itself. The client never shows a score, timer or red mark. schema_version 2 adds clip texts, the passage text on show_passage, and the step message. schema_version 3 adds child_speaking; the web app accepts 2 and 3.",
+  "description": "LiveKit data-channel messages (topic aloai.session) between the Session Agent (W2, producer) and the web app (W1, consumer). Agent to client: clip_list, play, step, show_passage, hide_passage, reconnecting, child_speaking. Client to agent: played, missing, shown. The agent decides every step; the client only follows these messages and never moves the session on by itself. The client never shows a score, timer or red mark. schema_version 2 adds clip texts, the passage text on show_passage, and the step message. schema_version 3 adds child_speaking; the web app accepts 2 and 3.",
   "oneOf": [
     {
       "type": "object",
@@ -115,6 +115,17 @@
         "clip_id": { "type": "string", "minLength": 1 }
       },
       "required": ["schema_version", "cmd", "clip_id"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "description": "Client to agent, once per story: the story named by `passage_id` (the id of the show_passage just handled) is on the child's screen and its word clips are downloaded (or the client stopped waiting for them after 8 s). The agent starts the reading clock from this moment: the recording of the reading, the position tracker, the 90 s cap and the 30 s kindness window. Without it the agent starts them itself 12 s after sending show_passage, so a client that never sends it is never stalled. Added without a schema_version bump: it is a new client command, an agent that does not know it drops it, and nothing existing changes.",
+      "properties": {
+        "schema_version": { "type": "integer", "const": 3 },
+        "cmd": { "const": "shown" },
+        "passage_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["schema_version", "cmd", "passage_id"],
       "additionalProperties": false
     }
   ]
