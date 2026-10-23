@@ -6,7 +6,8 @@ import { createSessionClipCache, unlockAudio } from '../session/clipCache';
 import type { SessionDriver } from '../session/driver';
 import { createSessionDriver } from '../session/driverFactory';
 import HoldToConfirm from '../session/HoldToConfirm';
-import { requestMic, type MicResult } from '../session/micPermission';
+import { createMicMeter, primeAudioContext, useMicWatch, type MicMeter } from '../session/micLevel';
+import { openMic, stopMic, type MicResult } from '../session/micPermission';
 import japaBase from '../session/assets/japa-base.svg';
 import NightStage from '../session/NightStage';
 import type { AgentMessage } from '../session/protocol';
@@ -17,6 +18,15 @@ import type { Mode, StageInput } from '../session/stageEngine';
 // hand-back (the artifact: 8 s after the light becomes the moon).
 const END_MS = 8000;
 const QUESTION_CLIP = /^question:(\d+)$/;
+// The steps in which the child is expected to talk.
+const LISTEN_STEPS = new Set([
+  'INTEREST_CHAT',
+  'MIC_CHECK',
+  'READING',
+  'RETELL',
+  'QUESTIONS',
+  'LISTENING',
+]);
 
 // Kid mode session screen (PRD 4.1, 4.4): the "Alo Night Session V" design.
 // One night sky; Auntie Kemi is a light that moves (centre, the corner while
@@ -28,10 +38,13 @@ const QUESTION_CLIP = /^question:(\d+)$/;
 // itself. Children never see a score, timer, percentage or red mark.
 export default function SessionPage({
   createDriver,
+  createMeter = createMicMeter,
 }: {
   /** Overrides which SessionDriver carries the session (tests). By default the
    *  build decides (driverFactory): fixture replay, or LiveKit in a live build. */
   createDriver?: () => SessionDriver;
+  /** Overrides how the microphone level is measured (tests). */
+  createMeter?: (stream: MediaStream) => MicMeter;
 } = {}) {
   const { childId } = useParams();
   const navigate = useNavigate();
@@ -44,6 +57,11 @@ export default function SessionPage({
   const [endDone, setEndDone] = useState(false);
   const [reported, setReported] = useState(false);
   const driverRef = useRef<SessionDriver | null>(null);
+  // The one microphone capture: published to the room, and measured for the green lights.
+  const micStreamRef = useRef<MediaStream | null>(null);
+  const meterRef = useRef<MicMeter | null>(null);
+  const [meter, setMeter] = useState<MicMeter | null>(null);
+  const [quietDismissed, setQuietDismissed] = useState(false);
 
   // Fixture build: clips are simulated locally. Live build: every clip is
   // downloaded into Cache Storage before it can be played (D4).
@@ -75,21 +93,48 @@ export default function SessionPage({
       return;
     }
     setFailure(null);
-    const driver = (createDriver ?? (() => createSessionDriver(childId ?? '')))();
+    const driver = (
+      createDriver ?? (() => createSessionDriver(childId ?? '', micStreamRef.current ?? undefined))
+    )();
     driverRef.current = driver;
     driver.onFailed?.((plain) => setFailure(plain));
     driver.start(dispatch);
   }
 
-  function retrySession() {
+  // Opens the microphone and starts measuring it. Stopping a driver ends the track it
+  // published, so a fresh capture is opened for every (re)start.
+  async function acquireMic(): Promise<MicResult> {
+    meterRef.current?.stop();
+    stopMic(micStreamRef.current);
+    micStreamRef.current = null;
+    meterRef.current = null;
+    setMeter(null);
+    const { result, stream } = await openMic();
+    if (result === 'granted' && stream) {
+      micStreamRef.current = stream;
+      meterRef.current = createMeter(stream);
+      setMeter(meterRef.current);
+    }
+    return result;
+  }
+
+  async function retrySession() {
+    primeAudioContext(); // inside the tap, before any await (Safari)
     driverRef.current?.stop();
     setState(initialSessionState);
     setQuestionsLit(0);
+    setQuietDismissed(false);
+    const result = await acquireMic();
+    if (result !== 'granted') {
+      setMicPhase(result);
+      return;
+    }
     startSession();
   }
 
   async function askForMic() {
-    const result = await requestMic();
+    primeAudioContext(); // inside the tap, before the browser's own prompt (Safari)
+    const result = await acquireMic();
     if (result === 'granted') {
       setMicPhase('granted');
       setStarted(true);
@@ -102,6 +147,8 @@ export default function SessionPage({
   useEffect(
     () => () => {
       driverRef.current?.stop();
+      meterRef.current?.stop();
+      stopMic(micStreamRef.current);
     },
     [],
   );
@@ -116,6 +163,12 @@ export default function SessionPage({
   }, [ending]);
 
   const speaking = state.playingClipId !== null;
+  // The child is expected to talk (and Kemi is not): the green lights follow the microphone
+  // only then, so Kemi's own voice through the speaker never lights them.
+  const listening =
+    started && !state.reconnecting && failure === null && !speaking && LISTEN_STEPS.has(step ?? '');
+  const watch = useMicWatch(meter, listening);
+  const micQuiet = watch.quiet && !quietDismissed;
   const savedEarly = started && failure !== null && step !== null;
   const reading = step === 'READING' && state.passageVisible && state.passage !== null;
 
@@ -138,7 +191,8 @@ export default function SessionPage({
     () => ({
       mode,
       speaking,
-      childSpeaking: state.childSpeaking,
+      // The green lights: the agent heard the child, or this phone's microphone does.
+      childSpeaking: state.childSpeaking || watch.heard,
       counting: mode === 'count' && !speaking,
       questionsLit: ending ? 3 : questionsLit,
       seeds: 0,
@@ -153,6 +207,7 @@ export default function SessionPage({
       ending,
       questionsLit,
       state.childSpeaking,
+      watch.heard,
       state.playingClipId,
       state.passageVisible,
       state.passage,
@@ -246,19 +301,27 @@ export default function SessionPage({
 
   const blocked = micPhase === 'denied' || micPhase === 'unavailable';
   const failedToStart = failure !== null && !savedEarly;
+  const quietCard = micQuiet && !blocked && !failedToStart;
   const grownUp =
-    blocked || failedToStart ? (
+    blocked || failedToStart || quietCard ? (
       <div className="l grownup" data-theme="dark">
-        <div className="report" data-theme="light" role={failedToStart ? 'alert' : undefined}>
+        <div className="report" data-theme="light" role={failedToStart || quietCard ? 'alert' : undefined}>
           <h5>
             {failedToStart
               ? 'We could not start'
-              : micPhase === 'denied'
-                ? 'The microphone is turned off'
-                : 'No microphone found'}
+              : quietCard
+                ? `We can’t hear ${childName} yet`
+                : micPhase === 'denied'
+                  ? 'The microphone is turned off'
+                  : 'No microphone found'}
           </h5>
           {failedToStart ? (
             <p>{failure}</p>
+          ) : quietCard ? (
+            <p>
+              The microphone sounds very quiet. Please check it is not muted or covered, that the
+              phone is not on silent for calls, and that {childName} is close to it. Then tap Try again.
+            </p>
           ) : (
             <>
               <p>
@@ -280,13 +343,19 @@ export default function SessionPage({
             <button
               type="button"
               className="cta"
-              onClick={() => (failedToStart ? retrySession() : void askForMic())}
+              onClick={() => (failedToStart || quietCard ? void retrySession() : void askForMic())}
             >
               Try again
             </button>
-            <button type="button" className="cta2" onClick={() => navigate('/children')}>
-              Back to your children
-            </button>
+            {quietCard ? (
+              <button type="button" className="cta2" onClick={() => setQuietDismissed(true)}>
+                Carry on anyway
+              </button>
+            ) : (
+              <button type="button" className="cta2" onClick={() => navigate('/children')}>
+                Back to your children
+              </button>
+            )}
           </div>
         </div>
       </div>
