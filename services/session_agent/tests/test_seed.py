@@ -364,3 +364,43 @@ def test_a_homograph_with_no_ipa_is_reported_as_failed_and_left_out_of_the_dry_r
         bank=bank, store=store(), docs=MemoryStore(), line=mp3, word=word_mp3, dry_run=True, out=dry
     )
     assert "would make" in dry.getvalue()
+
+
+# ---- a generated story's word clips are made by the session (4.5 G5)
+
+
+def _story_pair():
+    from types import SimpleNamespace
+
+    read = next(p for p in BANK if p["mode"] == "READ")
+    return SimpleNamespace(read=read, listening=None)
+
+
+def test_a_session_makes_only_the_story_words_the_store_lacks(monkeypatch):
+    from types import SimpleNamespace
+
+    made = []
+    monkeypatch.setattr(
+        seed, "_synthesizers", lambda cfg, shared, env: (None, lambda t, i: made.append(t) or b"x")
+    )
+    clips = store()
+    cfg, shared = SimpleNamespace(ai_mode="live"), SimpleNamespace(cloud="azure")
+    make = seed.story_clip_maker(cfg, shared, {"TTS_VOICE": "en-NG-EzinneNeural"}, clips)
+    pair = _story_pair()
+    make(pair)
+    first = len(made)
+    assert first > 0
+    make(pair)  # the words are there now: nothing more is made
+    assert len(made) == first
+
+
+def test_a_session_without_a_voice_makes_no_clips():
+    from types import SimpleNamespace
+
+    clips = store()
+    azure = SimpleNamespace(cloud="azure")
+    voice = {"TTS_VOICE": "en-NG-EzinneNeural"}
+    assert seed.story_clip_maker(SimpleNamespace(ai_mode="fixtures"), azure, voice, clips) is None
+    assert seed.story_clip_maker(SimpleNamespace(ai_mode="live"), azure, {}, clips) is None
+    google = SimpleNamespace(cloud="google")
+    assert seed.story_clip_maker(SimpleNamespace(ai_mode="live"), google, voice, clips) is None

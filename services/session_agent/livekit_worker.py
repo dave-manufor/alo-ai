@@ -33,7 +33,7 @@ from livekit import rtc
 from livekit.agents import AutoSubscribe, JobContext, JobProcess, WorkerOptions, cli, stt, vad
 from livekit.plugins import silero
 
-from . import cloud, config, generation, metadata, quick_grade
+from . import cloud, config, generation, metadata, quick_grade, seed
 from .background import Background
 from .clips.catalog import ClipCatalog
 from .clips.store import ClipStore
@@ -254,6 +254,20 @@ def _tagger(settings: config.WorkerSettings, shared: aloai_env.Config) -> genera
     return generation.VertexTagger(vertex)
 
 
+def _clip_maker(settings: config.WorkerSettings, cfg: config.Config, shared: aloai_env.Config):
+    """Makes the missing "That word is X." clips of a generated story (None: this build cannot)."""
+    if cfg.ai_mode != "live" or shared.cloud != "azure" or not os.environ.get("TTS_VOICE"):
+        return None  # nothing to make them with: do not even open the store
+    store = ClipStore(
+        cloud.BlobBucket(open_blobs(shared), settings.cloud, settings.clips_bucket),
+        settings.clips_bucket,
+        settings.voice_profile_id,
+        settings.tts_version,
+        SCHEME_OF[settings.cloud],
+    )
+    return seed.story_clip_maker(cfg, shared, os.environ, store)
+
+
 def _story_requester(
     settings: config.WorkerSettings,
     cfg: config.Config,
@@ -276,6 +290,7 @@ def _story_requester(
             settings.core_url, generation.PATH, PASSAGE_WAIT_MS / 1000, _id_token(settings, shared)
         ),
         load_pair=lambda passage_id: bank.pair(passage_id, profile),
+        make_clips=_clip_maker(settings, cfg, shared),
     )
 
 
