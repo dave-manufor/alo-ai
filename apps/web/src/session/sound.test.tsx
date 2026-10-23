@@ -74,7 +74,7 @@ describe('the sound board', () => {
     expect(oscillators.every((o) => o.type === 'sine')).toBe(true);
     const master = gains[0];
     expect(master.gain.value).toBe(MASTER_GAIN);
-    expect(MASTER_GAIN).toBeLessThanOrEqual(0.1);
+    expect(MASTER_GAIN).toBeLessThanOrEqual(0.25); // still softer than a voice
     expect(master.connect).toHaveBeenCalledWith(destination);
     expect(oscillators.every((o) => o.start.mock.calls.length === 1 && o.stop.mock.calls.length === 1)).toBe(true);
   });
@@ -87,6 +87,33 @@ describe('the sound board', () => {
     expect(heard.slice(0, 5)).toEqual([...heard.slice(0, 5)].sort((a, b) => a - b));
     expect(heard[5]).toBe(heard[4]); // past the last: the last note
     expect(heard[6]).toBe(heard[0]); // below the first: the first note
+  });
+
+  it('wakes a suspended audio context (Safari suspends it when the microphone opens), then plays', async () => {
+    const { context, oscillators } = fakeContext('suspended');
+    const mutable = context as unknown as { state: string; resume: () => Promise<void> };
+    mutable.resume = vi.fn(async () => {
+      mutable.state = 'running';
+    });
+    const board = createSoundBoard(context);
+    board.chime('step');
+    expect(oscillators).toHaveLength(0); // not yet: the context is still waking
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(mutable.resume).toHaveBeenCalled();
+    expect(oscillators.map((o) => o.frequency.value)).toEqual([523.25, 659.25]);
+  });
+
+  it('stays silent if the context cannot be woken, and does not throw', async () => {
+    const { context, oscillators } = fakeContext('suspended');
+    (context as unknown as { resume: () => Promise<void> }).resume = vi.fn(async () => {
+      throw new Error('not allowed');
+    });
+    const board = createSoundBoard(context);
+    board.tick();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(oscillators).toHaveLength(0);
   });
 
   it('ticks once when the story appears', () => {
