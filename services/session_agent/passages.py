@@ -11,7 +11,7 @@ Firestore passages/{id}.
 """
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,6 +36,38 @@ STANDARD_BANK = {
     9: "bank_p5_music_contest",
     11: "bank_p6_river_crossing",
 }
+
+
+# Every STANDARD READ passage a session may be given for what the child likes: id -> (ARL,
+# its topic tags). A test keeps this equal to the passages in the bank (fixtures/contracts).
+INTEREST_BANK: dict[str, tuple[int, tuple[str, ...]]] = {
+    "bank_p1_ada_and_the_dog": (1, ("animals", "food")),
+    "bank_p2_lost_ball": (3, ("football", "family")),
+    "bank_p3_school_garden": (5, ("school", "farming")),
+    "bank_p4_night_bus": (7, ("transport", "family")),
+    "bank_p5_music_contest": (9, ("music", "school")),
+    "bank_p6_river_crossing": (11, ("adventure", "family")),
+}
+MAX_LEVEL_GAP = 2  # a story this many levels from the child's is still a fair read
+
+
+def passage_id_for_interest(level: int | None, tags: Sequence[str], default: str) -> str:
+    """The bank READ passage for what the child likes: among those within MAX_LEVEL_GAP of
+    the child's level, the one whose topics match their tags best (the first tag counts
+    double), the nearest level on a tie, the easier one on a further tie. `default` (the
+    passage for the child's level) when nothing matches or the level is not known."""
+    if level is None or not tags:
+        return default
+    best: tuple[int, int, int, str] | None = None
+    for passage_id, (arl, topics) in INTEREST_BANK.items():
+        gap = abs(arl - level)
+        match = sum((2 if rank == 0 else 1) for rank, tag in enumerate(tags) if tag in topics)
+        if gap > MAX_LEVEL_GAP or match == 0:
+            continue
+        key = (-match, gap, arl, passage_id)
+        if best is None or key < best:
+            best = key
+    return best[3] if best else default
 
 
 def passage_id_for_level(profile_name: str, level: int | None) -> str:
