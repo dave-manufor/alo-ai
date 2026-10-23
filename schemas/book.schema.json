@@ -5,7 +5,7 @@
   "description": "A catalogue book in Firestore books/{book_id} (PRD 9). Real open-licence African children's books only: title, author, licence, attribution and the publisher's level come from the book and its publisher, never invented. Producer: the book ingestion job aloai-book-ingest (W2), idempotent on file_hash. Consumers: book ranking and the Reading Coach's search_books (W3: vector search on embedding, then aloai_scoring.rank_books), and the web app's report screen (W1: title, author and attribution). A book whose estimated level is more than 2 ARL from its publisher level is held for a person to check and is never recommended while held. Contains no child data.",
   "type": "object",
   "properties": {
-    "schema_version": { "type": "integer", "const": 2 },
+    "schema_version": { "type": "integer", "const": 3 },
     "book_id": { "type": "string", "pattern": "^book_[a-z0-9_]+$" },
     "title": { "type": "string", "minLength": 1 },
     "author": { "type": "string", "minLength": 1 },
@@ -72,8 +72,8 @@
     },
     "embedding_model": {
       "type": "string",
-      "enum": ["text-embedding-005", "text-embedding-3-small"],
-      "description": "Pinned per deployment (text-embedding-005 on GCP, text-embedding-3-small on Azure). Vectors from different models are not comparable, so a new model means re-embedding every book (and the interest queries) together."
+      "enum": ["text-embedding-005", "text-embedding-3-small", "gemini-embedding-001"],
+      "description": "Pinned per deployment (text-embedding-005 on GCP, text-embedding-3-small on Azure OpenAI, gemini-embedding-001 on Azure through the Gemini route, schema_version 3). Vectors from different models are not comparable, so a new model means re-embedding every book (and the interest queries) together."
     },
     "page_count": { "type": "integer", "minimum": 1 },
     "illustration_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
