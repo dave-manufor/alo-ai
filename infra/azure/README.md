@@ -2,14 +2,14 @@
 
 One flat Terraform configuration for the Azure build, next to the Google Cloud one described in PRD 15.1. Read `docs/adr/0001-azure-as-a-second-cloud.md` for why and for the service map. Nothing here is created or changed by hand in the portal; if a manual fix is unavoidable, copy it into Terraform the same day.
 
-Written and validated (`terraform fmt`, `terraform validate`) without an Azure subscription to hand. **It has never been planned or applied.** Expect the first plan to need small fixes.
+Planned and applied by hand against the study subscription (2026-10-22, by David with `terraform apply` run from his own terminal; CI does not apply). `terraform fmt` and `terraform validate` run in CI. For the steps to put the web app live and run a study day, see `docs/ops/go-live.md` and `docs/ops/study-day-runbook.md`.
 
 ## What it creates
 
 | File | What |
 |---|---|
 | `main.tf` | Resource group, a managed identity per service and one for CI (GitHub OIDC), Container Registry, Blob Storage (`audio` private with a 90-day lifecycle, `clips` public read, `books` private), Cosmos DB (`docs`, and `books` with a vector index through `azapi`), Service Bus queues from `../events.json`, Key Vault entries, Azure OpenAI and Speech with their deployments, every role assignment, the budget |
-| `apps.tf` | Log Analytics, the Container Apps environment, the four services, the book-ingestion job, and the Static Web Apps resource for the web app (West Europe, Free tier) |
+| `apps.tf` | Log Analytics, the Container Apps environment, the four services, the book-ingestion job, and the Static Web Apps resource for the web app (`westus2`, Free tier: West Europe refused it; the static files hold no child data, see the ADR exception) |
 | `variables.tf`, `terraform.tfvars` | The server settings (`voice_mode`, `session_profile`, `demo_warm`, `agent_on`) and the rest |
 | `outputs.tf` | What CI and the web app need |
 
@@ -20,7 +20,7 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 1. Create the state storage (`aloai-tfstate-rg`, storage account `aloaitfstateeu`, container `tfstate`, versioning on, EU). Rename it in `backend.tf` if the account name is taken: storage account names are global.
 2. `az login`, then from `infra/azure`: `terraform init`, then the vault first: `terraform apply -target=azurerm_key_vault.main -var 'budget_contact_emails=["<an address>"]'`.
 3. Set the secret values (see "Secret values" below). The vault must hold all four before the apps are created, because the Container Apps read them.
-4. Then the full `terraform apply -var 'budget_contact_emails=["<an address>"]'`. The first apply is done by a person, because it creates the CI identity and its roles. After that CI applies on merge to `main`.
+4. Then the full `terraform apply -var 'budget_contact_emails=["<an address>"]'`. The first apply is done by a person, because it creates the CI identity and its roles. Every later apply is also done by a person (CI only plans checks and builds images; no workflow runs `terraform apply`).
 5. In GitHub, set the repository variables `AZURE_CLIENT_ID` (output `ci_client_id`), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, and `TF_VAR_budget_contact_emails`. The address is a person's, so it is not in `terraform.tfvars`.
 6. Register `Microsoft.App`, `Microsoft.DocumentDB`, `Microsoft.ServiceBus`, `Microsoft.CognitiveServices` and `Microsoft.ContainerRegistry` on the subscription if they are not.
 
@@ -71,7 +71,7 @@ Re-apply the previous commit's configuration (`git revert`, merge, CI applies). 
 Two manual jobs, run when needed (`az containerapp job start --name <name> --resource-group aloai-rg`; the names are in the `jobs` output):
 
 1. **`seed`**: makes the clips with the Azure voice and writes the bank passages (`services/session_agent/seed.py`). Run it after the first apply, and again after changing `voice_profile_id`, `tts_voice` or the bank passages. Clips already there are never replaced, so it is safe to repeat. Until it has run, a session on Azure has no clips and no bank passage and cannot start. Check `az containerapp job execution list` for a failed run: the job exits non-zero if any clip or passage failed.
-2. **`book_ingest`**: embeds the catalogue with `text-embedding-3-small` once there is one in Cosmos DB (`services/core/books/reembed.py`). **There is no catalogue yet:** the ingestion job and the 30 real open-licence books it would load do not exist, so this job finds nothing to do. It needs a Core image, and there is no Core Dockerfile yet.
+2. **`book_ingest`**: embeds the catalogue with `text-embedding-3-small` once there is one in Cosmos DB (`services/core/books/reembed.py`). **There is no catalogue yet:** the ingestion job and the 30 real open-licence books it would load do not exist, so this job finds nothing to do. It uses the Core image (`services/core/Dockerfile`).
 
 Both jobs are untested against Azure.
 

@@ -1,5 +1,5 @@
 # The values in use. Changing a server setting is a one-line pull request (chore/infra-...).
-# After the demo: demo_warm = false and session_profile = "standard".
+# demo_warm = false and session_profile = "standard" are the study settings.
 voice_mode      = "cache_first"
 session_profile = "standard"
 demo_warm       = false
@@ -28,7 +28,9 @@ generator_on    = false
 # information sheet names Google as the provider, (2) W3 reruns the grading, tagger and Coach
 # evaluation sets on these models (hard rule 6) and confirms the single-transcript rule below
 # (PRD 5.3), (3) a paid, agreement-covered route with EU processing is chosen before anything
-# beyond the study.
+# beyond the study. docs/privacy/ndpa-transfer-basis.md still says "fictional data only" (W3's
+# draft); its decision log records this permission and that the two disagree until W3 and the
+# adviser review it.
 # To go back: llm_base_url = "", llm_models = {} and restore openai_deployments.
 llm_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
 llm_models = {
@@ -49,7 +51,7 @@ interest_chat = false
 # transcript dropped a word in a test. Needs W3's confirmation before real children (PRD 5.3).
 second_transcript = "off"
 
-# Entra External ID (the aloai external tenant; set up by hand, steps in ops/README.md). Identifiers only, no secrets.
+# Entra External ID (the aloai external tenant; set up by hand, steps in apps/web/README.md "Sign-in" and docs/ops/go-live.md). Identifiers only, no secrets.
 entra_tenant_id    = "d611df49-f494-4953-9681-5a99d88b0d06"
 entra_authority    = "https://aloaiauth.ciamlogin.com"
 entra_api_audience = "15b55da5-38e0-4a9c-8b47-38f39e717bfe"
