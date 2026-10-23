@@ -11,6 +11,7 @@ not read from here: a person checks them against the publisher's page (the manif
 import io
 import posixpath
 import re
+import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import dataclass
@@ -110,14 +111,26 @@ def _epub_pages(data: bytes) -> list[tuple[str, bool]]:
             if item.tag.endswith("item") and "id" in item.attrib
         }
         pages = []
+        read: set[str] = set()
         for itemref in (e for e in opf.iter() if e.tag.endswith("itemref")):
             href = hrefs.get(itemref.attrib.get("idref", ""))
             if href is None:
                 continue
+            member = _member(base, href)
+            if member in read:
+                continue  # another part of a document already read
+            read.add(member)
             reader = _Text()
-            reader.feed(book.read(posixpath.normpath(posixpath.join(base, href))).decode("utf-8"))
+            reader.feed(book.read(member).decode("utf-8"))
             pages.append(("\n".join(reader.lines), reader.images > 0))
     return pages
+
+
+def _member(base: str, href: str) -> str:
+    """The ZIP member an OPF href names: relative to the OPF, without a #fragment, and with
+    %-escapes decoded (an href is a URL, a member name is a path)."""
+    path = urllib.parse.unquote(href.split("#", 1)[0])
+    return posixpath.normpath(posixpath.join(base, path))
 
 
 class _Text(HTMLParser):

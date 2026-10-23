@@ -459,3 +459,31 @@ def test_a_gutenberg_book_keeps_only_what_lies_between_its_markers():
     ]
     found = read_book("ball.epub", epub(pages))
     assert found.sentences == tuple(STORY)
+
+
+def test_an_epub_href_with_a_fragment_or_an_escape_is_read_once():
+    """An OPF href is a URL: it can carry a #fragment and %-escapes, which the ZIP member name
+    does not, and two spine entries can point into one document."""
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w") as book:
+        book.writestr(
+            "META-INF/container.xml",
+            '<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" '
+            'version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf"/></rootfiles></container>',
+        )
+        book.writestr(
+            "OEBPS/text/Chapter One.xhtml",
+            f"<html><body><p>{STORY[0]}</p><p>{STORY[1]}</p></body></html>",
+        )
+        book.writestr("OEBPS/text/two.xhtml", f"<html><body><p>{STORY[2]}</p></body></html>")
+        book.writestr(
+            "OEBPS/content.opf",
+            '<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><manifest>'
+            '<item id="a" href="text/Chapter%20One.xhtml#start" media-type="application/xhtml+xml"/>'
+            '<item id="b" href="text/Chapter%20One.xhtml#middle" media-type="application/xhtml+xml"/>'
+            '<item id="c" href="text/two.xhtml#top" media-type="application/xhtml+xml"/>'
+            '</manifest><spine><itemref idref="a"/><itemref idref="b"/><itemref idref="c"/></spine></package>',
+        )
+    found = read_book("fragments.epub", out.getvalue())
+    assert found.sentences == tuple(STORY[:3])
+    assert found.page_count == 2
