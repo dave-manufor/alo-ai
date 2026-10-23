@@ -43,6 +43,21 @@ const defaultFactory: MsalFactory = async (config) => {
   return createStandardPublicClientApplication(config);
 };
 
+function errorCodeOf(error: unknown): string | undefined {
+  const code = (error as { errorCode?: unknown } | null)?.errorCode;
+  return typeof code === 'string' ? code : undefined;
+}
+
+function clearInteractionMarker(): void {
+  try {
+    for (const key of Object.keys(window.sessionStorage)) {
+      if (key.includes('interaction.status')) window.sessionStorage.removeItem(key);
+    }
+  } catch {
+    // Storage blocked: the retry will fail the same way and the page says so.
+  }
+}
+
 export function userFrom(account: AccountInfo): AuthUser {
   const claims = (account.idTokenClaims ?? {}) as Record<string, unknown>;
   const idp = String(claims.idp ?? '');
@@ -88,7 +103,22 @@ export async function createEntraClient(
       // The one-time code is Entra's default; the email the guardian typed is passed on so its
       // page opens with the address filled in and sends the code straight away.
       const loginHint = email.trim();
-      await app.loginRedirect({ scopes, ...(loginHint ? { loginHint } : {}) });
+      const request = { scopes, ...(loginHint ? { loginHint } : {}) };
+      try {
+        await app.loginRedirect(request);
+      } catch (error) {
+        // An earlier attempt that never came back (closed tab, a redirect address Entra refused)
+        // leaves MSAL believing a sign-in is still in progress, and it then refuses to start
+        // another. Clear that marker and try once more.
+        if (errorCodeOf(error) === 'interaction_in_progress') {
+          clearInteractionMarker();
+          await app.loginRedirect(request);
+          return;
+        }
+        // The code only (no message, which can carry an address), so the cause can be found.
+        console.error('sign-in could not start:', errorCodeOf(error) ?? 'unknown');
+        throw error;
+      }
     },
 
     async signOut() {
