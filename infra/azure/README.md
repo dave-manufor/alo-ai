@@ -33,6 +33,16 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 - **Container images.** CI builds and pushes them to the registry (`acr_login_server`) and passes each digest back in `var.images`. Until then the apps run a placeholder image.
 - **The first clips and books.** The seed job makes the clips and writes the bank passages (see "After the first apply: seed the stores"); someone runs it after the first apply. The book ingestion run and the 30-book catalogue are not built yet.
 
+## Paystack (test mode)
+
+The Account app is the only holder of the Paystack secret (PRD 11.1, `services/account/payments.py`). It refuses a key that is not a test key (`sk_test_`). Done once, by whoever holds the Paystack account:
+
+1. **Secret key:** in the Paystack dashboard, in **test mode**, under Settings, API Keys & Webhooks, copy the test secret key. Put it in Key Vault from your own terminal, never in a file: `az keyvault secret set --vault-name <key_vault output> --name paystack-secret-key --value <sk_test_...>`. Then restart the Account app's revision so it reads the new version.
+2. **Plan:** under Products, Plans, create the monthly plan (N1,500, interval *Monthly*). Put its code (`PLN_...`) in `paystack_plan_code` in `terraform.tfvars` (not a secret) and apply.
+3. **Webhook:** on the same API Keys & Webhooks page, set the **test** webhook URL to `<account_url output>/webhooks/paystack`. Paystack signs each event with the secret key, and the Account app refuses any event whose `x-paystack-signature` doesn't match.
+4. **Paywall:** keep `plans_need_subscription = false` for the mini-study, so every consented guardian sees the plan. Set it to `true` for the demo, so a test payment is what unlocks the weekly plan.
+5. **Try it:** sign in, open the plan, then Upgrade and Pay with Paystack. Use Paystack's test card from its "Test payments" page. The plan opens once the server has confirmed the payment with Paystack (the popup's confirm call, or the webhook, whichever comes first). The documents are `checkouts/`, `subscriptions/` and `payment_events/` in Cosmos.
+
 ## Smoke test
 
 `services/session_agent/tools/cloud_smoke.py` drives a fictional child through a whole session and checks the result: the session ran to the end, the report and the parent plan were written, and both dead-letter queues (`core-events`, `scorer-events`) are empty. It exits non-zero if any check fails. Run it after an apply and after the images are deployed, and not during a rehearsal. The agent worker must be running, and so must Core, the Scorer and LiveKit.

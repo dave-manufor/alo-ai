@@ -66,6 +66,11 @@ locals {
     ENTRA_TENANT_ID    = var.entra_tenant_id
     ENTRA_AUTHORITY    = var.entra_authority
     ENTRA_API_AUDIENCE = var.entra_api_audience
+    # Paystack test mode (PRD 11.1): the plan the server initializes every checkout with (not a
+    # secret; the secret key is PAYSTACK_SECRET_KEY from Key Vault), and whether the weekly plan
+    # needs a subscription (false for the mini-study, true for the demo).
+    PAYSTACK_PLAN_CODE      = var.paystack_plan_code
+    PLANS_NEED_SUBSCRIPTION = tostring(var.plans_need_subscription)
   })
 
   env_core = merge(local.base_env, local.ai_env, {
