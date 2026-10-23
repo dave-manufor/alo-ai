@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { addChild, changeTrainingOptIn, editChild, syncAccount } from '../account/actions';
 import { accountStore, type ConsentRecord } from '../account/store';
+import { consentDraft } from '../onboarding/draft';
 import AccountPage from '../pages/AccountPage';
 import ChildFormPage from '../pages/ChildFormPage';
 import ReportDetailPage from '../pages/ReportDetailPage';
@@ -204,6 +205,29 @@ describe('live build: editing a child and the recordings choice', () => {
     fireEvent.click(choice);
     fireEvent.click(choice);
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+  });
+
+  it('adding the first child ends on Home, not back on the consent step', async () => {
+    // Clearing the consent draft after the save re-renders the form with the tick gone, and its
+    // "consent comes first" redirect must not win over the move to Home (it once looked like a
+    // loop in a browser; jsdom does not reproduce it, this keeps the intended end state).
+    api.post.mockResolvedValue({ child_id: 'child_1', child, consent });
+    consentDraft.set({ attested: true, trainingOptIn: false });
+    render(
+      <MemoryRouter initialEntries={['/onboarding/child']}>
+        <Routes>
+          <Route path="/onboarding/child" element={<ChildFormPage mode="onboarding" />} />
+          <Route path="/onboarding/consent" element={<p>The consent step</p>} />
+          <Route path="/home" element={<p>Home</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: /First name/ }), { target: { value: 'Ada' } });
+    fireEvent.click(screen.getByRole('button', { name: /Save|Add|Continue|Finish/ }));
+    expect(await screen.findByText('Home')).toBeInTheDocument();
+    expect(screen.queryByText('The consent step')).not.toBeInTheDocument();
+    expect(api.post).toHaveBeenCalledWith('/v1/children', expect.objectContaining({ attested: true }));
+    expect(consentDraft.get().attested).toBe(false);
   });
 
   it('the edit form saves through the API instead of saying "coming soon"', async () => {

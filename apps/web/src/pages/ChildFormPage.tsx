@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { addChild, editChild } from '../account/actions';
 import { CONSENT_TEXT, ageFromBirthYear, attestationFor, useAccount } from '../account/store';
@@ -37,8 +37,15 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
   const [nameError, setNameError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Set once the child is saved. Clearing the consent draft then re-renders this page with the
+  // tick gone, and without this the check below would send the guardian back to the consent step
+  // (a loop: the child was saved, the next screen never opened).
+  const saved = useRef(false);
+
   // Onboarding without the last step's tick goes back to it: consent comes first.
-  if (mode === 'onboarding' && !draft.attested) return <Navigate to="/onboarding/consent" replace />;
+  if (mode === 'onboarding' && !draft.attested && !saved.current) {
+    return <Navigate to="/onboarding/consent" replace />;
+  }
   if (mode === 'edit' && !editing) return <Navigate to="/account" replace />;
 
   const attestedBefore = mode === 'onboarding' && draft.attested;
@@ -66,8 +73,9 @@ export default function ChildFormPage({ mode }: { mode: ChildFormMode }) {
         return;
       }
       await addChild({ firstName: trimmed, primaryClass, birthYear: year, attested, trainingOptIn });
-      consentDraft.clear();
+      saved.current = true;
       navigate('/home');
+      consentDraft.clear();
     } catch (err) {
       setError(err instanceof ApiError ? err.plain : 'We could not save that. Please try again.');
       setSaving(false);
