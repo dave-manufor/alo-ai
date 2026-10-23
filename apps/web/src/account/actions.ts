@@ -44,13 +44,23 @@ export async function syncSubscription(): Promise<void> {
 
 export type PaymentOutcome = 'paid' | 'pending' | 'cancelled';
 
-/** Live build: the server starts the transaction, Paystack's popup takes the payment, then the
- *  server confirms it with Paystack before the plan opens. 'pending' means the popup said paid
- *  but Paystack has not confirmed it yet (the webhook will). */
-export async function payForPlan(popup: OpenPopup = openPaystackPopup): Promise<PaymentOutcome> {
+/** Sample-build stand-in for Paystack's popup: nothing is charged, the plan unlocks locally. */
+const samplePopup: OpenPopup = async () => 'success';
+
+/** Pays for the weekly plan. Live: the Account service starts the transaction, Paystack's
+ *  popup takes the card, then the server confirms with Paystack before the plan opens
+ *  ('pending' means the popup said paid but Paystack has not confirmed it yet — the webhook
+ *  will). Fixture: the same screen, with a simulated popup and a local sample entitlement
+ *  (PRD 11.1: amounts and the plan are never set in the browser either way). */
+export async function payForPlan(popup?: OpenPopup): Promise<PaymentOutcome> {
+  if (dataMode !== 'live') {
+    if ((await (popup ?? samplePopup)('fixture')) === 'cancelled') return 'cancelled';
+    accountStore.activateSampleSubscription();
+    return accountStore.hasActiveSubscription() ? 'paid' : 'pending';
+  }
   const api = liveApi();
   const started = await startCheckout(api);
-  if ((await popup(started.access_code)) === 'cancelled') return 'cancelled';
+  if ((await (popup ?? openPaystackPopup)(started.access_code)) === 'cancelled') return 'cancelled';
   const status = await confirmCheckout(api, started.reference);
   accountStore.replaceSubscription(status);
   return status.active ? 'paid' : 'pending';

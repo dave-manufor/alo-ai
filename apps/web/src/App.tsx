@@ -1,14 +1,12 @@
 import type { ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { retrySync, useSyncFailed } from './account/syncStatus';
-import { dataMode } from './api';
 import { useAccount } from './account/store';
 import { saveReturnTo } from './auth/returnTo';
 import { Button } from './design-system/alo';
 import { Notice } from './ui/primitives';
 import AccountPage from './pages/AccountPage';
 import ChildFormPage from './pages/ChildFormPage';
-import CheckoutPlaceholderPage from './pages/CheckoutPlaceholderPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ConsentPage from './pages/ConsentPage';
 import GetReadyPage from './pages/GetReadyPage';
@@ -112,7 +110,7 @@ export default function App() {
         <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/upgrade" element={<UpgradePage />} />
-        <Route path="/plan/checkout" element={dataMode === 'live' ? <CheckoutPage /> : <CheckoutPlaceholderPage />} />
+        <Route path="/plan/checkout" element={<CheckoutPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/children/new" element={<ChildFormPage mode="new" />} />
         <Route path="/children/:childId/edit" element={<ChildFormPage mode="edit" />} />

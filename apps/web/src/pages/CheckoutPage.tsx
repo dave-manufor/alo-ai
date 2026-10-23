@@ -2,22 +2,24 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { payForPlan, syncSubscription } from '../account/actions';
 import { accountStore } from '../account/store';
-import { ApiError } from '../api';
+import { ApiError, dataMode } from '../api';
 import { Button } from '../design-system/alo';
 import { PLAN_PRICE, PLAN_PRICE_PERIOD } from '../plan/price';
 import type { OpenPopup } from '../plan/paystackPopup';
 import { useActiveChild } from '../shell/activeChildContext';
 import { BackLink, Card, Notice } from '../ui/primitives';
 
-// Paystack checkout in the live build (PRD 11.1). The Account service starts the transaction
-// and sets the plan and amount; Paystack's own popup takes the card; the server then confirms
-// the payment with Paystack before the plan opens. Nothing about the child goes to Paystack.
+// Paystack checkout (PRD 11.1). Live: the Account service starts the transaction and sets the
+// plan and amount; Paystack's popup takes the card; the server confirms with Paystack before
+// the plan opens. Fixture: the same screen, with a sample payment that unlocks the plan
+// locally and never calls Paystack. Nothing about the child goes to Paystack either way.
 type Step = 'ready' | 'working' | 'cancelled' | 'pending' | 'error';
 
 export default function CheckoutPage({ popup }: { popup?: OpenPopup }) {
   const navigate = useNavigate();
   const { child } = useActiveChild();
   const name = child?.first_name ?? 'your child';
+  const live = dataMode === 'live';
   const [step, setStep] = useState<Step>('ready');
   const [problem, setProblem] = useState('');
 
@@ -56,7 +58,11 @@ export default function CheckoutPage({ popup }: { popup?: OpenPopup }) {
         <p className="body">
           {PLAN_PRICE} {PLAN_PRICE_PERIOD}, by card on Paystack&apos;s secure page. It renews each month.
         </p>
-        <p className="caption muted">Test mode: no real money is taken.</p>
+        <p className="caption muted">
+          {live
+            ? 'Test mode: no real money is taken.'
+            : 'Sample build: the payment is simulated. Nothing is charged.'}
+        </p>
         {step === 'cancelled' ? (
           <Notice tone="sky" role="status">
             The payment was not finished. Nothing was charged.
@@ -78,11 +84,19 @@ export default function CheckoutPage({ popup }: { popup?: OpenPopup }) {
           </Button>
         ) : (
           <Button variant="primary" size="grown" onClick={pay} disabled={step === 'working'}>
-            {step === 'working' ? 'Opening Paystack…' : 'Pay with Paystack'}
+            {step === 'working'
+              ? live
+                ? 'Opening Paystack…'
+                : 'Unlocking the plan…'
+              : live
+                ? 'Pay with Paystack'
+                : 'Continue with sample payment'}
           </Button>
         )}
         <Notice tone="sky" role="note">
-          Payment is handled by Paystack. Paystack never receives anything about {name}.
+          {live
+            ? `Payment is handled by Paystack. Paystack never receives anything about ${name}.`
+            : `In the live app, payment is handled by Paystack. Paystack never receives anything about ${name}.`}
         </Notice>
       </Card>
     </div>
