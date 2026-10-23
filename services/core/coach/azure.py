@@ -37,7 +37,7 @@ class AzureSpeaker:
     blobs: Blobs
     synthesize: Callable[[str], bytes]  # SSML -> MP3 (aloai_azure.synthesize)
     container: str
-    voice: str  # e.g. en-NG-EzinneNeural
+    voice: str  # e.g. en-US-JennyNeural
 
     def speak(self, text: str, session_id: str) -> str | None:
         locale = "-".join(self.voice.split("-")[:2])

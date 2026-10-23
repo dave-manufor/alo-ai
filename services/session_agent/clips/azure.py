@@ -30,7 +30,7 @@ def word_synthesizer(
     synthesize: Callable[[str], bytes], *, voice: str, locale: str
 ) -> Callable[[str, str | None], bytes]:
     """`synthesize` takes SSML and returns MP3 (aloai_azure.synthesize with the settings
-    bound); voice is an Azure voice such as en-NG-EzinneNeural."""
+    bound); voice is an Azure voice such as en-US-JennyNeural."""
 
     def make(text: str, ipa: str | None) -> bytes:
         sentence = WORD_CLIP_TEXT.format(word=text)

@@ -97,6 +97,7 @@ locals {
     VOICE_MODE               = var.voice_mode
     SESSION_PROFILE          = var.session_profile
     VOICE_PROFILE_ID         = var.voice_profile_id
+    TTS_VOICE                = var.tts_voice # the clips of a generated story are made by the session
     CLIPS_BASE_URL           = "${azurerm_storage_account.main.primary_blob_endpoint}${azurerm_storage_container.clips.name}"
     CORE_URL                 = "https://${azurerm_container_app.core.ingress[0].fqdn}"
     LIVEKIT_URL              = var.livekit_url
@@ -566,7 +567,7 @@ resource "azurerm_container_app_job" "seed" {
 
       dynamic "env" {
         # The seed only makes speech clips: no model, so no provider address (it has no key).
-        for_each = merge(local.env_session_agent, { TTS_VOICE = var.tts_voice, LLM_BASE_URL = "" })
+        for_each = merge(local.env_session_agent, { LLM_BASE_URL = "" })
         content {
           name  = env.key
           value = env.value
