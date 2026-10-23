@@ -28,8 +28,8 @@ export interface GuardianPlan {
   next_session_at: string;
 }
 
-const PLAN_RETRY_MS = 10_000;
-const PLAN_TRIES = 30;
+const PLAN_RETRY_MS = 2_000; // a plan lookup is one small document: the plan shows soon after it exists
+const PLAN_TRIES = 150; // about five minutes, as before
 
 export async function fetchPlan(api: ApiClient, sessionId: string): Promise<GuardianPlan | null> {
   try {
