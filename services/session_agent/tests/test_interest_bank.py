@@ -12,9 +12,12 @@ from services.session_agent import generation
 from services.session_agent.livekit_worker import _interest_picker, _Passages
 from services.session_agent.machine.profiles import DEMO, STANDARD
 from services.session_agent.passages import (
+    DEFAULT_BANK,
+    DEMO_BANK,
     INTEREST_BANK,
     MAX_LEVEL_GAP,
     folder_bank,
+    passage_id_for_demo_interest,
     passage_id_for_interest,
 )
 
@@ -101,9 +104,15 @@ class _Driver:
 BANK = folder_bank(CONTRACTS)
 
 
-def _arrives(requester, pick, interest="i like football", level_default="bank_p3_school_garden"):
+def _arrives(
+    requester,
+    pick,
+    interest="i like football",
+    level_default="bank_p3_school_garden",
+    profile=STANDARD,
+):
     async def main():
-        passages = _Passages(BANK, level_default, STANDARD, requester, pick)
+        passages = _Passages(BANK, level_default, profile, requester, pick)
         passages.driver = _Driver()
         passages.generate(interest, 20_000)
         await asyncio.gather(*passages._calls)
@@ -158,12 +167,13 @@ def _config(**changes):
     return SimpleNamespace(**{**values, **changes})
 
 
-def test_there_is_no_picker_in_fixtures_mode_without_the_chat_or_for_the_demo_profile():
+def test_there_is_no_picker_in_fixtures_mode_or_without_the_chat():
     start = SimpleNamespace(child_id="child_1")
     for cfg, profile in (
         (_config(ai_mode="fixtures"), STANDARD),
         (_config(interest_chat=False), STANDARD),
-        (_config(), DEMO),
+        (_config(ai_mode="fixtures"), DEMO),
+        (_config(interest_chat=False), DEMO),
     ):
         assert _interest_picker(None, cfg, start, profile, DEFAULT, MemoryStore({}), None) is None
 
@@ -184,3 +194,59 @@ def test_the_picker_tags_the_answer_and_matches_it_at_the_childs_level(monkeypat
     # a child record that gives no level: the default for them
     pick = _interest_picker(None, _config(), start, STANDARD, DEFAULT, MemoryStore({}), None)
     assert asyncio.run(pick("i like football")) == DEFAULT
+
+
+# ---- the demo profile: a 50-word story for each topic
+
+
+def test_the_demo_bank_has_a_story_for_every_topic_and_each_fits_the_demo_profile():
+    assert set(DEMO_BANK) == set(generation.TOPIC_TAGS)
+    assert DEFAULT_BANK["demo"] in DEMO_BANK.values()
+    for tag, passage_id in DEMO_BANK.items():
+        read = BANK.pair(passage_id, DEMO).read  # DEMO's 2 questions, and its listening pair
+        assert read["topic_tags"] == [tag] and read["length_profile"] == "DEMO"
+        assert 45 <= read["word_count"] <= 55 and read["word_count"] == len(read["tokens"])
+        assert [item["type"] for item in read["items"]] == ["LITERAL", "INFERENTIAL"]
+        core = [p for p in read["propositions"] if p["weight"] == 2]
+        assert 4 <= len(read["propositions"]) <= 8 and len(core) >= 2
+
+
+def test_a_demo_child_gets_the_story_for_their_first_topic_that_has_one():
+    assert passage_id_for_demo_interest(["music", "space"], "d") == "bank_demo_music"
+    assert passage_id_for_demo_interest(["nothing", "space"], "d") == "bank_demo_space"
+    assert passage_id_for_demo_interest([], "d") == "d"
+    assert passage_id_for_demo_interest(["nothing"], "d") == "d"
+
+
+def test_the_demo_picker_tags_the_answer_and_reads_no_child_record(monkeypatch):
+    from services.session_agent import livekit_worker
+
+    heard = []
+
+    class Tagger:
+        async def tag(self, answer):
+            heard.append(answer)
+            return generation.Interest(("weather", "animals") if "rain" in answer else ())
+
+    monkeypatch.setattr(livekit_worker, "_tagger", lambda settings, shared: Tagger())
+    start = SimpleNamespace(child_id="child_1")
+    default = DEFAULT_BANK["demo"]
+    pick = _interest_picker(None, _config(), start, DEMO, default, MemoryStore({}), None)
+    assert asyncio.run(pick("i like rain and goats")) == "bank_demo_weather"
+    assert asyncio.run(pick("hmm")) == default  # nothing to match: the default story
+    assert heard == ["i like rain and goats", "hmm"]
+
+
+def test_a_demo_session_reads_the_story_for_the_topic_the_child_names():
+    default = DEFAULT_BANK["demo"]
+
+    async def pick(answer):
+        return "bank_demo_football"
+
+    async def broken(answer):
+        raise TimeoutError("the tagger took too long")
+
+    assert _arrives(None, pick, level_default=default, profile=DEMO) == [
+        ("bank_demo_football", True)
+    ]
+    assert _arrives(None, broken, level_default=default, profile=DEMO) == [(default, True)]

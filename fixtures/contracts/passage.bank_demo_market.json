@@ -1,0 +1,632 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_demo_market",
+  "title": "Bola at the Market",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "market"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 50,
+  "text_content": "Bola went to the market with Papa. She wanted to buy a big bunch of bananas. But she counted her coins, and there were too few. Papa said she could wait and save more. Bola kept her coins in a small basket. On the next market day, she bought it.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Bola",
+      "clean_text": "bola",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈbɔlɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bola~%CB%88b%C9%94l%C9%91.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "went",
+      "clean_text": "went",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/went.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "market",
+      "clean_text": "market",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/market.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "Papa.",
+      "clean_text": "papa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": "ˈpɑːpɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/papa~%CB%88p%C9%91%CB%90p%C9%91.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 1,
+      "text": "She",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 1,
+      "text": "wanted",
+      "clean_text": "wanted",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wanted.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 1,
+      "text": "buy",
+      "clean_text": "buy",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/buy.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "big",
+      "clean_text": "big",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/big.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "bunch",
+      "clean_text": "bunch",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bunch.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "of",
+      "clean_text": "of",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "bananas.",
+      "clean_text": "bananas",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bananas.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 2,
+      "text": "But",
+      "clean_text": "but",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/but.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 2,
+      "text": "she",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 2,
+      "text": "counted",
+      "clean_text": "counted",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/counted.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 2,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 2,
+      "text": "coins,",
+      "clean_text": "coins",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/coins.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 2,
+      "text": "there",
+      "clean_text": "there",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/there.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 2,
+      "text": "were",
+      "clean_text": "were",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/were.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 2,
+      "text": "too",
+      "clean_text": "too",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/too.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 2,
+      "text": "few.",
+      "clean_text": "few",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/few.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 3,
+      "text": "Papa",
+      "clean_text": "papa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈpɑːpɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/papa~%CB%88p%C9%91%CB%90p%C9%91.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 3,
+      "text": "said",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 3,
+      "text": "she",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 3,
+      "text": "could",
+      "clean_text": "could",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 3,
+      "text": "wait",
+      "clean_text": "wait",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wait.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 3,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 3,
+      "text": "save",
+      "clean_text": "save",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/save.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 3,
+      "text": "more.",
+      "clean_text": "more",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/more.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 4,
+      "text": "Bola",
+      "clean_text": "bola",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈbɔlɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bola~%CB%88b%C9%94l%C9%91.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 4,
+      "text": "kept",
+      "clean_text": "kept",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/kept.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 4,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 4,
+      "text": "coins",
+      "clean_text": "coins",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/coins.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 4,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 4,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 4,
+      "text": "small",
+      "clean_text": "small",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/small.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 4,
+      "text": "basket.",
+      "clean_text": "basket",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/basket.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 5,
+      "text": "On",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 5,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 5,
+      "text": "next",
+      "clean_text": "next",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/next.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 5,
+      "text": "market",
+      "clean_text": "market",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/market.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 5,
+      "text": "day,",
+      "clean_text": "day",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/day.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 5,
+      "text": "she",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 5,
+      "text": "bought",
+      "clean_text": "bought",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bought.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 5,
+      "text": "it.",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "Bola went to the market with Papa.",
+      "weight": 1,
+      "example_paraphrases": [
+        "Bola and her father went to the market."
+      ]
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "CHARACTER",
+      "description": "Bola wanted to buy a big bunch of bananas.",
+      "weight": 1,
+      "example_paraphrases": [
+        "She wanted a bananas."
+      ]
+    },
+    {
+      "id": "p3",
+      "sentence_index": 2,
+      "category": "PROBLEM",
+      "description": "Bola counted her coins and there were too few.",
+      "weight": 2,
+      "example_paraphrases": [
+        "She did not have enough coins for the bananas."
+      ]
+    },
+    {
+      "id": "p4",
+      "sentence_index": 4,
+      "category": "ACTION",
+      "description": "Bola kept her coins in a small basket.",
+      "weight": 2,
+      "example_paraphrases": [
+        "She saved her coins in a basket."
+      ]
+    },
+    {
+      "id": "p5",
+      "sentence_index": 5,
+      "category": "RESOLUTION",
+      "description": "On the next market day she bought the bananas.",
+      "weight": 1,
+      "example_paraphrases": [
+        "She bought it the next time at the market."
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 2,
+      "prompt_text": "What did Bola count?",
+      "rubric": {
+        "2": "Says her coins.",
+        "1": "Says her money.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_market_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Her coins.",
+          "points": 2
+        },
+        {
+          "answer": "Her money.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 4,
+      "prompt_text": "How did Bola get enough money for the bananas?",
+      "rubric": {
+        "2": "Says she saved her coins and waited.",
+        "1": "Gives a reason that is not in the story, such as being given it.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_market_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "She waited and saved her coins until she had enough.",
+          "points": 2
+        },
+        {
+          "answer": "She keep her money small small till e reach.",
+          "points": 2
+        },
+        {
+          "answer": "Papa gave her more.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_rain"
+}

@@ -148,14 +148,20 @@ PASSAGE_FIXTURES = [
     "passage.bank_l3_market.json",
     "passage.bank_l9_rocket.json",
 ]
+# The demo bank: one story for each topic (DEMO_BANK in services/session_agent/passages.py)
+DEMO_BANK_FIXTURES = sorted(path.name for path in FIXTURES.glob("passage.bank_demo_*.json"))
 
 
-@pytest.mark.parametrize("name", PASSAGE_FIXTURES)
+def test_the_demo_bank_fixtures_are_found():
+    assert len(DEMO_BANK_FIXTURES) == 12
+
+
+@pytest.mark.parametrize("name", PASSAGE_FIXTURES + DEMO_BANK_FIXTURES)
 def test_passage_fixture_validates(name):
     _validator("passage.schema.json").validate(_fixture(name))
 
 
-@pytest.mark.parametrize("name", PASSAGE_FIXTURES)
+@pytest.mark.parametrize("name", PASSAGE_FIXTURES + DEMO_BANK_FIXTURES)
 def test_passage_fixture_is_consistent(name):
     passage = _fixture(name)
     tokens = passage["tokens"]

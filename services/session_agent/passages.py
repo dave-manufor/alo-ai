@@ -24,7 +24,25 @@ class PassageError(LookupError):
 
 # The fallback READ passage for each session profile when the child's level is not known
 # (PRD 4.5). BANK_PASSAGE_ID overrides it.
-DEFAULT_BANK = {"standard": "bank_p3_school_garden", "demo": "bank_p3_market_day"}
+DEFAULT_BANK = {"standard": "bank_p3_school_garden", "demo": "bank_demo_market"}
+
+# The demo profile's READ passages, one for each topic of the taxonomy (50 words, ARL 3, 2
+# questions). The demo has one level, so the child's first topic picks the story. A test keeps
+# these equal to the topic tags and to the passages in the bank (fixtures/contracts).
+DEMO_BANK = {
+    "animals": "bank_demo_animals",
+    "football": "bank_demo_football",
+    "space": "bank_demo_space",
+    "food": "bank_demo_food",
+    "market": "bank_demo_market",
+    "family": "bank_demo_family",
+    "school": "bank_demo_school",
+    "music": "bank_demo_music",
+    "transport": "bank_demo_transport",
+    "farming": "bank_demo_farming",
+    "weather": "bank_demo_weather",
+    "adventure": "bank_demo_adventure",
+}
 
 # The STANDARD READ passages by ARL: one for each primary class's term 1 start level
 # (2 x class - 1, PRD 6.7), Primary 1 to 6.
@@ -78,10 +96,15 @@ def passage_id_for_interest(level: int | None, tags: Sequence[str], default: str
     return best[3] if best else default
 
 
+def passage_id_for_demo_interest(tags: Sequence[str], default: str) -> str:
+    """The demo READ passage for the child's first topic that has one, else `default`."""
+    return next((DEMO_BANK[tag] for tag in tags if tag in DEMO_BANK), default)
+
+
 def passage_id_for_level(profile_name: str, level: int | None) -> str:
     """The READ passage to fall back on: the STANDARD one nearest the child's level (the
     easier one on a tie), or the profile's default when the level is not known. The demo
-    profile has one passage."""
+    profile ignores the level: its default is a passage for any child."""
     if profile_name != "standard" or level is None:
         return DEFAULT_BANK[profile_name]
     return STANDARD_BANK[min(STANDARD_BANK, key=lambda arl: (abs(arl - level), arl))]

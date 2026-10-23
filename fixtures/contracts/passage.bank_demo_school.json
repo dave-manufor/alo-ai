@@ -1,0 +1,632 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_demo_school",
+  "title": "The Broken Pencil",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "school"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 3,
+  "word_count": 50,
+  "text_content": "Ngozi came to school with one pencil. In class, it broke in half on her desk. She looked sad and could not write. Her friend Obi pushed a spare one across the bench to her. Ngozi wrote her name on the page. After school, she said thank you to Obi.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "DEMO",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Ngozi",
+      "clean_text": "ngozi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈŋɡɔzi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ngozi~%CB%88%C5%8B%C9%A1%C9%94zi.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "came",
+      "clean_text": "came",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/came.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "school",
+      "clean_text": "school",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/school.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "one",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "pencil.",
+      "clean_text": "pencil",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pencil.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 1,
+      "text": "In",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 1,
+      "text": "class,",
+      "clean_text": "class",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/class.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 1,
+      "text": "broke",
+      "clean_text": "broke",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/broke.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "half",
+      "clean_text": "half",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/half.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "on",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "desk.",
+      "clean_text": "desk",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/desk.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 2,
+      "text": "She",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 2,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 2,
+      "text": "sad",
+      "clean_text": "sad",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/sad.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 2,
+      "text": "could",
+      "clean_text": "could",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 2,
+      "text": "not",
+      "clean_text": "not",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/not.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 2,
+      "text": "write.",
+      "clean_text": "write",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/write.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 3,
+      "text": "Her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 3,
+      "text": "friend",
+      "clean_text": "friend",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/friend.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 3,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 3,
+      "text": "pushed",
+      "clean_text": "pushed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pushed.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 3,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 3,
+      "text": "spare",
+      "clean_text": "spare",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/spare.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 3,
+      "text": "one",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 3,
+      "text": "across",
+      "clean_text": "across",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/across.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 3,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 3,
+      "text": "bench",
+      "clean_text": "bench",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bench.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 3,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 3,
+      "text": "her.",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 4,
+      "text": "Ngozi",
+      "clean_text": "ngozi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈŋɡɔzi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ngozi~%CB%88%C5%8B%C9%A1%C9%94zi.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 4,
+      "text": "wrote",
+      "clean_text": "wrote",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wrote.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 4,
+      "text": "her",
+      "clean_text": "her",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/her.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 4,
+      "text": "name",
+      "clean_text": "name",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/name.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 4,
+      "text": "on",
+      "clean_text": "on",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/on.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 4,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 4,
+      "text": "page.",
+      "clean_text": "page",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/page.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 5,
+      "text": "After",
+      "clean_text": "after",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/after.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 5,
+      "text": "school,",
+      "clean_text": "school",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/school.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 5,
+      "text": "she",
+      "clean_text": "she",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/she.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 5,
+      "text": "said",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 5,
+      "text": "thank",
+      "clean_text": "thank",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/thank.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 5,
+      "text": "you",
+      "clean_text": "you",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/you.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 5,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 5,
+      "text": "Obi.",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "Ngozi came to school with one pencil.",
+      "weight": 1,
+      "example_paraphrases": [
+        "Ngozi had a pencil at school."
+      ]
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "PROBLEM",
+      "description": "The pencil broke in half in class.",
+      "weight": 2,
+      "example_paraphrases": [
+        "Her pencil snapped in class."
+      ]
+    },
+    {
+      "id": "p3",
+      "sentence_index": 3,
+      "category": "ACTION",
+      "description": "Her friend Obi pushed a spare pencil across the bench.",
+      "weight": 2,
+      "example_paraphrases": [
+        "Obi gave her another one."
+      ]
+    },
+    {
+      "id": "p4",
+      "sentence_index": 4,
+      "category": "RESOLUTION",
+      "description": "Ngozi wrote her name on the page.",
+      "weight": 1,
+      "example_paraphrases": [
+        "She could write again."
+      ]
+    },
+    {
+      "id": "p5",
+      "sentence_index": 5,
+      "category": "DETAIL",
+      "description": "After school Ngozi said thank you to Obi.",
+      "weight": 1,
+      "example_paraphrases": [
+        "She thanked Obi when school ended."
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 3,
+      "prompt_text": "Who gave Ngozi a spare pencil?",
+      "rubric": {
+        "2": "Says Obi.",
+        "1": "Says her friend.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_school_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Obi did.",
+          "points": 2
+        },
+        {
+          "answer": "Her friend.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 5,
+      "prompt_text": "Why did Ngozi say thank you to Obi?",
+      "rubric": {
+        "2": "Says he helped her when her pencil broke.",
+        "1": "Gives a reason that is not in the story, such as it being home time.",
+        "0": "No relevant answer."
+      },
+      "item_id": "bank_demo_school_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because he gave her a pencil when hers broke.",
+          "points": 2
+        },
+        {
+          "answer": "Na because he help am when her pencil break.",
+          "points": 2
+        },
+        {
+          "answer": "Because school was over.",
+          "points": 1
+        },
+        {
+          "answer": "I do not know.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_rain"
+}
