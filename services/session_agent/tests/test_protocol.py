@@ -6,6 +6,7 @@ from services.session_agent import protocol
 from services.session_agent.machine.types import (
     ClipAck,
     HidePassage,
+    PassageShown,
     Phase,
     PlayClip,
     PlayWordClip,
@@ -137,6 +138,11 @@ def test_missing_ack_is_parsed():
     assert protocol.parse_client(raw) == ClipAck("word_3", "missing")
 
 
+def test_shown_says_which_story_is_on_the_childs_screen():
+    raw = json.dumps({"schema_version": 3, "cmd": "shown", "passage_id": "bank_p3_market_day"})
+    assert protocol.parse_client(raw) == PassageShown("bank_p3_market_day")
+
+
 @pytest.mark.parametrize(
     "raw",
     [
@@ -146,6 +152,9 @@ def test_missing_ack_is_parsed():
         b'{"cmd":"played"}',
         b'{"cmd":"played","clip_id":""}',
         b'{"cmd":"played","clip_id":7}',
+        b'{"cmd":"shown"}',
+        b'{"cmd":"shown","passage_id":""}',
+        b'{"cmd":"shown","passage_id":3}',
     ],
 )
 def test_anything_else_from_the_client_is_dropped(raw):

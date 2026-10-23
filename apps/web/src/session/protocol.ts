@@ -48,11 +48,18 @@ export type AgentMessage =
    *  stage's light. No words, no level. */
   | { schema_version: ProtocolVersion; cmd: 'child_speaking'; speaking: boolean };
 
-export type ClientMessage = {
-  schema_version: ProtocolVersion;
-  cmd: 'played' | 'missing';
-  clip_id: string;
-};
+export type ClientMessage =
+  | {
+      schema_version: ProtocolVersion;
+      cmd: 'played' | 'missing';
+      clip_id: string;
+    }
+  /** The story is on the child's screen (and its word clips are ready, or we stopped waiting
+   *  for them): the agent starts the reading clock from here. */
+  | { schema_version: ProtocolVersion; cmd: 'shown'; passage_id: string };
+
+/** The reply to a `play`: the clip finished, or could not be played. */
+export type ClipAckMessage = Extract<ClientMessage, { cmd: 'played' | 'missing' }>;
 
 const AGENT_COMMANDS = [
   'clip_list',
@@ -140,12 +147,16 @@ export function parseAgentMessage(raw: unknown): AgentMessage | null {
   }
 }
 
-export function playedAck(clip_id: string): ClientMessage {
+export function playedAck(clip_id: string): ClipAckMessage {
   return { schema_version: CLIENT_VERSION, cmd: 'played', clip_id };
 }
 
-export function missingAck(clip_id: string): ClientMessage {
+export function missingAck(clip_id: string): ClipAckMessage {
   return { schema_version: CLIENT_VERSION, cmd: 'missing', clip_id };
+}
+
+export function shownAck(passage_id: string): ClientMessage {
+  return { schema_version: CLIENT_VERSION, cmd: 'shown', passage_id };
 }
 
 /** The data-channel topic shared with the Session Agent (services/session_agent/livekit_worker.py). */

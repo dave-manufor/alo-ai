@@ -44,6 +44,8 @@ class TurnTaker:
     _speech_began: int = 0
     _voiced_ms: int = 0
     _playing_since: int | None = None
+    _plays_out: int = 0
+    _voiced_since_start: int = 0  # accepted speech segments since the session began
     _prompt_ended: int = -ECHO_TAIL_MS
     _ignored_start: bool = False
 
@@ -57,15 +59,30 @@ class TurnTaker:
         self.active = False
 
     def prompt_started(self, now_ms: int) -> None:
-        """A clip was sent to the child's phone."""
+        """A clip was sent to the child's phone. Several can be sent at once (a thank-you,
+        then the next prompt): the phone plays them one after another."""
+        self._plays_out += 1
         self._playing_since = now_ms
 
     def prompt_finished(self, now_ms: int) -> None:
-        """The clip finished (or could not play): the wait for speech starts from now."""
+        """A clip finished (or could not play). When none is left, the wait for speech
+        starts from now."""
+        self._plays_out = max(0, self._plays_out - 1)
+        if self._plays_out > 0:
+            return  # the next clip is about to play: Kemi is still speaking
         self._playing_since = None
         self._prompt_ended = now_ms
         if self.active and not self._heard:
             self._waiting_since = now_ms
+
+    def quiet_ms(self, now_ms: int) -> int | None:
+        """How long since the child last stopped speaking, or None if they have not spoken
+        (or are speaking now: 0)."""
+        if self._speaking:
+            return 0
+        if self._voiced_since_start == 0:
+            return None
+        return now_ms - self._last_speech_end
 
     def ignoring(self, now_ms: int) -> bool:
         """True while a prompt is playing or has only just stopped: what the microphone
@@ -93,6 +110,7 @@ class TurnTaker:
         self._speaking = False
         self._last_speech_end = now_ms
         self._voiced_ms += max(0, now_ms - self._speech_began)
+        self._voiced_since_start += 1
         return True
 
     def tick(self, now_ms: int) -> Literal["ANSWERED", "SILENCE"] | None:

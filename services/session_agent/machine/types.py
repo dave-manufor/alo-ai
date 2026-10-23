@@ -65,6 +65,9 @@ class SessionState:
     passage_ready: bool = False
     told: tuple[int, ...] = ()
     kindness_checked: bool = False
+    # The reading clock (recording, position tracker, 90 s cap, 30 s kindness window) has
+    # started: the story is on the child's screen, or the wait for that ran out.
+    reading_live: bool = False
     reading_stopped_early: bool = False
     flags: tuple[str, ...] = ()
     live_active: bool = True
@@ -187,6 +190,13 @@ class ClipAck:
 
 
 @dataclass(frozen=True)
+class PassageShown:
+    """The web app says the story is on the child's screen. The reading clock starts here."""
+
+    passage_id: str
+
+
+@dataclass(frozen=True)
 class Timer:
     name: str
 
@@ -208,6 +218,7 @@ Event = (
     | Reconnected
     | ChildStop
     | ClipAck
+    | PassageShown
     | Timer
 )
 

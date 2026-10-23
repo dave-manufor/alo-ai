@@ -18,7 +18,7 @@ import { openMic, stopMic, type MicResult } from '../session/micPermission';
 import { createSoundBoard, useSoundPreference } from '../session/sound';
 import japaBase from '../session/assets/japa-base.svg';
 import NightStage from '../session/NightStage';
-import type { AgentMessage } from '../session/protocol';
+import { shownAck, type AgentMessage } from '../session/protocol';
 import { applyAgentMessage, initialSessionState, recordAck } from '../session/sessionState';
 import type { Mode, StageInput } from '../session/stageEngine';
 
@@ -26,6 +26,18 @@ import type { Mode, StageInput } from '../session/stageEngine';
 // hand-back (the artifact: 8 s after the light becomes the moon).
 const END_MS = 8000;
 const QUESTION_CLIP = /^question:(\d+)$/;
+/** Resolves after the browser has drawn what React just rendered (two frames; a timeout where
+ *  there is no animation frame, as in tests). */
+function afterPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame !== 'function') {
+      setTimeout(resolve, 0);
+      return;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+}
+
 // How long showing the passage waits for its word clips (they are listed first).
 const WORD_CLIPS_WAIT_MS = 8000;
 // The steps in which the child is expected to talk.
@@ -98,6 +110,12 @@ export default function SessionPage({
     setState((current) =>
       applyAgentMessage(current, message, (clipId) => clipCache.textFor(clipId)),
     );
+    if (message.cmd === 'show_passage') {
+      // Tell the agent the story is on the child's screen once it has been drawn: the reading
+      // clock (the recording, the 90 s cap, the 30 s kindness window) starts from this.
+      await afterPaint();
+      driverRef.current?.ack?.(shownAck(message.passage_id));
+    }
     if (message.cmd === 'play') {
       if (!clipCache.has(message.clip_id)) setWaitingClip(true); // still downloading
       const ack = await clipCache.play(message.clip_id);

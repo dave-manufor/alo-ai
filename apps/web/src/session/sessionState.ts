@@ -1,4 +1,4 @@
-import type { AgentMessage, ClientMessage, SessionStep } from './protocol';
+import type { AgentMessage, ClipAckMessage, SessionStep } from './protocol';
 
 // What the session screen shows, decided only by agent messages
 // (protocol v2). The client never advances the session itself: the step
@@ -25,7 +25,7 @@ export interface SessionViewState {
   playingClipId: string | null;
   /** The agent hears the child speaking (the stage's light only). */
   childSpeaking: boolean;
-  acksSent: ClientMessage[];
+  acksSent: ClipAckMessage[];
 }
 
 export const initialSessionState: SessionViewState = {
@@ -83,7 +83,7 @@ export function applyAgentMessage(
   }
 }
 
-export function recordAck(state: SessionViewState, ack: ClientMessage): SessionViewState {
+export function recordAck(state: SessionViewState, ack: ClipAckMessage): SessionViewState {
   return {
     ...state,
     playingClipId: state.playingClipId === ack.clip_id ? null : state.playingClipId,

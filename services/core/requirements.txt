@@ -27,5 +27,9 @@ azure-identity==1.26.0
 pyjwt[crypto]==2.15.1
 openai==2.54.0
 litellm==1.106.2
+# LiteLLM imports mcp when a call carries tools (the Coach's does) and does not require it. Without
+# it every Coach run failed with "APIConnectionError" (LiteLLM reports any internal error as a
+# connection error), the template plan was used instead, and the cause was invisible in the logs.
+mcp==2.3.0
 azure-cognitiveservices-speech==1.52.0
 soundfile==0.14.0

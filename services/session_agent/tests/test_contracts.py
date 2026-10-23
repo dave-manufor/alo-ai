@@ -80,6 +80,7 @@ def test_session_protocol_fixture_messages_validate():
         "reconnecting",
         "played",
         "missing",
+        "shown",
     }
 
 
