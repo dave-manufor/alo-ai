@@ -1,6 +1,7 @@
 import json
 from types import SimpleNamespace
 
+from aloai_contracts import CONSENT
 from aloai_store import MemoryStore
 from services.session_agent.tools import cloud_smoke
 from services.session_agent.tools.cloud_smoke import Check, report_done, run_smoke, wait_for
@@ -135,6 +136,16 @@ def test_a_good_run_passes_every_check_and_makes_the_fictional_child():
     assert store.get("children/child_smoke") == cloud_smoke.CHILD
     assert "status COMPLETE" in checks[2].detail
     assert "40 agent messages" in checks[0].detail
+
+
+def test_the_fictional_child_has_a_consent_the_coach_will_accept():
+    # Without one the Coach makes no plan (PRD 12), and the smoke test would wait for it in vain.
+    CONSENT.validate(cloud_smoke.CONSENT)
+    assert cloud_smoke.CONSENT["child_id"] == cloud_smoke.CHILD_ID
+    assert cloud_smoke.CONSENT["guardian_id"] == cloud_smoke.CHILD["guardian_id"]
+    store = MemoryStore()
+    smoke(store, Admin({"core-events": 0, "scorer-events": 0}), lambda s, c: {"ended": True})
+    assert store.get("consents/consent_smoke") == cloud_smoke.CONSENT
 
 
 def test_the_child_document_has_what_the_grader_reads():
