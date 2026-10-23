@@ -12,8 +12,10 @@ import { useEffect, useState } from 'react';
 // The counting pops are the one sound during a child's turn: a brief note a fraction as loud as
 // speech. The agent's per-turn input level and voice-detector counts show whether it matters.
 
-/** Peak level of every sound: about -23 dBFS, well under a voice. */
-export const MASTER_GAIN = 0.07;
+/** Level of every sound: its loudest note is about -16 dBFS, softer than a voice (the first
+ *  0.07 could not be heard through a phone or laptop speaker in a live test). The counting
+ *  pop is scaled down to stay at the old level, since it falls in the child's turn. */
+export const MASTER_GAIN = 0.2;
 
 export interface SoundBoard {
   setEnabled(on: boolean): void;
@@ -45,7 +47,29 @@ export function createSoundBoard(
   let maker: Maker | null = null;
   let shimmer: { stop: () => void } | null = null;
 
-  const usable = () => enabled && context !== null && context.state === 'running';
+  let wantShimmer = false;
+  let reported = false;
+
+  /** Plays now if the audio context is running. Safari suspends (or "interrupts") a context
+   *  when the microphone opens, so otherwise it is woken first and the sound plays once it
+   *  runs: before, a suspended context meant no sound at all for the whole session. */
+  function whenRunning(play: () => void): void {
+    if (!enabled || context === null) return;
+    if (!reported) {
+      reported = true;
+      console.info('sound: audio context is', context.state);
+    }
+    if (context.state === 'running') {
+      play();
+      return;
+    }
+    const woken = context.resume?.();
+    void woken
+      ?.then(() => {
+        if (enabled && context.state === 'running') play();
+      })
+      .catch(() => undefined);
+  }
 
   function make(): Maker | null {
     if (!context) return null;
@@ -81,62 +105,70 @@ export function createSoundBoard(
     shimmer = null;
   }
 
+  function startShimmer(): void {
+    if (!wantShimmer || shimmer) return;
+    const m = make();
+    if (!m) return;
+    const { context: ctx, master } = m;
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(master);
+    const voices = [196, 293.66].map((freq) => {
+      const oscillator = ctx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = freq;
+      oscillator.connect(gain);
+      oscillator.start();
+      return oscillator;
+    });
+    // A slow swell in and out, so it breathes rather than drones.
+    const lfo = ctx.createOscillator();
+    const depth = ctx.createGain();
+    lfo.frequency.value = 0.3;
+    depth.gain.value = 0.2;
+    lfo.connect(depth);
+    depth.connect(gain.gain);
+    lfo.start();
+    gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.8);
+    shimmer = {
+      stop: () => {
+        const now = ctx.currentTime;
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(gain.gain.value, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.5);
+        for (const oscillator of [...voices, lfo]) oscillator.stop(now + 0.6);
+      },
+    };
+  }
+
   return {
     setEnabled(on) {
       enabled = on;
       if (!on) stopShimmer();
     },
     ambience(on) {
-      if (!on || !usable() || options.reducedMotion) {
+      wantShimmer = on;
+      if (!on || options.reducedMotion) {
         stopShimmer();
         return;
       }
-      if (shimmer) return;
-      const m = make();
-      if (!m) return;
-      const { context: ctx, master } = m;
-      const gain = ctx.createGain();
-      gain.gain.value = 0;
-      gain.connect(master);
-      const voices = [196, 293.66].map((freq) => {
-        const oscillator = ctx.createOscillator();
-        oscillator.type = 'sine';
-        oscillator.frequency.value = freq;
-        oscillator.connect(gain);
-        oscillator.start();
-        return oscillator;
-      });
-      // A slow swell in and out, so it breathes rather than drones.
-      const lfo = ctx.createOscillator();
-      const depth = ctx.createGain();
-      lfo.frequency.value = 0.3;
-      depth.gain.value = 0.2;
-      lfo.connect(depth);
-      depth.connect(gain.gain);
-      lfo.start();
-      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.8);
-      shimmer = {
-        stop: () => {
-          const now = ctx.currentTime;
-          gain.gain.cancelScheduledValues(now);
-          gain.gain.setValueAtTime(gain.gain.value, now);
-          gain.gain.linearRampToValueAtTime(0, now + 0.5);
-          for (const oscillator of [...voices, lfo]) oscillator.stop(now + 0.6);
-        },
-      };
+      whenRunning(startShimmer);
     },
     chime(kind) {
-      if (!usable()) return;
       const notes = kind === 'reward' ? REWARD_NOTES : STEP_NOTES;
-      notes.forEach((freq, i) => note(freq, i * 0.16, kind === 'reward' ? 0.9 : 0.55, 0.8));
+      whenRunning(() =>
+        notes.forEach((freq, i) => note(freq, i * 0.16, kind === 'reward' ? 0.9 : 0.55, 0.8)),
+      );
     },
     pop(index) {
-      if (!usable()) return;
-      note(POP_NOTES[Math.max(0, Math.min(POP_NOTES.length - 1, index))], 0, 0.16, 0.6);
+      // Scaled to the old, quieter master level: this is the one sound in the child's turn.
+      const peak = (0.6 * 0.07) / MASTER_GAIN;
+      whenRunning(() =>
+        note(POP_NOTES[Math.max(0, Math.min(POP_NOTES.length - 1, index))], 0, 0.16, peak),
+      );
     },
     tick() {
-      if (!usable()) return;
-      note(880, 0, 0.09, 0.35);
+      whenRunning(() => note(880, 0, 0.09, 0.35));
     },
     dispose() {
       stopShimmer();
