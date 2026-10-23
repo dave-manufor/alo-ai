@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "passage_generate_request.schema.json",
   "title": "PassageGenerateRequest",
-  "description": "Body of POST /v1/passages:generate (SDD 5, 11). Producer: Session Agent (W2). Consumer: Passage Generator in Core (W2). The child's own words are never sent: tags come from the fixed taxonomy and detail is a single safe common noun (PRD 4.5 G1). child_ref is an opaque reference, never a name.",
+  "description": "Body of POST /v1/passages:generate (SDD 5, 11). Producer: Session Agent (W2). Consumer: Passage Generator in Core (W2). The child's own words are never sent: tags come from the fixed taxonomy and detail / details are safe common nouns, up to six, each of one or two lowercase words (PRD 4.5 G1); Core checks every one again before the Writer sees it. detail is the older single form and is still accepted. child_ref is an opaque reference, never a name.",
   "type": "object",
   "properties": {
     "schema_version": { "const": 1 },
@@ -11,6 +11,7 @@
     "target_arl": { "type": "integer", "minimum": 1, "maximum": 12 },
     "tags": { "type": "array", "items": { "$ref": "topic_tag.schema.json" }, "maxItems": 2, "uniqueItems": true },
     "detail": { "type": "string", "pattern": "^[a-z]{2,20}( [a-z]{2,20})?$" },
+    "details": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]{2,20}( [a-z]{2,20})?$" }, "maxItems": 6, "uniqueItems": true },
     "genre_hint": { "type": "string", "enum": ["NARRATIVE", "EXPOSITORY"] },
     "voice_profile_id": { "type": "string", "minLength": 1 },
     "length_profile": { "type": "string", "enum": ["STANDARD", "DEMO"] },

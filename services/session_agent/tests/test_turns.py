@@ -1,5 +1,6 @@
 from services.session_agent.turns import (
     ANSWER_END_MS,
+    CHAT_END_MS,
     ECHO_TAIL_MS,
     MIC_END_MS,
     MIC_MIN_VOICED_MS,
@@ -168,3 +169,15 @@ def test_how_long_since_the_child_last_spoke():
     turns.speech_started(9_700)  # Kemi's voice: ignored, does not count as the child
     turns.speech_ended(9_900)
     assert turns.quiet_ms(10_000) == 7_000
+
+
+def test_a_child_listing_what_they_like_is_not_cut_off_at_a_breath():
+    # Football... (2 s to think) ...music: the chat waits longer than an ordinary answer.
+    turns = started("chat")
+    assert turns.speech_started(100)
+    assert turns.speech_ended(1_100)
+    assert turns.tick(1_100 + ANSWER_END_MS + 500) is None  # an ordinary answer would be over
+    assert turns.speech_started(1_100 + 2_000)  # the next thing they like
+    assert turns.speech_ended(1_100 + 3_000)
+    assert turns.tick(1_100 + 3_000 + CHAT_END_MS - 1) is None
+    assert turns.tick(1_100 + 3_000 + CHAT_END_MS) == "ANSWERED"

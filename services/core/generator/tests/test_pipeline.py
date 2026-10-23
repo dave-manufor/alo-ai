@@ -201,7 +201,7 @@ def test_a_pre_generated_story_has_no_deadline(nlp, clock):
 
 def test_an_unsafe_detail_never_reaches_the_writer(nlp):
     model = ScriptedModel(demo_responses())
-    run(model, nlp, detail="gun")
+    run(model, nlp, details=["gun"])
     assert not re.search(r"\bgun\b", model.prompt("writer/1"))  # "Segun" is a listed name
     assert "in the story." not in model.prompt("writer/1")
 
@@ -226,7 +226,7 @@ def test_the_contract_request_is_read_whole():
         length_profile="DEMO",
         voice_profile_id="vp_google_v1",
         deadline_ms=20000,
-        detail="goat",
+        details=("goat", "football", "red car"),
         genre_hint="NARRATIVE",
     )
 
@@ -262,3 +262,21 @@ def test_the_listening_story_has_the_same_profile_and_the_nearest_level(arl, pro
 def test_no_listening_story_for_the_profile():
     with pytest.raises(LookupError):
         pipeline.choose_listening(BANK[:2], 4, "STANDARD")
+
+
+def test_every_safe_interest_reaches_the_writer_and_an_unsafe_one_is_dropped_alone(nlp):
+    model = ScriptedModel(demo_responses())
+    run(model, nlp, details=["goat", "gun", "ball"])
+    prompt = model.prompt("writer/1")
+    assert "Include goat and ball in the story." in prompt
+    assert not re.search(r"\bgun\b", prompt)  # "Segun" is a listed name
+
+
+def test_the_older_single_detail_is_still_accepted():
+    body = {key: value for key, value in CONTRACT_REQUEST.items() if key != "details"}
+    assert Request.from_contract({**body, "detail": "goat"}).details == ("goat",)
+    both = Request.from_contract({**body, "details": ["ball"], "detail": "goat"})
+    assert both.details == ("ball", "goat")
+    assert Request.from_contract({**body, "details": ["goat"], "detail": "goat"}).details == (
+        "goat",
+    )

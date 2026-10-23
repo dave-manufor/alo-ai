@@ -171,7 +171,7 @@ def to_reading(driver, ports, clock):
 def to_story(driver, ports, clock):
     """Everything up to the story being sent to the web app, which has not said it is up."""
     driver.start()
-    speak(driver, clock, "i like football", then_quiet_ms=1_500)
+    speak(driver, clock, "i like football", then_quiet_ms=3_000)
     assert ports.passages.calls == [("generate", "i like football", 20_000)]
     driver.passage_arrived(PAIR, fallback=False)
     played(driver, clock)
@@ -359,7 +359,7 @@ def test_the_mic_check_level_leaves_out_the_prompt_coming_back_through_the_micro
 
 def to_mic_check(driver, ports, clock):
     driver.start()
-    speak(driver, clock, "i like football", then_quiet_ms=1_500)
+    speak(driver, clock, "i like football", then_quiet_ms=3_000)
     driver.passage_arrived(PAIR, fallback=False)
     assert driver.state.phase is Phase.MIC_CHECK
 
@@ -582,7 +582,7 @@ def test_the_kindness_rule_ends_a_hard_reading_and_goes_to_listening():
 def test_a_quiet_mic_check_gets_one_retry_then_low_audio():
     driver, ports, clock, _ = make_driver()
     driver.start()
-    speak(driver, clock, "football", then_quiet_ms=1_500)
+    speak(driver, clock, "football", then_quiet_ms=3_000)
     driver.passage_arrived(PAIR, fallback=False)
     played(driver, clock)
     driver.on_audio(tone(-55, 2_000))
@@ -595,7 +595,7 @@ def test_a_quiet_mic_check_gets_one_retry_then_low_audio():
 def test_a_loud_mic_check_asks_for_softer():
     driver, ports, clock, _ = make_driver()
     driver.start()
-    speak(driver, clock, "football", then_quiet_ms=1_500)
+    speak(driver, clock, "football", then_quiet_ms=3_000)
     driver.passage_arrived(PAIR, fallback=False)
     played(driver, clock)
     driver.on_audio(array("h", [32_767] * 16_000).tobytes())
@@ -690,7 +690,7 @@ def test_an_answer_heard_only_as_an_interim_transcript_is_still_scored():
 def test_only_the_interest_chat_answer_goes_to_the_story_request():
     driver, ports, clock, _ = make_driver()
     driver.start()
-    speak(driver, clock, "i like goats and space", then_quiet_ms=1_500)
+    speak(driver, clock, "i like goats and space", then_quiet_ms=3_000)
     ((_, interest, deadline_ms),) = ports.passages.calls
     assert (interest, deadline_ms) == ("i like goats and space", 20_000)
 
@@ -708,7 +708,7 @@ def test_a_child_who_says_nothing_still_gets_a_story_with_no_interest():
 def test_a_bank_fallback_flags_the_session_and_a_late_story_is_ignored():
     driver, ports, clock, _ = make_driver()
     driver.start()
-    speak(driver, clock, "football", then_quiet_ms=1_500)
+    speak(driver, clock, "football", then_quiet_ms=3_000)
     fire(driver, ports.timers, "passage_wait")
     assert ports.passages.calls[-1] == ("bank",)
     driver.passage_arrived(PAIR, fallback=True)

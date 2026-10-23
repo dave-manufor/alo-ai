@@ -440,6 +440,10 @@ def test_a_tag_outside_the_taxonomy_is_rejected(tag):
         {"tags": ["animals", "animals"]},
         {"tags": ["dyslexia"]},
         {"detail": "Goat"},
+        {"details": ["Goat"]},
+        {"details": ["a very small goat"]},
+        {"details": ["goat", "goat"]},
+        {"details": ["aa", "bb", "cc", "dd", "ee", "ff", "gg"]},
         {"detail": "a very small goat"},
         {"target_arl": 13},
         {"length_profile": "SHORT"},
@@ -452,7 +456,7 @@ def test_a_bad_generate_request_is_rejected(change):
     assert not _validator("passage_generate_request.schema.json").is_valid(request)
 
 
-@pytest.mark.parametrize("field", ["detail", "genre_hint"])
+@pytest.mark.parametrize("field", ["details", "genre_hint"])
 def test_the_optional_request_fields_may_be_left_out(field):
     request = _fixture("passage_generate.request.json")
     del request[field]
