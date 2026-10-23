@@ -25,6 +25,7 @@ Text-to-Speech clips are not built.
 import argparse
 import copy
 import json
+import logging
 import os
 import sys
 from collections.abc import Callable, Iterable, Mapping, Sequence
@@ -49,6 +50,9 @@ from .clips.keys import clean_word, word_key
 from .clips.prompts import PROMPT_TEXTS
 from .clips.seed import SeedReport, WordToSeed, seed_words, silent_clip, words_from_tokens
 from .clips.store import ClipStore
+from .passages import PassagePair
+
+log = logging.getLogger(__name__)
 
 MAX_CONCURRENT_REQUESTS = 16
 DEFAULT_BANK_DIR = "fixtures/contracts"
@@ -240,6 +244,33 @@ def _synthesizers(
         line_synthesizer(ssml_to_mp3, voice=voice, locale=locale),
         word_synthesizer(ssml_to_mp3, voice=voice, locale=locale),
     )
+
+
+def story_clip_maker(
+    cfg: config.Config,
+    shared: aloai_env.Config,
+    env: Mapping[str, str],
+    store: ClipStore,
+) -> Callable[[PassagePair], None] | None:
+    """What a session uses to make the "That word is X." clips of a story the Passage
+    Generator wrote (4.5 G5): only the words the shared store lacks are made, and each is
+    written only if still absent. None when this build has no voice to make them with
+    (fixtures, no Azure voice named, or another cloud): the story's words the store lacks are
+    then `missing` when told, as before."""
+    if cfg.ai_mode != "live" or shared.cloud != "azure" or not env.get("TTS_VOICE"):
+        return None
+    _, word = _synthesizers(cfg, shared, env)
+
+    def make(pair: PassagePair) -> None:
+        report = seed_words(words_from_tokens(pair.read["tokens"]), store, word)
+        log.info(
+            "story clips: %d made, %d already there, %d failed",
+            len(report.written),
+            len(report.existing),
+            len(report.failed),
+        )
+
+    return make
 
 
 def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None) -> int:

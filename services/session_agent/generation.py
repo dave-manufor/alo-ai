@@ -59,7 +59,7 @@ MARGIN_MS = 1000  # [CAL] the story must reach the machine before its own timer 
 
 TAGGER_MODEL = "gemini-2.5-flash"
 TAGGER_PROMPT_VERSION = "tagger_v1"
-TAGGER_TIMEOUT_S = 3.0  # [CAL] the tagger's share of the 20 s wait
+TAGGER_TIMEOUT_S = 6.0  # [CAL] the tagger's share of the 20 s wait (Gemini took 4.8 s)
 TAGGER_SCHEMA = {
     "type": "object",
     "properties": {
@@ -188,6 +188,9 @@ class StoryRequester:
     child: Callable[[], dict | None]  # the child's record (a blocking Firestore read)
     client: CoreClient
     load_pair: Callable[[str], PassagePair]  # a blocking load of the passage and its pair
+    # Makes the "That word is X." clips the story needs and the shared store does not have yet
+    # (4.5 G5): blocking, given the loaded pair. None: the clips are not made here.
+    make_clips: Callable[[PassagePair], None] | None = None
     today: Callable[[], date] = date.today
     clock: Callable[[], float] = time.monotonic
 
@@ -230,7 +233,25 @@ class StoryRequester:
             error = reply.get("error") or {}
             log.info("generator answered %s for %s", error.get("code", reply), self.session_id)
             return None
-        return await asyncio.to_thread(self.load_pair, passage_id)
+        pair = await asyncio.to_thread(self.load_pair, passage_id)
+        await self._clips(pair, deadline_ms - int(1000 * (self.clock() - started)) - MARGIN_MS)
+        return pair
+
+    async def _clips(self, pair: PassagePair, left_ms: int) -> None:
+        """Make the story's missing word clips before it is shown, for as long as the machine's
+        timer allows. A word still without a clip at the deadline is answered `missing` when
+        it is told, which is what happens to any word the store lacks; it never ends the
+        session or drops the story."""
+        if self.make_clips is None:
+            return
+        try:
+            await asyncio.wait_for(
+                asyncio.to_thread(self.make_clips, pair), timeout=max(left_ms, 0) / 1000
+            )
+        except TimeoutError:
+            log.warning("some word clips for %s were not ready in time", self.session_id)
+        except Exception:
+            log.exception("the word clips for %s could not be made", self.session_id)
 
     async def _interest(self, answer: str | None) -> Interest:
         if not answer:

@@ -100,7 +100,7 @@ def test_the_tagger_wraps_the_childs_words_as_data_and_asks_for_the_schema():
     config = client.seen["config"]
     assert config.response_json_schema == generation.TAGGER_SCHEMA
     assert config.temperature == 0
-    assert config.http_options.timeout == 3000
+    assert config.http_options.timeout == int(1000 * generation.TAGGER_TIMEOUT_S)
 
 
 @pytest.mark.parametrize("text", [None, "not json"])
@@ -251,3 +251,29 @@ def test_a_failure_anywhere_is_the_bank_passage_and_never_a_crash():
 
     assert request(requester(child=unreadable)) is None
     assert request(requester(load_pair=missing)) is None
+
+
+def test_the_storys_missing_word_clips_are_made_before_it_is_returned():
+    made = []
+    story = requester(make_clips=made.append)
+    assert request(story) == PAIR
+    assert made == [PAIR]
+
+
+def test_a_story_is_still_returned_when_its_clips_cannot_be_made():
+    def broken(pair):
+        raise RuntimeError("the voice service is down")
+
+    story = requester(make_clips=broken)
+    assert request(story) == PAIR
+
+
+def test_a_story_is_still_returned_when_its_clips_are_not_ready_in_time():
+    import time
+
+    def slow(pair):
+        time.sleep(1.0)
+
+    story = requester(make_clips=slow, clock=Clock(step=0.45))
+    # Of 2.5 s, the margin and the time already spent leave the clips 0.6 s: not the 1 s they take.
+    assert request(story, deadline_ms=2_500) == PAIR
