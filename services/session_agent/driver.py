@@ -182,25 +182,31 @@ class Driver:
             self._run(action)
 
     def on_audio(self, pcm: bytes) -> None:
-        self.stats.frame(pcm, self.clock_ms())
+        now = self.clock_ms()
+        self.stats.frame(pcm, now)
         if self._turn is not None:
-            self.ports.recorder.feed(pcm)
-            if self._turn.phase == "MIC_CHECK":
+            self.ports.recorder.feed(pcm)  # everything is recorded, as it was heard
+            # The level check is of the child's voice, not of Kemi's prompt coming back
+            # through the phone's microphone.
+            if self._turn.phase == "MIC_CHECK" and not self.turns.ignoring(now):
                 self.mic.feed(pcm)
 
     def on_speech_started(self) -> None:
         self.stats.vad_started(self._clip_playing)
-        self.ports.channel.send(protocol.child_speaking(True))
-        self.turns.speech_started(self.clock_ms())
+        # Speech while a prompt plays is Kemi's own voice in the room: not the child.
+        if self.turns.speech_started(self.clock_ms()):
+            self.ports.channel.send(protocol.child_speaking(True))
 
     def on_speech_ended(self) -> None:
         self.stats.vad_ended()
-        self.ports.channel.send(protocol.child_speaking(False))
-        self.turns.speech_ended(self.clock_ms())
+        if self.turns.speech_ended(self.clock_ms()):
+            self.ports.channel.send(protocol.child_speaking(False))
 
     def on_transcript(self, text: str, *, final: bool) -> None:
         self.stats.transcript(text, final=final)
         now = self.clock_ms()
+        if self.turns.ignoring(now):
+            return  # Kemi's prompt heard back by the microphone, not an answer or the reading
         if self._reading and self.tracker is not None:
             (self.tracker.on_final if final else self.tracker.on_partial)(text, now)
             return
@@ -218,8 +224,8 @@ class Driver:
         if ack is None:
             return
         self._clip_playing = False
-        if ack.status == "played":
-            self.turns.prompt_finished(self.clock_ms())
+        # A clip that could not play is over too: do not wait for it.
+        self.turns.prompt_finished(self.clock_ms())
         self.handle(ack)
 
     def on_quick_response(self, response: dict) -> None:
@@ -303,6 +309,7 @@ class Driver:
     def _send(self, message: dict) -> None:
         if message.get("cmd") == "play":
             self._clip_playing = True
+            self.turns.prompt_started(self.clock_ms())
         self.ports.channel.send({"schema_version": protocol.SCHEMA_VERSION, **message})
 
     def _emit(self, action: EmitEvent) -> None:
