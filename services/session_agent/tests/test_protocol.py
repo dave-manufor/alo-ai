@@ -49,6 +49,32 @@ def test_other_actions_are_not_data_channel_messages(action):
     assert protocol.message_for(action, word_clip) is None
 
 
+def clips(n: int) -> list[tuple[str, str, str | None]]:
+    return [(f"c{i}", f"https://clips.example/{i}.mp3", f"text {i}") for i in range(n)]
+
+
+def test_a_long_clip_list_is_cut_into_messages_under_the_size_limit(validate):
+    wanted = clips(300)
+    messages = protocol.clip_lists(wanted)
+    assert len(messages) > 1
+    assert all(len(protocol.encode(m)) <= protocol.CLIP_LIST_MAX_BYTES for m in messages)
+    for message in messages:
+        validate("session_protocol.schema.json", message)
+    sent = [(c["clip_id"], c["url"], c["text"]) for m in messages for c in m["clips"]]
+    assert sent == wanted  # every clip once, in order
+
+
+def test_a_short_clip_list_stays_one_message_and_none_is_none():
+    assert protocol.clip_lists(clips(3)) == [protocol.clip_list(clips(3))]
+    assert protocol.clip_lists([]) == []
+
+
+def test_one_clip_bigger_than_the_limit_goes_alone():
+    big = [("a", "https://x/a.mp3", "t" * 200), ("b", "https://x/b.mp3", "t" * 200)]
+    messages = protocol.clip_lists(big, max_bytes=100)
+    assert [[c["clip_id"] for c in m["clips"]] for m in messages] == [["a"], ["b"]]
+
+
 def test_clip_list_is_schema_valid(validate):
     message = protocol.clip_list(
         [
