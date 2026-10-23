@@ -1,9 +1,9 @@
 # The values in use. Changing a server setting is a one-line pull request (chore/infra-...).
 # demo_warm = false and session_profile = "standard" are the study settings.
 voice_mode      = "cache_first"
-session_profile = "standard"
-demo_warm       = false
-agent_on        = true # one warm Session Agent for the mini-study; false again afterwards (it runs all day)
+session_profile = "demo" # the stage demo only: every session is a demo session; "standard" again after (PRD 14.3 day 6)
+demo_warm       = true   # min 1 replica on all four services for the demo; false again after
+agent_on        = true   # one warm Session Agent for the mini-study; false again afterwards (it runs all day)
 coach_on        = true
 generator_on    = false
 
