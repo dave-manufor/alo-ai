@@ -234,7 +234,7 @@ def _synthesizers(
         )
     voice = env.get("TTS_VOICE", "")
     if not voice:
-        raise aloai_env.ConfigError("TTS_VOICE must name an Azure voice, e.g. en-NG-EzinneNeural")
+        raise aloai_env.ConfigError("TTS_VOICE must name an Azure voice, e.g. en-US-JennyNeural")
     locale = "-".join(voice.split("-")[:2])
 
     def ssml_to_mp3(ssml: str) -> bytes:

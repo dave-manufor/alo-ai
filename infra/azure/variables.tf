@@ -153,15 +153,15 @@ variable "images" {
 # ---- voice and speech
 
 variable "voice_profile_id" {
-  description = "Names the Azure voice's clips in the clip store, apart from the Google ones."
+  description = "Names the voice's clips in the clip store, apart from every other voice's (a new voice is a new id, and then the seed job makes its clips). vp_azure_us_v1: the American English female voice."
   type        = string
-  default     = "vp_azure_v1"
+  default     = "vp_azure_us_v1"
 }
 
 variable "tts_voice" {
-  description = "Azure neural voice for Auntie Kemi and the parent summary."
+  description = "Azure neural voice for Auntie Kemi and the parent summary: an American English female voice. Changing it needs a new voice_profile_id and a run of the seed job."
   type        = string
-  default     = "en-NG-EzinneNeural"
+  default     = "en-US-JennyNeural"
 }
 
 variable "speech_locale" {
