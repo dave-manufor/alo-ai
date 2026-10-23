@@ -18,6 +18,7 @@ import logging
 import os
 import time
 import uuid
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -44,6 +45,7 @@ from .passages import PassageBank, PassageError, folder_bank, passage_id_for_lev
 from .protocol import encode
 from .recorder import FlacRecorder, object_name
 from .recording import AudioLog
+from .supervise import supervised
 
 log = logging.getLogger("aloai.session_agent")
 
@@ -434,7 +436,8 @@ def _pump(
     """Microphone frames -> recorder, VAD and STT; their events -> the driver."""
     audio = rtc.AudioStream.from_track(track=track, sample_rate=16_000, num_channels=1)
     vad_stream = ctx.proc.userdata["vad"].stream()
-    speech = _stt(cfg, shared)
+    speech = _stt(cfg, shared, on_error=driver.stats.stt_error)
+    log.info("listening to the child's microphone track")
 
     async def frames() -> None:
         async for event in audio:
@@ -460,10 +463,13 @@ def _pump(
             elif event.type == stt.SpeechEventType.FINAL_TRANSCRIPT:
                 driver.on_transcript(text, final=True)
 
-    asyncio.create_task(frames())
-    asyncio.create_task(vad_events())
+    # Supervised, so a task that dies is logged and counted instead of vanishing: before, a
+    # failed speech stream left the session running on timers with no sign of why.
+    report = driver.stats.task_stopped
+    supervised("audio_frames", frames(), log=log, stopped=report)
+    supervised("voice_detection", vad_events(), log=log, stopped=report)
     if speech is not None:
-        asyncio.create_task(transcripts())
+        supervised("speech_to_text", transcripts(), log=log, stopped=report)
 
 
 def azure_stt_options(shared: aloai_env.Config) -> dict[str, str]:
@@ -476,26 +482,39 @@ def azure_stt_options(shared: aloai_env.Config) -> dict[str, str]:
     return options | {"speech_auth_token": credentials["auth_token"]}
 
 
-def _stt(cfg: config.Config, shared: aloai_env.Config):
+def _stt(cfg: config.Config, shared: aloai_env.Config, on_error: Callable[[], None] | None = None):
     """Streaming STT: Chirp 3 on gcp, Azure AI Speech on azure. AI_MODE=fixtures has none:
     no cloud calls locally, so the reading runs to its 90 s cap and answers reach
-    grade:quick empty."""
+    grade:quick empty. `on_error` is called for each error the plugin reports (it retries
+    itself, and only logs through here)."""
     if cfg.ai_mode != "live":
         log.warning("AI_MODE=fixtures: no speech to text; the position tracker will not move")
         return None
     if shared.cloud == "azure":
         from livekit.plugins import azure
 
-        return azure.STT(**azure_stt_options(shared)).stream()
-    from livekit.plugins import google
+        engine = azure.STT(**azure_stt_options(shared))
+    else:
+        from livekit.plugins import google
 
-    settings = config.worker_settings(os.environ)
-    return google.STT(
-        model="chirp_3",
-        languages=settings.stt_language,
-        location=settings.stt_location,
-        interim_results=True,
-    ).stream()
+        settings = config.worker_settings(os.environ)
+        engine = google.STT(
+            model="chirp_3",
+            languages=settings.stt_language,
+            location=settings.stt_location,
+            interim_results=True,
+        )
+    listen_for_errors = getattr(engine, "on", None)
+    if listen_for_errors is not None:
+
+        def reported(error: object) -> None:
+            # The class only: the message can quote the audio's text.
+            log.error("speech to text error: %s", type(error).__name__)
+            if on_error is not None:
+                on_error()
+
+        listen_for_errors("error", reported)
+    return engine.stream()
 
 
 def run() -> None:  # pragma: no cover - the worker process
