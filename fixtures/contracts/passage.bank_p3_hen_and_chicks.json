@@ -1419,12 +1419,12 @@
       "prompt_text": "How many chicks did the mother have?",
       "rubric": {
         "2": "Says seven.",
-        "1": "Says a number close to seven, or many.",
+        "1": "Says many or a lot, without a number.",
         "0": "Another number, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_hen_and_chicks_q1",
       "order": 1,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Seven.",
@@ -1446,31 +1446,31 @@
     },
     {
       "type": "LITERAL",
-      "target_sentence_index": 6,
-      "prompt_text": "What did the mother do with her wings?",
+      "target_sentence_index": 3,
+      "prompt_text": "What bird circled above the yard?",
       "rubric": {
-        "2": "Says she spread her wings.",
-        "1": "Says with her body or her feathers.",
+        "2": "Says a hawk.",
+        "1": "Says a big bird, or an eagle, without saying hawk.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_hen_and_chicks_q2",
       "order": 2,
-      "max_points": 2,
       "exemplars": [
         {
-          "answer": "She spread her wings.",
+          "answer": "A hawk.",
           "points": 2
         },
         {
-          "answer": "E open im wings.",
+          "answer": "Na hawk.",
           "points": 2
         },
         {
-          "answer": "With her body.",
+          "answer": "A big bird.",
           "points": 1
         },
         {
-          "answer": "With a basket.",
+          "answer": "A chicken.",
           "points": 0
         }
       ]
@@ -1484,9 +1484,9 @@
         "1": "Says the hen protected them, or the chicks hid.",
         "0": "Something else, or no answer."
       },
+      "max_points": 2,
       "item_id": "bank_p3_hen_and_chicks_q3",
       "order": 3,
-      "max_points": 2,
       "exemplars": [
         {
           "answer": "Because the chicks ran to their mother and she hid them under her wings.",
