@@ -1,0 +1,1631 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_p3_cup_day",
+  "title": "The Winning Pass",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "football",
+    "school"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 5,
+  "word_count": 145,
+  "text_content": "The big match between the two classes was about to begin. Dayo, the captain, tied his jersey and ran onto the field with his teammates. The referee blew his whistle, and the game began. Dayo dribbled past one defender, then past another. The goalkeeper gasped and spread his arms wide. Dayo could have kicked the ball himself, but he saw Tolu standing alone near the goal. He kicked it high, and the ball bounced off Tolu's head and into the net. The goalkeeper could not stop it. The crowd cheered and clapped with joy. The referee blew his whistle again, and the match was over. Dayo's team had won the trophy. The other team shook hands with Dayo and Tolu and smiled. Dayo lifted the trophy and said that the best part was the pass. A good captain gives his friends a chance to shine.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "STANDARD",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "big",
+      "clean_text": "big",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/big.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "match",
+      "clean_text": "match",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/match.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "between",
+      "clean_text": "between",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/between.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "two",
+      "clean_text": "two",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/two.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "classes",
+      "clean_text": "classes",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/classes.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 0,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 0,
+      "text": "about",
+      "clean_text": "about",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/about.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 0,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 0,
+      "text": "begin.",
+      "clean_text": "begin",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/begin.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 1,
+      "text": "Dayo,",
+      "clean_text": "dayo",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": "ˈdɑjɔ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo~%CB%88d%C9%91j%C9%94.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "captain,",
+      "clean_text": "captain",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/captain.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "tied",
+      "clean_text": "tied",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tied.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 1,
+      "text": "jersey",
+      "clean_text": "jersey",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/jersey.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 1,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 1,
+      "text": "ran",
+      "clean_text": "ran",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ran.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 1,
+      "text": "onto",
+      "clean_text": "onto",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/onto.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 1,
+      "text": "field",
+      "clean_text": "field",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/field.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 1,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 1,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 1,
+      "text": "teammates.",
+      "clean_text": "teammates",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/teammates.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 2,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 2,
+      "text": "referee",
+      "clean_text": "referee",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/referee.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 2,
+      "text": "blew",
+      "clean_text": "blew",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/blew.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 2,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 2,
+      "text": "whistle,",
+      "clean_text": "whistle",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/whistle.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 2,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 2,
+      "text": "game",
+      "clean_text": "game",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/game.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 2,
+      "text": "began.",
+      "clean_text": "began",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/began.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 3,
+      "text": "Dayo",
+      "clean_text": "dayo",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈdɑjɔ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo~%CB%88d%C9%91j%C9%94.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 3,
+      "text": "dribbled",
+      "clean_text": "dribbled",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dribbled.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 3,
+      "text": "past",
+      "clean_text": "past",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/past.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 3,
+      "text": "one",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 3,
+      "text": "defender,",
+      "clean_text": "defender",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/defender.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 3,
+      "text": "then",
+      "clean_text": "then",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/then.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 3,
+      "text": "past",
+      "clean_text": "past",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/past.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 3,
+      "text": "another.",
+      "clean_text": "another",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/another.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 4,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 4,
+      "text": "goalkeeper",
+      "clean_text": "goalkeeper",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goalkeeper.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 4,
+      "text": "gasped",
+      "clean_text": "gasped",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gasped.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 4,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 4,
+      "text": "spread",
+      "clean_text": "spread",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/spread.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 4,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 4,
+      "text": "arms",
+      "clean_text": "arms",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/arms.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 4,
+      "text": "wide.",
+      "clean_text": "wide",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wide.mp3"
+    },
+    {
+      "token_index": 50,
+      "sentence_index": 5,
+      "text": "Dayo",
+      "clean_text": "dayo",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈdɑjɔ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo~%CB%88d%C9%91j%C9%94.mp3"
+    },
+    {
+      "token_index": 51,
+      "sentence_index": 5,
+      "text": "could",
+      "clean_text": "could",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
+    },
+    {
+      "token_index": 52,
+      "sentence_index": 5,
+      "text": "have",
+      "clean_text": "have",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/have.mp3"
+    },
+    {
+      "token_index": 53,
+      "sentence_index": 5,
+      "text": "kicked",
+      "clean_text": "kicked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/kicked.mp3"
+    },
+    {
+      "token_index": 54,
+      "sentence_index": 5,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 55,
+      "sentence_index": 5,
+      "text": "ball",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    },
+    {
+      "token_index": 56,
+      "sentence_index": 5,
+      "text": "himself,",
+      "clean_text": "himself",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/himself.mp3"
+    },
+    {
+      "token_index": 57,
+      "sentence_index": 5,
+      "text": "but",
+      "clean_text": "but",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/but.mp3"
+    },
+    {
+      "token_index": 58,
+      "sentence_index": 5,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 59,
+      "sentence_index": 5,
+      "text": "saw",
+      "clean_text": "saw",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/saw.mp3"
+    },
+    {
+      "token_index": 60,
+      "sentence_index": 5,
+      "text": "Tolu",
+      "clean_text": "tolu",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈtɔlu",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tolu~%CB%88t%C9%94lu.mp3"
+    },
+    {
+      "token_index": 61,
+      "sentence_index": 5,
+      "text": "standing",
+      "clean_text": "standing",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/standing.mp3"
+    },
+    {
+      "token_index": 62,
+      "sentence_index": 5,
+      "text": "alone",
+      "clean_text": "alone",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/alone.mp3"
+    },
+    {
+      "token_index": 63,
+      "sentence_index": 5,
+      "text": "near",
+      "clean_text": "near",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/near.mp3"
+    },
+    {
+      "token_index": 64,
+      "sentence_index": 5,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 65,
+      "sentence_index": 5,
+      "text": "goal.",
+      "clean_text": "goal",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goal.mp3"
+    },
+    {
+      "token_index": 66,
+      "sentence_index": 6,
+      "text": "He",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 67,
+      "sentence_index": 6,
+      "text": "kicked",
+      "clean_text": "kicked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/kicked.mp3"
+    },
+    {
+      "token_index": 68,
+      "sentence_index": 6,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 69,
+      "sentence_index": 6,
+      "text": "high,",
+      "clean_text": "high",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/high.mp3"
+    },
+    {
+      "token_index": 70,
+      "sentence_index": 6,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 71,
+      "sentence_index": 6,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 72,
+      "sentence_index": 6,
+      "text": "ball",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    },
+    {
+      "token_index": 73,
+      "sentence_index": 6,
+      "text": "bounced",
+      "clean_text": "bounced",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bounced.mp3"
+    },
+    {
+      "token_index": 74,
+      "sentence_index": 6,
+      "text": "off",
+      "clean_text": "off",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/off.mp3"
+    },
+    {
+      "token_index": 75,
+      "sentence_index": 6,
+      "text": "Tolu's",
+      "clean_text": "tolu's",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tolu%27s.mp3"
+    },
+    {
+      "token_index": 76,
+      "sentence_index": 6,
+      "text": "head",
+      "clean_text": "head",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/head.mp3"
+    },
+    {
+      "token_index": 77,
+      "sentence_index": 6,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 78,
+      "sentence_index": 6,
+      "text": "into",
+      "clean_text": "into",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/into.mp3"
+    },
+    {
+      "token_index": 79,
+      "sentence_index": 6,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 80,
+      "sentence_index": 6,
+      "text": "net.",
+      "clean_text": "net",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/net.mp3"
+    },
+    {
+      "token_index": 81,
+      "sentence_index": 7,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 82,
+      "sentence_index": 7,
+      "text": "goalkeeper",
+      "clean_text": "goalkeeper",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goalkeeper.mp3"
+    },
+    {
+      "token_index": 83,
+      "sentence_index": 7,
+      "text": "could",
+      "clean_text": "could",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/could.mp3"
+    },
+    {
+      "token_index": 84,
+      "sentence_index": 7,
+      "text": "not",
+      "clean_text": "not",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/not.mp3"
+    },
+    {
+      "token_index": 85,
+      "sentence_index": 7,
+      "text": "stop",
+      "clean_text": "stop",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stop.mp3"
+    },
+    {
+      "token_index": 86,
+      "sentence_index": 7,
+      "text": "it.",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 87,
+      "sentence_index": 8,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 88,
+      "sentence_index": 8,
+      "text": "crowd",
+      "clean_text": "crowd",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/crowd.mp3"
+    },
+    {
+      "token_index": 89,
+      "sentence_index": 8,
+      "text": "cheered",
+      "clean_text": "cheered",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/cheered.mp3"
+    },
+    {
+      "token_index": 90,
+      "sentence_index": 8,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 91,
+      "sentence_index": 8,
+      "text": "clapped",
+      "clean_text": "clapped",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/clapped.mp3"
+    },
+    {
+      "token_index": 92,
+      "sentence_index": 8,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 93,
+      "sentence_index": 8,
+      "text": "joy.",
+      "clean_text": "joy",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/joy.mp3"
+    },
+    {
+      "token_index": 94,
+      "sentence_index": 9,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 95,
+      "sentence_index": 9,
+      "text": "referee",
+      "clean_text": "referee",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/referee.mp3"
+    },
+    {
+      "token_index": 96,
+      "sentence_index": 9,
+      "text": "blew",
+      "clean_text": "blew",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/blew.mp3"
+    },
+    {
+      "token_index": 97,
+      "sentence_index": 9,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 98,
+      "sentence_index": 9,
+      "text": "whistle",
+      "clean_text": "whistle",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/whistle.mp3"
+    },
+    {
+      "token_index": 99,
+      "sentence_index": 9,
+      "text": "again,",
+      "clean_text": "again",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/again.mp3"
+    },
+    {
+      "token_index": 100,
+      "sentence_index": 9,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 101,
+      "sentence_index": 9,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 102,
+      "sentence_index": 9,
+      "text": "match",
+      "clean_text": "match",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/match.mp3"
+    },
+    {
+      "token_index": 103,
+      "sentence_index": 9,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 104,
+      "sentence_index": 9,
+      "text": "over.",
+      "clean_text": "over",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/over.mp3"
+    },
+    {
+      "token_index": 105,
+      "sentence_index": 10,
+      "text": "Dayo's",
+      "clean_text": "dayo's",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo%27s.mp3"
+    },
+    {
+      "token_index": 106,
+      "sentence_index": 10,
+      "text": "team",
+      "clean_text": "team",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/team.mp3"
+    },
+    {
+      "token_index": 107,
+      "sentence_index": 10,
+      "text": "had",
+      "clean_text": "had",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/had.mp3"
+    },
+    {
+      "token_index": 108,
+      "sentence_index": 10,
+      "text": "won",
+      "clean_text": "won",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/won.mp3"
+    },
+    {
+      "token_index": 109,
+      "sentence_index": 10,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 110,
+      "sentence_index": 10,
+      "text": "trophy.",
+      "clean_text": "trophy",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/trophy.mp3"
+    },
+    {
+      "token_index": 111,
+      "sentence_index": 11,
+      "text": "The",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 112,
+      "sentence_index": 11,
+      "text": "other",
+      "clean_text": "other",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/other.mp3"
+    },
+    {
+      "token_index": 113,
+      "sentence_index": 11,
+      "text": "team",
+      "clean_text": "team",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/team.mp3"
+    },
+    {
+      "token_index": 114,
+      "sentence_index": 11,
+      "text": "shook",
+      "clean_text": "shook",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shook.mp3"
+    },
+    {
+      "token_index": 115,
+      "sentence_index": 11,
+      "text": "hands",
+      "clean_text": "hands",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hands.mp3"
+    },
+    {
+      "token_index": 116,
+      "sentence_index": 11,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 117,
+      "sentence_index": 11,
+      "text": "Dayo",
+      "clean_text": "dayo",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈdɑjɔ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo~%CB%88d%C9%91j%C9%94.mp3"
+    },
+    {
+      "token_index": 118,
+      "sentence_index": 11,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 119,
+      "sentence_index": 11,
+      "text": "Tolu",
+      "clean_text": "tolu",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": "ˈtɔlu",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tolu~%CB%88t%C9%94lu.mp3"
+    },
+    {
+      "token_index": 120,
+      "sentence_index": 11,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 121,
+      "sentence_index": 11,
+      "text": "smiled.",
+      "clean_text": "smiled",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/smiled.mp3"
+    },
+    {
+      "token_index": 122,
+      "sentence_index": 12,
+      "text": "Dayo",
+      "clean_text": "dayo",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈdɑjɔ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/dayo~%CB%88d%C9%91j%C9%94.mp3"
+    },
+    {
+      "token_index": 123,
+      "sentence_index": 12,
+      "text": "lifted",
+      "clean_text": "lifted",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/lifted.mp3"
+    },
+    {
+      "token_index": 124,
+      "sentence_index": 12,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 125,
+      "sentence_index": 12,
+      "text": "trophy",
+      "clean_text": "trophy",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/trophy.mp3"
+    },
+    {
+      "token_index": 126,
+      "sentence_index": 12,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 127,
+      "sentence_index": 12,
+      "text": "said",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 128,
+      "sentence_index": 12,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 129,
+      "sentence_index": 12,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 130,
+      "sentence_index": 12,
+      "text": "best",
+      "clean_text": "best",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/best.mp3"
+    },
+    {
+      "token_index": 131,
+      "sentence_index": 12,
+      "text": "part",
+      "clean_text": "part",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/part.mp3"
+    },
+    {
+      "token_index": 132,
+      "sentence_index": 12,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 133,
+      "sentence_index": 12,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 134,
+      "sentence_index": 12,
+      "text": "pass.",
+      "clean_text": "pass",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pass.mp3"
+    },
+    {
+      "token_index": 135,
+      "sentence_index": 13,
+      "text": "A",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 136,
+      "sentence_index": 13,
+      "text": "good",
+      "clean_text": "good",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/good.mp3"
+    },
+    {
+      "token_index": 137,
+      "sentence_index": 13,
+      "text": "captain",
+      "clean_text": "captain",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/captain.mp3"
+    },
+    {
+      "token_index": 138,
+      "sentence_index": 13,
+      "text": "gives",
+      "clean_text": "gives",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gives.mp3"
+    },
+    {
+      "token_index": 139,
+      "sentence_index": 13,
+      "text": "his",
+      "clean_text": "his",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/his.mp3"
+    },
+    {
+      "token_index": 140,
+      "sentence_index": 13,
+      "text": "friends",
+      "clean_text": "friends",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/friends.mp3"
+    },
+    {
+      "token_index": 141,
+      "sentence_index": 13,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 142,
+      "sentence_index": 13,
+      "text": "chance",
+      "clean_text": "chance",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/chance.mp3"
+    },
+    {
+      "token_index": 143,
+      "sentence_index": 13,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 144,
+      "sentence_index": 13,
+      "text": "shine.",
+      "clean_text": "shine",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shine.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "A big match between two classes was about to begin.",
+      "weight": 1
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "CHARACTER",
+      "description": "Dayo was the captain of his team.",
+      "weight": 1
+    },
+    {
+      "id": "p3",
+      "sentence_index": 3,
+      "category": "ACTION",
+      "description": "Dayo dribbled past two defenders.",
+      "weight": 1
+    },
+    {
+      "id": "p4",
+      "sentence_index": 5,
+      "category": "PROBLEM",
+      "description": "Dayo saw Tolu standing alone near the goal.",
+      "weight": 2
+    },
+    {
+      "id": "p5",
+      "sentence_index": 6,
+      "category": "ACTION",
+      "description": "Dayo kicked the ball high to Tolu.",
+      "weight": 1
+    },
+    {
+      "id": "p6",
+      "sentence_index": 6,
+      "category": "RESOLUTION",
+      "description": "The ball bounced off Tolu's head into the net.",
+      "weight": 2
+    },
+    {
+      "id": "p7",
+      "sentence_index": 8,
+      "category": "DETAIL",
+      "description": "The crowd cheered and clapped with joy.",
+      "weight": 1
+    },
+    {
+      "id": "p8",
+      "sentence_index": 10,
+      "category": "DETAIL",
+      "description": "Dayo's team won the trophy.",
+      "weight": 1
+    },
+    {
+      "id": "p9",
+      "sentence_index": 13,
+      "category": "MAIN_IDEA",
+      "description": "A good captain gives his friends a chance to shine.",
+      "weight": 2
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 5,
+      "prompt_text": "Who was standing alone near the goal?",
+      "rubric": {
+        "2": "Says Tolu.",
+        "1": "Says a friend or a boy from the class, without the name.",
+        "0": "Someone else, or no answer."
+      },
+      "item_id": "bank_p3_cup_day_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Tolu.",
+          "points": 2
+        },
+        {
+          "answer": "Na Tolu.",
+          "points": 2
+        },
+        {
+          "answer": "A boy from the class.",
+          "points": 1
+        },
+        {
+          "answer": "The referee.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 10,
+      "prompt_text": "What did Dayo's team win?",
+      "rubric": {
+        "2": "Says the trophy.",
+        "1": "Says the match or a prize.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p3_cup_day_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "The trophy.",
+          "points": 2
+        },
+        {
+          "answer": "Dem win the trophy.",
+          "points": 2
+        },
+        {
+          "answer": "The match.",
+          "points": 1
+        },
+        {
+          "answer": "A football.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 5,
+      "prompt_text": "Why did Dayo kick the ball to Tolu?",
+      "rubric": {
+        "2": "Says Tolu was alone near the goal, so he had a better chance to score than Dayo.",
+        "1": "Says Tolu was alone, or Dayo wanted to help his friend.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p3_cup_day_q3",
+      "order": 3,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because Tolu was free next to the goal, and he could score.",
+          "points": 2
+        },
+        {
+          "answer": "Tolu dey near the goal alone, so he fit score am.",
+          "points": 2
+        },
+        {
+          "answer": "Because Tolu was alone.",
+          "points": 1
+        },
+        {
+          "answer": "Because the match was over.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l5_before_rain"
+}

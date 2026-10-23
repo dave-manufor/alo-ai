@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from aloai_store import MemoryStore
 from services.session_agent import generation
 from services.session_agent.livekit_worker import _interest_picker, _Passages
@@ -37,26 +39,40 @@ def test_every_indexed_passage_loads_as_a_fitting_pair():
         assert len(pair.listening["items"]) == STANDARD.n_listening_items
 
 
-def test_a_child_gets_the_story_that_matches_what_they_like():
-    # Level 5 child who likes football: the football story two levels down beats the school one.
-    assert passage_id_for_interest(5, ["football"], DEFAULT) == "bank_p2_lost_ball"
-    assert passage_id_for_interest(9, ["music"], "x") == "bank_p5_music_contest"
+@pytest.mark.parametrize(
+    ("level", "tags", "expected"),
+    [
+        (5, ["football"], "bank_p3_cup_day"),  # at their own level, not the one two down
+        (9, ["music"], "bank_p5_music_contest"),
+        (3, ["food"], "bank_p2_cooking_rice"),
+        (6, ["animals"], "bank_p3_hen_and_chicks"),
+        (7, ["space"], "bank_p4_night_sky"),
+        (11, ["space", "adventure"], "bank_p6_science_fair_rocket"),
+    ],
+)
+def test_a_child_gets_the_story_that_matches_what_they_like(level, tags, expected):
+    assert passage_id_for_interest(level, tags, DEFAULT) == expected
 
 
 def test_the_first_tag_counts_double_and_a_second_tag_can_win_alone():
-    # Level 4: farming (school garden, 5) is two away... football (lost ball, 3) is one away.
-    assert passage_id_for_interest(4, ["farming", "football"], DEFAULT) == "bank_p3_school_garden"
+    # Level 4: farming is the second tag, so one point; football is the first, so two.
+    assert passage_id_for_interest(4, ["football", "farming"], DEFAULT) == "bank_p2_lost_ball"
+    # Farming first: goat story (3, one away) scores 2, the same as the hen's (5), and is easier.
+    assert passage_id_for_interest(4, ["farming", "football"], DEFAULT) == "bank_p2_goat_at_gate"
+    # A second tag wins alone when the first has nothing within reach.
     assert passage_id_for_interest(4, ["space", "football"], DEFAULT) == "bank_p2_lost_ball"
 
 
 def test_nothing_that_matches_within_two_levels_means_the_levels_own_passage():
+    # No space story within two levels of level 1: the child's own level's passage.
     assert passage_id_for_interest(1, ["space"], "bank_p1_ada_and_the_dog") == (
         "bank_p1_ada_and_the_dog"
     )
-    # Football exists, but five levels away from a level 8 child.
-    far = [p for p, (arl, tags) in INTEREST_BANK.items() if "football" in tags and arl > 5]
-    assert not far or passage_id_for_interest(8, ["football"], DEFAULT) != far[0]
-    assert MAX_LEVEL_GAP == 2
+    # Every story is at least a level... a story more than two levels away is never chosen.
+    for level in range(1, 13):
+        picked = passage_id_for_interest(level, ["football", "animals", "space"], DEFAULT)
+        if picked != DEFAULT:
+            assert abs(INTEREST_BANK[picked][0] - level) <= MAX_LEVEL_GAP
 
 
 def test_no_tags_or_no_known_level_means_the_default():
@@ -65,9 +81,10 @@ def test_no_tags_or_no_known_level_means_the_default():
 
 
 def test_a_tie_goes_to_the_nearer_level_then_the_easier():
-    tied = passage_id_for_interest(4, ["family"], DEFAULT)
-    # family: lost ball (3), night bus (7), river crossing (11): only lost ball is in reach
-    assert tied == "bank_p2_lost_ball"
+    # family within reach of level 4: lost ball and cooking rice, both level 3: by id
+    assert passage_id_for_interest(4, ["family"], DEFAULT) == "bank_p2_cooking_rice"
+    # level 2, animals: ada and the dog (1) and the goat story (3) are both one away: the easier
+    assert passage_id_for_interest(2, ["animals"], DEFAULT) == "bank_p1_ada_and_the_dog"
 
 
 # ---- _Passages
@@ -163,7 +180,7 @@ def test_the_picker_tags_the_answer_and_matches_it_at_the_childs_level(monkeypat
     store = MemoryStore({"children/child_1": {"primary_class": 3, "next_passage_arl": 5}})
     start = SimpleNamespace(child_id="child_1")
     pick = _interest_picker(None, _config(), start, STANDARD, DEFAULT, store, None)
-    assert asyncio.run(pick("i like football")) == "bank_p2_lost_ball"
+    assert asyncio.run(pick("i like football")) == "bank_p3_cup_day"
     # a child record that gives no level: the default for them
     pick = _interest_picker(None, _config(), start, STANDARD, DEFAULT, MemoryStore({}), None)
     assert asyncio.run(pick("i like football")) == DEFAULT
