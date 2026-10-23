@@ -17,7 +17,8 @@ detector runs inside its LLM pipeline, so it arrives with the Gemini Live
 conductor and its end_turn (PRD 4.2).
 """
 
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from typing import Literal
 
 SILENCE_MS = 8_000  # no speech at all: one SILENCE (PRD 4.3)
@@ -26,8 +27,10 @@ ANSWER_END_MS = 1_500  # a pause that ends an answer or the chat; rehearse befor
 MIC_END_MS = 2_000  # the count to five has ended: a child counts with pauses between numbers
 MIC_MIN_VOICED_MS = 2_000  # about how long the count takes
 MIC_SHORT_END_MS = 4_000  # a count shorter than that ends after this pause instead
-PLAY_SAFETY_MS = 60_000  # a play with no ack for this long is taken as over (a lost ack)
+PLAY_SAFETY_MS = 60_000  # a play with no ack this long after it was sent is taken as over
 ECHO_TAIL_MS = 300  # the end of a clip's sound still in the room after its ack
+
+log = logging.getLogger(__name__)
 
 TurnKind = Literal["answer", "retell", "mic"]
 _END_MS = {"answer": ANSWER_END_MS, "retell": RETELL_END_MS, "mic": MIC_END_MS}
@@ -43,8 +46,7 @@ class TurnTaker:
     _last_speech_end: int = 0
     _speech_began: int = 0
     _voiced_ms: int = 0
-    _playing_since: int | None = None
-    _plays_out: int = 0
+    _plays: list[int] = field(default_factory=list)  # when each unacked play was sent
     _voiced_since_start: int = 0  # accepted speech segments since the session began
     _prompt_ended: int = -ECHO_TAIL_MS
     _ignored_start: bool = False
@@ -61,16 +63,29 @@ class TurnTaker:
     def prompt_started(self, now_ms: int) -> None:
         """A clip was sent to the child's phone. Several can be sent at once (a thank-you,
         then the next prompt): the phone plays them one after another."""
-        self._plays_out += 1
-        self._playing_since = now_ms
+        self._plays.append(now_ms)
+
+    def playing(self, now_ms: int) -> bool:
+        """True while a clip sent to the phone has no ack yet. A play whose ack never comes
+        (lost, or a clip cut off on the phone) is dropped PLAY_SAFETY_MS after it was sent,
+        so one lost ack cannot keep the child unheard for the rest of the session."""
+        kept = [t for t in self._plays if now_ms - t < PLAY_SAFETY_MS]
+        if len(kept) != len(self._plays):
+            log.warning("%d play(s) never acked; taken as over", len(self._plays) - len(kept))
+            self._plays = kept
+            if not kept:
+                self._prompt_ended = now_ms
+                if self.active and not self._heard:
+                    self._waiting_since = now_ms  # the child's wait starts now
+        return bool(self._plays)
 
     def prompt_finished(self, now_ms: int) -> None:
         """A clip finished (or could not play). When none is left, the wait for speech
         starts from now."""
-        self._plays_out = max(0, self._plays_out - 1)
-        if self._plays_out > 0:
+        if self._plays:
+            self._plays.pop(0)  # the oldest: the phone plays them in the order sent
+        if self.playing(now_ms):
             return  # the next clip is about to play: Kemi is still speaking
-        self._playing_since = None
         self._prompt_ended = now_ms
         if self.active and not self._heard:
             self._waiting_since = now_ms
@@ -87,7 +102,7 @@ class TurnTaker:
     def ignoring(self, now_ms: int) -> bool:
         """True while a prompt is playing or has only just stopped: what the microphone
         hears then is Kemi's voice in the room."""
-        if self._playing_since is not None and now_ms - self._playing_since < PLAY_SAFETY_MS:
+        if self.playing(now_ms):
             return True
         return now_ms - self._prompt_ended < ECHO_TAIL_MS
 
@@ -116,7 +131,7 @@ class TurnTaker:
     def tick(self, now_ms: int) -> Literal["ANSWERED", "SILENCE"] | None:
         if not self.active or self._speaking:
             return None
-        if self._playing_since is not None and now_ms - self._playing_since < PLAY_SAFETY_MS:
+        if self.playing(now_ms):
             return None  # the child is still hearing the prompt
         if self._heard:
             if now_ms - self._last_speech_end >= self._end_ms():

@@ -39,7 +39,32 @@ def test_a_prompt_that_never_acks_stops_blocking_after_the_safety_limit():
     turns = started(at=0)
     turns.prompt_started(0)
     assert turns.tick(PLAY_SAFETY_MS - 1) is None
-    assert turns.tick(PLAY_SAFETY_MS) == "SILENCE"
+    assert turns.tick(PLAY_SAFETY_MS) is None  # taken as over: the child's wait starts now
+    assert turns.tick(PLAY_SAFETY_MS + SILENCE_MS) == "SILENCE"
+
+
+def test_one_lost_ack_does_not_silence_the_child_for_the_rest_of_the_session():
+    # A clip was cut off on the phone: its ack never comes. Later prompts are acked normally.
+    turns = started(at=0)
+    turns.prompt_started(0)  # lost
+    turns.prompt_started(5_000)
+    turns.prompt_finished(7_000)  # acks the OLDEST: the other is still out
+    assert turns.ignoring(8_000)
+    # The lost play expires on its own clock, not 60 s after the latest send.
+    assert turns.playing(PLAY_SAFETY_MS - 1)
+    assert not turns.playing(PLAY_SAFETY_MS + 5_000)
+    assert turns.speech_started(PLAY_SAFETY_MS + 5_000 + ECHO_TAIL_MS) is True
+
+
+def test_prompts_acked_normally_leave_nothing_out():
+    turns = started(at=0)
+    turns.prompt_started(0)
+    turns.prompt_started(0)
+    turns.prompt_finished(1_000)
+    turns.prompt_finished(2_000)
+    assert not turns.playing(2_000)
+    turns.prompt_finished(3_000)  # a stray extra ack changes nothing
+    assert not turns.playing(3_000)
 
 
 def test_kemis_voice_in_the_room_is_not_the_childs_answer():

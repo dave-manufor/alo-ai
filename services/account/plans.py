@@ -3,8 +3,10 @@ the guardian's id on it; this service only reads it, and only for that guardian,
 to what the plan screen shows (schemas/guardian_plan.schema.json): no guardian id, no audio
 path, no internal flags. The books are looked up by id; a missing one, or one held for
 review, is left out. Someone else's plan looks exactly like one that does not exist (404).
-No entitlement check yet: Paystack is later work, so every consented guardian sees the plan.
-It makes no number. Every read writes an audit_log entry."""
+With PLANS_NEED_SUBSCRIPTION (a server setting, the demo) the plan comes only with an active
+subscription (payments.py), and without one the reply is 402 PAYMENT_REQUIRED, after the 404
+checks, so it says nothing about another guardian's plan. Off (the mini-study), every consented
+guardian sees it. It makes no number. Every read writes an audit_log entry."""
 
 import re
 from collections.abc import Callable
@@ -16,6 +18,7 @@ from fastapi import APIRouter, Depends
 from .access import Clock, NewId, audit, not_found, utc_now
 from .auth import Principal
 from .children import default_id
+from .errors import AccountError
 
 _ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
 SCHEMA_VERSION = 1
@@ -28,6 +31,7 @@ def router(
     guardian: Callable[..., Principal],
     now: Clock = utc_now,
     new_id: NewId = default_id,
+    plan_open: Callable[[str], bool] = lambda guardian_id: True,
 ) -> APIRouter:
     routes = APIRouter()
     current = Depends(guardian)
@@ -39,6 +43,13 @@ def router(
         plan = store.get(f"plans/plan_{session_id}")
         if plan is None or plan.get("guardian_id") != principal.guardian_id:
             raise not_found()
+        if not plan_open(principal.guardian_id):
+            raise AccountError(
+                402,
+                "PAYMENT_REQUIRED",
+                "The weekly plan comes with a subscription.",
+                retryable=False,
+            )
         found = store.get_many([f"books/{book_id}" for book_id in plan["book_ids"]])
         books = [
             {key: book[key] for key in BOOK_FIELDS}

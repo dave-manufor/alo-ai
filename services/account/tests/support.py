@@ -58,7 +58,11 @@ NOW = datetime(2026, 1, 15, 9, 0, 0, tzinfo=UTC)
 
 
 def make_client(
-    settings: AccountSettings = SETTINGS, store: MemoryStore | None = None, at=NOW, rooms=None
+    settings: AccountSettings = SETTINGS,
+    store: MemoryStore | None = None,
+    at=NOW,
+    rooms=None,
+    paystack=None,
 ):
     """(client, store): a fixed clock and ids child_1, consent_2, ... so tests can name them."""
     store = MemoryStore() if store is None else store
@@ -68,5 +72,7 @@ def make_client(
         return f"{prefix}_{next(counter)}"
 
     verifier = GuardianVerifier(settings, signing_key=lambda _token: KEY.public_key())
-    app = build_app(settings, store, verifier, now=lambda: at, new_id=new_id, rooms=rooms)
+    app = build_app(
+        settings, store, verifier, now=lambda: at, new_id=new_id, rooms=rooms, paystack=paystack
+    )
     return TestClient(app), store

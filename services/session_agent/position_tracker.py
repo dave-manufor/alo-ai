@@ -3,8 +3,8 @@
 Follows where the child is in the passage by fuzzy-matching speech-to-text
 partials to the passage tokens. It reports three things to the state machine:
 
-- `stall(now_ms)`  5.0 s with no progress on the same word -> Silence(ms, word_index).
-  No progress, not silence: a child sounding a word out gets the same 5 s.
+- `stall(now_ms)`  2.5 s with no progress on the same word -> Silence(ms, word_index).
+  No progress, not silence: a child sounding a word out gets the same 2.5 s.
 - `progress(now_ms, told)` the words read so far, without the words the child was
   told, for the kindness rule -> ReadingProgress. The tracker cannot judge a word
   correct live, so this approximates "words correct" (PRD 4.3).

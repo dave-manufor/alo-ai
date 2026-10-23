@@ -9,6 +9,7 @@ import { Notice } from './ui/primitives';
 import AccountPage from './pages/AccountPage';
 import ChildFormPage from './pages/ChildFormPage';
 import CheckoutPlaceholderPage from './pages/CheckoutPlaceholderPage';
+import CheckoutPage from './pages/CheckoutPage';
 import ConsentPage from './pages/ConsentPage';
 import GetReadyPage from './pages/GetReadyPage';
 import HomePage from './pages/HomePage';
@@ -110,8 +111,8 @@ export default function App() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:sessionId" element={<ReportDetailPage />} />
         <Route path="/plan" element={<PlanPage />} />
-        <Route path="/upgrade" element={dataMode === 'live' ? <Navigate to="/plan" replace /> : <UpgradePage />} />
-        <Route path="/plan/checkout" element={dataMode === 'live' ? <Navigate to="/plan" replace /> : <CheckoutPlaceholderPage />} />
+        <Route path="/upgrade" element={<UpgradePage />} />
+        <Route path="/plan/checkout" element={dataMode === 'live' ? <CheckoutPage /> : <CheckoutPlaceholderPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/children/new" element={<ChildFormPage mode="new" />} />
         <Route path="/children/:childId/edit" element={<ChildFormPage mode="edit" />} />

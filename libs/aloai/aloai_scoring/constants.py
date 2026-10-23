@@ -7,7 +7,7 @@ changelog line (alo-scoring-change).
 
 from typing import Literal
 
-SCORING_MODULE = "1.1.0"  # 1.1.0: W3's single-transcript rule (SINGLE_SURE, SINGLE_TRANSCRIPT)
+SCORING_MODULE = "1.2.0"  # 1.2.0: the told-word wait is 2.5 s (was 5 s); 1.1.0: W3's single-transcript rule (SINGLE_SURE, SINGLE_TRANSCRIPT)
 
 Band = Literal["INDEPENDENT", "INSTRUCTIONAL", "SUPPORTED", "FRUSTRATION"]
 ProfileCode = Literal[
@@ -29,7 +29,7 @@ HIGH_UNCERTAINTY_SHARE = 0.05
 
 ACCURACY_CUT = 95  # [CAL] PRD 6.2
 WCPM_CUT = {1: 34, 2: 59, 3: 79, 4: 95, 5: 109, 6: 109}  # [CAL] PRD 6.2, US norms until local ones
-TOLD_WAIT_S = 5  # PRD 4.1: the Session Agent's wait before "That word is X." (its TOLD_WORD_MS)
+TOLD_WAIT_S = 2.5  # PRD 4.1: the Session Agent's wait before "That word is X." (its TOLD_WORD_MS)
 NORM_TOLD_WAIT_S = 3  # [CAL] PRD 6.2: the norms behind WCPM_CUT tell a word after 3 s
 
 RETELL_FULL_COVERAGE = 0.60  # [CAL] PRD 6.3

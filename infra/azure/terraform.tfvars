@@ -50,6 +50,12 @@ openai_deployments = {}
 # recorded like any other turn.
 interest_chat = true
 
+# Paystack test mode (PRD 11.1, README "Paystack"). The plan code is not a secret. Keep
+# plans_need_subscription false for the mini-study; true for the demo, so a test payment unlocks
+# the weekly plan.
+paystack_plan_code      = "PLN_3jclhtvlok3a3mo" # the N1,500 monthly plan (test mode), created 2026-10-23
+plans_need_subscription = false
+
 # One transcript (Azure AI Speech): the Gemini endpoint has no /audio/transcriptions and a chat
 # transcript dropped a word in a test. Needs W3's confirmation before real children (PRD 5.3).
 second_transcript = "off"

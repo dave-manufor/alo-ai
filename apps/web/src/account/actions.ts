@@ -1,5 +1,14 @@
 import { dataMode, liveApi } from '../api';
-import { addConsent, createChild, loadAccount, patchChild } from './remote';
+import { openPaystackPopup, type OpenPopup } from '../plan/paystackPopup';
+import {
+  addConsent,
+  confirmCheckout,
+  createChild,
+  loadAccount,
+  loadSubscription,
+  patchChild,
+  startCheckout,
+} from './remote';
 import { accountStore } from './store';
 
 // What screens call. The build picks the path (D6): the live build goes
@@ -19,6 +28,32 @@ export async function syncAccount(): Promise<void> {
   if (dataMode !== 'live') return;
   const { children, consents } = await loadAccount(liveApi());
   accountStore.replaceFromServer(children, consents);
+  await syncSubscription();
+}
+
+/** The subscription and the paywall setting. A failure leaves the last known answer: the plan
+ *  route itself still refuses (402) a plan that needs a subscription. */
+export async function syncSubscription(): Promise<void> {
+  if (dataMode !== 'live') return;
+  try {
+    accountStore.replaceSubscription(await loadSubscription(liveApi()));
+  } catch {
+    // Kept as it was; the guardian can try again from the plan or payment screen.
+  }
+}
+
+export type PaymentOutcome = 'paid' | 'pending' | 'cancelled';
+
+/** Live build: the server starts the transaction, Paystack's popup takes the payment, then the
+ *  server confirms it with Paystack before the plan opens. 'pending' means the popup said paid
+ *  but Paystack has not confirmed it yet (the webhook will). */
+export async function payForPlan(popup: OpenPopup = openPaystackPopup): Promise<PaymentOutcome> {
+  const api = liveApi();
+  const started = await startCheckout(api);
+  if ((await popup(started.access_code)) === 'cancelled') return 'cancelled';
+  const status = await confirmCheckout(api, started.reference);
+  accountStore.replaceSubscription(status);
+  return status.active ? 'paid' : 'pending';
 }
 
 export async function addChild(input: NewChildInput): Promise<void> {
