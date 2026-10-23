@@ -92,7 +92,7 @@ def test_the_scorer_refuses_to_start_with_local_shortcuts_on_cloud_run():
 
 def test_told_waits_that_cannot_fit_are_parked_not_retried():
     http, store, publisher = client()
-    told = recorded(told_token_indices=[3, 6, 9, 12])
+    told = recorded(told_token_indices=[2, 3, 4, 5, 6, 7, 8, 9, 10])  # 9 waits of 2.5 s: more than the reading
     response = http.post("/pubsub/session-events", json=pushed("phase1.recorded", told))
     assert response.status_code == 204
     assert store.get(f"sessions/{SESSION_ID}/errors/phase1.recorded")["error"] == "ValueError"

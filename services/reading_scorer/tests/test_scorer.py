@@ -129,4 +129,4 @@ def test_a_told_first_word_has_no_wait_inside_the_reading_time():
     scorer(store, MemoryPublisher()).handle(recorded(told_token_indices=[0, 14]))
     telemetry = store.get(telemetry_path(SESSION_ID))
     assert telemetry["error_counts"]["told"] == 2
-    assert telemetry["wcpm"] == 60 * 19 / (19.65 - 2)
+    assert telemetry["wcpm"] == 60 * 19 / (19.65 + 0.5)  # one wait, 0.5 s under the norms' 3 s

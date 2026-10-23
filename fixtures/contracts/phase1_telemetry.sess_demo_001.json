@@ -10,7 +10,7 @@
   "self_correction_count": 1,
   "uncertain_count": 1,
   "accuracy_pct": 90.9090909090909,
-  "wcpm": 67.98866855524079,
+  "wcpm": 59.55334987593052,
   "self_correction_ratio": 0.5,
   "prosody": { "reported": true, "pause_intrusion_rate": 0.0, "f0_word_corr": null, "phrasing": 100, "expression": null, "overall": 100 },
   "word_events": [
@@ -39,5 +39,5 @@
     { "token_index": 22, "target_word": "hat", "chirp_hypothesis": "hat", "gemini_hypothesis": "hat", "chirp_confidence": 0.95, "start_ms": 20380, "end_ms": 20850, "label": "CORRECT", "is_self_corrected": false, "pre_word_latency_ms": 120 }
   ],
   "flags": ["SHORT_READING"],
-  "model_versions": { "scoring_module": "1.1.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "transcription_prompt": "transcribe_v1", "alignment": "torchaudio-mms_fa", "word_alignment": "words_v3", "vad": "silero-vad-5" }
+  "model_versions": { "scoring_module": "1.2.0", "chirp": "chirp_3", "gemini_transcription": "gemini-2.5-flash", "transcription_prompt": "transcribe_v1", "alignment": "torchaudio-mms_fa", "word_alignment": "words_v3", "vad": "silero-vad-5" }
 }
