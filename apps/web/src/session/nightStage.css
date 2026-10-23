@@ -378,6 +378,22 @@
     opacity: 0;
   }
 }
+/* "getting ready": a few soft words, only if the wait is long (the engine fades it in) */
+.night-stage .prep {
+  top: auto;
+  bottom: 14%;
+  width: 100%;
+  margin: 0;
+  padding: 0 24px;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: var(--font-reading);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+  color: rgb(var(--art-lilac-rgb) / 0.85);
+  will-change: opacity;
+}
 .night-stage .call {
   text-align: center;
   font-family: var(--font-reading);

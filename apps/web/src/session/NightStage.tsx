@@ -212,6 +212,9 @@ export default function NightStage({ input, story, start, hand, grownUp, srText 
       <div className="l ov handov" data-k="handov" data-theme="dark">
         {hand}
       </div>
+      <p className="l prep" data-k="prepNote" aria-hidden="true" style={{ opacity: 0 }}>
+        Getting your reading check ready…
+      </p>
       <div className="l grain" aria-hidden="true" />
       <div className="l vignette" data-k="vig" aria-hidden="true" />
       {grownUp}
