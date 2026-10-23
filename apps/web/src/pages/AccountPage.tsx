@@ -98,7 +98,7 @@ export default function AccountPage() {
           </div>
         </Card>
         <p className="caption muted">
-          <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy notice</Link>
+          <Link to="/terms" className="ui-tap ui-tap--flush">Terms</Link> · <Link to="/privacy" className="ui-tap ui-tap--flush">Privacy notice</Link>
         </p>
       </section>
     </div>

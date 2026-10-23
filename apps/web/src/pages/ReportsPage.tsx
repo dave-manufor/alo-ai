@@ -52,7 +52,7 @@ export default function ReportsPage() {
                     </div>
                   </div>
                   <ProfilePill profile={report.profile.code} provisional={report.profile.provisional} />
-                  <Link to={`/reports/${report.session_id}`} className="body card-title">
+                  <Link to={`/reports/${report.session_id}`} className="body card-title ui-tap ui-tap--flush">
                     See the full report
                   </Link>
                 </Card>

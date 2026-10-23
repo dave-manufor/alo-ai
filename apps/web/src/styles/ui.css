@@ -165,7 +165,8 @@
 .ui-check input {
   width: var(--space-5);
   height: var(--space-5);
-  margin: 0;
+  /* Centred on the first line of the label, which is a full tap target tall. */
+  margin: calc((var(--tap-grown) - var(--space-5)) / 2) 0 0;
   flex: none;
   accent-color: var(--night);
 }
@@ -178,19 +179,26 @@
 
 .ui-check__title {
   font-weight: 700;
+  /* The label is what a thumb hits: at least tap-grown (44px) tall, however short the text. */
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-grown);
 }
 
 .ui-switch {
   display: flex;
   gap: var(--space-4);
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
 .ui-switch__text {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--space-1);
+  /* The label toggles the switch, so it is at least tap-grown (44px) tall. */
+  min-height: var(--tap-grown);
 }
 
 .ui-switch__input {
@@ -355,6 +363,11 @@
   align-items: center;
   min-height: var(--tap-grown);
   padding: 0 var(--space-2);
+}
+
+/* A tap-sized link on its own line, lined up with the text above it (no side padding). */
+.ui-tap--flush {
+  padding-inline: 0;
 }
 
 .price-card {

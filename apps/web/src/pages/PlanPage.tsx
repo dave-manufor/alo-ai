@@ -79,7 +79,7 @@ export default function PlanPage() {
             It is made after each check. Please look again in a little while, or open the report for one thing to try
             now.
           </p>
-          <Link to={`/reports/${report.session_id}`} className="body card-title">
+          <Link to={`/reports/${report.session_id}`} className="body card-title ui-tap ui-tap--flush">
             Back to the report
           </Link>
         </Card>
@@ -149,7 +149,7 @@ export default function PlanPage() {
               See the plan · {PLAN_PRICE} {PLAN_PRICE_PERIOD}
             </NavButton>
           </Card>
-          <Link to={`/reports/${report.session_id}`} className="body card-title">
+          <Link to={`/reports/${report.session_id}`} className="body card-title ui-tap ui-tap--flush">
             Back to the report
           </Link>
         </>
