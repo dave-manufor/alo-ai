@@ -128,10 +128,25 @@ def make_driver(profile="demo"):
     return driver, ports, clock, ended
 
 
-def speak(driver, clock, text, *, then_quiet_ms):
-    """The child says `text` (one VAD speech segment), then stays quiet."""
+PLAYED = b'{"schema_version": 3, "cmd": "played", "clip_id": "x"}'
+
+
+def played(driver, clock=None, after_ms=0):
+    """The web app finished playing the clip the agent last sent (if one is playing)."""
+    if clock is not None:
+        clock.ms += after_ms
+    if driver._clip_playing:
+        driver.on_client_message(PLAYED)
+    if clock is not None:
+        clock.ms += 400  # past the echo tail: the room is quiet again
+
+
+def speak(driver, clock, text, *, then_quiet_ms, voiced_ms=1_000):
+    """The child says `text` (one VAD speech segment of `voiced_ms`), then stays quiet. The
+    web app plays each prompt at once, so the child speaks after the prompt has ended."""
+    played(driver, clock)
     driver.on_speech_started()
-    clock.ms += 1_000
+    clock.ms += voiced_ms
     driver.on_transcript(text, final=True)
     driver.on_speech_ended()
     wait(driver, clock, then_quiet_ms)
@@ -140,6 +155,7 @@ def speak(driver, clock, text, *, then_quiet_ms):
 def wait(driver, clock, ms, step=250):
     for _ in range(ms // step):
         clock.ms += step
+        played(driver)  # an instant player: any prompt the agent sends has played by the next tick
         driver.tick()
 
 
@@ -152,15 +168,89 @@ def to_reading(driver, ports, clock):
     speak(driver, clock, "i like football", then_quiet_ms=1_500)
     assert ports.passages.calls == [("generate", "i like football", 20_000)]
     driver.passage_arrived(PAIR, fallback=False)
+    played(driver, clock)
     driver.on_audio(tone(-20, 2_000))
-    speak(driver, clock, "one two three four five", then_quiet_ms=1_000)
+    speak(driver, clock, "one two three four five", then_quiet_ms=2_250, voiced_ms=2_500)
     assert driver.state.phase is Phase.READING
 
 
 def read_passage(driver, clock):
+    played(driver, clock)
     driver.on_transcript(PAIR.read["text_content"], final=False)
     clock.ms += 250
     driver.tick()
+
+
+# ---- Kemi's prompts are not the child
+
+
+def test_silence_is_not_counted_before_the_first_prompt_has_played():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    ports.channel.sent.clear()
+    clock.ms = 0
+    for _ in range(80):  # 20 s with the phone still downloading: no ack yet
+        clock.ms += 250
+        driver.tick()
+    assert ports.channel.plays() == []  # no "take your time", the wait has not begun
+    played(driver, clock)
+    wait_no_ack(driver, clock, 7_000)
+    assert ports.channel.plays() == []
+    wait_no_ack(driver, clock, 1_500)
+    assert ports.channel.plays()  # 8 s after the child could first have heard it
+
+
+def wait_no_ack(driver, clock, ms, step=250):
+    for _ in range(ms // step):
+        clock.ms += step
+        driver.tick()
+
+
+def test_kemis_voice_heard_by_the_microphone_is_not_taken_as_the_childs_answer():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    ports.channel.sent.clear()
+    # The prompt is playing: the VAD fires on Kemi's voice, speech to text writes her words.
+    driver.on_speech_started()
+    driver.on_transcript("what kind of stories do you like", final=True)
+    driver.on_speech_ended()
+    assert [m for m in ports.channel.sent if m["cmd"] == "child_speaking"] == []
+    played(driver, clock)
+    wait_no_ack(driver, clock, 2_000)
+    assert ports.passages.calls == []  # the chat did not end on her words
+    assert driver.stats.vad_starts_during_clip == 1  # but it was counted, for the logs
+
+
+def test_a_clip_that_could_not_play_does_not_hold_up_the_childs_wait():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    clock.ms = 20_000
+    missing = b'{"schema_version": 3, "cmd": "missing", "clip_id": "interest_prompt"}'
+    driver.on_client_message(missing)  # the agent streams the clip once more...
+    driver.on_client_message(missing)  # ...and it still cannot play: give up on it
+    ports.channel.sent.clear()
+    wait_no_ack(driver, clock, 7_500)
+    assert ports.channel.plays() == []
+    wait_no_ack(driver, clock, 1_000)
+    assert ports.channel.plays() == ["interest_fallback"]  # the usual nudge, 8 s after
+
+
+def test_the_mic_check_level_leaves_out_the_prompt_coming_back_through_the_microphone():
+    driver, ports, clock, _ = make_driver()
+    to_mic_check(driver, ports, clock)
+    # Loud audio while Kemi's mic prompt plays (her voice in the room), then a quiet child.
+    driver.on_audio(tone(-20, 2_000))  # not counted: a prompt is playing
+    played(driver, clock)
+    driver.on_audio(tone(-60, 2_000))  # the child, too quiet
+    speak(driver, clock, "one two three four five", then_quiet_ms=2_250, voiced_ms=2_500)
+    assert ports.channel.plays()[-1] == "mic_closer"  # judged on the child, not on Kemi
+
+
+def to_mic_check(driver, ports, clock):
+    driver.start()
+    speak(driver, clock, "i like football", then_quiet_ms=1_500)
+    driver.passage_arrived(PAIR, fallback=False)
+    assert driver.state.phase is Phase.MIC_CHECK
 
 
 # ---- the clip lists
@@ -187,6 +277,7 @@ def test_the_driver_counts_what_it_hears_and_logs_each_turn_without_words(caplog
     driver, ports, clock, _ = make_driver()
     caplog.set_level(logging.INFO, logger="services.session_agent.driver")
     driver.start()
+    played(driver, clock)
     driver.on_audio(tone(-20, 500))
     driver.on_speech_started()
     driver.on_transcript("i like football", final=True)
@@ -234,7 +325,7 @@ def run_demo_session(driver, ports, clock):
     speak(driver, clock, "ada went to the market and saw a red hat", then_quiet_ms=4_000)
     speak(driver, clock, "she got a blue one", then_quiet_ms=4_000)
     speak(driver, clock, "it was red", then_quiet_ms=1_500)
-    wait(driver, clock, 16_000)
+    wait(driver, clock, 17_000)
     grader = FixtureQuickGrader(items=2, default=True)
     for body in ports.grader.bodies:
         driver.on_quick_response(grader.answer(body))
@@ -296,7 +387,7 @@ def test_a_demo_session_runs_end_to_end_and_publishes_valid_events(validate):
     speak(driver, clock, "she got a blue one", then_quiet_ms=4_000)
     assert driver.state.phase is Phase.QUESTIONS
     speak(driver, clock, "it was red", then_quiet_ms=1_500)
-    wait(driver, clock, 16_000)  # two 8 s silences on the second question
+    wait(driver, clock, 17_000)  # two 8 s silences on the second question (and its nudge between)
 
     assert [(b["turn_phase"], b["index"], b["transcript"]) for b in ports.grader.bodies] == [
         ("RETELL", 0, "ada went to the market and saw a red hat she got a blue one"),
@@ -353,6 +444,7 @@ def test_the_clip_lists_cover_every_clip_the_session_plays(validate):
 def test_a_stall_plays_the_word_clip_and_a_quick_finish_moves_on():
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
+    played(driver, clock)
     driver.on_transcript("ada and", final=False)
     wait(driver, clock, 5_000)
     assert ports.channel.plays()[-1] == "word_mama"
@@ -364,6 +456,7 @@ def test_a_stall_plays_the_word_clip_and_a_quick_finish_moves_on():
 def test_the_kindness_rule_ends_a_hard_reading_and_goes_to_listening():
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
+    played(driver, clock)
     driver.on_transcript("ada and mama", final=False)
     wait(driver, clock, 30_000)
     assert driver.state.phase is Phase.LISTENING and driver.state.reading_stopped_early
@@ -377,8 +470,9 @@ def test_a_quiet_mic_check_gets_one_retry_then_low_audio():
     driver.start()
     speak(driver, clock, "football", then_quiet_ms=1_500)
     driver.passage_arrived(PAIR, fallback=False)
+    played(driver, clock)
     driver.on_audio(tone(-55, 2_000))
-    speak(driver, clock, "one two three", then_quiet_ms=1_000)
+    speak(driver, clock, "one two three", then_quiet_ms=2_250, voiced_ms=2_500)
     assert ports.channel.plays()[-1] == "mic_closer"
     wait(driver, clock, 8_000)  # nothing at all on the retry
     assert "LOW_AUDIO" in driver.state.flags and driver.state.phase is Phase.READING
@@ -389,14 +483,16 @@ def test_a_loud_mic_check_asks_for_softer():
     driver.start()
     speak(driver, clock, "football", then_quiet_ms=1_500)
     driver.passage_arrived(PAIR, fallback=False)
+    played(driver, clock)
     driver.on_audio(array("h", [32_767] * 16_000).tobytes())
-    speak(driver, clock, "one two three", then_quiet_ms=1_000)
+    speak(driver, clock, "one two three", then_quiet_ms=2_250, voiced_ms=2_500)
     assert ports.channel.plays()[-1] == "mic_softer"
 
 
 def test_saying_stop_ends_the_session_incomplete():
     driver, ports, clock, ended = make_driver()
     driver.start()
+    played(driver, clock)
     driver.on_transcript("I want to stop", final=True)
     assert ended == ["INCOMPLETE"] and ports.channel.plays()[-1] == "stop_praise"
     assert "sessions/sess_demo_001" not in ports.documents.docs  # no passage, no record
@@ -409,6 +505,7 @@ def test_say_it_again_repeats_a_question_once():
     fire(driver, ports.timers, "transition")
     speak(driver, clock, "a red hat", then_quiet_ms=4_000)
     wait(driver, clock, 16_000)  # no follow-up
+    played(driver, clock)
     driver.on_transcript("say it again", final=True)
     assert ports.channel.plays()[-1] == "question:0"
     assert [t.part for t in ports.recorder.turns if t.phase == "QUESTION"] == [0, 1]
@@ -448,6 +545,7 @@ def test_a_missing_clip_is_sent_again_from_the_store():
 def test_the_web_app_is_told_when_the_child_starts_and_stops_speaking():
     driver, ports, clock, _ = make_driver()
     driver.start()
+    played(driver, clock)
     ports.channel.sent.clear()
     driver.on_speech_started()
     clock.ms += 500
@@ -462,6 +560,7 @@ def test_an_answer_heard_only_as_an_interim_transcript_is_still_scored():
     to_reading(driver, ports, clock)
     read_passage(driver, clock)
     fire(driver, ports.timers, "transition")
+    played(driver, clock)
     driver.on_speech_started()
     driver.on_transcript("a red", final=False)
     driver.on_transcript("a red hat", final=False)  # no final before the turn ends
