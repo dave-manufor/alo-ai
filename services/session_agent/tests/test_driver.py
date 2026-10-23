@@ -746,3 +746,30 @@ def test_a_dropped_connection_stops_the_turn_and_resumes_it():
     driver.on_reconnected()
     assert "RECONNECTED" in driver.state.flags
     assert ports.recorder.turns[-1].phase == "INTEREST_CHAT" and ports.recorder.turns[-1].part == 1
+
+
+# ---- the first word gets time to settle in
+
+
+def test_the_first_word_is_told_only_after_the_extra_settling_time():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    before = len(ports.channel.plays())
+    wait(driver, clock, 5_000)  # the usual 2.5 s, and the story has only just appeared
+    assert len(ports.channel.plays()) == before
+    wait(driver, clock, 1_000)
+    assert ports.channel.plays()[-1].startswith("word_")  # 2.5 s plus 3 s to settle in
+
+
+def test_the_first_words_wait_does_not_run_while_kemi_is_still_speaking():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    driver._send({"cmd": "play", "clip_id": "reading_prompt"})  # her line is still playing
+    wait_no_ack(driver, clock, 10_000)  # long past 5.5 s
+    assert not ports.channel.plays()[-1].startswith("word_")
+    played(driver)  # it ends
+    before = len(ports.channel.plays())
+    wait(driver, clock, 5_000)
+    assert len(ports.channel.plays()) == before  # the wait began when she stopped
+    wait(driver, clock, 1_500)
+    assert ports.channel.plays()[-1].startswith("word_")

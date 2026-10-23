@@ -63,10 +63,11 @@ def test_stray_punctuation_tokens_are_stepped_over():
     assert t.position == 5 and t.words_read == 3 and t.done_reached
 
 
-def test_two_and_a_half_seconds_on_one_word_is_reported_once():
+def test_the_first_word_waits_longer_and_is_reported_once():
     t = tracker()
-    assert t.stall(2499) is None
-    assert t.stall(2500) == Silence(ms=2500, word_index=0)
+    assert t.stall(2500) is None  # the usual wait is not enough for the first word
+    assert t.stall(5499) is None
+    assert t.stall(5500) == Silence(ms=5500, word_index=0)  # 2.5 s plus 3 s to settle in
     assert t.stall(15_000) is None  # already reported for this word
 
 
@@ -113,3 +114,24 @@ def test_done_when_the_last_word_is_reached():
     assert t.done(5000) is None
     t.on_partial("the cat sat on the mat", 4000)
     assert t.done(61_000) == ReadingDone(elapsed_ms=60_000)
+
+
+def test_the_first_word_waits_from_when_kemi_stops_speaking():
+    t = tracker()
+    t.hold(4000)  # her line was still playing at 4 s
+    assert t.stall(4000 + 5499) is None
+    assert t.stall(4000 + 5500) == Silence(ms=5500, word_index=0)
+
+
+def test_holding_does_nothing_once_the_child_has_started_reading():
+    t = tracker()
+    t.on_partial("the cat", 1000)
+    t.hold(2000)  # the told word's clip, say: the next word's wait is the usual one
+    assert t.stall(3499) is None  # not held: counted from the last word read, at 1 s
+    assert t.stall(3500) == Silence(ms=2500, word_index=2)
+
+
+def test_the_extra_wait_is_for_the_first_word_only_even_after_leading_blanks():
+    t = tracker(["—", "The", "cat"])  # a blank token is skipped: "The" is the first word
+    assert t.stall(5499) is None
+    assert t.stall(5500) == Silence(ms=5500, word_index=1)

@@ -32,6 +32,7 @@ VOICE_MODES = ("cache_first", "live_first")
 
 SHOWN_WAIT_MS = 20_000  # then the reading starts even if the web app never says the story is up
 TOLD_WORD_MS = 2_500  # no progress on the same word before "That word is X." (PRD 4.1)
+FIRST_WORD_EXTRA_MS = 3_000  # [CAL] the first word gets this long on top: the child is settling in
 # The reading also ends when the child has stopped, not only at the story's last word (which
 # speech to text often misses) or the 90 s cap [CAL]. Until now a reader who finished but whose
 # last words were not recognised waited out the cap (a live session waited about 40 s).
