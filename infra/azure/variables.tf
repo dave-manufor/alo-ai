@@ -88,6 +88,22 @@ variable "llm_models" {
   default     = {}
 }
 
+variable "paystack_plan_code" {
+  description = "The Paystack plan (test mode) every checkout is started with, e.g. PLN_xxxxxxxx: the N1,500 monthly plan from the Paystack dashboard (README, Paystack). Empty: payments are off and POST /v1/checkout answers 503."
+  type        = string
+  default     = ""
+  validation {
+    condition     = var.paystack_plan_code == "" || can(regex("^PLN_[A-Za-z0-9]+$", var.paystack_plan_code))
+    error_message = "paystack_plan_code must be empty or a Paystack plan code (PLN_...)."
+  }
+}
+
+variable "plans_need_subscription" {
+  description = "true: the weekly plan comes only with a Paystack subscription (the demo, PRD 14.1). false: every guardian with a consented child sees it (the mini-study)."
+  type        = bool
+  default     = false
+}
+
 variable "interest_chat" {
   description = "false: a generic session. No interest chat; every session opens at the mic check with the bank passage chosen by the child's level, never by what they like. true: the session opens by asking what the child likes (PRD 4)."
   type        = bool

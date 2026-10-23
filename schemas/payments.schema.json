@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "payments.schema.json",
+  "title": "Payments",
+  "description": "The parent subscription in Paystack test mode (PRD 11.1), on the Account service (W1, the only holder of the Paystack secret). subscription is the entitlement document subscriptions/{guardian_id}, written only after Paystack's Verify Transaction says the guardian's checkout is paid (from the webhook's charge.success or the confirm call) and read by the Account service and its plan route. checkout_start is the reply of POST /v1/checkout: the access code the web app opens Paystack's popup with. subscription_status is the reply of GET /v1/subscription and of POST /v1/checkout/{reference}/confirm. Amounts and the plan are set on the server and are never part of any of these; Paystack receives the guardian's email and nothing about a child. schema_version 1 for all three.",
+  "oneOf": [
+    { "$ref": "#/$defs/subscription" },
+    { "$ref": "#/$defs/checkout_start" },
+    { "$ref": "#/$defs/subscription_status" }
+  ],
+  "$defs": {
+    "moment": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$" },
+    "subscription": {
+      "description": "subscriptions/{guardian_id}. Active until current_period_end (Paystack's next payment date once subscription.create arrives, else 31 days after payment).",
+      "type": "object",
+      "properties": {
+        "schema_version": { "const": 1 },
+        "guardian_id": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "plan_code": { "type": "string", "pattern": "^PLN_[A-Za-z0-9]+$" },
+        "last_reference": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$" },
+        "paid_at": { "$ref": "#/$defs/moment" },
+        "current_period_end": { "$ref": "#/$defs/moment" },
+        "customer_code": { "type": "string", "pattern": "^CUS_[A-Za-z0-9]+$" },
+        "subscription_code": { "type": "string", "pattern": "^SUB_[A-Za-z0-9]+$" },
+        "updated_at": { "$ref": "#/$defs/moment" }
+      },
+      "required": ["schema_version", "guardian_id", "status", "plan_code", "last_reference", "paid_at", "current_period_end", "updated_at"],
+      "additionalProperties": false
+    },
+    "checkout_start": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "const": 1 },
+        "reference": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$" },
+        "access_code": { "type": "string", "minLength": 1 },
+        "authorization_url": { "type": "string", "pattern": "^https://" }
+      },
+      "required": ["schema_version", "reference", "access_code", "authorization_url"],
+      "additionalProperties": false
+    },
+    "subscription_status": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "const": 1 },
+        "active": { "type": "boolean" },
+        "plans_need_subscription": { "type": "boolean", "description": "A server setting: true when the weekly plan comes only with a subscription (the demo)." },
+        "current_period_end": { "oneOf": [{ "$ref": "#/$defs/moment" }, { "type": "null" }] }
+      },
+      "required": ["schema_version", "active", "plans_need_subscription", "current_period_end"],
+      "additionalProperties": false
+    }
+  }
+}

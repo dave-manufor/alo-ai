@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "reference": "pay_0000000000000000000000000000demo",
+  "access_code": "demo_access_code",
+  "authorization_url": "https://checkout.paystack.com/demo_access_code"
+}

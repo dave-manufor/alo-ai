@@ -98,3 +98,32 @@ export async function createChild(
     consent: saved.consent,
   };
 }
+
+// The subscription (PRD 11.1; schemas/payments.schema.json). The server sets the plan and the
+// amount and grants access only after Paystack confirms the payment; the browser only asks.
+export interface SubscriptionStatus {
+  schema_version: 1;
+  active: boolean;
+  plans_need_subscription: boolean;
+  current_period_end: string | null;
+}
+
+export interface CheckoutStart {
+  schema_version: 1;
+  reference: string;
+  access_code: string;
+  authorization_url: string;
+}
+
+export function loadSubscription(api: ApiClient): Promise<SubscriptionStatus> {
+  return api.get<SubscriptionStatus>('/v1/subscription');
+}
+
+export function startCheckout(api: ApiClient): Promise<CheckoutStart> {
+  return api.post<CheckoutStart>('/v1/checkout', {});
+}
+
+/** After the popup: the server asks Paystack (Verify Transaction) before granting anything. */
+export function confirmCheckout(api: ApiClient, reference: string): Promise<SubscriptionStatus> {
+  return api.post<SubscriptionStatus>(`/v1/checkout/${encodeURIComponent(reference)}/confirm`, {});
+}

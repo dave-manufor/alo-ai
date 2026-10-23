@@ -57,6 +57,8 @@ export interface AccountState {
   /** consents/{consent_id} by child_id — one record per child. */
   consentsByChildId: Record<string, ConsentRecord>;
   subscription: Subscription | null;
+  /** Live build: the server setting PLANS_NEED_SUBSCRIPTION, from GET /v1/subscription. */
+  plansNeedSubscription: boolean;
 }
 
 const STORAGE_KEY = 'alo.fixture.account.v2';
@@ -65,6 +67,7 @@ const emptyState: AccountState = {
   children: [],
   consentsByChildId: {},
   subscription: null,
+  plansNeedSubscription: false,
 };
 
 // The sample build keeps its fixtures in localStorage. With real sign-in (Entra) nothing is
@@ -196,6 +199,15 @@ export const accountStore = {
       ...state,
       children,
       consentsByChildId: Object.fromEntries(consents.map((consent) => [consent.child_id, consent])),
+    });
+  },
+  /** Live build: the subscription as the Account service holds it (GET /v1/subscription). */
+  replaceSubscription(status: { active: boolean; plans_need_subscription: boolean }) {
+    if (!state.guardian) return;
+    setState({
+      ...state,
+      subscription: { guardian_id: state.guardian.guardian_id, active: status.active },
+      plansNeedSubscription: status.plans_need_subscription,
     });
   },
   /** Live build: adds a child and consent the Account API has just saved. */

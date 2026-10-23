@@ -148,12 +148,12 @@ class Driver:
     # What the agent heard, for the logs only (audio_stats.py): a session that hears nothing
     # looks the same as one that hears a child unless these are written down.
     stats: AudioStats = field(default_factory=AudioStats)
-    _plays_out: int = 0  # clips sent whose ack has not come back (several can be queued)
     _stats_logged_ms: int = 0
 
     @property
     def _clip_playing(self) -> bool:
-        return self._plays_out > 0
+        # Clips sent whose ack has not come back (several can be queued); a lost ack expires.
+        return self.turns.playing(self.clock_ms())
 
     # ---- lifecycle
 
@@ -233,7 +233,6 @@ class Driver:
         if isinstance(ack, PassageShown):
             self.handle(ack)  # the story is up: the reading clock starts
             return
-        self._plays_out = max(0, self._plays_out - 1)
         # A clip that could not play is over too: do not wait for it.
         self.turns.prompt_finished(self.clock_ms())
         self.handle(ack)
@@ -318,7 +317,6 @@ class Driver:
 
     def _send(self, message: dict) -> None:
         if message.get("cmd") == "play":
-            self._plays_out += 1
             self.turns.prompt_started(self.clock_ms())
         self.ports.channel.send({"schema_version": protocol.SCHEMA_VERSION, **message})
 
@@ -367,8 +365,13 @@ class Driver:
         self.ports.recorder.stop()
         text = " ".join([*self._final, self._interim]).strip()
         # Numbers only, never the words: whether this turn was heard at all, and how loud.
-        log.info("turn %s %d ended: %s; %s", turn.phase, turn.index, self.stats.end_turn(),
-                 self.stats.line())
+        log.info(
+            "turn %s %d ended: %s; %s",
+            turn.phase,
+            turn.index,
+            self.stats.end_turn(),
+            self.stats.line(),
+        )
         self._transcripts.setdefault((turn.phase, turn.index), []).append(text)
         self.ports.documents.set(
             session_store.turn_path(self.ctx.session_id, turn.turn_id),

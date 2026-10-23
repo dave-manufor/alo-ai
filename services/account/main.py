@@ -15,9 +15,10 @@ from aloai_store import Store, open_store
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import children, errors, plans, reports, sessions
+from . import children, errors, payments, plans, reports, sessions
 from .access import Clock, NewId, ensure_guardian, utc_now
 from .auth import GuardianVerifier, Principal, current_guardian
+from .paystack import Paystack, PaystackApi
 from .rooms import LiveKitRooms, Rooms
 from .settings import AccountSettings
 
@@ -27,7 +28,11 @@ def create_app(env: Mapping[str, str] | None = None) -> FastAPI:
     config = aloai_env.load(env, receives_pushes=False)
     settings = AccountSettings.from_env(env, hosted=config.hosted)
     return build_app(
-        settings, open_store(config), GuardianVerifier(settings), rooms=livekit_rooms(settings)
+        settings,
+        open_store(config),
+        GuardianVerifier(settings),
+        rooms=livekit_rooms(settings),
+        paystack=PaystackApi(settings.paystack_secret_key) if settings.payments_on else None,
     )
 
 
@@ -46,6 +51,7 @@ def build_app(
     now: Clock = utc_now,
     new_id: NewId = children.default_id,
     rooms: Rooms | None = None,
+    paystack: Paystack | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Alo.ai Account")
     errors.install(app)
@@ -53,7 +59,7 @@ def build_app(
         app.add_middleware(
             CORSMiddleware,
             allow_origins=[settings.web_origin],
-            allow_methods=["GET", "POST", "PATCH", "DELETE"],
+            allow_methods=["GET", "POST", "PATCH", "DELETE"],  # webhooks are server to server
             allow_headers=["Authorization", "Content-Type"],
         )
     guardian = current_guardian(verifier)
@@ -69,5 +75,9 @@ def build_app(
     app.include_router(children.router(store, guardian, now, new_id))
     app.include_router(sessions.router(store, guardian, rooms, now, new_id))
     app.include_router(reports.router(store, guardian, now, new_id))
-    app.include_router(plans.router(store, guardian, now, new_id))
+    subscriptions = payments.Subscriptions(store, paystack, settings, now)
+    app.include_router(
+        plans.router(store, guardian, now, new_id, plan_open=subscriptions.plan_open)
+    )
+    app.include_router(payments.router(store, guardian, subscriptions, settings, now, new_id))
     return app
