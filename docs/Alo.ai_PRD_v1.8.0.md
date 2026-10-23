@@ -16,6 +16,7 @@
 
 **Changes during the v1.8.0 sprint** (contract and rule changes agreed between workstreams; newest first):
 
+- **2026-10-23, "That word is X." after 2.5 s (4.1, 6.2; scoring: `scoring_module` 1.2.0; David's request; NEEDS W3's APPROVAL and the validation rerun before it is merged or deployed):** the wait with no progress on one word before Auntie Kemi says "That word is X." goes from 5.0 s to 2.5 s (`TOLD_WORD_MS` in the Session Agent and `TOLD_WAIT_S` in `aloai_scoring` change together; a test keeps them equal). The WCPM norms still assume a 3 s wait (`NORM_TOLD_WAIT_S`, [CAL], unchanged), so WCPM now adds the missing 0.5 s of each told wait to the reading time (it took 2 s off before); a told first word still adjusts nothing. Reports already stored keep `scoring_module` 1.1.0. Open for W3: whether `NORM_TOLD_WAIT_S` should move to 2.5 s with the norms, and the rerun of the golden recordings.
 - **2026-10-23, Paystack test mode (11.1, 14.1; new contract `payments`, schema_version 1; producer the Account service W1, consumer the web app):** the parent subscription is built to the demo scope. `POST /v1/checkout` records `checkouts/{reference}` for the guardian, then initializes a Paystack transaction with the plan code (server setting `paystack_plan_code`), so the browser sets neither amount nor plan and Paystack gets only the guardian's email. The web app opens Paystack's inline popup with the access code. Access is granted only after Paystack's Verify Transaction says the checkout is paid, NGN, on that plan, from `POST /v1/checkout/{reference}/confirm` (after the popup) or the webhook's `charge.success`, whichever comes first. `POST /webhooks/paystack` checks `x-paystack-signature` (HMAC-SHA512 of the raw body) before anything else, answers 200 at once and handles each event once (`payment_events/`, or again only if it failed); `subscription.create` records the renewal date. The entitlement is `subscriptions/{guardian_id}`; `GET /v1/subscription` returns it. A new server setting `plans_need_subscription` (false for the mini-study, true for the demo) makes `GET /v1/plans/{session_id}` need it (402 `PAYMENT_REQUIRED`). A key that is not `sk_test_` is refused unless `PAYSTACK_LIVE=true`. The term pass, the later lifecycle webhooks and the 15-minute pending check stay after the hackathon (11.1).
 - **2026-10-23, the first catalogue (9.1; team decision):** the first catalogue is **22 public-domain children's classics from Project Gutenberg** (`services/core/books/catalogue.json`), not open-licence African books: the African Storybook and Book Dash files could not be downloaded in time, and Nelson (W3) chose to ingest the downloaded set as it is. Every author died more than 70 years ago, so the books are public domain in Nigeria as well as the US. Each title, author and Gutenberg number was checked against the file itself: six of the first downloads were the wrong books and were replaced, and *Myths and Legends of the Bantu* is not on Gutenberg and is left out. Gutenberg books have no publisher level, so each ARL is a W3 draft from the book's usual reading age, with its reason; the text estimate holds 11 of the 22 (more than 2 levels apart) until a person checks them. Only one is set in West Africa. African open-licence books replace or join these when they can be downloaded.
 - **2026-10-23, the book ingestion job (9.1, 9.2; contract `book` schema_version 3; level map [CAL]):** `python -m services.core.books.ingest --files DIR` reads PDF or EPUB books and a manifest (`services/core/books/catalogue.json`) that a person checks against each publisher's page: title, author, publisher, source, licence, required attribution, the publisher's own level, topic tags, the setting and a short description. Nothing in it is invented. From the file it takes the story's text (front and back matter left out), the word and page counts and the share of illustrated pages. The publisher level maps to ARL through `services/core/books/levels.py` (**[CAL]**, W3: African Storybook levels 1-5 to ARL 1, 2, 4, 6, 8; StoryWeaver 1-4 to ARL 2, 4, 6, 8); a publisher without levels (Book Dash) needs the book's ARL in the manifest with a reason. The text-level estimate (9.2) cross-checks it, and a book more than 2 levels out is held. The description and tags are embedded with the deployment's model; the raw file is kept in the private books store under its SHA-256; the document must pass `book.schema.json`; and re-running changes nothing. `--check` reports levels and held books without any store or model. `book.schema.json` goes to `schema_version` 3 to allow `gemini-embedding-001`, the model on the Gemini route (Azure OpenAI is blocked), and the re-embed job now stores vectors under the model that made them.
@@ -287,7 +288,7 @@ The LLM grader tags meaning preservation using the sentence context. Tags are qu
    - Deterministic state machine (section 4) owns every prompt and item
    - End-of-speech detection: LiveKit's Silero VAD and turn-detector plugins
    - Phase 1: streaming position tracker (Chirp 3 streaming partials, fuzzy-matched
-     to the passage) -> "That word is X." clip after 5.0 s without progress
+     to the passage) -> "That word is X." clip after 2.5 s without progress
    - Server settings from Terraform: VOICE_MODE (cache_first | live_first, 4.2),
      SESSION_PROFILE (standard | demo, 4.1)
    - Records child audio per phase/turn to Cloud Storage; publishes Pub/Sub events
@@ -407,7 +408,7 @@ Pass means: no invented number, record, book or diagnosis, and the correct refus
 |---|---|---|
 | 0a. Interest chat | ~15 s | "Before we read, tell me: what kind of stories do you like?" If the child says nothing useful: "Animals, football, space, food, or something else?" The answer becomes topic tags (4.5); passage generation starts now and runs during step 0b. Returning children skip this; their next passage was generated at the end of the last session. |
 | 0b. Setup and mic check | ~10 s | Guardian confirms the child (consent already on file). The child counts 1 to 5. RMS < −42 dBFS per 500 ms block, or clipping > 0.1% of samples, triggers "bring the phone a little closer" or "speak a little softer"; one retry. If the story isn't ready yet, a fixed clip ("Your story is almost ready!") covers the wait; the bank fallback starts at 20 s (4.5). |
-| 1. Oral reading | 60–90 s (demo: 45–60 s) | The generated passage (or a bank passage on fallback) is shown. Reading is capped at 90 s. After 5.0 s with no progress on the same word (silence or sounding it out), Auntie Kemi says "That word is [X]." (a pre-made clip from the shared store, 4.5 G5) and the word is logged TOLD. No timer shown, no other corrections. |
+| 1. Oral reading | 60–90 s (demo: 45–60 s) | The generated passage (or a bank passage on fallback) is shown. Reading is capped at 90 s. After 2.5 s with no progress on the same word (silence or sounding it out), Auntie Kemi says "That word is [X]." (a pre-made clip from the shared store, 4.5 G5) and the word is logged TOLD. No timer shown, no other corrections. |
 | Transition | 2 s | Text disappears. |
 | 2A. Retell | ≤ 45 s | "In your own words, tell me everything you remember from the story." One neutral follow-up: "Anything else?" Ends after 4 s of silence. |
 | 2B. Scripted items | ~60 s (demo: ~25 s) | 3 fixed questions in fixed order (2 literal, 1 inferential); the demo profile asks 2 (1 literal, 1 inferential). Up to 8 s to start and 20 s per answer. Child can ask for one repeat. |
@@ -447,7 +448,7 @@ The state machine in the Session Agent decides every prompt. Gemini Live runs al
 | Listening story | Clip | Clip |
 | Flag | none | `LIVE_FIRST` (informational) |
 
-**"That word is X." is always a clip.** A clip is already on the phone and starts at once, so the child waits exactly 5 s every time. Live would add a variable 1–1.5 s, and that wait sits inside reading time, so words per minute would change with Live's speed on the day. Live is also generative: it may add words, rephrase or mispronounce, and it can't take the curated name pronunciations, while the scorer assumes the child heard exactly the right word.
+**"That word is X." is always a clip.** A clip is already on the phone and starts at once, so the child waits exactly 2.5 s every time. Live would add a variable 1–1.5 s, and that wait sits inside reading time, so words per minute would change with Live's speed on the day. Live is also generative: it may add words, rephrase or mispronounce, and it can't take the curated name pronunciations, while the scorer assumes the child heard exactly the right word.
 
 Why clips for scripted lines in `cache_first`: names are pronounced from the curated IPA list (Gemini Live can't take pronunciation overrides) and every child hears identical questions. The mini-study runs in `cache_first`.
 
@@ -749,15 +750,15 @@ errors          = SUBSTITUTION + OMISSION + TOLD + MISPRONUNCIATION
                   (self-corrected and UNCERTAIN words excluded; MISPRONUNCIATION and
                    DIALECT_VARIANT aren't produced in the hackathon build, 5.3)
 reading_seconds = first word onset to last word offset, capped at 90 s (stored as measured)
-told_waits      = TOLD words after the first word; each 5.0 s wait (4.1) lies inside the
-                  reading time, so told_waits * 5 > reading_seconds is refused
+told_waits      = TOLD words after the first word; each 2.5 s wait (4.1) lies inside the
+                  reading time, so told_waits * 2.5 > reading_seconds is refused
 
 accuracy_pct = 100 * (words_attempted - errors) / words_attempted
 WCPM         = 60  * (words_attempted - errors) / (reading_seconds - 2 * told_waits)
 SCR          = N_self_corrections / (N_self_corrections + SUBSTITUTION + OMISSION + MISPRONUNCIATION)
 ```
 
-The WCPM_CUT norms told a word after 3 s and the session waits 5 s, so WCPM takes the extra 2 s of each told wait off the reading time. A told first word's wait comes before the first onset, so it takes nothing off. Every value is exact: the cuts (6.2, 6.5, 6.7) compare the exact numbers, and the report rounds them for display.
+The WCPM_CUT norms told a word after 3 s and the session waits 2.5 s, so WCPM adds the missing 0.5 s of each told wait to the reading time. A told first word's wait comes before the first onset, so it takes nothing off. Every value is exact: the cuts (6.2, 6.5, 6.7) compare the exact numbers, and the report rounds them for display.
 
 `SHORT_READING` flag: reading_seconds < 60. WCPM is then provisional, and the next session uses a longer passage.
 

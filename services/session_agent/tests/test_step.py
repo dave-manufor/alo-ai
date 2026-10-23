@@ -384,7 +384,7 @@ def test_three_seconds_on_one_word_plays_the_word_clip_once():
 
 def test_short_or_wordless_silence_does_nothing():
     state = at_reading()
-    assert isinstance(step(state, Silence(4999, 4))[1][0], Log)
+    assert isinstance(step(state, Silence(2499, 4))[1][0], Log)
     assert isinstance(step(state, Silence(5000, None))[1][0], Log)
 
 
@@ -905,7 +905,7 @@ def test_profile_values_match_the_prd():
     assert cfg.STANDARD.n_questions == 3 and cfg.DEMO.n_questions == 2
     assert cfg.STANDARD.n_listening_items == 2 and cfg.DEMO.n_listening_items == 1
     assert cfg.STANDARD.reading_cap_ms == cfg.DEMO.reading_cap_ms == 90_000
-    assert cfg.TOLD_WORD_MS == 5_000
+    assert cfg.TOLD_WORD_MS == 2_500
     assert not hasattr(cfg, "LISTENING_RC_THRESHOLD")  # the listening decision is scoring's
 
 
