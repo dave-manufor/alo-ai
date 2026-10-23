@@ -33,6 +33,15 @@ Rules it keeps: EU region only (validated); one identity per service; no keys or
 - **Container images.** CI builds and pushes them to the registry (`acr_login_server`) and passes each digest back in `var.images`. Until then the apps run a placeholder image.
 - **The first clips and books.** The seed job makes the clips and writes the bank passages (see "After the first apply: seed the stores"); someone runs it after the first apply. The book ingestion run and the 30-book catalogue are not built yet.
 
+## The book catalogue (PRD 9.1)
+
+The ingestion job reads real open-licence books (PDF or EPUB) and `services/core/books/catalogue.json`, the manifest a person checks against each publisher's page. Nothing in it is invented. Keep the book files out of Git; the job keeps each one in the private `books` container under its hash.
+
+1. Put the files in one folder, and add an entry for each to the manifest. `services/core/books/ingest.py` lists the fields; the publisher's level must be one `levels.py` maps, or give `arl` with an `arl_reason`.
+2. Check first, with no store or model: `PYTHONPATH=libs/aloai python -m services.core.books.ingest --files <folder> --check`. It prints each book's mapped ARL and any book the text estimate holds.
+3. Ingest, with your `az login` (Cosmos DB data contributor and Storage Blob Data Contributor) and the model key read from Key Vault into the shell: `CLOUD=azure AI_MODE=live AZURE_COSMOS_ENDPOINT=... AZURE_STORAGE_ACCOUNT=... BOOKS_BUCKET=books LLM_BASE_URL=... LLM_API_KEY=... AZURE_OPENAI_DEPLOYMENTS='{"embedding": "gemini-embedding-001"}' PYTHONPATH=libs/aloai python -m services.core.books.ingest --files <folder>`. Running it again changes nothing.
+4. A held book stays out of every recommendation until a person checks it and sets `held_for_review` to false.
+
 ## Smoke test
 
 `services/session_agent/tools/cloud_smoke.py` drives a fictional child through a whole session and checks the result: the session ran to the end, the report and the parent plan were written, and both dead-letter queues (`core-events`, `scorer-events`) are empty. It exits non-zero if any check fails. Run it after an apply and after the images are deployed, and not during a rehearsal. The agent worker must be running, and so must Core, the Scorer and LiveKit.

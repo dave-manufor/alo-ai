@@ -15,6 +15,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 import aloai_contracts
+from aloai_env import Config
 from aloai_store import Store
 
 from ..grader.books import Embedder, interests_text
@@ -25,6 +26,18 @@ KNOWN_MODELS = tuple(
     aloai_contracts.load("book.schema.json")["properties"]["embedding_model"]["enum"]
 )
 _BOOK = aloai_contracts.validator("book.schema.json")
+
+
+def azure_embedding_model(settings: Config) -> str:
+    """The model whose vectors the catalogue holds on Azure: with an OpenAI-compatible provider
+    (LLM_BASE_URL) the "embedding" role names the model itself (gemini-embedding-001 on the
+    Gemini route); on Azure OpenAI it is the pinned text-embedding-3-small. The Grader embeds a
+    child's interests with the same deployment, so a book and a query are always comparable."""
+    from aloai_azure import deployment
+
+    from ..grader.azure import EMBEDDING_MODEL
+
+    return deployment(settings, "embedding") if settings.llm_base_url else EMBEDDING_MODEL
 
 
 def book_text(book: dict) -> str:

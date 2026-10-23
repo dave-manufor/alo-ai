@@ -49,7 +49,12 @@ def test_the_tags_are_written_in_one_order_so_the_same_book_has_the_same_text():
 
 
 def test_the_models_are_the_ones_the_schema_allows():
-    assert set(embedding.KNOWN_MODELS) == {"text-embedding-005", "text-embedding-3-small"}
+    # book.schema.json v3 adds the Gemini route's model (Azure OpenAI is blocked, PRD changelog).
+    assert set(embedding.KNOWN_MODELS) == {
+        "text-embedding-005",
+        "text-embedding-3-small",
+        "gemini-embedding-001",
+    }
     assert EMBEDDING_MODEL in embedding.KNOWN_MODELS
 
 
