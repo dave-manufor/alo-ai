@@ -35,6 +35,7 @@ from .types import (
     PlayClip,
     PlayWordClip,
     QuickScore,
+    PassageShown,
     ReadingDone,
     ReadingProgress,
     Reconnected,
@@ -362,7 +363,9 @@ def _mic_done(state: SessionState) -> Result:
 
 
 def _enter_reading(state: SessionState) -> Result:
-    state = _next_task(state, phase=Phase.READING, sub="", told=(), kindness_checked=False)
+    state = _next_task(
+        state, phase=Phase.READING, sub="", told=(), kindness_checked=False, reading_live=False
+    )
     return state, [
         EmitEvent(
             "session.started",
@@ -372,7 +375,23 @@ def _enter_reading(state: SessionState) -> Result:
                 "session_profile": state.profile.name,
             },
         ),
+        # Tell the child what to do, then show the story. The web app plays its messages in
+        # order, so the story appears when Kemi has finished speaking and its `shown` comes
+        # after her instruction: the reading clock does not run while she talks.
+        _say(state, "reading_prompt"),
         ShowPassage(state.passage_id),
+        # The reading clock does not start until the child can see the story (the web app's
+        # `shown`), or this wait runs out: the web app may still be loading the word clips.
+        _timer("shown_wait", state, cfg.SHOWN_WAIT_MS),
+    ]
+
+
+def _start_reading(state: SessionState) -> Result:
+    """The story is on the child's screen: record, follow the reading, start the 90 s cap."""
+    if state.reading_live:
+        return state, [Log("reading already started")]
+    state = replace(state, reading_live=True)
+    return state, [
         StartRecording("READING"),
         _timer("reading_cap", state, state.profile.reading_cap_ms),
     ]
@@ -398,6 +417,10 @@ def _reading(state: SessionState, event: Event) -> Result:
         case ReadingDone():
             # SHORT_READING is the Scorer's flag, from forced alignment (PRD 6.1).
             return _finish_reading(state, kindly=False)
+        case PassageShown(passage_id=passage_id) if passage_id == state.passage_id:
+            return _start_reading(state)
+        case Timer() if _is_timer(event, "shown_wait", state):
+            return _start_reading(state)
         case Timer() if _is_timer(event, "reading_cap", state):
             return _finish_reading(state, kindly=False)
     return _ignored(state, event)
@@ -416,11 +439,15 @@ def _finish_reading(state: SessionState, *, kindly: bool) -> Result:
         # Fewer than 10 words in 30 s: stop kindly and go to listening. aloai_scoring sets
         # the next passage level from reading_stopped_early (PRD 4.3, 6.6).
         state = replace(state, reading_stopped_early=True)
-        actions.append(_say(state, "kind_end"))
-        state, more = _enter_listening(state)
+        actions.append(_say(state, "kind_end"))  # it already says "Now I will tell you a story"
+        state, more = _enter_listening(state, intro=False)
         return state, actions + more
     state = _next_task(state, phase=Phase.TRANSITION)
-    return state, actions + [_timer("transition", state, cfg.TRANSITION_MS)]
+    # Thank the child the moment the reading is over, while the story fades out.
+    return state, actions + [
+        _say(state, "reading_praise"),
+        _timer("transition", state, cfg.TRANSITION_MS),
+    ]
 
 
 # ---- transition, 2A. retell
@@ -465,7 +492,11 @@ def _retell(state: SessionState, event: Event) -> Result:
 
 def _finish_retell(state: SessionState, *, answered: bool) -> Result:
     state, actions = _ask_item(state, Phase.QUESTIONS, 0)
-    return state, [StopRecording(), CallQuickScore("RETELL", 0, answered)] + actions
+    return state, [
+        StopRecording(),
+        CallQuickScore("RETELL", 0, answered),
+        _say(state, "questions_intro"),  # tell the child what comes next, then the first question
+    ] + actions
 
 
 # ---- 2B. scripted items and 3. listening items (shared)
@@ -547,9 +578,9 @@ def _questions(state: SessionState, event: Event) -> Result:
 # ---- 3. listening module
 
 
-def _enter_listening(state: SessionState) -> Result:
+def _enter_listening(state: SessionState, *, intro: bool = True) -> Result:
     state = _next_task(state, phase=Phase.LISTENING, sub="story", listening_run=True)
-    return state, [
+    return state, ([_say(state, "listening_intro")] if intro else []) + [
         PlayClip("listening_story"),  # always a clip
         _timer("listening_story", state, state.profile.listening_story_ms),
     ]

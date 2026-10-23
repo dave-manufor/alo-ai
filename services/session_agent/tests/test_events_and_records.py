@@ -13,6 +13,7 @@ from services.session_agent.machine.types import (
     EmitEvent,
     MicResult,
     PassageReady,
+    PassageShown,
     QuickScore,
     ReadingDone,
     ReadingProgress,
@@ -207,6 +208,7 @@ def test_a_full_session_publishes_events_that_match_the_schemas(validate):
         TurnEnd("ANSWERED"),
         PassageReady("gen1"),
         MicResult(True),
+        PassageShown("gen1"),
         Silence(5000, 5),
         Silence(5000, 8),
         ReadingDone(75_000),
@@ -250,6 +252,7 @@ def test_a_session_stopped_early_publishes_the_listening_passage(validate):
         TurnEnd("ANSWERED"),
         PassageReady("gen1", "listen1"),
         MicResult(True),
+        PassageShown("gen1"),
         ReadingProgress(30_000, 4),  # the kindness rule ends the reading
     ]:
         state = drive(state, event, log, publisher, validate)

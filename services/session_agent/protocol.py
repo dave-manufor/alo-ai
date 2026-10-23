@@ -14,6 +14,7 @@ from .machine.types import (
     Action,
     ClipAck,
     HidePassage,
+    PassageShown,
     Phase,
     PlayClip,
     PlayWordClip,
@@ -122,11 +123,17 @@ def encode(message: dict) -> bytes:
     return json.dumps(message, separators=(",", ":")).encode()
 
 
-def parse_client(raw: bytes | str) -> ClipAck | None:
-    """A `played` or `missing` ack from the web app. Anything else is dropped."""
+def parse_client(raw: bytes | str) -> ClipAck | PassageShown | None:
+    """A `played` or `missing` ack, or `shown` (the story is on the child's screen), from the
+    web app. Anything else is dropped."""
     try:
         message = json.loads(raw)
     except ValueError:
+        return None
+    if isinstance(message, dict) and message.get("cmd") == "shown":
+        passage_id = message.get("passage_id")
+        if isinstance(passage_id, str) and passage_id:
+            return PassageShown(passage_id=passage_id)
         return None
     if not isinstance(message, dict) or message.get("cmd") not in ("played", "missing"):
         return None

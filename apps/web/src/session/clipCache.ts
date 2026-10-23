@@ -1,5 +1,5 @@
 import { dataMode } from '../api/mode';
-import { missingAck, playedAck, type ClipEntry, type ClientMessage } from './protocol';
+import { missingAck, playedAck, type ClipAckMessage, type ClipEntry } from './protocol';
 
 // Clip cache (PRD 4.4, protocol v2): the clips are downloaded into the phone before they
 // are played, so a slow connection never delays a prompt — most of all a told word, which
@@ -26,7 +26,7 @@ export interface ClipCache {
    *  resolves when THESE clips are done; callers should not wait on it before playing. */
   downloadAll(clips: ClipEntry[]): Promise<void>;
   /** Plays in reply to an agent `play`; resolves with the ack to send. */
-  play(clip_id: string): Promise<ClientMessage>;
+  play(clip_id: string): Promise<ClipAckMessage>;
   /** Resolves when every clip listed so far that matches `filter` has finished downloading
    *  (or failed), or after `timeoutMs`, whichever is first. */
   settled(filter: (clip_id: string) => boolean, timeoutMs: number): Promise<void>;

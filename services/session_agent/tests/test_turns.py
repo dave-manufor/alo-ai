@@ -112,3 +112,34 @@ def test_speech_when_no_turn_is_open_is_accepted_for_the_lights_but_ends_nothing
     assert turns.speech_started(10) is True
     assert turns.speech_ended(900) is True
     assert turns.tick(60_000) is None
+
+
+def test_two_clips_sent_together_keep_kemi_speaking_until_both_have_played():
+    turns = started()
+    turns.prompt_started(100)  # "Thank you for reading!"
+    turns.prompt_started(100)  # then the retell prompt
+    turns.prompt_finished(2_000)  # the first has played; the second is about to
+    assert turns.ignoring(2_100)  # still Kemi
+    assert turns.tick(2_000 + SILENCE_MS) is None  # and the child's wait has not begun
+    turns.prompt_finished(5_000)  # the last one is done
+    assert not turns.ignoring(5_000 + ECHO_TAIL_MS)
+    assert turns.tick(5_000 + SILENCE_MS) == "SILENCE"
+
+
+def test_an_ack_with_nothing_playing_is_harmless():
+    turns = started()
+    turns.prompt_finished(500)
+    assert not turns.ignoring(500 + ECHO_TAIL_MS)
+
+
+def test_how_long_since_the_child_last_spoke():
+    turns = TurnTaker()
+    assert turns.quiet_ms(10_000) is None  # has not spoken yet
+    turns.speech_started(1_000)
+    assert turns.quiet_ms(2_000) == 0  # speaking now
+    turns.speech_ended(3_000)
+    assert turns.quiet_ms(9_500) == 6_500
+    turns.prompt_started(9_600)
+    turns.speech_started(9_700)  # Kemi's voice: ignored, does not count as the child
+    turns.speech_ended(9_900)
+    assert turns.quiet_ms(10_000) == 7_000
