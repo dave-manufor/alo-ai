@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { dataMode } from '../api/mode';
 import { authMode, type AuthUser, type SignInMethod } from '../auth';
 
 // Fixture-backed account store for the MVP UI phase. Shapes mirror what
@@ -272,10 +273,11 @@ export const accountStore = {
       },
     });
   },
-  /** The sample build only: stands in for a Paystack payment so the plan can be seen. The
-   *  real entitlement is written by the Account and Payments service, never the browser. */
+  /** The sample build only (no Account API, whatever the sign-in): stands in for a Paystack
+   *  payment so the plan can be seen. The real entitlement is written by the Account and
+   *  Payments service, never the browser. */
   activateSampleSubscription() {
-    if (!state.guardian || authMode !== 'fixture') return;
+    if (!state.guardian || dataMode === 'live') return;
     setState({ ...state, subscription: { guardian_id: state.guardian.guardian_id, active: true } });
   },
   consentFor(childId: string): ConsentRecord | null {
