@@ -251,6 +251,37 @@ def test_live_azure_listens_with_azure_speech(monkeypatch):
     assert built == [{"language": "en-GB", "speech_region": "swedencentral", "speech_key": "k"}]
 
 
+def test_speech_to_text_errors_are_logged_by_class_and_counted(monkeypatch, caplog):
+    import logging
+
+    handlers = {}
+
+    class FakeSTT:
+        def __init__(self, **options):
+            pass
+
+        def on(self, event, handler):
+            handlers[event] = handler
+
+        def stream(self):
+            return "stream"
+
+    monkeypatch.setattr("livekit.plugins.azure.STT", FakeSTT)
+    cfg = config.load({"ALO_ENV": "local", "AI_MODE": "live"})
+    counted = []
+    live = shared(AI_MODE="live", AZURE_SPEECH_REGION="swedencentral", AZURE_SPEECH_KEY="k")
+    assert livekit_worker._stt(cfg, live, on_error=lambda: counted.append(1)) == "stream"
+    with caplog.at_level(logging.ERROR, logger="aloai.session_agent"):
+        handlers["error"](ValueError("a word the child said"))
+    assert counted == [1]
+    assert "speech to text error: ValueError" in caplog.text
+    assert "child said" not in caplog.text
+    handlers.clear()
+    # Without a callback the error is still logged, not lost.
+    livekit_worker._stt(cfg, live)
+    handlers["error"](ValueError("x"))
+
+
 # ---- clips
 
 

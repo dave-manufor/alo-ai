@@ -178,6 +178,51 @@ def test_the_session_clip_list_is_sent_after_the_prompts_words_first_and_small()
     assert lists[1]["clips"][0]["clip_id"].startswith("word_")
 
 
+# ---- what the agent heard (logs only)
+
+
+def test_the_driver_counts_what_it_hears_and_logs_each_turn_without_words(caplog):
+    import logging
+
+    driver, ports, clock, _ = make_driver()
+    caplog.set_level(logging.INFO, logger="services.session_agent.driver")
+    driver.start()
+    driver.on_audio(tone(-20, 500))
+    driver.on_speech_started()
+    driver.on_transcript("i like football", final=True)
+    driver.on_speech_ended()
+    assert (driver.stats.frames, driver.stats.vad_starts, driver.stats.stt_final) == (1, 1, 1)
+    clock.ms += 1_500
+    driver.on_audio(tone(-20, 500))
+    wait(driver, clock, 2_000)  # the interest answer ends: the turn is written
+    logged = " ".join(record.getMessage() for record in caplog.records)
+    assert "turn INTEREST_CHAT 0 ended: level max" in logged
+    assert "vad starts 1" in logged
+    assert "football" not in logged
+
+
+def test_a_voice_that_starts_while_a_clip_plays_is_counted_as_during_a_clip():
+    driver, ports, clock, _ = make_driver()
+    driver.start()
+    assert ports.channel.plays()  # a prompt was sent, so a clip is "playing"
+    driver.on_speech_started()
+    driver.on_client_message(b'{"schema_version": 3, "cmd": "played", "clip_id": "x"}')
+    driver.on_speech_started()
+    assert (driver.stats.vad_starts, driver.stats.vad_starts_during_clip) == (2, 1)
+
+
+def test_the_audio_counters_are_logged_every_ten_seconds(caplog):
+    import logging
+
+    driver, ports, clock, _ = make_driver()
+    caplog.set_level(logging.INFO, logger="services.session_agent.driver")
+    driver.start()
+    wait(driver, clock, 9_000)
+    assert not [r for r in caplog.records if r.getMessage().startswith("audio:")]
+    wait(driver, clock, 2_000)
+    assert [r for r in caplog.records if r.getMessage().startswith("audio:")]
+
+
 # ---- a whole session
 
 
