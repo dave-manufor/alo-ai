@@ -43,9 +43,12 @@ llm_models = {
 }
 openai_deployments = {}
 
-# A generic session (David, 2026-10-22): no interest chat. Every session opens at the mic check
-# with the bank passage for the child's level; nothing is chosen or generated from what they like.
-interest_chat = false
+# The interest chat is on (David, 2026-10-23, reversing the generic-session choice of 2026-10-22):
+# each session opens with Kemi asking what kind of stories the child likes, as in the PRD (4.1).
+# While generator_on is false nothing is tagged or generated from the answer: the bank passage for
+# the child's level is used afterwards (FALLBACK_PASSAGE, an informational flag). The answer is
+# recorded like any other turn.
+interest_chat = true
 
 # One transcript (Azure AI Speech): the Gemini endpoint has no /audio/transcriptions and a chat
 # transcript dropped a word in a test. Needs W3's confirmation before real children (PRD 5.3).
