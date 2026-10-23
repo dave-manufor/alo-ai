@@ -1,0 +1,727 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_p1_red_ball",
+  "title": "The Red Ball",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "football",
+    "family"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 1,
+  "word_count": 56,
+  "text_content": "Femi has a red ball. He gives it to Mama. Mama gives it back. Then the ball goes up, up, up! It goes into a big tree. Femi is not happy. He can not reach it. Papa is tall. Papa gets the ball down. Femi says, thank you, Papa! Now they all play with the ball.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "STANDARD",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Femi",
+      "clean_text": "femi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈfɛmi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/femi~%CB%88f%C9%9Bmi.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "has",
+      "clean_text": "has",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/has.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "red",
+      "clean_text": "red",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/red.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "ball.",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 1,
+      "text": "He",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 1,
+      "text": "gives",
+      "clean_text": "gives",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gives.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 1,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 1,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 1,
+      "text": "Mama.",
+      "clean_text": "mama",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": "ˈmɑːmɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama~%CB%88m%C9%91%CB%90m%C9%91.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 2,
+      "text": "Mama",
+      "clean_text": "mama",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈmɑːmɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama~%CB%88m%C9%91%CB%90m%C9%91.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 2,
+      "text": "gives",
+      "clean_text": "gives",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gives.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 2,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 2,
+      "text": "back.",
+      "clean_text": "back",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/back.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 3,
+      "text": "Then",
+      "clean_text": "then",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/then.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 3,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 3,
+      "text": "ball",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 3,
+      "text": "goes",
+      "clean_text": "goes",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goes.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 3,
+      "text": "up,",
+      "clean_text": "up",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 3,
+      "text": "up,",
+      "clean_text": "up",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 3,
+      "text": "up!",
+      "clean_text": "up",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 4,
+      "text": "It",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 4,
+      "text": "goes",
+      "clean_text": "goes",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/goes.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 4,
+      "text": "into",
+      "clean_text": "into",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/into.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 4,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 4,
+      "text": "big",
+      "clean_text": "big",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/big.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 4,
+      "text": "tree.",
+      "clean_text": "tree",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tree.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 5,
+      "text": "Femi",
+      "clean_text": "femi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈfɛmi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/femi~%CB%88f%C9%9Bmi.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 5,
+      "text": "is",
+      "clean_text": "is",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/is.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 5,
+      "text": "not",
+      "clean_text": "not",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/not.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 5,
+      "text": "happy.",
+      "clean_text": "happy",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/happy.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 6,
+      "text": "He",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 6,
+      "text": "can",
+      "clean_text": "can",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/can.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 6,
+      "text": "not",
+      "clean_text": "not",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/not.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 6,
+      "text": "reach",
+      "clean_text": "reach",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/reach.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 6,
+      "text": "it.",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 7,
+      "text": "Papa",
+      "clean_text": "papa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈpɑːpɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/papa~%CB%88p%C9%91%CB%90p%C9%91.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 7,
+      "text": "is",
+      "clean_text": "is",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/is.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 7,
+      "text": "tall.",
+      "clean_text": "tall",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tall.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 8,
+      "text": "Papa",
+      "clean_text": "papa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈpɑːpɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/papa~%CB%88p%C9%91%CB%90p%C9%91.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 8,
+      "text": "gets",
+      "clean_text": "gets",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gets.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 8,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 8,
+      "text": "ball",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 8,
+      "text": "down.",
+      "clean_text": "down",
+      "is_content_word": false,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/down.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 9,
+      "text": "Femi",
+      "clean_text": "femi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈfɛmi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/femi~%CB%88f%C9%9Bmi.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 9,
+      "text": "says,",
+      "clean_text": "says",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/says.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 9,
+      "text": "thank",
+      "clean_text": "thank",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/thank.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 9,
+      "text": "you,",
+      "clean_text": "you",
+      "is_content_word": false,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/you.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 9,
+      "text": "Papa!",
+      "clean_text": "papa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": "ˈpɑːpɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/papa~%CB%88p%C9%91%CB%90p%C9%91.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 10,
+      "text": "Now",
+      "clean_text": "now",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/now.mp3"
+    },
+    {
+      "token_index": 50,
+      "sentence_index": 10,
+      "text": "they",
+      "clean_text": "they",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/they.mp3"
+    },
+    {
+      "token_index": 51,
+      "sentence_index": 10,
+      "text": "all",
+      "clean_text": "all",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/all.mp3"
+    },
+    {
+      "token_index": 52,
+      "sentence_index": 10,
+      "text": "play",
+      "clean_text": "play",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/play.mp3"
+    },
+    {
+      "token_index": 53,
+      "sentence_index": 10,
+      "text": "with",
+      "clean_text": "with",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/with.mp3"
+    },
+    {
+      "token_index": 54,
+      "sentence_index": 10,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 55,
+      "sentence_index": 10,
+      "text": "ball.",
+      "clean_text": "ball",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/ball.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "SETTING",
+      "description": "Femi has a red ball.",
+      "weight": 1
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "ACTION",
+      "description": "Femi gives the ball to Mama.",
+      "weight": 1
+    },
+    {
+      "id": "p3",
+      "sentence_index": 4,
+      "category": "PROBLEM",
+      "description": "The ball goes into a big tree.",
+      "weight": 2
+    },
+    {
+      "id": "p4",
+      "sentence_index": 6,
+      "category": "PROBLEM",
+      "description": "Femi can not reach the ball.",
+      "weight": 2
+    },
+    {
+      "id": "p5",
+      "sentence_index": 7,
+      "category": "CHARACTER",
+      "description": "Papa is tall.",
+      "weight": 1
+    },
+    {
+      "id": "p6",
+      "sentence_index": 8,
+      "category": "RESOLUTION",
+      "description": "Papa gets the ball down.",
+      "weight": 2
+    },
+    {
+      "id": "p7",
+      "sentence_index": 10,
+      "category": "DETAIL",
+      "description": "They all play with the ball.",
+      "weight": 1
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 0,
+      "prompt_text": "What color is Femi's ball?",
+      "rubric": {
+        "2": "Says red.",
+        "1": "Says a color that is close, like pink or orange.",
+        "0": "Another color, or no answer."
+      },
+      "item_id": "bank_p1_red_ball_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Red.",
+          "points": 2
+        },
+        {
+          "answer": "E be red.",
+          "points": 2
+        },
+        {
+          "answer": "Pink.",
+          "points": 1
+        },
+        {
+          "answer": "Blue.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 4,
+      "prompt_text": "Where does the ball go?",
+      "rubric": {
+        "2": "Says into a big tree.",
+        "1": "Says up high, or into a tree without saying big.",
+        "0": "Somewhere else, or no answer."
+      },
+      "item_id": "bank_p1_red_ball_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Into a big tree.",
+          "points": 2
+        },
+        {
+          "answer": "For the tree.",
+          "points": 2
+        },
+        {
+          "answer": "Up high.",
+          "points": 1
+        },
+        {
+          "answer": "Into the house.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 9,
+      "prompt_text": "Why does Femi say thank you to Papa?",
+      "rubric": {
+        "2": "Says Papa is tall, so he got the ball out of the tree for him.",
+        "1": "Says Papa helped him, or was kind.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p1_red_ball_q3",
+      "order": 3,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because Papa is tall and he got the ball out of the tree.",
+          "points": 2
+        },
+        {
+          "answer": "Papa tall, so he bring the ball come down.",
+          "points": 2
+        },
+        {
+          "answer": "Because Papa helped him.",
+          "points": 1
+        },
+        {
+          "answer": "Because it is night.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l3_market"
+}

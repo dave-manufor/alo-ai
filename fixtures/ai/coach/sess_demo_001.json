@@ -34,7 +34,7 @@
             "child_id": "child_demo_001",
             "activity_ids": ["act_sound_hunt", "act_word_cards", "act_class_level_talk"],
             "book_ids": ["book_demo_001", "book_demo_002", "book_demo_003"],
-            "summary": "Hello! Auntie Kemi here. Chidi read 68 words correctly in a minute today and understood the story well. Word reading is still growing, so try a sound hunt with the 'ch' sound, word cards for the words Chidi paused on, and class-level stories read aloud. This was a short check, so think of it as a first look. We will check in again in 7 days.",
+            "summary": "Hello! Auntie Kemi here. Chidi read 59.6 words correctly in a minute today and understood the story well. Word reading is still growing, so try a sound hunt with the 'ch' sound, word cards for the words Chidi paused on, and class-level stories read aloud. This was a short check, so think of it as a first look. We will check in again in 7 days.",
             "home_practice": "Each day, find three things that start with a sound from today's story, and read the word cards together."
           }
         }

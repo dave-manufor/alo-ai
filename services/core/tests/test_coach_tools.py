@@ -16,7 +16,7 @@ GOOD_PLAN = {
     "child_id": CHILD_ID,
     "activity_ids": ["act_sound_hunt", "act_word_cards", "act_class_level_talk"],
     "book_ids": BOOKS,
-    "summary": "Chidi read 68 words correctly in a minute and understood the story well.",
+    "summary": "Chidi read 59.6 words correctly in a minute and understood the story well.",
     "home_practice": "Find three things that start with a sound from today's story.",
 }
 
@@ -31,7 +31,7 @@ def test_get_report_leaves_out_the_guardian_and_versions():
     report = coach_tools().get_report(SESSION_ID)
     assert "guardian_id" not in report
     assert "versions" not in report
-    assert report["fluency"]["wcpm"] == 68.0
+    assert report["fluency"]["wcpm"] == 59.6
 
 
 def test_get_history_lists_earlier_checks_and_the_last_plan():

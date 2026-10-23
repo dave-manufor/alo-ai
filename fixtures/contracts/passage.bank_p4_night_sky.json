@@ -1,0 +1,1831 @@
+{
+  "schema_version": 4,
+  "passage_id": "bank_p4_night_sky",
+  "title": "Stars on the Roof",
+  "mode": "READ",
+  "source": "BANK",
+  "licence": "CC0-1.0 (written for Alo.ai fixtures)",
+  "topic_tags": [
+    "space",
+    "family"
+  ],
+  "genre": "NARRATIVE",
+  "arl_level": 7,
+  "word_count": 165,
+  "text_content": "Obi loved the night sky more than anything else in the world. One evening, Grandpa carried an old telescope up to the flat roof of their house. Obi looked through it and gasped, because the moon looked enormous and full of craters. Grandpa smiled and pointed to a bright planet that twinkled in the east. That planet is the biggest one in our solar system, he said. Then Obi spotted a streak of light racing across the darkness. A meteor, he shouted, and he made a wish before it vanished. Grandpa laughed and said a meteor is only a tiny rock that burns up in the air. Obi was surprised, because it had looked so magical. They stayed for hours, naming the groups of stars that Grandpa remembered. When Mama called them for supper, Obi did not want to leave. He promised himself that one day he would study the stars as a scientist. Every night after that, he looked up and remembered that evening.",
+  "voice_profile_id": "vp_google_v1",
+  "length_profile": "STANDARD",
+  "tokens": [
+    {
+      "token_index": 0,
+      "sentence_index": 0,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 1,
+      "sentence_index": 0,
+      "text": "loved",
+      "clean_text": "loved",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/loved.mp3"
+    },
+    {
+      "token_index": 2,
+      "sentence_index": 0,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 3,
+      "sentence_index": 0,
+      "text": "night",
+      "clean_text": "night",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/night.mp3"
+    },
+    {
+      "token_index": 4,
+      "sentence_index": 0,
+      "text": "sky",
+      "clean_text": "sky",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/sky.mp3"
+    },
+    {
+      "token_index": 5,
+      "sentence_index": 0,
+      "text": "more",
+      "clean_text": "more",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/more.mp3"
+    },
+    {
+      "token_index": 6,
+      "sentence_index": 0,
+      "text": "than",
+      "clean_text": "than",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/than.mp3"
+    },
+    {
+      "token_index": 7,
+      "sentence_index": 0,
+      "text": "anything",
+      "clean_text": "anything",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/anything.mp3"
+    },
+    {
+      "token_index": 8,
+      "sentence_index": 0,
+      "text": "else",
+      "clean_text": "else",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/else.mp3"
+    },
+    {
+      "token_index": 9,
+      "sentence_index": 0,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 10,
+      "sentence_index": 0,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 11,
+      "sentence_index": 0,
+      "text": "world.",
+      "clean_text": "world",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/world.mp3"
+    },
+    {
+      "token_index": 12,
+      "sentence_index": 1,
+      "text": "One",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 13,
+      "sentence_index": 1,
+      "text": "evening,",
+      "clean_text": "evening",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/evening.mp3"
+    },
+    {
+      "token_index": 14,
+      "sentence_index": 1,
+      "text": "Grandpa",
+      "clean_text": "grandpa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɡrænpɑː",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/grandpa~%CB%88%C9%A1r%C3%A6np%C9%91%CB%90.mp3"
+    },
+    {
+      "token_index": 15,
+      "sentence_index": 1,
+      "text": "carried",
+      "clean_text": "carried",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/carried.mp3"
+    },
+    {
+      "token_index": 16,
+      "sentence_index": 1,
+      "text": "an",
+      "clean_text": "an",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/an.mp3"
+    },
+    {
+      "token_index": 17,
+      "sentence_index": 1,
+      "text": "old",
+      "clean_text": "old",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/old.mp3"
+    },
+    {
+      "token_index": 18,
+      "sentence_index": 1,
+      "text": "telescope",
+      "clean_text": "telescope",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/telescope.mp3"
+    },
+    {
+      "token_index": 19,
+      "sentence_index": 1,
+      "text": "up",
+      "clean_text": "up",
+      "is_content_word": false,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 20,
+      "sentence_index": 1,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 21,
+      "sentence_index": 1,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 22,
+      "sentence_index": 1,
+      "text": "flat",
+      "clean_text": "flat",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/flat.mp3"
+    },
+    {
+      "token_index": 23,
+      "sentence_index": 1,
+      "text": "roof",
+      "clean_text": "roof",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/roof.mp3"
+    },
+    {
+      "token_index": 24,
+      "sentence_index": 1,
+      "text": "of",
+      "clean_text": "of",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
+    },
+    {
+      "token_index": 25,
+      "sentence_index": 1,
+      "text": "their",
+      "clean_text": "their",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/their.mp3"
+    },
+    {
+      "token_index": 26,
+      "sentence_index": 1,
+      "text": "house.",
+      "clean_text": "house",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/house.mp3"
+    },
+    {
+      "token_index": 27,
+      "sentence_index": 2,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 28,
+      "sentence_index": 2,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 29,
+      "sentence_index": 2,
+      "text": "through",
+      "clean_text": "through",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/through.mp3"
+    },
+    {
+      "token_index": 30,
+      "sentence_index": 2,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 31,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 32,
+      "sentence_index": 2,
+      "text": "gasped,",
+      "clean_text": "gasped",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/gasped.mp3"
+    },
+    {
+      "token_index": 33,
+      "sentence_index": 2,
+      "text": "because",
+      "clean_text": "because",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/because.mp3"
+    },
+    {
+      "token_index": 34,
+      "sentence_index": 2,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 35,
+      "sentence_index": 2,
+      "text": "moon",
+      "clean_text": "moon",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/moon.mp3"
+    },
+    {
+      "token_index": 36,
+      "sentence_index": 2,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 37,
+      "sentence_index": 2,
+      "text": "enormous",
+      "clean_text": "enormous",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/enormous.mp3"
+    },
+    {
+      "token_index": 38,
+      "sentence_index": 2,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 39,
+      "sentence_index": 2,
+      "text": "full",
+      "clean_text": "full",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/full.mp3"
+    },
+    {
+      "token_index": 40,
+      "sentence_index": 2,
+      "text": "of",
+      "clean_text": "of",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
+    },
+    {
+      "token_index": 41,
+      "sentence_index": 2,
+      "text": "craters.",
+      "clean_text": "craters",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/craters.mp3"
+    },
+    {
+      "token_index": 42,
+      "sentence_index": 3,
+      "text": "Grandpa",
+      "clean_text": "grandpa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɡrænpɑː",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/grandpa~%CB%88%C9%A1r%C3%A6np%C9%91%CB%90.mp3"
+    },
+    {
+      "token_index": 43,
+      "sentence_index": 3,
+      "text": "smiled",
+      "clean_text": "smiled",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/smiled.mp3"
+    },
+    {
+      "token_index": 44,
+      "sentence_index": 3,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 45,
+      "sentence_index": 3,
+      "text": "pointed",
+      "clean_text": "pointed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/pointed.mp3"
+    },
+    {
+      "token_index": 46,
+      "sentence_index": 3,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 47,
+      "sentence_index": 3,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 48,
+      "sentence_index": 3,
+      "text": "bright",
+      "clean_text": "bright",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/bright.mp3"
+    },
+    {
+      "token_index": 49,
+      "sentence_index": 3,
+      "text": "planet",
+      "clean_text": "planet",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/planet.mp3"
+    },
+    {
+      "token_index": 50,
+      "sentence_index": 3,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 51,
+      "sentence_index": 3,
+      "text": "twinkled",
+      "clean_text": "twinkled",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/twinkled.mp3"
+    },
+    {
+      "token_index": 52,
+      "sentence_index": 3,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 53,
+      "sentence_index": 3,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 54,
+      "sentence_index": 3,
+      "text": "east.",
+      "clean_text": "east",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/east.mp3"
+    },
+    {
+      "token_index": 55,
+      "sentence_index": 4,
+      "text": "That",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 56,
+      "sentence_index": 4,
+      "text": "planet",
+      "clean_text": "planet",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/planet.mp3"
+    },
+    {
+      "token_index": 57,
+      "sentence_index": 4,
+      "text": "is",
+      "clean_text": "is",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/is.mp3"
+    },
+    {
+      "token_index": 58,
+      "sentence_index": 4,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 59,
+      "sentence_index": 4,
+      "text": "biggest",
+      "clean_text": "biggest",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/biggest.mp3"
+    },
+    {
+      "token_index": 60,
+      "sentence_index": 4,
+      "text": "one",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 61,
+      "sentence_index": 4,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 62,
+      "sentence_index": 4,
+      "text": "our",
+      "clean_text": "our",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/our.mp3"
+    },
+    {
+      "token_index": 63,
+      "sentence_index": 4,
+      "text": "solar",
+      "clean_text": "solar",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/solar.mp3"
+    },
+    {
+      "token_index": 64,
+      "sentence_index": 4,
+      "text": "system,",
+      "clean_text": "system",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/system.mp3"
+    },
+    {
+      "token_index": 65,
+      "sentence_index": 4,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 66,
+      "sentence_index": 4,
+      "text": "said.",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 67,
+      "sentence_index": 5,
+      "text": "Then",
+      "clean_text": "then",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/then.mp3"
+    },
+    {
+      "token_index": 68,
+      "sentence_index": 5,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 69,
+      "sentence_index": 5,
+      "text": "spotted",
+      "clean_text": "spotted",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/spotted.mp3"
+    },
+    {
+      "token_index": 70,
+      "sentence_index": 5,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 71,
+      "sentence_index": 5,
+      "text": "streak",
+      "clean_text": "streak",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/streak.mp3"
+    },
+    {
+      "token_index": 72,
+      "sentence_index": 5,
+      "text": "of",
+      "clean_text": "of",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
+    },
+    {
+      "token_index": 73,
+      "sentence_index": 5,
+      "text": "light",
+      "clean_text": "light",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/light.mp3"
+    },
+    {
+      "token_index": 74,
+      "sentence_index": 5,
+      "text": "racing",
+      "clean_text": "racing",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/racing.mp3"
+    },
+    {
+      "token_index": 75,
+      "sentence_index": 5,
+      "text": "across",
+      "clean_text": "across",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/across.mp3"
+    },
+    {
+      "token_index": 76,
+      "sentence_index": 5,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 77,
+      "sentence_index": 5,
+      "text": "darkness.",
+      "clean_text": "darkness",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/darkness.mp3"
+    },
+    {
+      "token_index": 78,
+      "sentence_index": 6,
+      "text": "A",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 79,
+      "sentence_index": 6,
+      "text": "meteor,",
+      "clean_text": "meteor",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/meteor.mp3"
+    },
+    {
+      "token_index": 80,
+      "sentence_index": 6,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 81,
+      "sentence_index": 6,
+      "text": "shouted,",
+      "clean_text": "shouted",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/shouted.mp3"
+    },
+    {
+      "token_index": 82,
+      "sentence_index": 6,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 83,
+      "sentence_index": 6,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 84,
+      "sentence_index": 6,
+      "text": "made",
+      "clean_text": "made",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/made.mp3"
+    },
+    {
+      "token_index": 85,
+      "sentence_index": 6,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 86,
+      "sentence_index": 6,
+      "text": "wish",
+      "clean_text": "wish",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/wish.mp3"
+    },
+    {
+      "token_index": 87,
+      "sentence_index": 6,
+      "text": "before",
+      "clean_text": "before",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/before.mp3"
+    },
+    {
+      "token_index": 88,
+      "sentence_index": 6,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 89,
+      "sentence_index": 6,
+      "text": "vanished.",
+      "clean_text": "vanished",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/vanished.mp3"
+    },
+    {
+      "token_index": 90,
+      "sentence_index": 7,
+      "text": "Grandpa",
+      "clean_text": "grandpa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɡrænpɑː",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/grandpa~%CB%88%C9%A1r%C3%A6np%C9%91%CB%90.mp3"
+    },
+    {
+      "token_index": 91,
+      "sentence_index": 7,
+      "text": "laughed",
+      "clean_text": "laughed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/laughed.mp3"
+    },
+    {
+      "token_index": 92,
+      "sentence_index": 7,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 93,
+      "sentence_index": 7,
+      "text": "said",
+      "clean_text": "said",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/said.mp3"
+    },
+    {
+      "token_index": 94,
+      "sentence_index": 7,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 95,
+      "sentence_index": 7,
+      "text": "meteor",
+      "clean_text": "meteor",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/meteor.mp3"
+    },
+    {
+      "token_index": 96,
+      "sentence_index": 7,
+      "text": "is",
+      "clean_text": "is",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/is.mp3"
+    },
+    {
+      "token_index": 97,
+      "sentence_index": 7,
+      "text": "only",
+      "clean_text": "only",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/only.mp3"
+    },
+    {
+      "token_index": 98,
+      "sentence_index": 7,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 99,
+      "sentence_index": 7,
+      "text": "tiny",
+      "clean_text": "tiny",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/tiny.mp3"
+    },
+    {
+      "token_index": 100,
+      "sentence_index": 7,
+      "text": "rock",
+      "clean_text": "rock",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/rock.mp3"
+    },
+    {
+      "token_index": 101,
+      "sentence_index": 7,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 102,
+      "sentence_index": 7,
+      "text": "burns",
+      "clean_text": "burns",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/burns.mp3"
+    },
+    {
+      "token_index": 103,
+      "sentence_index": 7,
+      "text": "up",
+      "clean_text": "up",
+      "is_content_word": false,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 104,
+      "sentence_index": 7,
+      "text": "in",
+      "clean_text": "in",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/in.mp3"
+    },
+    {
+      "token_index": 105,
+      "sentence_index": 7,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 106,
+      "sentence_index": 7,
+      "text": "air.",
+      "clean_text": "air",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/air.mp3"
+    },
+    {
+      "token_index": 107,
+      "sentence_index": 8,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 108,
+      "sentence_index": 8,
+      "text": "was",
+      "clean_text": "was",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/was.mp3"
+    },
+    {
+      "token_index": 109,
+      "sentence_index": 8,
+      "text": "surprised,",
+      "clean_text": "surprised",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/surprised.mp3"
+    },
+    {
+      "token_index": 110,
+      "sentence_index": 8,
+      "text": "because",
+      "clean_text": "because",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/because.mp3"
+    },
+    {
+      "token_index": 111,
+      "sentence_index": 8,
+      "text": "it",
+      "clean_text": "it",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/it.mp3"
+    },
+    {
+      "token_index": 112,
+      "sentence_index": 8,
+      "text": "had",
+      "clean_text": "had",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/had.mp3"
+    },
+    {
+      "token_index": 113,
+      "sentence_index": 8,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 114,
+      "sentence_index": 8,
+      "text": "so",
+      "clean_text": "so",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/so.mp3"
+    },
+    {
+      "token_index": 115,
+      "sentence_index": 8,
+      "text": "magical.",
+      "clean_text": "magical",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/magical.mp3"
+    },
+    {
+      "token_index": 116,
+      "sentence_index": 9,
+      "text": "They",
+      "clean_text": "they",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/they.mp3"
+    },
+    {
+      "token_index": 117,
+      "sentence_index": 9,
+      "text": "stayed",
+      "clean_text": "stayed",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stayed.mp3"
+    },
+    {
+      "token_index": 118,
+      "sentence_index": 9,
+      "text": "for",
+      "clean_text": "for",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/for.mp3"
+    },
+    {
+      "token_index": 119,
+      "sentence_index": 9,
+      "text": "hours,",
+      "clean_text": "hours",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/hours.mp3"
+    },
+    {
+      "token_index": 120,
+      "sentence_index": 9,
+      "text": "naming",
+      "clean_text": "naming",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/naming.mp3"
+    },
+    {
+      "token_index": 121,
+      "sentence_index": 9,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 122,
+      "sentence_index": 9,
+      "text": "groups",
+      "clean_text": "groups",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/groups.mp3"
+    },
+    {
+      "token_index": 123,
+      "sentence_index": 9,
+      "text": "of",
+      "clean_text": "of",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/of.mp3"
+    },
+    {
+      "token_index": 124,
+      "sentence_index": 9,
+      "text": "stars",
+      "clean_text": "stars",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stars.mp3"
+    },
+    {
+      "token_index": 125,
+      "sentence_index": 9,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 126,
+      "sentence_index": 9,
+      "text": "Grandpa",
+      "clean_text": "grandpa",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɡrænpɑː",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/grandpa~%CB%88%C9%A1r%C3%A6np%C9%91%CB%90.mp3"
+    },
+    {
+      "token_index": 127,
+      "sentence_index": 9,
+      "text": "remembered.",
+      "clean_text": "remembered",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/remembered.mp3"
+    },
+    {
+      "token_index": 128,
+      "sentence_index": 10,
+      "text": "When",
+      "clean_text": "when",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/when.mp3"
+    },
+    {
+      "token_index": 129,
+      "sentence_index": 10,
+      "text": "Mama",
+      "clean_text": "mama",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈmɑːmɑ",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/mama~%CB%88m%C9%91%CB%90m%C9%91.mp3"
+    },
+    {
+      "token_index": 130,
+      "sentence_index": 10,
+      "text": "called",
+      "clean_text": "called",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/called.mp3"
+    },
+    {
+      "token_index": 131,
+      "sentence_index": 10,
+      "text": "them",
+      "clean_text": "them",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/them.mp3"
+    },
+    {
+      "token_index": 132,
+      "sentence_index": 10,
+      "text": "for",
+      "clean_text": "for",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/for.mp3"
+    },
+    {
+      "token_index": 133,
+      "sentence_index": 10,
+      "text": "supper,",
+      "clean_text": "supper",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/supper.mp3"
+    },
+    {
+      "token_index": 134,
+      "sentence_index": 10,
+      "text": "Obi",
+      "clean_text": "obi",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": "ˈɔbi",
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/obi~%CB%88%C9%94bi.mp3"
+    },
+    {
+      "token_index": 135,
+      "sentence_index": 10,
+      "text": "did",
+      "clean_text": "did",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/did.mp3"
+    },
+    {
+      "token_index": 136,
+      "sentence_index": 10,
+      "text": "not",
+      "clean_text": "not",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/not.mp3"
+    },
+    {
+      "token_index": 137,
+      "sentence_index": 10,
+      "text": "want",
+      "clean_text": "want",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/want.mp3"
+    },
+    {
+      "token_index": 138,
+      "sentence_index": 10,
+      "text": "to",
+      "clean_text": "to",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/to.mp3"
+    },
+    {
+      "token_index": 139,
+      "sentence_index": 10,
+      "text": "leave.",
+      "clean_text": "leave",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/leave.mp3"
+    },
+    {
+      "token_index": 140,
+      "sentence_index": 11,
+      "text": "He",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 141,
+      "sentence_index": 11,
+      "text": "promised",
+      "clean_text": "promised",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/promised.mp3"
+    },
+    {
+      "token_index": 142,
+      "sentence_index": 11,
+      "text": "himself",
+      "clean_text": "himself",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/himself.mp3"
+    },
+    {
+      "token_index": 143,
+      "sentence_index": 11,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 144,
+      "sentence_index": 11,
+      "text": "one",
+      "clean_text": "one",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/one.mp3"
+    },
+    {
+      "token_index": 145,
+      "sentence_index": 11,
+      "text": "day",
+      "clean_text": "day",
+      "is_content_word": true,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/day.mp3"
+    },
+    {
+      "token_index": 146,
+      "sentence_index": 11,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 147,
+      "sentence_index": 11,
+      "text": "would",
+      "clean_text": "would",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/would.mp3"
+    },
+    {
+      "token_index": 148,
+      "sentence_index": 11,
+      "text": "study",
+      "clean_text": "study",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/study.mp3"
+    },
+    {
+      "token_index": 149,
+      "sentence_index": 11,
+      "text": "the",
+      "clean_text": "the",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/the.mp3"
+    },
+    {
+      "token_index": 150,
+      "sentence_index": 11,
+      "text": "stars",
+      "clean_text": "stars",
+      "is_content_word": true,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/stars.mp3"
+    },
+    {
+      "token_index": 151,
+      "sentence_index": 11,
+      "text": "as",
+      "clean_text": "as",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/as.mp3"
+    },
+    {
+      "token_index": 152,
+      "sentence_index": 11,
+      "text": "a",
+      "clean_text": "a",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/a.mp3"
+    },
+    {
+      "token_index": 153,
+      "sentence_index": 11,
+      "text": "scientist.",
+      "clean_text": "scientist",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/scientist.mp3"
+    },
+    {
+      "token_index": 154,
+      "sentence_index": 12,
+      "text": "Every",
+      "clean_text": "every",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/every.mp3"
+    },
+    {
+      "token_index": 155,
+      "sentence_index": 12,
+      "text": "night",
+      "clean_text": "night",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/night.mp3"
+    },
+    {
+      "token_index": 156,
+      "sentence_index": 12,
+      "text": "after",
+      "clean_text": "after",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/after.mp3"
+    },
+    {
+      "token_index": 157,
+      "sentence_index": 12,
+      "text": "that,",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "PHRASE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 158,
+      "sentence_index": 12,
+      "text": "he",
+      "clean_text": "he",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/he.mp3"
+    },
+    {
+      "token_index": 159,
+      "sentence_index": 12,
+      "text": "looked",
+      "clean_text": "looked",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/looked.mp3"
+    },
+    {
+      "token_index": 160,
+      "sentence_index": 12,
+      "text": "up",
+      "clean_text": "up",
+      "is_content_word": false,
+      "syntactic_boundary_after": "CLAUSE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/up.mp3"
+    },
+    {
+      "token_index": 161,
+      "sentence_index": 12,
+      "text": "and",
+      "clean_text": "and",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/and.mp3"
+    },
+    {
+      "token_index": 162,
+      "sentence_index": 12,
+      "text": "remembered",
+      "clean_text": "remembered",
+      "is_content_word": true,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/remembered.mp3"
+    },
+    {
+      "token_index": 163,
+      "sentence_index": 12,
+      "text": "that",
+      "clean_text": "that",
+      "is_content_word": false,
+      "syntactic_boundary_after": "NONE",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/that.mp3"
+    },
+    {
+      "token_index": 164,
+      "sentence_index": 12,
+      "text": "evening.",
+      "clean_text": "evening",
+      "is_content_word": true,
+      "syntactic_boundary_after": "TERMINAL",
+      "name_ipa": null,
+      "word_clip_gcs_uri": "gs://aloai-dev-clips/vp_google_v1/v1/words/evening.mp3"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "sentence_index": 0,
+      "category": "CHARACTER",
+      "description": "Obi loved the night sky.",
+      "weight": 1
+    },
+    {
+      "id": "p2",
+      "sentence_index": 1,
+      "category": "SETTING",
+      "description": "Grandpa carried an old telescope up to the roof.",
+      "weight": 1
+    },
+    {
+      "id": "p3",
+      "sentence_index": 2,
+      "category": "ACTION",
+      "description": "Obi saw the moon full of craters through the telescope.",
+      "weight": 1
+    },
+    {
+      "id": "p4",
+      "sentence_index": 3,
+      "category": "DETAIL",
+      "description": "Grandpa pointed to a bright planet in the east.",
+      "weight": 1
+    },
+    {
+      "id": "p5",
+      "sentence_index": 5,
+      "category": "ACTION",
+      "description": "Obi spotted a streak of light across the darkness.",
+      "weight": 1
+    },
+    {
+      "id": "p6",
+      "sentence_index": 7,
+      "category": "MAIN_IDEA",
+      "description": "A meteor is a tiny piece of rock that burns up in the air.",
+      "weight": 2
+    },
+    {
+      "id": "p7",
+      "sentence_index": 9,
+      "category": "DETAIL",
+      "description": "They stayed on the roof for hours naming the stars.",
+      "weight": 1
+    },
+    {
+      "id": "p8",
+      "sentence_index": 10,
+      "category": "PROBLEM",
+      "description": "Obi did not want to leave when Mama called.",
+      "weight": 2
+    },
+    {
+      "id": "p9",
+      "sentence_index": 11,
+      "category": "RESOLUTION",
+      "description": "Obi promised he would study the stars as a scientist one day.",
+      "weight": 2
+    }
+  ],
+  "items": [
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 2,
+      "prompt_text": "What did Obi see on the moon through the telescope?",
+      "rubric": {
+        "2": "Says craters.",
+        "1": "Says holes or bumps, or that the moon looked big.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p4_night_sky_q1",
+      "order": 1,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Craters.",
+          "points": 2
+        },
+        {
+          "answer": "E see plenty craters.",
+          "points": 2
+        },
+        {
+          "answer": "It looked huge.",
+          "points": 1
+        },
+        {
+          "answer": "A tree.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "LITERAL",
+      "target_sentence_index": 7,
+      "prompt_text": "What does Grandpa say a meteor really is?",
+      "rubric": {
+        "2": "Says a tiny piece of rock that burns up in the air.",
+        "1": "Says a rock, or a piece of something.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p4_night_sky_q2",
+      "order": 2,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "A tiny piece of rock that burns up in the air.",
+          "points": 2
+        },
+        {
+          "answer": "Na small rock wey dey burn for sky.",
+          "points": 2
+        },
+        {
+          "answer": "A rock.",
+          "points": 1
+        },
+        {
+          "answer": "A big star.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "type": "INFERENTIAL",
+      "target_sentence_index": 10,
+      "prompt_text": "Why did Obi not want to leave the roof when Mama called?",
+      "rubric": {
+        "2": "Says he loved the night sky and was enjoying looking at the stars with Grandpa.",
+        "1": "Says he liked the roof, or he was not hungry.",
+        "0": "Something else, or no answer."
+      },
+      "item_id": "bank_p4_night_sky_q3",
+      "order": 3,
+      "max_points": 2,
+      "exemplars": [
+        {
+          "answer": "Because he loved the sky and was happy watching the stars with Grandpa.",
+          "points": 2
+        },
+        {
+          "answer": "E love the sky well well, so e no wan comot.",
+          "points": 2
+        },
+        {
+          "answer": "Because he liked it there.",
+          "points": 1
+        },
+        {
+          "answer": "Because he was afraid of Mama.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "paired_listening_passage_id": "bank_l9_rocket"
+}

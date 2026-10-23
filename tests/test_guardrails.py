@@ -91,7 +91,7 @@ def test_true_and_false_are_not_numbers():
 
 def test_numbers_are_found_anywhere_in_a_full_report():
     numbers = traceable_numbers(REPORT)
-    assert {90.9, 68.0, 70.0, 2.0, 50.0} <= numbers
+    assert {90.9, 59.6, 70.0, 2.0, 50.0} <= numbers
 
 
 @pytest.mark.parametrize(
@@ -107,7 +107,7 @@ def test_a_made_up_score_in_words_is_refused(said, value):
 
 def test_a_report_number_in_words_passes():
     assert (
-        validate_parent_summary("Chidi read sixty-eight words correctly in a minute.", REPORT) == []
+        validate_parent_summary("Chidi read fifty words correctly in a minute.", REPORT) == []
     )
 
 

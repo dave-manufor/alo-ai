@@ -42,11 +42,19 @@ STANDARD_BANK = {
 # its topic tags). A test keeps this equal to the passages in the bank (fixtures/contracts).
 INTEREST_BANK: dict[str, tuple[int, tuple[str, ...]]] = {
     "bank_p1_ada_and_the_dog": (1, ("animals", "food")),
+    "bank_p1_red_ball": (1, ("football", "family")),
     "bank_p2_lost_ball": (3, ("football", "family")),
+    "bank_p2_goat_at_gate": (3, ("animals", "farming")),
+    "bank_p2_cooking_rice": (3, ("food", "family")),
     "bank_p3_school_garden": (5, ("school", "farming")),
+    "bank_p3_cup_day": (5, ("football", "school")),
+    "bank_p3_hen_and_chicks": (5, ("animals", "farming")),
     "bank_p4_night_bus": (7, ("transport", "family")),
+    "bank_p4_night_sky": (7, ("space", "family")),
     "bank_p5_music_contest": (9, ("music", "school")),
+    "bank_p5_rainy_final": (9, ("football", "school")),
     "bank_p6_river_crossing": (11, ("adventure", "family")),
+    "bank_p6_science_fair_rocket": (11, ("space", "school")),
 }
 MAX_LEVEL_GAP = 2  # a story this many levels from the child's is still a fair read
 
