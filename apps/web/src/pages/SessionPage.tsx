@@ -8,12 +8,14 @@ import { createSessionDriver } from '../session/driverFactory';
 import HoldToConfirm from '../session/HoldToConfirm';
 import {
   createMicMeter,
+  primedAudioContext,
   primeAudioContext,
   useCountedWords,
   useMicWatch,
   type MicMeter,
 } from '../session/micLevel';
 import { openMic, stopMic, type MicResult } from '../session/micPermission';
+import { createSoundBoard, useSoundPreference } from '../session/sound';
 import japaBase from '../session/assets/japa-base.svg';
 import NightStage from '../session/NightStage';
 import { shownAck, type AgentMessage } from '../session/protocol';
@@ -238,6 +240,30 @@ export default function SessionPage({
     else mode = endDone ? 'hand' : 'end';
   }
 
+  // Sound (session/sound.ts): quiet, off if a grown-up has turned it off, silent unless the
+  // audio context is running. The shimmer plays only while the session is being prepared.
+  const [soundOn, setSoundOn] = useSoundPreference();
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+  const board = useMemo(
+    () => (started ? createSoundBoard(primedAudioContext(), { reducedMotion }) : null),
+    [started, reducedMotion],
+  );
+  useEffect(() => board?.setEnabled(soundOn), [board, soundOn]);
+  useEffect(() => board?.ambience(preparing), [board, preparing]);
+  useEffect(() => {
+    if (!board || step === null || step === 'ENDED') return;
+    board.chime(step === 'CLOSE' ? 'reward' : 'step');
+  }, [board, step]);
+  useEffect(() => {
+    if (board && state.passageVisible) board.tick();
+  }, [board, state.passageVisible]);
+  useEffect(() => {
+    if (board && counted > 0) board.pop(counted - 1);
+  }, [board, counted]);
+  useEffect(() => () => board?.dispose(), [board]);
+
   const input = useMemo<StageInput>(
     () => ({
       mode,
@@ -297,6 +323,14 @@ export default function SessionPage({
         <p>Ask a grown-up to tap Allow when the phone asks about the microphone.</p>
         <button type="button" className="pill" onClick={() => void askForMic()}>
           I’m ready
+        </button>
+        <button
+          type="button"
+          className="pill pill--quiet"
+          aria-pressed={soundOn}
+          onClick={() => setSoundOn(!soundOn)}
+        >
+          {soundOn ? 'Sound on' : 'Sound off'}
         </button>
       </div>
     ) : (

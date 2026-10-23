@@ -29,6 +29,12 @@ function contextConstructor(): ContextConstructor | undefined {
 
 let primed: AudioContext | null = null;
 
+/** The audio context started inside the Start tap, if there is one: the session's sounds play
+ *  through it too (one context, started where the browser allows it). */
+export function primedAudioContext(): AudioContext | null {
+  return primed && primed.state !== 'closed' ? primed : null;
+}
+
 /** Lets go of the primed context (tests; and when the session screen is left for good). */
 export function forgetAudioContext(): void {
   void primed?.close?.();
