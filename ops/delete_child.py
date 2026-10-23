@@ -78,6 +78,11 @@ def footprint(store: Store, child_id: str) -> Footprint:
     for path, consent in zip(consent_paths, store.get_many(consent_paths), strict=True):
         if consent is not None and consent.get("child_id") == child_id:
             documents.append(path)
+    # The Account service's record of which guardian was handed a session id (GET /v1/sessions).
+    start_paths = store.list_paths("session_starts")
+    for path, start in zip(start_paths, store.get_many(start_paths), strict=True):
+        if start is not None and start.get("child_id") == child_id:
+            documents.append(path)
     if store.get(f"children/{child_id}") is not None:
         documents.append(f"children/{child_id}")
     if not documents:

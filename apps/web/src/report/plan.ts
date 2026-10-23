@@ -28,6 +28,9 @@ export interface GuardianPlan {
   next_session_at: string;
 }
 
+const PLAN_RETRY_MS = 10_000;
+const PLAN_TRIES = 30;
+
 export async function fetchPlan(api: ApiClient, sessionId: string): Promise<GuardianPlan | null> {
   try {
     return await api.get<GuardianPlan>(`/v1/plans/${encodeURIComponent(sessionId)}`);
@@ -66,16 +69,25 @@ export function usePlan(report: ReadingReport | null | undefined, wanted: boolea
   useEffect(() => {
     if (dataMode !== 'live' || !wanted || !sessionId) return;
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let tries = 0;
     setState({ status: 'loading' });
-    fetchPlan(liveApi(), sessionId)
-      .then((plan) => {
-        if (!cancelled) setState({ status: 'ready', plan });
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) setState({ status: 'error', message: messageOf(error) });
-      });
+    // The Coach makes the plan a little after the report: while there is none, ask again.
+    const look = () => {
+      fetchPlan(liveApi(), sessionId)
+        .then((plan) => {
+          if (cancelled) return;
+          setState({ status: 'ready', plan });
+          if (plan === null && (tries += 1) < PLAN_TRIES) timer = setTimeout(look, PLAN_RETRY_MS);
+        })
+        .catch((error: unknown) => {
+          if (!cancelled) setState({ status: 'error', message: messageOf(error) });
+        });
+    };
+    look();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [sessionId, wanted]);
   if (!wanted || !report) return { status: 'ready', plan: null };

@@ -51,5 +51,6 @@ def definition(schema_file: str, name: str) -> Draft202012Validator:
 
 SESSION_START_REQUEST = definition("session_start.schema.json", "request")
 SESSION_START_RESPONSE = definition("session_start.schema.json", "response")
-SESSION_ROOM_METADATA = definition("session_start.schema.json", "room_metadata")
+SESSION_STATUS = definition("session_start.schema.json", "status")
+SESSION_ROOM_METADATA =definition("session_start.schema.json", "room_metadata")
 TOPIC_TAGS: tuple[str, ...] = tuple(load("topic_tag.schema.json")["enum"])

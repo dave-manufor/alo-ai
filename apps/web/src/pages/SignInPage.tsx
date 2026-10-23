@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { accountStore, useAccount } from '../account/store';
 import { auth, authMode, signInFailed } from '../auth';
+import { clearReturnTo, peekReturnTo } from '../auth/returnTo';
 import { Button } from '../design-system/alo';
 import { BackLink, Field, Notice } from '../ui/primitives';
 
@@ -14,7 +15,7 @@ import { BackLink, Field, Notice } from '../ui/primitives';
 //    screen because no email is sent. It stands in for the return from Entra.
 export default function SignInPage() {
   const { guardian, children } = useAccount();
-  if (guardian) return <Navigate to={children.length === 0 ? '/onboarding/consent' : '/home'} replace />;
+  if (guardian) return <SignedIn hasChildren={children.length > 0} />;
   return (
     <div className="page">
       <BackLink to="/" />
@@ -35,7 +36,14 @@ export default function SignInPage() {
   );
 }
 
-const looksLikeEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+// Back from sign-in: to the screen the guardian was on when they were sent away, else Home.
+function SignedIn({ hasChildren }: { hasChildren: boolean }) {
+  const back = peekReturnTo();
+  useEffect(() => clearReturnTo(), []);
+  return <Navigate to={!hasChildren ? '/onboarding/consent' : (back ?? '/home')} replace />;
+}
+
+const looksLikeEmail =(value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 export function EntraSignIn() {
   const [email, setEmail] = useState('');

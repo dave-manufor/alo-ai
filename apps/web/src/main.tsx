@@ -2,8 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
-import { syncAccount } from './account/actions';
 import { accountStore } from './account/store';
+import { loadAccountSafely } from './account/syncStatus';
 import App from './App';
 import { restoreSignIn } from './auth';
 import './styles/app.css';
@@ -21,13 +21,9 @@ restoreSignIn()
   .then(async (user) => {
     if (!user) return;
     accountStore.signInVerified(user);
-    // Live build: load this guardian's children and consents from the Account API. A
-    // failure leaves the list empty (the guardian can reload); it must not block the app.
-    try {
-      await syncAccount();
-    } catch {
-      // Intentionally ignored: the screens fall back to an empty list.
-    }
+    // Live build: load this guardian's children and consents from the Account API. A failure
+    // must not block the app: the screens say the list could not be loaded and offer a retry.
+    await loadAccountSafely();
   })
   .finally(() => {
     createRoot(document.getElementById('root')!).render(

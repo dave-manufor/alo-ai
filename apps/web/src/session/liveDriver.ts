@@ -82,6 +82,8 @@ export function createLiveDriver(options: {
   let sink: AgentMessageSink | null = null;
   let room: LiveRoom | null = null;
   let stopped = false;
+  let joined: SessionJoin | null = null;
+  let ended = false;
   let rejoins = 0;
   let failed: ((plain: string) => void) | null = null;
   // Agent messages are handed to the screen one at a time, in order, so
@@ -100,9 +102,10 @@ export function createLiveDriver(options: {
   }
 
   async function join() {
-    let joined: SessionJoin;
     try {
-      joined = await options.startSession();
+      // A rejoin goes back into the SAME session and room with the same token (it lasts an
+      // hour); asking again would make a new session and leave the agent waiting in the old one.
+      joined ??= await options.startSession();
       room = await openRoom(joined.livekit_url, joined.token);
     } catch {
       fail(START_FAILED);
@@ -115,12 +118,16 @@ export function createLiveDriver(options: {
     room.onData((payload, topic) => {
       if (topic !== SESSION_TOPIC) return;
       const message = decodeAgentData(payload);
+      if (message?.cmd === 'step' && (message.step === 'CLOSE' || message.step === 'ENDED')) {
+        ended = true;
+      }
       if (message) deliver(message);
     });
     room.onConnection((event) => {
       if (event === 'reconnecting') deliver({ schema_version: 2, cmd: 'reconnecting' });
       // After 'reconnected' the agent re-sends the step and a play, which clears the overlay.
-      if (event === 'disconnected' && !stopped) void rejoin();
+      // Once the agent has ended the session the room closing is expected: do not go back in.
+      if (event === 'disconnected' && !stopped && !ended) void rejoin();
     });
     try {
       await room.enableMicrophone();
@@ -157,6 +164,7 @@ export function createLiveDriver(options: {
     onFailed(listener) {
       failed = listener;
     },
+    sessionId: () => joined?.session_id ?? null,
     stop() {
       stopped = true;
       room?.disconnect();

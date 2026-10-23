@@ -220,18 +220,23 @@ export default function SessionPage({
       <div className={`report${reported ? ' shown' : ''}`} data-theme="light">
         <small>{savedEarly ? 'Reading check · saved' : 'Reading check · today'}</small>
         <h5>
-          {savedEarly ? `We saved ${childName}’s reading` : `${childName}’s report is ready`}
+          {savedEarly ? `We saved ${childName}’s reading` : `${childName}’s reading check is done`}
         </h5>
         <p>
           {savedEarly
             ? 'The internet dropped, so the check stopped early. You’ll be offered a new session later, with a different story.'
-            : `See how ${childName} read and what to try this week.`}
+            : `The report is being made. See how ${childName} read and what to try this week.`}
         </p>
         <button
           type="button"
           className="cta"
           tabIndex={reported ? 0 : -1}
-          onClick={() => navigate(savedEarly ? '/children' : '/reports')}
+          onClick={() => {
+            const sessionId = driverRef.current?.sessionId?.();
+            navigate(
+              savedEarly ? '/children' : sessionId ? `/reports?pending=${encodeURIComponent(sessionId)}` : '/reports',
+            );
+          }}
         >
           {savedEarly ? 'Back to your children' : 'See the report'}
         </button>

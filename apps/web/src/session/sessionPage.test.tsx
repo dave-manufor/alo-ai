@@ -166,7 +166,7 @@ describe('the Night session screen', () => {
       renderSession(signedInChild());
       startSessionScreen();
       const hold = await screen.findByRole('button', { name: /press and hold/i }, { timeout: 4000 });
-      const report = screen.getByText(/report is ready/);
+      const report = screen.getByText(/reading check is done/);
       expect(report.closest('.report')).not.toHaveClass('shown');
       // matchMedia is absent in jsdom: the hold runs for its full time, so it is released early here.
       fireEvent.keyDown(hold, { key: ' ' });

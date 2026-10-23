@@ -132,7 +132,7 @@ describe('LiveKit driver (D3), against the documented protocol v2 with a fake ro
     expect(seen.map((m) => m.cmd)).toEqual(['reconnecting', 'step']);
   });
 
-  it('rejoins with a fresh token when the room is lost, then gives up with a plain message', async () => {
+  it('rejoins the SAME session when the room is lost, then gives up with a plain message', async () => {
     const rooms = [fakeRoom(), fakeRoom(), fakeRoom()];
     let n = 0;
     const startSession = vi.fn(async () => join);
@@ -149,7 +149,10 @@ describe('LiveKit driver (D3), against the documented protocol v2 with a fake ro
     rooms[0].event('disconnected');
     await tick();
     await tick();
-    expect(startSession).toHaveBeenCalledTimes(2); // resumed
+    // Back into the room already made: asking for a session again would leave the agent
+    // waiting in the first room and give the child a second, empty one.
+    expect(startSession).toHaveBeenCalledTimes(1);
+    expect(n).toBe(2);
     rooms[1].event('disconnected');
     await tick();
     await tick();
@@ -157,6 +160,29 @@ describe('LiveKit driver (D3), against the documented protocol v2 with a fake ro
     await tick();
     await tick();
     expect(failures).toEqual(['The connection was lost and could not come back. Please try again.']);
+  });
+
+  it('does not go back in once the agent has ended the session, and knows the session id', async () => {
+    const fake = fakeRoom();
+    const openRoom = vi.fn(async () => fake.room);
+    const failures: string[] = [];
+    const driver = createLiveDriver({
+      startSession: async () => join,
+      openRoom,
+      rejoinDelayMs: 0,
+    });
+    driver.onFailed?.((plain) => failures.push(plain));
+    expect(driver.sessionId?.()).toBeNull();
+    driver.start(() => undefined);
+    await tick();
+    expect(driver.sessionId?.()).toBe('s1');
+    fake.push({ ...v3, cmd: 'step', step: 'ENDED' });
+    await tick();
+    fake.event('disconnected');
+    await tick();
+    await tick();
+    expect(openRoom).toHaveBeenCalledTimes(1);
+    expect(failures).toEqual([]);
   });
 
   it('reports a plain failure when the session cannot start, and when stopped does nothing', async () => {
