@@ -410,7 +410,7 @@ class Driver:
         # A child who read only a few words and stopped is not "done": the kindness rule
         # (fewer than 10 words in 30 s) ends that reading kindly, as before.
         read_enough = self.tracker.words_read >= cfg.KINDNESS_MIN_WORDS
-        if (far and quiet >= cfg.READING_DONE_QUIET_MS) or (
+        if (far and quiet >= self.state.profile.reading_done_quiet_ms) or (
             read_enough and quiet >= cfg.READING_GAVE_UP_QUIET_MS
         ):
             return ReadingDone(elapsed_ms=self.tracker.elapsed(now))
@@ -421,11 +421,14 @@ class Driver:
     def _use(self, pair: PassagePair) -> None:
         self.pair = pair
         self.tracker = PositionTracker([t["text"] for t in pair.read["tokens"]])
+        profile = self.state.profile
+        # A session that never runs the listening module doesn't send its clips, so the phone
+        # downloads less. The pair keeps its listening passage: the contracts name it.
         clips = self.catalog.session_clips(
             pair.read,
-            pair.listening,
-            self.state.profile.n_questions,
-            self.state.profile.n_listening_items,
+            pair.listening if profile.listening_module else None,
+            profile.n_questions,
+            profile.n_listening_items,
         )
         for message in protocol.clip_lists(clips):
             self.ports.channel.send(message)

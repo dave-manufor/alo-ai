@@ -285,7 +285,7 @@ def _restart_task(state: SessionState) -> Result:
             return _finish_reading(state, kindly=False)
         case Phase.TRANSITION:
             state = _next_task(state)
-            return state, [_timer("transition", state, cfg.TRANSITION_MS)]
+            return state, [_timer("transition", state, state.profile.transition_ms)]
         case Phase.RETELL:
             return _enter_retell(state)
         case Phase.QUESTIONS:
@@ -300,7 +300,7 @@ def _restart_task(state: SessionState) -> Result:
             return _ask_item(state, Phase.LISTENING, state.index)
     # Phase.CLOSE: the only phase left once the others have returned.
     state = _next_task(state)
-    return state, [_timer("close", state, cfg.CLOSE_MS)]
+    return state, [_timer("close", state, state.profile.close_ms)]
 
 
 # ---- 0a. interest chat
@@ -439,6 +439,10 @@ def _finish_reading(state: SessionState, *, kindly: bool) -> Result:
         # Fewer than 10 words in 30 s: stop kindly and go to listening. aloai_scoring sets
         # the next passage level from reading_stopped_early (PRD 4.3, 6.6).
         state = replace(state, reading_stopped_early=True)
+        if not state.profile.listening_module:
+            # No story to promise (kind_end does): thank the child and close.
+            state, more = _enter_close(state)
+            return state, actions + more
         actions.append(_say(state, "kind_end"))  # it already says "Now I will tell you a story"
         state, more = _enter_listening(state, intro=False)
         return state, actions + more
@@ -446,7 +450,7 @@ def _finish_reading(state: SessionState, *, kindly: bool) -> Result:
     # Thank the child the moment the reading is over, while the story fades out.
     return state, actions + [
         _say(state, "reading_praise"),
-        _timer("transition", state, cfg.TRANSITION_MS),
+        _timer("transition", state, state.profile.transition_ms),
     ]
 
 
@@ -464,7 +468,7 @@ def _enter_retell(state: SessionState) -> Result:
     return state, [
         _say(state, "retell_prompt"),
         StartRecording("RETELL"),
-        _timer("retell_cap", state, cfg.RETELL_CAP_MS),
+        _timer("retell_cap", state, state.profile.retell_cap_ms),
     ]
 
 
@@ -473,7 +477,7 @@ def _retell(state: SessionState, event: Event) -> Result:
         case Timer() if _is_timer(event, "retell_cap", state):
             return _finish_retell(state, answered=True)
         case TurnEnd(reason="ANSWERED"):
-            if state.sub == "main":
+            if state.sub == "main" and state.profile.retell_follow_up:
                 # One neutral follow-up, then done.
                 return replace(state, sub="followup", silences=0), [
                     StopRecording(),
@@ -558,6 +562,10 @@ def _item_done(state: SessionState, *, answered: bool) -> Result:
 
 
 def _await_quick_score(state: SessionState) -> Result:
+    if not state.profile.listening_module:
+        # Nothing hangs on the decision, so don't wait for it. Every turn was still sent to
+        # grade:quick, and the report is built without waiting on this session.
+        return _enter_close(state)
     state = _next_task(state, phase=Phase.QUESTIONS, sub="awaiting_quick")
     return state, [_timer("quick_score", state, cfg.QUICK_SCORE_TIMEOUT_MS)]
 
@@ -629,7 +637,7 @@ def _listening_retell_done(state: SessionState, *, answered: bool) -> Result:
 
 def _enter_close(state: SessionState) -> Result:
     state = _next_task(state, phase=Phase.CLOSE, sub="")
-    return state, [_say(state, "close_praise"), _timer("close", state, cfg.CLOSE_MS)]
+    return state, [_say(state, "close_praise"), _timer("close", state, state.profile.close_ms)]
 
 
 def _close(state: SessionState, event: Event) -> Result:

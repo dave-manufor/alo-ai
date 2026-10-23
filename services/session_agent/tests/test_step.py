@@ -528,9 +528,53 @@ def test_questions_run_in_order_and_each_answer_is_quick_scored():
     assert has_timer(actions, "quick_score")
 
 
-def test_demo_asks_two_questions():
-    state = at_awaiting(profile="demo")
-    assert state.sub == "awaiting_quick" and state.profile.n_questions == 2
+def test_demo_asks_two_questions_then_closes_without_the_listening_decision():
+    state = at_questions(profile="demo")  # the one retell answer asked question 0; this was it
+    assert state.profile.n_questions == 2 and state.index == 1
+    state, actions = step(state, ANSWERED)
+    assert actions[:2] == [StopRecording(), CallQuickScore("QUESTION", 1)]  # still graded
+    assert state.phase is Phase.CLOSE  # no wait for the decision, no listening
+    assert PlayClip("close_praise") in actions
+    assert StartTimer(f"close:{state.task_seq}", 2_000) in actions
+    assert not has_timer(actions, "quick_score")
+
+
+def test_demo_retell_has_no_follow_up_and_a_shorter_cap():
+    state = at_transition(profile="demo")
+    assert StartTimer(f"transition:{state.task_seq}", 1_000) in step(
+        at_reading(profile="demo"), ReadingDone(70_000)
+    )[1]
+    state, actions = step(state, T(state, "transition"))
+    assert StartTimer(f"retell_cap:{state.task_seq}", 25_000) in actions
+    state, actions = step(state, ANSWERED)
+    assert state.phase is Phase.QUESTIONS and state.sub == "ask" and state.index == 0
+    assert PlayClip("anything_else") not in actions
+    assert PlayClip("question:0") in actions
+
+
+def test_demo_retell_that_stays_silent_goes_on_to_the_questions():
+    state = at_retell(profile="demo")
+    state, actions = step(state, SILENCE)
+    assert PlayClip("take_your_time") in actions
+    state, actions = step(state, SILENCE)
+    assert state.phase is Phase.QUESTIONS and CallQuickScore("RETELL", 0, False) in actions
+
+
+def test_demo_ends_a_hard_reading_kindly_and_closes_without_a_story():
+    state, actions = step(at_reading(profile="demo"), ReadingProgress(30_000, 4))
+    assert state.phase is Phase.CLOSE and state.reading_stopped_early
+    assert PlayClip("close_praise") in actions and PlayClip("kind_end") not in actions
+    assert not any(isinstance(a, PlayClip) and a.clip_id == "listening_story" for a in actions)
+
+
+def test_standard_keeps_its_own_waits_and_the_listening_decision():
+    state, actions = step(at_reading(), ReadingDone(70_000))
+    assert StartTimer(f"transition:{state.task_seq}", 2_000) in actions
+    state, actions = step(state, T(state, "transition"))
+    assert StartTimer(f"retell_cap:{state.task_seq}", 45_000) in actions
+    state, actions = step(state, ANSWERED)
+    assert PlayClip("anything_else") in actions  # the follow-up
+    assert at_awaiting().sub == "awaiting_quick"
 
 
 def test_answer_cap_counts_as_an_answer():
@@ -607,7 +651,9 @@ def test_listening_story_is_a_clip_even_in_live_first():
     assert actions[1] == PlayClip("listening_story")
 
 
-def test_listening_story_length_follows_the_profile():
+def test_listening_story_length_follows_the_profile(override_profile):
+    # The demo profile never plays the story, so its length is checked with the module on.
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     _, standard = step(at_awaiting(), QuickScore(True))
     _, demo = step(at_awaiting(profile="demo"), QuickScore(True))
     assert StartTimer(standard[2].name, 40_000) == standard[2]
@@ -633,8 +679,10 @@ def test_story_then_retell_then_items_then_close():
     assert state.phase is Phase.CLOSE
 
 
-def test_demo_listening_has_one_item():
+def test_demo_length_listening_has_one_item(override_profile):
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     state = at_listening_ask(profile="demo")
+    assert state.phase is Phase.LISTENING and state.profile.n_listening_items == 1
     state, _ = step(state, ANSWERED)
     assert state.phase is Phase.CLOSE
 
@@ -694,7 +742,8 @@ def test_close_ends_the_session_and_publishes_session_done():
     assert actions[1] == EndSession("COMPLETE")
 
 
-def test_session_done_reports_listening_and_flags():
+def test_session_done_reports_listening_and_flags(override_profile):
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     state = run(at_listening_ask(profile="demo", listening="l1"), ANSWERED)[0]
     _, actions = step(state, T(state, "close"))
     assert actions[0].data["listening_module_run"] is True
@@ -703,8 +752,9 @@ def test_session_done_reports_listening_and_flags():
     assert actions[0].data["flags"] == ["DEMO_PROFILE"]
 
 
-def test_a_listening_module_without_a_listening_passage_is_logged():
+def test_a_listening_module_without_a_listening_passage_is_logged(override_profile):
     # The passage schema makes the pairing required, so this means a bug upstream.
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     state = run(at_listening_ask(profile="demo"), ANSWERED)[0]
     _, actions = step(state, T(state, "close"))
     assert isinstance(actions[0], Log) and "without a listening passage" in actions[0].reason

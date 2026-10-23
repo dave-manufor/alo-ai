@@ -243,10 +243,12 @@ def read_aloud(driver, clock, words, *, seconds=4):
     driver.on_speech_ended()
 
 
-def test_a_reader_who_has_finished_does_not_wait_for_the_cap():
+def test_a_reader_who_has_finished_does_not_wait_for_the_cap(override_profile):
     # Speech to text followed nearly all of the story but never matched its last word. The
     # old rule waited for the 90 s cap (a live session waited about 40 s after the child
-    # had finished); now the reading ends 8 s after they stopped.
+    # had finished); now the reading ends once the profile's quiet window has passed (8 s in
+    # the standard profile, which the demo passages here are run with).
+    override_profile("demo", reading_done_quiet_ms=8_000)
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
     total = len(PAIR.read["text_content"].split())
@@ -257,6 +259,19 @@ def test_a_reader_who_has_finished_does_not_wait_for_the_cap():
     wait(driver, clock, 2_000)
     assert driver.state.phase is Phase.TRANSITION
     assert ports.channel.plays()[-1] == "reading_praise"  # thanked at once
+
+
+def test_the_demo_reader_who_has_finished_is_thanked_after_three_seconds():
+    driver, ports, clock, _ = make_driver("demo")
+    to_reading(driver, ports, clock)
+    total = len(PAIR.read["text_content"].split())
+    read_aloud(driver, clock, total - 2)
+    assert driver.state.phase is Phase.READING and not driver.tracker.done_reached
+    wait(driver, clock, 2_000)
+    assert driver.state.phase is Phase.READING  # not yet
+    wait(driver, clock, 2_000)
+    assert driver.state.phase is Phase.TRANSITION
+    assert ports.channel.plays()[-1] == "reading_praise"
 
 
 def test_a_reader_who_stopped_part_way_is_not_cut_off_early():
@@ -270,7 +285,10 @@ def test_a_reader_who_stopped_part_way_is_not_cut_off_early():
     assert driver.state.phase is Phase.TRANSITION
 
 
-def test_a_child_who_read_only_a_few_words_still_gets_the_kind_ending_not_an_early_done():
+def test_a_child_who_read_only_a_few_words_still_gets_the_kind_ending_not_an_early_done(
+    override_profile,
+):
+    override_profile("demo", listening_module=True)
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
     read_aloud(driver, clock, 4)
@@ -278,6 +296,16 @@ def test_a_child_who_read_only_a_few_words_still_gets_the_kind_ending_not_an_ear
     assert driver.state.phase is Phase.READING
     wait(driver, clock, 6_000)
     assert driver.state.phase is Phase.LISTENING and driver.state.reading_stopped_early
+
+
+def test_the_demo_child_who_read_only_a_few_words_is_thanked_and_the_session_closes():
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    read_aloud(driver, clock, 4)
+    wait(driver, clock, 31_000)
+    assert driver.state.phase is Phase.CLOSE and driver.state.reading_stopped_early
+    plays = ports.channel.plays()
+    assert plays[-1] == "close_praise" and "kind_end" not in plays  # no story is promised
 
 
 def test_the_reading_does_not_end_while_kemis_clip_is_playing():
@@ -428,8 +456,9 @@ def test_the_audio_counters_are_logged_every_ten_seconds(caplog):
 # ---- a whole session
 
 
-def run_demo_session(driver, ports, clock):
-    """A whole demo-profile session in which the listening module runs."""
+def run_session_with_listening(driver, ports, clock):
+    """A whole session on the demo passages in which the listening module runs (the demo
+    profile itself has none: the test switches it on)."""
     to_reading(driver, ports, clock)
     read_passage(driver, clock)
     fire(driver, ports.timers, "transition")
@@ -446,9 +475,12 @@ def run_demo_session(driver, ports, clock):
     fire(driver, ports.timers, "close")
 
 
-def test_the_web_app_can_follow_a_whole_session_from_the_protocol_alone(validate):
+def test_the_web_app_can_follow_a_whole_session_from_the_protocol_alone(
+    validate, override_profile
+):
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     driver, ports, clock, ended = make_driver()
-    run_demo_session(driver, ports, clock)
+    run_session_with_listening(driver, ports, clock)
     assert ended == ["COMPLETE"]
     sent = ports.channel.sent
     for message in sent:
@@ -490,7 +522,51 @@ def test_a_reconnect_tells_the_web_app_which_step_it_is_back_in():
     assert {"schema_version": 3, "cmd": "step", "step": "INTEREST_CHAT"} in after
 
 
-def test_a_demo_session_runs_end_to_end_and_publishes_valid_events(validate):
+def test_a_demo_session_runs_end_to_end_without_the_listening_module(validate):
+    driver, ports, clock, ended = make_driver()
+    to_reading(driver, ports, clock)
+    read_passage(driver, clock)
+    assert driver.state.phase is Phase.TRANSITION
+    fire(driver, ports.timers, "transition")
+
+    # One retell answer goes straight to the questions: there is no "Anything else?".
+    speak(driver, clock, "ada went to the market and saw a red hat", then_quiet_ms=4_000)
+    assert driver.state.phase is Phase.QUESTIONS
+    speak(driver, clock, "it was red", then_quiet_ms=1_500)
+    wait(driver, clock, 17_000)  # two 8 s silences on the second question (and its nudge between)
+
+    # The last question closes the session at once: nothing waits for the listening decision.
+    assert driver.state.phase is Phase.CLOSE
+    assert [(b["turn_phase"], b["index"], b["transcript"]) for b in ports.grader.bodies] == [
+        ("RETELL", 0, "ada went to the market and saw a red hat"),
+        ("QUESTION", 0, "it was red"),
+        ("QUESTION", 1, ""),
+    ]
+    assert "anything_else" not in ports.channel.plays()
+    fire(driver, ports.timers, "close")
+
+    assert ended == ["COMPLETE"]
+    steps = [m["step"] for m in ports.channel.sent if m["cmd"] == "step"]
+    assert steps == ["INTEREST_CHAT", "MIC_CHECK", "READING", "RETELL", "QUESTIONS", "CLOSE", "ENDED"]
+    events = ports.publisher.events
+    assert [e["type"] for e in events] == ["session.started", "phase1.recorded", "session.done"]
+    for event in events:
+        validate("event_envelope.schema.json", event)
+    done = events[-1]["data"]
+    assert done["listening_module_run"] is False and done["reading_stopped_early"] is False
+    phases = [(t["phase"], t["index"], t["part"]) for t in done["turn_audio_uris"]]
+    assert phases[3:] == [("RETELL", 0, 0), ("QUESTION", 0, 0), ("QUESTION", 1, 0)]
+    for doc in ports.documents.docs.values():
+        validate("session_record.schema.json", doc)
+    record = ports.documents.docs["sessions/sess_demo_001"]
+    assert record["status"] == "COMPLETE" and record["flags"] == ["DEMO_PROFILE"]
+    assert ports.recorder.stops == len(ports.recorder.turns) == len(done["turn_audio_uris"])
+
+
+def test_a_session_with_the_listening_module_runs_end_to_end_and_publishes_valid_events(
+    validate, override_profile
+):
+    override_profile("demo", listening_module=True, retell_follow_up=True)
     driver, ports, clock, ended = make_driver()
     to_reading(driver, ports, clock)
     read_passage(driver, clock)
@@ -541,7 +617,8 @@ def test_a_demo_session_runs_end_to_end_and_publishes_valid_events(validate):
     assert ports.recorder.stops == len(ports.recorder.turns) == len(done["turn_audio_uris"])
 
 
-def test_the_clip_lists_cover_every_clip_the_session_plays(validate):
+def test_the_clip_lists_cover_every_clip_the_session_plays(validate, override_profile):
+    override_profile("demo", listening_module=True)
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
     lists = [m for m in ports.channel.sent if m["cmd"] == "clip_list"]
@@ -550,6 +627,19 @@ def test_the_clip_lists_cover_every_clip_the_session_plays(validate):
         validate("session_protocol.schema.json", message)
     assert set(ports.channel.plays()) <= cached
     assert "word_market" in cached and "question:1" in cached and "listening_story" in cached
+
+
+def test_the_demo_clip_lists_leave_out_the_listening_module(validate):
+    driver, ports, clock, _ = make_driver()
+    to_reading(driver, ports, clock)
+    lists = [m for m in ports.channel.sent if m["cmd"] == "clip_list"]
+    cached = {c["clip_id"] for m in lists for c in m["clips"]}
+    for message in ports.channel.sent:
+        validate("session_protocol.schema.json", message)
+    assert set(ports.channel.plays()) <= cached
+    assert "word_market" in cached and "question:1" in cached
+    assert "listening_story" not in cached  # the long clip the phone would otherwise download
+    assert not any(clip_id.startswith("listening_item:") for clip_id in cached)
 
 
 # ---- reading
@@ -567,7 +657,8 @@ def test_a_stall_plays_the_word_clip_and_a_quick_finish_moves_on():
     assert driver.state.phase is Phase.TRANSITION
 
 
-def test_the_kindness_rule_ends_a_hard_reading_and_goes_to_listening():
+def test_the_kindness_rule_ends_a_hard_reading_and_goes_to_listening(override_profile):
+    override_profile("demo", listening_module=True)
     driver, ports, clock, _ = make_driver()
     to_reading(driver, ports, clock)
     played(driver, clock)

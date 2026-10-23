@@ -46,6 +46,14 @@ class Profile:
     n_questions: int
     n_listening_items: int
     listening_story_ms: int
+    # Whether the listening module can run at all. The demo profile never runs it, so the
+    # session closes after the last question without waiting for the listening decision.
+    listening_module: bool
+    retell_follow_up: bool  # one neutral "Anything else?" after the retell
+    retell_cap_ms: int
+    transition_ms: int  # the pause between the reading and the retell
+    close_ms: int  # the goodbye, before session.done
+    reading_done_quiet_ms: int  # 80% of the story followed, then this long quiet: finished
 
 
 @dataclass(frozen=True)
