@@ -49,6 +49,7 @@ export function createClipCache(deps: {
   const finish = new Map<string, (ok: boolean) => void>();
   const waiting: ClipEntry[] = []; // queued, not started
   let active = 0;
+  let turnEnd: Promise<void> = Promise.resolve(); // when the clip played last has finished
 
   async function fetchClip(clip: ClipEntry): Promise<void> {
     let ok = false;
@@ -102,19 +103,29 @@ export function createClipCache(deps: {
       for (const clip of clips) texts.set(clip.clip_id, clip.text);
       await Promise.all(clips.map((clip) => startDownload(clip)));
     },
-    async play(clip_id) {
-      if (!objectUrls.has(clip_id)) {
+    play(clip_id) {
+      // The clip's own download starts at once (and jumps the queue), but it is only played
+      // after the clips sent before it have finished: the agent can send several `play`s in a
+      // row (a thank-you, then the next prompt) and the phone plays them one after another.
+      // Each gets exactly one ack, so the agent never waits on a clip that was cut off.
+      const ready = (async (): Promise<boolean> => {
+        if (objectUrls.has(clip_id)) return true;
         const inFlight = downloads.get(clip_id);
-        if (!inFlight) return missingAck(clip_id); // never listed, or it failed
+        if (!inFlight) return false; // never listed, or it failed
         prioritise(clip_id);
-        if (!(await inFlight)) return missingAck(clip_id);
-      }
-      try {
-        await deps.player.play(clip_id, objectUrls.get(clip_id));
-        return playedAck(clip_id);
-      } catch {
-        return missingAck(clip_id);
-      }
+        return inFlight;
+      })();
+      const turn = turnEnd.then(async () => {
+        if (!(await ready)) return missingAck(clip_id);
+        try {
+          await deps.player.play(clip_id, objectUrls.get(clip_id));
+          return playedAck(clip_id);
+        } catch {
+          return missingAck(clip_id);
+        }
+      });
+      turnEnd = turn.then(() => undefined);
+      return turn;
     },
     async settled(filter, timeoutMs) {
       const open = [...downloads.entries()].filter(([id]) => filter(id)).map(([, promise]) => promise);
@@ -194,6 +205,8 @@ function silentClipUrl(): string {
   return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
 }
 
+let cutOff: ((reason: Error) => void) | null = null;
+
 /** Browser player: plays through the shared element and resolves on
  *  its `ended` event, so `played` still means playback finished. */
 export const browserPlayer: ClipPlayer = {
@@ -204,7 +217,15 @@ export const browserPlayer: ClipPlayer = {
         return;
       }
       const audio = getSharedAudio();
-      audio.onended = () => resolve();
+      // A clip still playing is being replaced: settle it (as `missing`) rather than leave
+      // its promise, and so its ack, hanging for ever. The cache plays one at a time, so this
+      // is only a safety net.
+      cutOff?.(new Error('clip replaced'));
+      cutOff = reject;
+      audio.onended = () => {
+        cutOff = null;
+        resolve();
+      };
       audio.onerror = () => reject(new Error('clip failed to play'));
       audio.pause();
       audio.src = objectUrl;

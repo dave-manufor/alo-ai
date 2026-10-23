@@ -285,6 +285,7 @@ describe('a microphone that hears nothing', () => {
       renderWithMeter(createMeter);
       startSessionScreen();
       await screen.findByText(fixtureClips[1].text as string);
+      await act(async () => void (await vi.advanceTimersByTimeAsync(50))); // Kemi's clip ends
       expect(createMeter).toHaveBeenCalledTimes(1);
       expect(screen.queryByText(/can’t hear Adaeze/)).not.toBeInTheDocument();
 
@@ -310,6 +311,7 @@ describe('a microphone that hears nothing', () => {
       renderWithMeter(createMeter);
       startSessionScreen();
       await screen.findByText(fixtureClips[1].text as string);
+      await act(async () => void (await vi.advanceTimersByTimeAsync(50))); // Kemi's clip ends
       await act(async () => void (await vi.advanceTimersByTimeAsync(QUIET_MS + 8_000)));
       fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
       await act(async () => void (await vi.advanceTimersByTimeAsync(100)));

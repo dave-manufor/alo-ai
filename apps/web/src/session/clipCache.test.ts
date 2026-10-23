@@ -92,6 +92,43 @@ describe('the clip cache', () => {
     expect(await cache.play('nope')).toEqual({ schema_version: 3, cmd: 'missing', clip_id: 'nope' });
   });
 
+  it('clips sent one after another play one after another, each acked once and in order', async () => {
+    const finishes: Array<() => void> = [];
+    const started: string[] = [];
+    const slow = {
+      play: vi.fn(
+        (id: string) =>
+          new Promise<void>((resolve) => {
+            started.push(id);
+            finishes.push(resolve);
+          }),
+      ),
+    };
+    const cache = createClipCache({ load: async () => 'blob:x', player: slow });
+    await cache.downloadAll([clip('thanks'), clip('next')]);
+    const first = cache.play('thanks');
+    const second = cache.play('next'); // sent while the first is still playing
+    await flush();
+    expect(started).toEqual(['thanks']); // the second waits its turn: it does not cut the first off
+    finishes[0]();
+    expect(await first).toEqual({ schema_version: 3, cmd: 'played', clip_id: 'thanks' });
+    await flush();
+    expect(started).toEqual(['thanks', 'next']);
+    finishes[1]();
+    expect(await second).toEqual({ schema_version: 3, cmd: 'played', clip_id: 'next' });
+  });
+
+  it('a clip that fails does not hold up the clip behind it', async () => {
+    const cache = createClipCache({
+      load: async (url) => (url.includes('bad') ? undefined : 'blob:ok'),
+      player: player(),
+    });
+    await cache.downloadAll([clip('bad'), clip('good')]);
+    const [a, b] = await Promise.all([cache.play('bad'), cache.play('good')]);
+    expect(a.cmd).toBe('missing');
+    expect(b.cmd).toBe('played');
+  });
+
   it('a clip that downloads but will not play is missing', async () => {
     const cache = createClipCache({
       load: async () => 'blob:x',
