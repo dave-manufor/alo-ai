@@ -154,9 +154,7 @@ class Ingest:
         estimated = min(max(estimated, 1), 12)
         held = abs(estimated - arl) > HOLD_GAP
         if held:
-            report.held[book_id] = (
-                f"publisher level is ARL {arl}, the text estimates ARL {estimated}"
-            )
+            report.held[book_id] = f"the ARL given is {arl}, the text estimates ARL {estimated}"
         text = book_text(copied)
         if (
             existing

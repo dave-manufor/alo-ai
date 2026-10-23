@@ -1,3 +1,440 @@
 {
-  "books": []
+  "books": [
+    {
+      "book_id": "book_the_tale_of_peter_rabbit",
+      "file": "the-tale-of-peter-rabbit.epub",
+      "title": "The Tale of Peter Rabbit",
+      "author": "Beatrix Potter",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/14838",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Tale of Peter Rabbit, by Beatrix Potter. Project Gutenberg eBook #14838, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 3,
+      "arl_reason": "Draft by W3 from the book's usual reading age (5 to 7); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "farming"
+      ],
+      "west_african_setting": false,
+      "description": "A disobedient young rabbit slips into Mr. McGregor's vegetable garden, is chased, and only just gets home."
+    },
+    {
+      "book_id": "book_the_velveteen_rabbit",
+      "file": "the-velveteen-rabbit.epub",
+      "title": "The Velveteen Rabbit",
+      "author": "Margery Williams Bianco",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/11757",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Velveteen Rabbit, by Margery Williams Bianco. Project Gutenberg eBook #11757, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 5,
+      "arl_reason": "Draft by W3 from the book's usual reading age (6 to 9); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "A toy rabbit longs to become real through a boy's love, and finds out what real means."
+    },
+    {
+      "book_id": "book_aesops_fables_for_children",
+      "file": "aesops-fables-for-children.epub",
+      "title": "Aesop's Fables",
+      "author": "Aesop",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/11339",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Aesop's Fables, by Aesop. Project Gutenberg eBook #11339, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 5,
+      "arl_reason": "Draft by W3 from the book's usual reading age (7 to 10); to be confirmed by a person.",
+      "topic_tags": [
+        "animals"
+      ],
+      "west_african_setting": false,
+      "description": "Short fables, each ending with a lesson, in which animals such as the fox, the crow and the tortoise act like people."
+    },
+    {
+      "book_id": "book_just_so_stories",
+      "file": "just-so-stories.epub",
+      "title": "Just So Stories",
+      "author": "Rudyard Kipling",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/2781",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Just So Stories, by Rudyard Kipling. Project Gutenberg eBook #2781, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 7,
+      "arl_reason": "Draft by W3 from the book's usual reading age (8 to 11); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "Playful stories about how animals came to be as they are, such as how the camel got its hump and the elephant its trunk."
+    },
+    {
+      "book_id": "book_the_wonderful_wizard_of_oz",
+      "file": "the-wonderful-wizard-of-oz.epub",
+      "title": "The Wonderful Wizard of Oz",
+      "author": "L. Frank Baum",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/55",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Wonderful Wizard of Oz, by L. Frank Baum. Project Gutenberg eBook #55, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 7,
+      "arl_reason": "Draft by W3 from the book's usual reading age (8 to 11); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure",
+        "weather"
+      ],
+      "west_african_setting": false,
+      "description": "A cyclone carries Dorothy to the land of Oz, where she travels with friends to find a wizard who can send her home."
+    },
+    {
+      "book_id": "book_the_story_of_doctor_dolittle",
+      "file": "the-story-of-doctor-dolittle.epub",
+      "title": "The Story of Doctor Dolittle",
+      "author": "Hugh Lofting",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/501",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Story of Doctor Dolittle, by Hugh Lofting. Project Gutenberg eBook #501, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 7,
+      "arl_reason": "Draft by W3 from the book's usual reading age (8 to 11); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "A doctor who can talk to animals sails to Africa to cure a sickness among the monkeys."
+    },
+    {
+      "book_id": "book_the_adventures_of_pinocchio",
+      "file": "the-adventures-of-pinocchio.epub",
+      "title": "The Adventures of Pinocchio",
+      "author": "Carlo Collodi",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/500",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Adventures of Pinocchio, by Carlo Collodi. Project Gutenberg eBook #500, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 7,
+      "arl_reason": "Draft by W3 from the book's usual reading age (8 to 11); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "A wooden puppet who wants to become a real boy gets into trouble again and again before he learns to be good."
+    },
+    {
+      "book_id": "book_peter_pan",
+      "file": "peter-pan.epub",
+      "title": "Peter Pan",
+      "author": "J. M. Barrie",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/16",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Peter Pan, by J. M. Barrie. Project Gutenberg eBook #16, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "Wendy and her brothers fly with Peter Pan to Neverland, a land of pirates, fairies and lost boys."
+    },
+    {
+      "book_id": "book_the_jungle_book",
+      "file": "the-jungle-book.epub",
+      "title": "The Jungle Book",
+      "author": "Rudyard Kipling",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/236",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Jungle Book, by Rudyard Kipling. Project Gutenberg eBook #236, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "Stories of Mowgli, a boy raised by wolves in the Indian jungle, and other animal tales."
+    },
+    {
+      "book_id": "book_alices_adventures_in_wonderland",
+      "file": "alices-adventures-in-wonderland.epub",
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/11",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Alice's Adventures in Wonderland, by Lewis Carroll. Project Gutenberg eBook #11, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "Alice falls down a rabbit hole into a strange land of talking animals, riddles and a quarrelsome queen."
+    },
+    {
+      "book_id": "book_the_secret_garden",
+      "file": "the-secret-garden.epub",
+      "title": "The Secret Garden",
+      "author": "Frances Hodgson Burnett",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/17396",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Secret Garden, by Frances Hodgson Burnett. Project Gutenberg eBook #17396, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "family",
+        "farming"
+      ],
+      "west_african_setting": false,
+      "description": "A lonely girl finds a locked, neglected garden and brings it, and her sickly cousin, back to life."
+    },
+    {
+      "book_id": "book_black_beauty",
+      "file": "black-beauty.epub",
+      "title": "Black Beauty",
+      "author": "Anna Sewell",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/271",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Black Beauty, by Anna Sewell. Project Gutenberg eBook #271, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "transport"
+      ],
+      "west_african_setting": false,
+      "description": "A horse tells the story of his life, from a happy colthood to hard work pulling cabs in the city."
+    },
+    {
+      "book_id": "book_the_wind_in_the_willows",
+      "file": "the-wind-in-the-willows.epub",
+      "title": "The Wind in the Willows",
+      "author": "Kenneth Grahame",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/289",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Wind in the Willows, by Kenneth Grahame. Project Gutenberg eBook #289, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "Mole, Rat, Badger and the boastful Toad share adventures along the riverbank."
+    },
+    {
+      "book_id": "book_a_little_princess",
+      "file": "a-little-princess.epub",
+      "title": "A Little Princess",
+      "author": "Frances Hodgson Burnett",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/146",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "A Little Princess, by Frances Hodgson Burnett. Project Gutenberg eBook #146, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 9,
+      "arl_reason": "Draft by W3 from the book's usual reading age (9 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "school",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "Sara Crewe goes from favoured pupil to servant at a London boarding school and stays kind through hard times."
+    },
+    {
+      "book_id": "book_folk_stories_from_southern_nigeria",
+      "file": "folk-stories-from-southern-nigeria.epub",
+      "title": "Folk Stories from Southern Nigeria, West Africa",
+      "author": "Elphinstone Dayrell",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/34655",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Folk Stories from Southern Nigeria, West Africa, by Elphinstone Dayrell. Project Gutenberg eBook #34655, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 10,
+      "arl_reason": "Draft by W3 from the book's usual reading age (10 to 12); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "family"
+      ],
+      "west_african_setting": true,
+      "description": "Folk tales from southern Nigeria collected in the early 1900s, including stories of the tortoise, animals and village life."
+    },
+    {
+      "book_id": "book_treasure_island",
+      "file": "treasure-island.epub",
+      "title": "Treasure Island",
+      "author": "Robert Louis Stevenson",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/120",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Treasure Island, by Robert Louis Stevenson. Project Gutenberg eBook #120, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 11,
+      "arl_reason": "Draft by W3 from the book's usual reading age (10 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure",
+        "transport"
+      ],
+      "west_african_setting": false,
+      "description": "Young Jim Hawkins sails with pirates in search of buried treasure."
+    },
+    {
+      "book_id": "book_anne_of_green_gables",
+      "file": "anne-of-green-gables.epub",
+      "title": "Anne of Green Gables",
+      "author": "L. M. Montgomery",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/45",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Anne of Green Gables, by L. M. Montgomery. Project Gutenberg eBook #45, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 11,
+      "arl_reason": "Draft by W3 from the book's usual reading age (10 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "family",
+        "school"
+      ],
+      "west_african_setting": false,
+      "description": "An imaginative orphan girl is sent by mistake to an elderly brother and sister on a farm, and wins them over."
+    },
+    {
+      "book_id": "book_the_prince_and_the_pauper",
+      "file": "the-prince-and-the-pauper.epub",
+      "title": "The Prince and the Pauper",
+      "author": "Mark Twain",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/1837",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Prince and the Pauper, by Mark Twain. Project Gutenberg eBook #1837, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 11,
+      "arl_reason": "Draft by W3 from the book's usual reading age (10 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "A prince and a poor boy who look alike swap places and learn how the other lives."
+    },
+    {
+      "book_id": "book_around_the_world_in_eighty_days",
+      "file": "around-the-world-in-eighty-days.epub",
+      "title": "Around the World in Eighty Days",
+      "author": "Jules Verne",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/103",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Around the World in Eighty Days, by Jules Verne. Project Gutenberg eBook #103, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 12,
+      "arl_reason": "Draft by W3 from the book's usual reading age (11 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "transport",
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "Phileas Fogg bets that he can travel around the world in eighty days, by ship, train and elephant."
+    },
+    {
+      "book_id": "book_kidnapped",
+      "file": "kidnapped.epub",
+      "title": "Kidnapped",
+      "author": "Robert Louis Stevenson",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/421",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Kidnapped, by Robert Louis Stevenson. Project Gutenberg eBook #421, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 12,
+      "arl_reason": "Draft by W3 from the book's usual reading age (11 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "A young man is kidnapped and shipwrecked, then crosses the Scottish Highlands with an outlaw."
+    },
+    {
+      "book_id": "book_the_legend_of_sleepy_hollow",
+      "file": "the-legend-of-sleepy-hollow.epub",
+      "title": "The Legend of Sleepy Hollow",
+      "author": "Washington Irving",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/41",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "The Legend of Sleepy Hollow, by Washington Irving. Project Gutenberg eBook #41, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 12,
+      "arl_reason": "Draft by W3 from the book's usual reading age (11 to 14); to be confirmed by a person.",
+      "topic_tags": [
+        "adventure"
+      ],
+      "west_african_setting": false,
+      "description": "A schoolmaster in a quiet village meets the legend of the Headless Horseman."
+    },
+    {
+      "book_id": "book_kaffir_xhosa_folk_lore",
+      "file": "kaffir-xhosa-folk-lore.epub",
+      "title": "Kaffir Folk-Lore",
+      "author": "George McCall Theal",
+      "publisher": "Project Gutenberg",
+      "source_url": "https://www.gutenberg.org/ebooks/71335",
+      "licence": "Public domain (Project Gutenberg eBook; the author died more than 70 years ago)",
+      "attribution": "Kaffir Folk-Lore, by George McCall Theal. Project Gutenberg eBook #71335, www.gutenberg.org.",
+      "language": "en",
+      "publisher_level": "Not levelled (Project Gutenberg)",
+      "arl": 12,
+      "arl_reason": "Draft by W3 from the book's usual reading age (adult collection); to be confirmed by a person.",
+      "topic_tags": [
+        "animals",
+        "family"
+      ],
+      "west_african_setting": false,
+      "description": "Traditional Xhosa tales collected in the 1880s, with the collector's notes."
+    }
+  ]
 }

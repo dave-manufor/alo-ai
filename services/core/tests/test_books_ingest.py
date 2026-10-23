@@ -235,8 +235,14 @@ def test_an_arl_given_by_hand_needs_a_reason():
     assert check_entry(hand) == 3
 
 
-def test_the_shipped_manifest_is_a_list():
-    assert load_manifest() == []
+def test_every_book_in_the_shipped_manifest_is_complete_and_has_its_arl():
+    books = load_manifest()
+    assert len(books) == len({book["book_id"] for book in books}) > 0
+    for book in books:
+        assert 1 <= check_entry(book) <= 12, book["book_id"]
+        assert book["topic_tags"] and set(book["topic_tags"]) <= set(data.taxonomy().tags), book[
+            "book_id"
+        ]
 
 
 def test_a_manifest_must_hold_a_list(tmp_path):
@@ -431,3 +437,25 @@ def test_a_page_whose_images_cannot_be_read_still_counts_as_pictured(monkeypatch
     monkeypatch.setattr(extract, "PdfReader", Reader)
     found = read_book("odd.pdf", b"%PDF")
     assert (found.illustration_ratio, found.sentences) == (1.0, ("Ada has a red ball.",))
+
+
+def test_a_gutenberg_book_keeps_only_what_lies_between_its_markers():
+    pages = [
+        (
+            [
+                "The Project Gutenberg eBook of The Red Ball",
+                "This eBook is for the use of anyone anywhere.",
+            ],
+            False,
+        ),
+        (["*** START OF THE PROJECT GUTENBERG EBOOK THE RED BALL ***", *STORY], True),
+        (
+            [
+                "*** END OF THE PROJECT GUTENBERG EBOOK THE RED BALL ***",
+                "Updated editions will replace the previous one.",
+            ],
+            False,
+        ),
+    ]
+    found = read_book("ball.epub", epub(pages))
+    assert found.sentences == tuple(STORY)

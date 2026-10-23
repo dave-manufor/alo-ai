@@ -3,7 +3,8 @@ words, the page count and the share of pages with a picture. PDF and EPUB, the f
 Storybook, Book Dash and StoryWeaver publish.
 
 Front and back matter (the licence, the credits, web addresses) is left out of the text, so the
-level estimate and the word count are of the story itself. The licence and the attribution are
+level estimate and the word count are of the story itself. A Project Gutenberg book keeps only what
+lies between its "*** START OF ... PROJECT GUTENBERG EBOOK" and "*** END OF ..." lines. The licence and the attribution are
 not read from here: a person checks them against the publisher's page (the manifest).
 """
 
@@ -25,6 +26,8 @@ _MATTER = re.compile(
     re.IGNORECASE,
 )
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_GUTENBERG_START = re.compile(r"\*\*\*\s*START OF (THE|THIS) PROJECT GUTENBERG", re.IGNORECASE)
+_GUTENBERG_END = re.compile(r"\*\*\*\s*END OF (THE|THIS) PROJECT GUTENBERG", re.IGNORECASE)
 _WORD = re.compile(r"[A-Za-z][A-Za-z'’-]*")
 
 
@@ -47,7 +50,9 @@ def read_book(name: str, data: bytes) -> Extracted:
         raise ValueError(f"{name}: only PDF and EPUB books can be read")
     if not pages:
         raise ValueError(f"{name}: no pages")
-    lines = [line for text, _ in pages for line in _story_lines(text)]
+    lines = _story_lines(
+        _between_markers([line for text, _ in pages for line in text.splitlines()])
+    )
     sentences = tuple(
         part.strip() for line in lines for part in _SENTENCE_END.split(line) if _WORD.search(part)
     )
@@ -61,9 +66,18 @@ def read_book(name: str, data: bytes) -> Extracted:
     )
 
 
-def _story_lines(text: str) -> list[str]:
-    lines = (" ".join(line.split()) for line in text.splitlines())
-    return [line for line in lines if line and not _MATTER.search(line)]
+def _between_markers(lines: list[str]) -> list[str]:
+    """A Project Gutenberg book's text without its header and its licence (other books as they are)."""
+    start = next((i for i, line in enumerate(lines) if _GUTENBERG_START.search(line)), None)
+    if start is not None:
+        lines = lines[start + 1 :]
+    end = next((i for i, line in enumerate(lines) if _GUTENBERG_END.search(line)), None)
+    return lines if end is None else lines[:end]
+
+
+def _story_lines(lines: list[str]) -> list[str]:
+    tidy = (" ".join(line.split()) for line in lines)
+    return [line for line in tidy if line and not _MATTER.search(line)]
 
 
 def _pdf_pages(data: bytes) -> list[tuple[str, bool]]:
